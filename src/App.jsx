@@ -1,0 +1,156 @@
+import React, { Suspense, lazy } from 'react'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { AuthProvider, useAuth } from './context/AuthContext'
+import { NotificationProvider } from './context/NotificationContext'
+import { supabase } from './lib/supabase'
+import { ImportProvider } from './context/ImportContext'
+import Layout from './components/Layout'
+import SkeletonLoader from './components/SkeletonLoader'
+
+const LoginPage = lazy(() => import('./pages/LoginPage'))
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const AssetList = lazy(() => import('./pages/AssetList'))
+const AssetForm = lazy(() => import('./pages/AssetForm'))
+const AssetDetail = lazy(() => import('./pages/AssetDetail'))
+const StickerPage = lazy(() => import('./pages/StickerPage'))
+const ExcelImport = lazy(() => import('./pages/ExcelImport'))
+const AdminPage = lazy(() => import('./pages/AdminPage'))
+const PublicAssetView = lazy(() => import('./pages/PublicAssetView'))
+const MaintenancePage = lazy(() => import('./pages/MaintenancePage'))
+const InventoryPage = lazy(() => import('./pages/InventoryPage'))
+const AuditModulePage = lazy(() => import('./pages/AuditModulePage'))
+const SitesPage = lazy(() => import('./pages/SitesPage'))
+const ReportsPage = lazy(() => import('./pages/ReportsPage'))
+const MobileFieldView = lazy(() => import('./pages/MobileFieldView'))
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,       // 5 minutes before refetch
+      refetchOnWindowFocus: false,     // don't spam API on tab switch
+      retry: 1,
+    },
+  },
+})
+
+// React Error Boundary to catch render errors gracefully instead of showing a blank screen
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { hasError: false, error: null }
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error }
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("ErrorBoundary caught an error:", error, errorInfo)
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '40px 24px', textAlign: 'center', background: 'var(--bg-2)', borderRadius: 16, border: '1px solid var(--border)', margin: '20px auto', maxWidth: 600, boxShadow: 'var(--clay-shadow)' }}>
+          <h2 style={{ fontFamily: 'Oswald', color: '#ef4444', fontSize: '1.4rem', margin: '0 0 10px' }}>SOMETHING WENT WRONG</h2>
+          <p style={{ fontFamily: 'DM Sans', color: 'var(--text-2)', fontSize: '0.85rem', marginBottom: 20 }}>
+            {this.state.error?.message || 'An unexpected error occurred while rendering this section.'}
+          </p>
+          <button onClick={() => { this.setState({ hasError: false, error: null }); window.location.reload() }} className="btn-primary" style={{ fontSize: '0.8rem', padding: '8px 20px', gap: 6 }}>
+            Reload Page
+          </button>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
+function Guard({ children, require: req }) {
+  const { user, profile, loading } = useAuth()
+  const deactivated = profile && profile.is_active === false
+
+  // Side-effect: sign out deactivated users (must not run during render)
+  React.useEffect(() => {
+    if (deactivated) supabase.auth.signOut()
+  }, [deactivated])
+
+  if (loading) return (
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh', background:'var(--bg-0)' }}>
+      <div style={{ textAlign:'center' }}>
+        <div style={{ width:36, height:36, border:'2px solid var(--accent)', borderTopColor:'transparent', borderRadius:'50%', animation:'spin 0.8s linear infinite', margin:'0 auto 12px' }} />
+        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+        <p style={{ color:'var(--text-2)', fontFamily:'DM Sans' }}>Loading…</p>
+      </div>
+    </div>
+  )
+  if (!user) return <Navigate to="/login" replace />
+  if (deactivated) return <Navigate to="/login?deactivated=1" replace />
+  if (req === 'admin' && profile?.role !== 'admin' && profile?.role !== 'super_admin') return <Navigate to="/" replace />
+  return children
+}
+
+// Route-level permission guard — redirects normal users to checklists
+function PermGuard({ check, children, fallback = '/audit' }) {
+  const auth = useAuth()
+  if (auth.loading) return null
+  if (!check(auth)) return <Navigate to={fallback} replace />
+  return children
+}
+
+function AppRoutes() {
+  const { user } = useAuth()
+  return (
+    <Suspense fallback={<SkeletonLoader />}>
+      <Routes>
+        <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage />} />
+        {/* Public QR scan view — no login needed */}
+        <Route path="/scan/:id" element={<PublicAssetView />} />
+        <Route path="/" element={<Guard><Layout /></Guard>}>
+          <Route index element={
+            <PermGuard check={({ isAdmin, isMod }) => isAdmin || isMod} fallback="/field">
+              <Dashboard />
+            </PermGuard>
+          } />
+          <Route path="field" element={<MobileFieldView />} />
+          <Route path="assets" element={
+            <PermGuard check={({ isAdmin, isMod }) => isAdmin || isMod}>
+              <AssetList />
+            </PermGuard>
+          } />
+          <Route path="sites" element={
+            <PermGuard check={({ isAdmin, isMod }) => isAdmin || isMod}>
+              <SitesPage />
+            </PermGuard>
+          } />
+          <Route path="assets/new" element={<AssetForm />} />
+          <Route path="assets/:id" element={<AssetDetail />} />
+          <Route path="assets/:id/edit" element={<AssetForm />} />
+          <Route path="stickers" element={<StickerPage />} />
+          <Route path="import"  element={<ExcelImport />} />
+          <Route path="audit"   element={<AuditModulePage />} />
+          <Route path="maintenance" element={<MaintenancePage />} />
+          <Route path="inventory"   element={<InventoryPage />} />
+          <Route path="reports"     element={<ReportsPage />} />
+          <Route path="reports/:reportId" element={<ReportsPage />} />
+          <Route path="admin"   element={<Guard require="admin"><ErrorBoundary><AdminPage /></ErrorBoundary></Guard>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+      </Routes>
+    </Suspense>
+  )
+}
+
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <HashRouter>
+        <AuthProvider>
+          <NotificationProvider>
+            <ImportProvider>
+              <AppRoutes />
+            </ImportProvider>
+          </NotificationProvider>
+        </AuthProvider>
+      </HashRouter>
+    </QueryClientProvider>
+  )
+}

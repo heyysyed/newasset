@@ -1,0 +1,93 @@
+import React, { useState } from 'react'
+import { Archive, Trash2, RotateCcw, RefreshCw, Clock, AlertTriangle } from 'lucide-react'
+import { formatCurrency } from '../../lib/depreciation'
+
+function PackageIcon(props) {
+  return <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><svg xmlns="http://www.w3.org/2000/svg" width={props.size||16} height={props.size||16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></span>
+}
+
+export default function TrashBinManager({
+  deletedAssets,
+  trashLoading,
+  restoring,
+  handleRestore,
+  handlePermanentDelete
+}) {
+  const [ttlDays, setTtlDays] = useState(60)
+
+  return (
+    <div className="card" style={{ overflow: 'hidden' }}>
+      <div className="card-header" style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'space-between', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Archive size={16} style={{ color: 'var(--text-3)' }} />
+          <div>
+            <h3 style={{ fontFamily: 'Oswald', fontSize: '0.85rem', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Deleted Assets Archive & Recovery</h3>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>Soft-deleted assets backed up here with 1-click restore & cascade recovery.</span>
+          </div>
+        </div>
+
+        {/* TTL Auto-Purge Setting */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Clock size={14} style={{ color: 'var(--accent)' }} />
+          <span style={{ fontSize: '0.72rem', color: 'var(--text-2)', fontFamily: 'DM Sans' }}>TTL Auto-Purge:</span>
+          <select
+            value={ttlDays}
+            onChange={e => setTtlDays(Number(e.target.value))}
+            style={{ padding: '4px 8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-1)', fontSize: '0.75rem', color: 'var(--text-0)', outline: 'none' }}
+          >
+            <option value={30}>Auto-Purge in 30 Days</option>
+            <option value={60}>Auto-Purge in 60 Days</option>
+            <option value={90}>Auto-Purge in 90 Days</option>
+          </select>
+          <span style={{ fontSize: '0.78rem', fontFamily: 'DM Mono', color: 'var(--text-3)', fontWeight: 600, marginLeft: 8 }}>{deletedAssets.length} items</span>
+        </div>
+      </div>
+
+      {trashLoading ? (
+        <div style={{ padding: 60, textAlign: 'center' }}>
+          <div style={{ width: 24, height: 24, border: '2px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto' }} />
+        </div>
+      ) : deletedAssets.length === 0 ? (
+        <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-3)' }}>
+          <Trash2 size={32} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
+          <p style={{ fontFamily: 'DM Sans', fontSize: '0.88rem' }}>Trash is empty. Deleted assets will appear here.</p>
+        </div>
+      ) : (
+        <div>
+          {deletedAssets.map((d, idx) => (
+            <div key={d.id} style={{
+              display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px',
+              borderBottom: idx < deletedAssets.length - 1 ? '1px solid var(--border)' : 'none',
+            }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <PackageIcon size={15} style={{ color: 'var(--red)' }} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-0)' }}>{d.asset_name || 'Unnamed'}</span>
+                  <span style={{ fontFamily: 'DM Mono', fontSize: '0.68rem', color: 'var(--accent)', background: 'var(--accent-glow)', padding: '1px 6px', borderRadius: 4 }}>{d.asset_code}</span>
+                  {d.category && <span style={{ fontSize: '0.65rem', color: 'var(--text-3)', background: 'var(--bg-3)', padding: '1px 6px', borderRadius: 4 }}>{d.category}</span>}
+                </div>
+                <div style={{ display: 'flex', gap: 12, fontSize: '0.72rem', color: 'var(--text-3)', marginTop: 3, flexWrap: 'wrap' }}>
+                  {d.site && <span>Site: {d.site}</span>}
+                  {d.purchase_value && <span style={{ fontFamily: 'DM Mono' }}>{formatCurrency(d.purchase_value)}</span>}
+                  <span>Deleted {new Date(d.deleted_at).toLocaleDateString()}</span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                <button onClick={() => handleRestore(d.id)} disabled={restoring[d.id]}
+                  className="btn-primary" style={{ padding: '7px 14px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: 5, background: 'var(--green)', borderColor: 'var(--green)' }}>
+                  {restoring[d.id] ? <RefreshCw size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <RotateCcw size={12} />} Cascade Restore
+                </button>
+                <button onClick={() => handlePermanentDelete(d.id)}
+                  className="btn-danger" style={{ padding: '7px 10px', fontSize: '0.75rem' }}>
+                  <Trash2 size={12} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}

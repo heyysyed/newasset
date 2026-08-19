@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Excel Generator Helper</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 40px;
+      background: #f1f5f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    button {
+      padding: 16px 32px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: white;
+      background: #3b82f6;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+      transition: all 0.2s;
+    }
+    button:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+  <button id="generate-btn">Generate and Download Excel</button>
+  <script>
+    document.getElementById('generate-btn').addEventListener('click', () => {
+      const data = [
+        { "Employee Code": "EMP-9001", "Full Name": "Test Employee One", "Designation": "Developer", "Department": "IT", "Email": "emp1@test.com", "Phone": "1234567890" },
+        { "Employee Code": "EMP-9002", "Full Name": "Test Employee Two", "Designation": "Designer", "Department": "Administration", "Email": "emp2@test.com", "Phone": "0987654321" }
+      ];
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Employees");
+      XLSX.writeFile(wb, "test_employees.xlsx");
+    });
+  </script>
+</body>
+</html>
