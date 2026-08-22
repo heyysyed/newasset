@@ -56,7 +56,7 @@ export default function CommandPalette({ isOpen, onClose }) {
         ])
 
         const combined = [
-          ...(assetRes.data || []).map(a => ({ ...a, type: 'asset', label: `${a.asset_code} — ${a.asset_name}`, path: `/assets/${a.id}` })),
+          ...(assetRes.data || []).map(a => ({ ...a, type: 'asset', label: `${a.asset_code} - ${a.asset_name}`, path: `/assets/${a.id}` })),
           ...(profileRes.data || []).map(p => ({ ...p, type: 'user', label: `User: ${p.full_name || p.email}`, path: `/admin` })),
           ...(empRes.data || []).map(e => ({ ...e, type: 'employee', label: `Staff: ${e.full_name} (${e.employee_code})`, path: `/admin` })),
         ]
@@ -106,9 +106,8 @@ export default function CommandPalette({ isOpen, onClose }) {
             onChange={e => setQuery(e.target.value)}
             style={{
               flex: 1, border: 'none', background: 'transparent',
-              fontSize: '1.1rem', color: 'var(--text-0)', outline: 'none',
-              fontFamily: 'DM Sans', fontWeight: 500
-            }}
+              color: 'var(--text-0)', outline: 'none',
+              }}
           />
           {loading ? (
             <div style={{ width: 18, height: 18, border: '2px solid var(--text-3)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
@@ -122,13 +121,13 @@ export default function CommandPalette({ isOpen, onClose }) {
         {/* Results */}
         <div style={{ maxHeight: 400, overflowY: 'auto', padding: '8px 0' }}>
           {results.length === 0 && query.trim() && !loading && (
-            <div style={{ padding: '24px 20px', textAlign: 'center', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>
+            <div style={{ padding: '24px 20px', textAlign: 'center', color: 'var(--text-3)', }}>
               No results found for "{query}"
             </div>
           )}
           
           {results.length === 0 && !query.trim() && (
-            <div style={{ padding: '24px 20px', textAlign: 'center', color: 'var(--text-3)', fontFamily: 'DM Sans', fontSize: '0.9rem' }}>
+            <div style={{ padding: '24px 20px', textAlign: 'center', color: 'var(--text-3)', }}>
               Start typing to search...
             </div>
           )}
@@ -147,14 +146,14 @@ export default function CommandPalette({ isOpen, onClose }) {
               <Package size={18} color="var(--accent)" style={{ marginRight: 14 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                  <span style={{ fontWeight: 600, color: 'var(--text-0)', fontFamily: 'DM Sans', fontSize: '0.95rem' }}>
+                  <span style={{ color: 'var(--text-0)', }}>
                     {item.asset_name || 'Unnamed Asset'}
                   </span>
-                  <span style={{ fontSize: '0.75rem', fontFamily: 'DM Mono', color: 'var(--accent)', background: 'var(--accent-glow)', padding: '2px 6px', borderRadius: 6 }}>
+                  <span style={{ color: 'var(--accent)', background: 'var(--accent-glow)', padding: '2px 6px', borderRadius: 6 }}>
                     {item.asset_code}
                   </span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: '0.8rem', color: 'var(--text-3)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, color: 'var(--text-3)' }}>
                   {item.category && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Ticket size={12} /> {item.category}</span>}
                   {item.site && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={12} /> {item.site}</span>}
                 </div>
@@ -165,10 +164,10 @@ export default function CommandPalette({ isOpen, onClose }) {
         </div>
         
         {/* Footer */}
-        <div style={{ padding: '8px 20px', borderTop: '1px solid var(--border)', background: 'var(--bg-1)', display: 'flex', alignItems: 'center', gap: 16, fontSize: '0.75rem', color: 'var(--text-3)' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><kbd style={{ background: 'var(--bg-3)', padding: '2px 6px', borderRadius: 4, fontFamily: 'DM Mono' }}>↑↓</kbd> to navigate</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><kbd style={{ background: 'var(--bg-3)', padding: '2px 6px', borderRadius: 4, fontFamily: 'DM Mono' }}>Enter</kbd> to select</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><kbd style={{ background: 'var(--bg-3)', padding: '2px 6px', borderRadius: 4, fontFamily: 'DM Mono' }}>Esc</kbd> to close</span>
+        <div style={{ padding: '8px 20px', borderTop: '1px solid var(--border)', background: 'var(--bg-1)', display: 'flex', alignItems: 'center', gap: 16, color: 'var(--text-3)' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><kbd style={{ background: 'var(--bg-3)', padding: '2px 6px', borderRadius: 4, }}>↑↓</kbd> to navigate</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><kbd style={{ background: 'var(--bg-3)', padding: '2px 6px', borderRadius: 4, }}>Enter</kbd> to select</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><kbd style={{ background: 'var(--bg-3)', padding: '2px 6px', borderRadius: 4, }}>Esc</kbd> to close</span>
         </div>
       </div>
     </div>

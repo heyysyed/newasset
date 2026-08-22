@@ -14,9 +14,9 @@ import companyLogo from '../../assets/logo.png'
 // ── Config ───────────────────────────────────────────────────────────────────
 
 const PASS_TYPE_CONFIG = {
-  asset_out:   { label: 'Asset Out',   color: 'var(--red)',   bg: 'rgba(239,68,68,0.08)', icon: ArrowUpRight },
+  asset_out:   { label: 'Asset Out',   color: 'var(--red)',   bg: 'var(--status-danger-soft)', icon: ArrowUpRight },
   asset_in:    { label: 'Asset In',    color: 'var(--green)', bg: 'rgba(34,197,94,0.08)', icon: ArrowDownLeft },
-  returnable:  { label: 'Returnable',  color: '#f59e0b',      bg: 'rgba(245,158,11,0.08)', icon: RotateCcw },
+  returnable:  { label: 'Returnable',  color: 'var(--status-warning)',      bg: 'var(--status-warning-soft)', icon: RotateCcw },
 }
 
 const STATUS_CONFIG = {
@@ -69,7 +69,7 @@ function printGatePass(transfer, transferItems) {
         <td class="qty-col" style="font-weight:bold;">${item.quantity || 1}</td>
         <td>${item.remarks || ''}</td>
       </tr>`).join('')
-    : `<tr><td class="sr-col">1</td><td>—</td><td class="unit-col">nos</td><td class="qty-col">1</td><td></td></tr>`
+    : `<tr><td class="sr-col">1</td><td>-</td><td class="unit-col">nos</td><td class="qty-col">1</td><td></td></tr>`
 
   const filledCount = items.length > 0 ? items.length : 1
   const emptyRows = Math.max(0, 11 - filledCount)
@@ -80,7 +80,7 @@ function printGatePass(transfer, transferItems) {
 <style>
   @page { size: A4; margin: 15mm; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: Arial, sans-serif; font-size: 13px; color: #000; background: #fff; }
+  body { font-size: 13px; color: #000; background: #fff; }
   .gate-pass { max-width: 780px; margin: 0 auto; border: 2px solid #000; }
   .header { text-align: center; padding: 16px 20px 12px; border-bottom: 2px solid #000; }
   .company-name { font-size: 22px; font-weight: bold; letter-spacing: 1px; margin-bottom: 6px; }
@@ -107,7 +107,7 @@ function printGatePass(transfer, transferItems) {
   @media print { body { -webkit-print-color-adjust: exact; } .no-print { display: none !important; } }
 </style></head><body>
   <div style="text-align:center; margin: 10px 0 16px;" class="no-print">
-    <button onclick="window.print()" style="padding:10px 28px; font-size:15px; font-weight:bold; cursor:pointer; background:#2563eb; color:white; border:none; border-radius:6px;">Print / Download PDF</button>
+    <button onclick="window.print()" style="padding:10px 28px; font-size:15px; font-weight:bold; cursor:pointer; background:var(--accent); color:white; border:none; border-radius:6px;">Print / Download PDF</button>
   </div>
   <div class="gate-pass">
     <div class="header" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px;">
@@ -116,7 +116,7 @@ function printGatePass(transfer, transferItems) {
       </div>
       <div style="text-align: right;">
         <div class="company-name" style="margin-bottom: 2px; text-align: right;">Strongbuilt Constructions Pvt. Ltd.</div>
-        <div class="gate-pass-title" style="margin-bottom: 4px; text-align: right;">GATE PASS — ASSET TRANSFER</div>
+        <div class="gate-pass-title" style="margin-bottom: 4px; text-align: right;">GATE PASS - ASSET TRANSFER</div>
         <div class="gp-no" style="text-align: right;">${t.gate_pass_no || t.transfer_no}</div>
       </div>
     </div>
@@ -147,7 +147,7 @@ function printGatePass(transfer, transferItems) {
       <div class="signature-block"><div class="signature-line"></div><div class="signature-label">Receiver Signature</div></div>
     </div>
   </div>
-  <div style="text-align:center; margin-top:12px; font-size:11px; color:#999;" class="no-print">Generated digitally from AssetPro — ${new Date().toLocaleString('en-IN')}</div>
+  <div style="text-align:center; margin-top:12px; font-size:11px; color:#999;" class="no-print">Generated digitally from AssetPro - ${new Date().toLocaleString('en-IN')}</div>
 </body></html>`
 
   const win = window.open('', '_blank')
@@ -253,7 +253,7 @@ function CreateTransferModal({ onClose, assets, sites, onSubmit }) {
         <div style={{ position: 'sticky', top: 0, zIndex: 2, background: 'var(--bg-2)',
           padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           borderBottom: '1px solid var(--border)' }}>
-          <h3 style={{ fontFamily: 'Oswald', fontSize: 16, textTransform: 'uppercase', letterSpacing: 0.5,
+          <h3 style={{ textTransform: 'uppercase', letterSpacing: 0.5,
             color: 'var(--text-0)', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
             <Truck size={16} style={{ color: passTypeCfg?.color || 'var(--accent)' }} />
             New Asset Transfer / Gate Pass
@@ -280,8 +280,7 @@ function CreateTransferModal({ onClose, assets, sites, onSubmit }) {
                       border: `1.5px solid ${active ? cfg.color : 'var(--border)'}`,
                       background: active ? cfg.bg : 'var(--bg-3)',
                       color: active ? cfg.color : 'var(--text-3)',
-                      cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                      fontFamily: 'DM Sans', fontWeight: 700, fontSize: '0.65rem', textTransform: 'uppercase',
+                      cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, textTransform: 'uppercase',
                       transition: 'all 0.15s' }}>
                     <Icon size={16} />
                     {cfg.label}
@@ -313,20 +312,20 @@ function CreateTransferModal({ onClose, assets, sites, onSubmit }) {
 
           {/* Carrier / Vehicle */}
           <div style={{ background: 'var(--bg-1)', borderRadius: 12, padding: '14px 14px', border: '1px solid var(--border)' }}>
-            <div style={{ fontFamily: 'Oswald', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase',
+            <div style={{ textTransform: 'uppercase',
               color: 'var(--text-3)', marginBottom: 10, letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: 5 }}>
               <Truck size={13} /> Carrier / Vehicle
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                <input className="inp" value={form.carrier_name} onChange={e => set('carrier_name', e.target.value)} placeholder="Driver Name" style={{ fontSize: '0.82rem' }} />
-                <input className="inp" value={form.carrier_company} onChange={e => set('carrier_company', e.target.value)} placeholder="Transporter" style={{ fontSize: '0.82rem' }} />
+                <input className="inp" value={form.carrier_name} onChange={e => set('carrier_name', e.target.value)} placeholder="Driver Name"  />
+                <input className="inp" value={form.carrier_company} onChange={e => set('carrier_company', e.target.value)} placeholder="Transporter"  />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                <input className="inp" value={form.vehicle_no} onChange={e => set('vehicle_no', e.target.value)} placeholder="Vehicle No." style={{ fontSize: '0.82rem', fontFamily: 'DM Mono' }} />
-                <input className="inp" value={form.carrier_phone} onChange={e => set('carrier_phone', e.target.value)} placeholder="Phone" style={{ fontSize: '0.82rem' }} />
+                <input className="inp" value={form.vehicle_no} onChange={e => set('vehicle_no', e.target.value)} placeholder="Vehicle No."  />
+                <input className="inp" value={form.carrier_phone} onChange={e => set('carrier_phone', e.target.value)} placeholder="Phone"  />
               </div>
-              <input className="inp" value={form.ref_mtv_no} onChange={e => set('ref_mtv_no', e.target.value)} placeholder="Ref. MTV No." style={{ fontSize: '0.82rem' }} />
+              <input className="inp" value={form.ref_mtv_no} onChange={e => set('ref_mtv_no', e.target.value)} placeholder="Ref. MTV No."  />
             </div>
           </div>
 
@@ -334,7 +333,7 @@ function CreateTransferModal({ onClose, assets, sites, onSubmit }) {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
               <label className="lbl" style={{ margin: 0 }}>Assets / Items *</label>
-              <button type="button" onClick={addLine} className="btn-ghost" style={{ padding: '5px 12px', fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: 4, borderRadius: 8 }}>
+              <button type="button" onClick={addLine} className="btn-ghost" style={{ padding: '5px 12px', display: 'flex', alignItems: 'center', gap: 4, borderRadius: 8 }}>
                 <Plus size={13} /> Add
               </button>
             </div>
@@ -342,19 +341,19 @@ function CreateTransferModal({ onClose, assets, sites, onSubmit }) {
               {lineItems.map((li, i) => (
                 <div key={i} style={{ background: 'var(--bg-1)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 12px', position: 'relative' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                    <span style={{ fontSize: '0.68rem', fontFamily: 'Oswald', textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em' }}>
+                    <span style={{ textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em' }}>
                       Item {i + 1}
                     </span>
                     {lineItems.length > 1 && (
                       <button type="button" onClick={() => removeLine(i)} className="btn-ghost"
-                        style={{ padding: '2px 6px', color: 'var(--red)', fontSize: '0.68rem', display: 'flex', alignItems: 'center', gap: 3 }}>
+                        style={{ padding: '2px 6px', color: 'var(--red)', display: 'flex', alignItems: 'center', gap: 3 }}>
                         <Trash2 size={11} /> Remove
                       </button>
                     )}
                   </div>
 
                   {/* Asset select */}
-                  <select className="sel" style={{ width: '100%', fontSize: '0.82rem', marginBottom: 8 }}
+                  <select className="sel" style={{ width: '100%', marginBottom: 8 }}
                     value={li.asset_id || ''} onChange={e => pickAsset(i, e.target.value)}
                     disabled={!form.from_site}>
                     <option value="">{!form.from_site ? 'Select a From Site first...' : siteAssets.length === 0 ? 'No assets at this site' : 'Select asset or type custom...'}</option>
@@ -362,7 +361,7 @@ function CreateTransferModal({ onClose, assets, sites, onSubmit }) {
                       const isBulkAsset = a.asset_type === 'bulk' || (Number(a.quantity) > 1)
                       return (
                         <option key={a.id} value={a.id}>
-                          {a.asset_code ? `${a.asset_code} — ` : ''}{a.asset_name}{a.category ? ` [${a.category}]` : ''}{isBulkAsset ? ` (${a.quantity} ${a.uom || 'nos'})` : ''}
+                          {a.asset_code ? `${a.asset_code} - ` : ''}{a.asset_name}{a.category ? ` [${a.category}]` : ''}{isBulkAsset ? ` (${a.quantity} ${a.uom || 'nos'})` : ''}
                         </option>
                       )
                     })}
@@ -370,35 +369,35 @@ function CreateTransferModal({ onClose, assets, sites, onSubmit }) {
 
                   {/* Description */}
                   <input className="inp" value={li.description} onChange={e => updateLine(i, 'description', e.target.value)}
-                    placeholder="Description" style={{ fontSize: '0.82rem', width: '100%', marginBottom: 8 }} />
+                    placeholder="Description" style={{ width: '100%', marginBottom: 8 }} />
 
                   {/* Bulk asset info */}
                   {li._isBulk && li._availableQty > 0 && (
-                    <div style={{ fontSize: '0.72rem', color: 'var(--accent)', background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', borderRadius: 6, padding: '5px 10px', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
-                      <Package size={12} /> Bulk Asset — Available: <strong>{li._availableQty} {li._uom}</strong>. Enter qty to transfer.
+                    <div style={{ color: 'var(--accent)', background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', borderRadius: 6, padding: '5px 10px', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <Package size={12} /> Bulk Asset - Available: <strong>{li._availableQty} {li._uom}</strong>. Enter qty to transfer.
                     </div>
                   )}
 
                   {/* Qty + Unit + Remarks */}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1.5fr', gap: 6 }}>
                     <div>
-                      <label style={{ fontSize: '0.6rem', color: 'var(--text-3)', display: 'block', marginBottom: 2 }}>Qty {li._isBulk ? `(max ${li._availableQty})` : ''}</label>
+                      <label style={{ color: 'var(--text-3)', display: 'block', marginBottom: 2 }}>Qty {li._isBulk ? `(max ${li._availableQty})` : ''}</label>
                       <input className="inp" type="number" min="1" max={li._isBulk ? li._availableQty : undefined} step="1" value={li.quantity}
                         onChange={e => updateLine(i, 'quantity', e.target.value)}
                         placeholder={li._isBulk ? `Max ${li._availableQty}` : '1'}
-                        style={{ fontSize: '0.82rem', textAlign: 'center', borderColor: li._isBulk && Number(li.quantity) > li._availableQty ? 'var(--red)' : undefined }} />
+                        style={{ textAlign: 'center', borderColor: li._isBulk && Number(li.quantity) > li._availableQty ? 'var(--red)' : undefined }} />
                       {li._isBulk && Number(li.quantity) > li._availableQty && (
-                        <p style={{ fontSize: '0.62rem', color: 'var(--red)', marginTop: 2 }}>Exceeds available qty</p>
+                        <p style={{ color: 'var(--red)', marginTop: 2 }}>Exceeds available qty</p>
                       )}
                     </div>
                     <div>
-                      <label style={{ fontSize: '0.6rem', color: 'var(--text-3)', display: 'block', marginBottom: 2 }}>Unit</label>
-                      <input className="inp" value={li.unit} onChange={e => updateLine(i, 'unit', e.target.value)} style={{ fontSize: '0.82rem' }} />
+                      <label style={{ color: 'var(--text-3)', display: 'block', marginBottom: 2 }}>Unit</label>
+                      <input className="inp" value={li.unit} onChange={e => updateLine(i, 'unit', e.target.value)}  />
                     </div>
                     <div>
-                      <label style={{ fontSize: '0.6rem', color: 'var(--text-3)', display: 'block', marginBottom: 2 }}>Remarks</label>
+                      <label style={{ color: 'var(--text-3)', display: 'block', marginBottom: 2 }}>Remarks</label>
                       <input className="inp" value={li.remarks || ''} onChange={e => updateLine(i, 'remarks', e.target.value)}
-                        placeholder="Optional" style={{ fontSize: '0.82rem' }} />
+                        placeholder="Optional"  />
                     </div>
                   </div>
                 </div>
@@ -410,7 +409,7 @@ function CreateTransferModal({ onClose, assets, sites, onSubmit }) {
           <div>
             <label className="lbl">Document (optional)</label>
             <button type="button" className="btn-ghost" onClick={() => fileRef.current?.click()}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, width: '100%', justifyContent: 'center', padding: '10px 14px', border: '1.5px dashed var(--border)', borderRadius: 10 }}>
+              style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', justifyContent: 'center', padding: '10px 14px', border: '1.5px dashed var(--border)', borderRadius: 10 }}>
               <Upload size={14} />
               {uploadedFile ? uploadedFile.name : 'Choose File'}
             </button>
@@ -421,12 +420,12 @@ function CreateTransferModal({ onClose, assets, sites, onSubmit }) {
           <div>
             <label className="lbl">Remarks</label>
             <textarea className="inp" rows={2} placeholder="Additional notes…"
-              value={form.notes} onChange={e => set('notes', e.target.value)} style={{ resize: 'vertical', fontSize: '0.82rem' }} />
+              value={form.notes} onChange={e => set('notes', e.target.value)} style={{ resize: 'vertical', }} />
           </div>
 
           {/* Submit */}
           <button type="submit" className="btn-primary" disabled={!valid || saving}
-            style={{ marginTop: 4, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: '0.88rem', borderRadius: 12 }}>
+            style={{ marginTop: 4, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 12 }}>
             {saving
               ? <><Loader2 size={16} className="spin" /> Creating...</>
               : <><ArrowLeftRight size={16} /> Create Transfer & Gate Pass</>}
@@ -447,7 +446,7 @@ function TransferDetailModal({ transfer, transferItems, onClose, onConfirm, onRe
 
   return (
     <ModalShell onClose={onClose} accent={STATUS_CONFIG[t.status]?.color || 'var(--accent)'} wide>
-      <h3 style={{ fontFamily: 'Oswald', fontSize: 18, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 20, color: 'var(--text-0)' }}>
+      <h3 style={{ textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 20, color: 'var(--text-0)' }}>
         <Eye size={18} style={{ marginRight: 8, verticalAlign: 'middle', color: 'var(--accent)' }} />
         Asset Transfer / Gate Pass Details
       </h3>
@@ -455,9 +454,9 @@ function TransferDetailModal({ transfer, transferItems, onClose, onConfirm, onRe
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontFamily: 'DM Mono', fontSize: 14, fontWeight: 600, color: 'var(--accent)' }}>{t.transfer_no}</span>
+          <span style={{ color: 'var(--accent)' }}>{t.transfer_no}</span>
           {t.gate_pass_no && (
-            <span style={{ fontFamily: 'DM Mono', fontSize: 12, color: 'var(--text-3)', background: 'var(--bg-3)', padding: '2px 8px', borderRadius: 6 }}>
+            <span style={{ color: 'var(--text-3)', background: 'var(--bg-3)', padding: '2px 8px', borderRadius: 6 }}>
               GP: {t.gate_pass_no}
             </span>
           )}
@@ -471,31 +470,31 @@ function TransferDetailModal({ transfer, transferItems, onClose, onConfirm, onRe
       {/* Info Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px 16px', marginBottom: 20 }}>
         <div>
-          <div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.5 }}>From Site</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 14, fontWeight: 600 }}>
-            <MapPin size={13} style={{ color: 'var(--red)' }} />{t.from_site || '—'}
+          <div style={{ color: 'var(--text-3)', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.5 }}>From Site</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, }}>
+            <MapPin size={13} style={{ color: 'var(--red)' }} />{t.from_site || '-'}
           </div>
         </div>
         <div>
-          <div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.5 }}>To Site</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 14, fontWeight: 600 }}>
-            <MapPin size={13} style={{ color: 'var(--green)' }} />{t.to_site || '—'}
+          <div style={{ color: 'var(--text-3)', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.5 }}>To Site</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, }}>
+            <MapPin size={13} style={{ color: 'var(--green)' }} />{t.to_site || '-'}
           </div>
         </div>
         <div>
-          <div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.5 }}>Initiated By</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 14 }}>
-            <User size={13} style={{ color: 'var(--text-3)' }} />{initiator.full_name || '—'}
+          <div style={{ color: 'var(--text-3)', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.5 }}>Initiated By</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, }}>
+            <User size={13} style={{ color: 'var(--text-3)' }} />{initiator.full_name || '-'}
           </div>
         </div>
         <div>
-          <div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.5 }}>Date</div>
-          <div style={{ fontSize: 13 }}>{fmtDateTime(t.created_at)}</div>
+          <div style={{ color: 'var(--text-3)', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.5 }}>Date</div>
+          <div >{fmtDateTime(t.created_at)}</div>
         </div>
         {t.purpose && (
           <div style={{ gridColumn: '1 / -1' }}>
-            <div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.5 }}>Purpose</div>
-            <div style={{ fontSize: 13 }}>{t.purpose}</div>
+            <div style={{ color: 'var(--text-3)', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.5 }}>Purpose</div>
+            <div >{t.purpose}</div>
           </div>
         )}
       </div>
@@ -503,21 +502,21 @@ function TransferDetailModal({ transfer, transferItems, onClose, onConfirm, onRe
       {/* Carrier */}
       {(t.vehicle_no || t.carrier_name || t.carrier_company) && (
         <div style={{ marginBottom: 16, background: 'var(--bg-1)', borderRadius: 10, border: '1px solid var(--border)', padding: '14px 16px' }}>
-          <div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5, display: 'flex', alignItems: 'center', gap: 5 }}>
+          <div style={{ color: 'var(--text-3)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5, display: 'flex', alignItems: 'center', gap: 5 }}>
             <Truck size={13} /> Carrier / Vehicle
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 16px', fontSize: 13 }}>
-            {t.carrier_name && <div><span style={{ color: 'var(--text-3)', fontSize: 11 }}>Driver: </span>{t.carrier_name}</div>}
-            {t.carrier_company && <div><span style={{ color: 'var(--text-3)', fontSize: 11 }}>Transporter: </span>{t.carrier_company}</div>}
-            {t.vehicle_no && <div><span style={{ color: 'var(--text-3)', fontSize: 11 }}>Vehicle: </span><strong>{t.vehicle_no}</strong></div>}
-            {t.carrier_phone && <div><span style={{ color: 'var(--text-3)', fontSize: 11 }}>Phone: </span>{t.carrier_phone}</div>}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 16px', }}>
+            {t.carrier_name && <div><span style={{ color: 'var(--text-3)', }}>Driver: </span>{t.carrier_name}</div>}
+            {t.carrier_company && <div><span style={{ color: 'var(--text-3)', }}>Transporter: </span>{t.carrier_company}</div>}
+            {t.vehicle_no && <div><span style={{ color: 'var(--text-3)', }}>Vehicle: </span><strong>{t.vehicle_no}</strong></div>}
+            {t.carrier_phone && <div><span style={{ color: 'var(--text-3)', }}>Phone: </span>{t.carrier_phone}</div>}
           </div>
         </div>
       )}
 
       {/* Items */}
       <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+        <div style={{ color: 'var(--text-3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
           Assets / Items ({items.length})
         </div>
         <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
@@ -527,13 +526,13 @@ function TransferDetailModal({ transfer, transferItems, onClose, onConfirm, onRe
               {items.map((item, idx) => (
                 <tr key={item.id || idx}>
                   <td style={{ textAlign: 'center', color: 'var(--text-3)' }}>{idx + 1}</td>
-                  <td style={{ fontWeight: 600 }}>
-                    {item.description || item.assets?.asset_name || '—'}
-                    {item.assets?.asset_code && <span style={{ fontSize: 11, color: 'var(--text-3)', fontFamily: 'DM Mono', marginLeft: 6 }}>{item.assets.asset_code}</span>}
+                  <td >
+                    {item.description || item.assets?.asset_name || '-'}
+                    {item.assets?.asset_code && <span style={{ color: 'var(--text-3)', marginLeft: 6 }}>{item.assets.asset_code}</span>}
                   </td>
                   <td style={{ textAlign: 'center' }}>{item.unit || 'nos'}</td>
-                  <td style={{ textAlign: 'center', fontFamily: 'DM Mono', fontWeight: 600 }}>{item.quantity || 1}</td>
-                  <td style={{ fontSize: 12, color: 'var(--text-2)' }}>{item.remarks || ''}</td>
+                  <td style={{ textAlign: 'center', }}>{item.quantity || 1}</td>
+                  <td style={{ color: 'var(--text-2)' }}>{item.remarks || ''}</td>
                 </tr>
               ))}
             </tbody>
@@ -739,16 +738,16 @@ export default function AssetTransferTab({ assets = [], sites = [], onRefresh })
         const isBulk = assetData?.asset_type === 'bulk' || (Number(assetData?.quantity) > 1)
 
         if (isBulk && Number(item.quantity) < Number(assetData.quantity)) {
-          // Partial bulk transfer — use atomic RPC
+          // Partial bulk transfer - use atomic RPC
           await bulkTransferAsset(
             item.asset_id,
             Number(item.quantity),
             t.to_site,
             user?.id,
-            `Transfer ${t.transfer_no} (GP: ${t.gate_pass_no || ''}) — ${item.description || ''}`
+            `Transfer ${t.transfer_no} (GP: ${t.gate_pass_no || ''}) - ${item.description || ''}`
           )
         } else {
-          // Full transfer (serialized or entire bulk qty) — move the asset
+          // Full transfer (serialized or entire bulk qty) - move the asset
           const { error: assetErr } = await supabase
             .from('assets')
             .update({ site: t.to_site, updated_at: new Date().toISOString() })
@@ -762,7 +761,7 @@ export default function AssetTransferTab({ assets = [], sites = [], onRefresh })
             movement_type: 'transfer',
             from_location: t.from_site,
             to_location: t.to_site,
-            notes: `Transfer ${t.transfer_no} (GP: ${t.gate_pass_no || ''}) — ${item.description || ''}`,
+            notes: `Transfer ${t.transfer_no} (GP: ${t.gate_pass_no || ''}) - ${item.description || ''}`,
           })
         }
       }
@@ -868,7 +867,7 @@ export default function AssetTransferTab({ assets = [], sites = [], onRefresh })
           {['all', 'pending', 'confirmed', 'rejected'].map(f => (
             <button key={f}
               className={statusFilter === f ? 'btn-primary' : 'btn-ghost'}
-              style={{ fontSize: 12, padding: '4px 12px', borderRadius: 20 }}
+              style={{ padding: '4px 12px', borderRadius: 20 }}
               onClick={() => setStatusFilter(f)}>
               {f.charAt(0).toUpperCase() + f.slice(1)}
             </button>
@@ -888,10 +887,10 @@ export default function AssetTransferTab({ assets = [], sites = [], onRefresh })
       ) : filtered.length === 0 ? (
         <div className="card" style={{ textAlign: 'center', padding: '48px 20px', color: 'var(--text-3)' }}>
           <ArrowLeftRight size={36} style={{ marginBottom: 12, opacity: 0.4 }} />
-          <div style={{ fontFamily: 'Oswald', fontSize: 16, textTransform: 'uppercase', marginBottom: 4 }}>
+          <div style={{ textTransform: 'uppercase', marginBottom: 4 }}>
             {search || statusFilter !== 'all' ? 'No matching transfers' : 'No asset transfers yet'}
           </div>
-          <div style={{ fontSize: 13 }}>
+          <div >
             {search || statusFilter !== 'all' ? 'Try adjusting your filters' : 'Click "New Transfer / Gate Pass" to get started'}
           </div>
         </div>
@@ -917,21 +916,21 @@ export default function AssetTransferTab({ assets = [], sites = [], onRefresh })
               <tbody>
                 {filtered.map(t => (
                   <tr key={t.id}>
-                    <td style={{ whiteSpace: 'nowrap', fontSize: 13 }}>{fmtDate(t.created_at)}</td>
+                    <td style={{ whiteSpace: 'nowrap', }}>{fmtDate(t.created_at)}</td>
                     <td>
-                      <div style={{ fontFamily: 'DM Mono', fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>{t.gate_pass_no}</div>
-                      <div style={{ fontFamily: 'DM Mono', fontSize: 11, color: 'var(--text-3)' }}>{t.transfer_no}</div>
+                      <div style={{ color: 'var(--accent)', }}>{t.gate_pass_no}</div>
+                      <div style={{ color: 'var(--text-3)' }}>{t.transfer_no}</div>
                     </td>
                     <td><PassTypeBadge type={t.pass_type} /></td>
-                    <td style={{ fontSize: 13 }}><MapPin size={11} style={{ color: 'var(--red)', marginRight: 3 }} />{t.from_site}</td>
-                    <td style={{ fontSize: 13 }}><MapPin size={11} style={{ color: 'var(--green)', marginRight: 3 }} />{t.to_site}</td>
-                    <td style={{ fontSize: 13, maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.purpose || '—'}</td>
-                    <td style={{ fontFamily: 'DM Mono', fontSize: 12 }}>{t.vehicle_no || '—'}</td>
+                    <td ><MapPin size={11} style={{ color: 'var(--red)', marginRight: 3 }} />{t.from_site}</td>
+                    <td ><MapPin size={11} style={{ color: 'var(--green)', marginRight: 3 }} />{t.to_site}</td>
+                    <td style={{ maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.purpose || '-'}</td>
+                    <td >{t.vehicle_no || '-'}</td>
                     <td><StatusBadge status={t.status} /></td>
-                    <td style={{ fontSize: 13 }}>{t.initiator?.full_name || '—'}</td>
+                    <td >{t.initiator?.full_name || '-'}</td>
                     <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                       <button onClick={() => openDetail(t)} title="View"
-                        style={{ background: 'var(--accent-glow)', border: '1.5px solid rgba(79,126,255,0.2)',
+                        style={{ background: 'var(--accent-glow)', border: '1.5px solid var(--accent-soft)',
                           borderRadius: 10, padding: '6px 8px', cursor: 'pointer', color: 'var(--accent)', marginRight: 4 }}>
                         <Eye size={14} />
                       </button>
@@ -952,24 +951,24 @@ export default function AssetTransferTab({ assets = [], sites = [], onRefresh })
             {filtered.map(t => (
               <div key={t.id} className="card" style={{ padding: '14px 16px', cursor: 'pointer' }} onClick={() => openDetail(t)}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span style={{ fontFamily: 'DM Mono', fontSize: 12, fontWeight: 600, color: 'var(--accent)' }}>{t.gate_pass_no}</span>
-                  <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{fmtDate(t.created_at)}</span>
+                  <span style={{ color: 'var(--accent)' }}>{t.gate_pass_no}</span>
+                  <span style={{ color: 'var(--text-3)' }}>{fmtDate(t.created_at)}</span>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 12px', fontSize: 13, marginBottom: 8 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 12px', marginBottom: 8 }}>
                   <div>
-                    <div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 1 }}>From</div>
+                    <div style={{ color: 'var(--text-3)', marginBottom: 1 }}>From</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}><MapPin size={11} style={{ color: 'var(--red)' }} />{t.from_site}</div>
                   </div>
                   <div>
-                    <div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 1 }}>To</div>
+                    <div style={{ color: 'var(--text-3)', marginBottom: 1 }}>To</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}><MapPin size={11} style={{ color: 'var(--green)' }} />{t.to_site}</div>
                   </div>
                 </div>
-                {t.purpose && <div style={{ fontSize: 12, color: 'var(--text-2)', marginBottom: 8 }}>{t.purpose}</div>}
+                {t.purpose && <div style={{ color: 'var(--text-2)', marginBottom: 8 }}>{t.purpose}</div>}
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                   <PassTypeBadge type={t.pass_type} />
                   <StatusBadge status={t.status} />
-                  {t.vehicle_no && <span style={{ fontSize: 11, color: 'var(--text-3)', fontFamily: 'DM Mono', marginLeft: 'auto' }}>{t.vehicle_no}</span>}
+                  {t.vehicle_no && <span style={{ color: 'var(--text-3)', marginLeft: 'auto' }}>{t.vehicle_no}</span>}
                 </div>
               </div>
             ))}

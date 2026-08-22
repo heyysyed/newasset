@@ -46,10 +46,10 @@ export default function MonthlyMaintenanceTrend({ maintLogs = [] }) {
     if (!active || !payload?.length) return null
     const item = payload[0].payload
     return (
-      <div style={{ background: '#0f172a', color: '#fff', padding: '8px 12px', borderRadius: 8, fontSize: '0.8rem', fontFamily: 'DM Sans', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
-        <div style={{ fontWeight: 700, color: '#60a5fa' }}>{item.name} Spend Trend</div>
-        <div>Repair Cost: <strong style={{ color: '#34d399', fontFamily: 'DM Mono' }}>{formatCurrency(item.cost)}</strong></div>
-        <div>Work Orders: <strong style={{ color: '#fbbf24', fontFamily: 'DM Mono' }}>{item.count} tickets</strong></div>
+      <div style={{ background: '#0f172a', color: '#fff', padding: '8px 12px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+        <div style={{ color: 'var(--status-info)' }}>{item.name} Spend Trend</div>
+        <div>Repair Cost: <strong style={{ color: '#34d399', }}>{formatCurrency(item.cost)}</strong></div>
+        <div>Work Orders: <strong style={{ color: '#fbbf24', }}>{item.count} tickets</strong></div>
       </div>
     )
   }
@@ -58,10 +58,10 @@ export default function MonthlyMaintenanceTrend({ maintLogs = [] }) {
     <div className="card" style={{ padding: 20, background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
         <div>
-          <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <h3 style={{ margin: 0, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Monthly Repair Spend Trend
           </h3>
-          <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>6-month rolling maintenance cost trend (₹)</p>
+          <p style={{ margin: 0, color: '#64748b' }}>6-month rolling maintenance cost trend (₹)</p>
         </div>
         <TrendingUp size={18} color="#059669" />
       </div>
@@ -71,15 +71,15 @@ export default function MonthlyMaintenanceTrend({ maintLogs = [] }) {
           <AreaChart data={trendData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
             <defs>
               <linearGradient id="colorCost" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+                <stop offset="5%" stopColor='var(--accent)' stopOpacity={0.3}/>
+                <stop offset="95%" stopColor='var(--accent)' stopOpacity={0}/>
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
             <XAxis dataKey="name" stroke="#64748b" fontSize={11} tickLine={false} />
             <YAxis stroke="#64748b" fontSize={10} tickLine={false} tickFormatter={(v) => `₹${(v/1000).toFixed(0)}k`} />
             <Tooltip content={<CustomTooltip />} />
-            <Area type="monotone" dataKey="cost" stroke="#2563eb" strokeWidth={2.5} fillOpacity={1} fill="url(#colorCost)" />
+            <Area type="monotone" dataKey="cost" stroke='var(--accent)' strokeWidth={2.5} fillOpacity={1} fill="url(#colorCost)" />
           </AreaChart>
         </ResponsiveContainer>
       </div>

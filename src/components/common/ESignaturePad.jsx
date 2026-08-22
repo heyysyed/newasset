@@ -61,14 +61,14 @@ export default function ESignaturePad({ onSave, onClear, label = "Digital Signat
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <label className="lbl" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}>
+        <label className="lbl" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 6, }}>
           <PenTool size={14} color="var(--accent)" /> {label} *
         </label>
         <button 
           type="button" 
           onClick={clearCanvas} 
           className="btn-ghost" 
-          style={{ padding: '4px 10px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: 4 }}
+          style={{ padding: '4px 10px', display: 'flex', alignItems: 'center', gap: 4 }}
         >
           <Eraser size={13} /> Clear
         </button>
@@ -88,7 +88,7 @@ export default function ESignaturePad({ onSave, onClear, label = "Digital Signat
           style={{ width: '100%', height: 130, cursor: 'crosshair', touchAction: 'none' }}
         />
         {isEmpty && (
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', color: 'var(--text-3)', fontSize: '0.8rem', fontFamily: 'DM Sans' }}>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', color: 'var(--text-3)', }}>
             Sign here using finger or mouse cursor...
           </div>
         )}

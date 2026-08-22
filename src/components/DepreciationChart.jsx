@@ -49,8 +49,8 @@ export default function DepreciationChart({ assets }) {
     if (active && payload && payload.length) {
       return (
         <div style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', padding: '12px 16px', borderRadius: 12, boxShadow: 'var(--clay-shadow)' }}>
-          <p style={{ margin: '0 0 6px', fontWeight: 600, color: 'var(--text-1)' }}>Year: {label}</p>
-          <p style={{ margin: 0, fontWeight: 700, fontSize: '1.2rem', color: 'var(--accent)' }}>
+          <p style={{ margin: '0 0 6px', color: 'var(--text-1)' }}>Year: {label}</p>
+          <p style={{ margin: 0, color: 'var(--accent)' }}>
             {formatCurrency(payload[0].value)}
           </p>
         </div>
@@ -62,8 +62,8 @@ export default function DepreciationChart({ assets }) {
   return (
     <div className="card" style={{ padding: '24px', minHeight: 400, display: 'flex', flexDirection: 'column' }}>
       <div style={{ marginBottom: 24 }}>
-        <h3 style={{ margin: 0, fontFamily: 'Oswald', fontSize: '1.3rem', color: 'var(--text-0)' }}>10-YEAR DEPRECIATION FORECAST</h3>
-        <p style={{ margin: '4px 0 0', color: 'var(--text-2)', fontSize: '0.85rem' }}>
+        <h3 style={{ margin: 0, color: 'var(--text-0)' }}>10-YEAR DEPRECIATION FORECAST</h3>
+        <p style={{ margin: '4px 0 0', color: 'var(--text-2)', }}>
           Projected aggregate book value of currently filtered assets over the next decade (straight-line method).
         </p>
       </div>
@@ -78,12 +78,12 @@ export default function DepreciationChart({ assets }) {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-            <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} />
+            <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fill: '#64748b', }} dy={10} />
             <YAxis 
               axisLine={false} 
               tickLine={false} 
               tickFormatter={(val) => `₹${(val/100000).toFixed(1)}L`} 
-              tick={{ fill: '#64748b', fontSize: 12 }} 
+              tick={{ fill: '#64748b', }} 
               dx={-10}
             />
             <Tooltip content={<CustomTooltip />} />

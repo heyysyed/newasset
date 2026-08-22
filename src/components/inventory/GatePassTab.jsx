@@ -9,16 +9,16 @@ import { useAuth } from '../../context/AuthContext'
 import * as XLSX from 'xlsx'
 
 const TYPE_CONFIG = {
-  material_out: { label: 'Material Out', color: 'var(--red)', bg: 'rgba(239,68,68,0.08)', icon: ArrowUpRight },
+  material_out: { label: 'Material Out', color: 'var(--red)', bg: 'var(--status-danger-soft)', icon: ArrowUpRight },
   material_in:  { label: 'Material In',  color: 'var(--green)', bg: 'rgba(34,197,94,0.08)', icon: ArrowDownLeft },
-  returnable:   { label: 'Returnable',   color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', icon: RotateCcw },
+  returnable:   { label: 'Returnable',   color: 'var(--status-warning)', bg: 'var(--status-warning-soft)', icon: RotateCcw },
 }
 
 const STATUS_CONFIG = {
-  pending:   { label: 'Pending',   color: '#f59e0b', bg: 'rgba(245,158,11,0.08)' },
+  pending:   { label: 'Pending',   color: 'var(--status-warning)', bg: 'var(--status-warning-soft)' },
   approved:  { label: 'Approved',  color: 'var(--green)', bg: 'rgba(34,197,94,0.08)' },
-  rejected:  { label: 'Rejected',  color: 'var(--red)', bg: 'rgba(239,68,68,0.08)' },
-  completed: { label: 'Completed', color: 'var(--accent)', bg: 'rgba(79,126,255,0.08)' },
+  rejected:  { label: 'Rejected',  color: 'var(--red)', bg: 'var(--status-danger-soft)' },
+  completed: { label: 'Completed', color: 'var(--accent)', bg: 'var(--accent-soft)' },
   cancelled: { label: 'Cancelled', color: 'var(--text-3)', bg: 'var(--bg-3)' },
 }
 
@@ -62,22 +62,22 @@ export default function GatePassTab({ gatePasses, items, assets, sites = [], onR
       <div style={{ display: 'flex', gap: 8, marginBottom: 14, alignItems: 'center', flexWrap: 'wrap' }}>
         <div style={{ position: 'relative', flex: 1, minWidth: 180 }}>
           <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
-          <input className="inp" placeholder="Search passes…" style={{ paddingLeft: 32, height: 36, fontSize: '0.82rem' }}
+          <input className="inp" placeholder="Search passes…" style={{ paddingLeft: 32, height: 36, }}
             value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <div style={{ display: 'flex', gap: 4, overflowX: 'auto', flexShrink: 0 }}>
           {['all', 'pending', 'approved', 'completed'].map(s => (
             <button key={s} onClick={() => setFilterStatus(s)}
               className={filterStatus === s ? 'btn-primary' : 'btn-ghost'}
-              style={{ padding: '5px 11px', fontSize: '0.7rem', textTransform: 'capitalize', whiteSpace: 'nowrap', borderRadius: 8,
-                ...(s === 'pending' && filterStatus === s ? { background: '#f59e0b', borderColor: '#f59e0b' } : {}),
+              style={{ padding: '5px 11px', textTransform: 'capitalize', whiteSpace: 'nowrap', borderRadius: 8,
+                ...(s === 'pending' && filterStatus === s ? { background: 'var(--status-warning)', borderColor: 'var(--status-warning)' } : {}),
                 ...(s === 'approved' && filterStatus === s ? { background: 'var(--green)', borderColor: 'var(--green)' } : {}),
               }}>
               {s}{s === 'pending' && pendingCount > 0 ? ` (${pendingCount})` : ''}
             </button>
           ))}
         </div>
-        <button onClick={() => setShowForm(true)} className="btn-primary" style={{ padding: '8px 14px', fontSize: '0.78rem', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <button onClick={() => setShowForm(true)} className="btn-primary" style={{ padding: '8px 14px', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
           <Plus size={14} /> New Pass
         </button>
       </div>
@@ -105,24 +105,24 @@ export default function GatePassTab({ gatePasses, items, assets, sites = [], onR
                 const TIcon = tc.icon
                 return (
                   <tr key={gp.id} style={{ cursor: 'pointer' }} onClick={() => openDetail(gp)}>
-                    <td><span style={{ fontFamily: 'DM Mono', fontWeight: 700, fontSize: '0.82rem', color: 'var(--accent)' }}>{gp.pass_no}</span></td>
+                    <td><span style={{ color: 'var(--accent)' }}>{gp.pass_no}</span></td>
                     <td>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 20, background: tc.bg, color: tc.color, fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 20, background: tc.bg, color: tc.color, textTransform: 'uppercase' }}>
                         <TIcon size={11} /> {tc.label}
                       </span>
                     </td>
-                    <td style={{ fontSize: '0.82rem', color: 'var(--text-2)' }}>{gp.site || '—'}</td>
+                    <td style={{ color: 'var(--text-2)' }}>{gp.site || '-'}</td>
                     <td>
-                      <div style={{ fontSize: '0.82rem', color: 'var(--text-0)', fontWeight: 600 }}>{gp.carrier_name || '—'}</div>
-                      {gp.vehicle_no && <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'DM Mono' }}>{gp.vehicle_no}</div>}
+                      <div style={{ color: 'var(--text-0)', }}>{gp.carrier_name || '-'}</div>
+                      {gp.vehicle_no && <div style={{ color: 'var(--text-3)', }}>{gp.vehicle_no}</div>}
                     </td>
-                    <td style={{ fontSize: '0.82rem', color: 'var(--text-2)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{gp.purpose || '—'}</td>
+                    <td style={{ color: 'var(--text-2)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{gp.purpose || '-'}</td>
                     <td>
-                      <div style={{ fontSize: '0.82rem', color: 'var(--text-2)' }}>{gp.requester?.full_name || '—'}</div>
-                      <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', fontFamily: 'DM Mono' }}>{new Date(gp.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</div>
+                      <div style={{ color: 'var(--text-2)' }}>{gp.requester?.full_name || '-'}</div>
+                      <div style={{ color: 'var(--text-3)', }}>{new Date(gp.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</div>
                     </td>
                     <td>
-                      <span style={{ fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', padding: '2px 8px', borderRadius: 4, color: sc.color, background: sc.bg, border: `1px solid ${sc.color}25` }}>{sc.label}</span>
+                      <span style={{ textTransform: 'uppercase', padding: '2px 8px', borderRadius: 4, color: sc.color, background: sc.bg, border: `1px solid ${sc.color}25` }}>{sc.label}</span>
                     </td>
                     <td style={{ textAlign: 'right' }} onClick={e => e.stopPropagation()}>
                       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
@@ -159,29 +159,29 @@ export default function GatePassTab({ gatePasses, items, assets, sites = [], onR
             }}>
               {/* Row 1: Pass No + Type + Status */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                <span style={{ fontFamily: 'DM Mono', fontWeight: 700, fontSize: '0.82rem', color: 'var(--accent)' }}>{gp.pass_no}</span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 12, background: tc.bg, color: tc.color, fontSize: '0.58rem', fontWeight: 700, textTransform: 'uppercase' }}>
+                <span style={{ color: 'var(--accent)' }}>{gp.pass_no}</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 12, background: tc.bg, color: tc.color, textTransform: 'uppercase' }}>
                   <TIcon size={9} /> {tc.label}
                 </span>
-                <span style={{ marginLeft: 'auto', fontSize: '0.58rem', fontWeight: 700, textTransform: 'uppercase', padding: '2px 7px', borderRadius: 4, color: sc.color, background: sc.bg }}>{sc.label}</span>
+                <span style={{ marginLeft: 'auto', textTransform: 'uppercase', padding: '2px 7px', borderRadius: 4, color: sc.color, background: sc.bg }}>{sc.label}</span>
               </div>
               {/* Row 2: Details */}
-              <div style={{ display: 'flex', gap: 8, fontSize: '0.72rem', color: 'var(--text-3)', marginBottom: 4, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 8, color: 'var(--text-3)', marginBottom: 4, flexWrap: 'wrap' }}>
                 {gp.site && <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><MapPin size={10} /> {gp.site}</span>}
                 {gp.carrier_name && <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Truck size={10} /> {gp.carrier_name}</span>}
-                {gp.vehicle_no && <span style={{ fontFamily: 'DM Mono', fontSize: '0.68rem' }}>{gp.vehicle_no}</span>}
+                {gp.vehicle_no && <span >{gp.vehicle_no}</span>}
               </div>
-              {gp.purpose && <div style={{ fontSize: '0.72rem', color: 'var(--text-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 4 }}>{gp.purpose}</div>}
+              {gp.purpose && <div style={{ color: 'var(--text-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 4 }}>{gp.purpose}</div>}
               {/* Row 3: Meta */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.66rem', color: 'var(--text-3)' }}>
-                <span>{gp.requester?.full_name || '—'}</span>
-                <span style={{ fontFamily: 'DM Mono' }}>{new Date(gp.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-3)' }}>
+                <span>{gp.requester?.full_name || '-'}</span>
+                <span >{new Date(gp.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
               </div>
             </div>
           )
         })}
         {filtered.length === 0 && (
-          <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-3)', fontSize: '0.85rem' }}>
+          <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-3)', }}>
             <FileText size={32} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
             No gate passes found.
           </div>
@@ -284,7 +284,7 @@ function GatePassFormModal({ items, assets, sites = [], user, cc, onClose, onSav
       <div className="modal" style={{ maxWidth: 640, maxHeight: '92vh', overflow: 'auto', padding: 0 }} onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, background: 'var(--bg-2)', zIndex: 1 }}>
-          <h2 style={{ fontFamily: 'Oswald', fontSize: '1rem', margin: 0, letterSpacing: '0.05em', color: 'var(--text-0)' }}>NEW GATE PASS</h2>
+          <h2 style={{ margin: 0, letterSpacing: '0.05em', color: 'var(--text-0)' }}>NEW GATE PASS</h2>
           <button onClick={onClose} className="btn-ghost" style={{ padding: 6 }}><X size={16} /></button>
         </div>
 
@@ -300,8 +300,7 @@ function GatePassFormModal({ items, assets, sites = [], user, cc, onClose, onSav
                     style={{
                       flex: 1, padding: '8px 6px', borderRadius: 10, border: `1.5px solid ${form.pass_type === key ? cfg.color : 'var(--border)'}`,
                       background: form.pass_type === key ? cfg.bg : 'var(--bg-3)', color: form.pass_type === key ? cfg.color : 'var(--text-3)',
-                      cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
-                      fontFamily: 'DM Sans', fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase',
+                      cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, textTransform: 'uppercase',
                     }}>
                     <Icon size={13} /> {cfg.label}
                   </button>
@@ -337,12 +336,12 @@ function GatePassFormModal({ items, assets, sites = [], user, cc, onClose, onSav
 
           {/* Carrier Info */}
           <div style={{ background: 'var(--bg-1)', borderRadius: 10, padding: '12px 14px', border: '1px solid var(--border)' }}>
-            <div style={{ fontFamily: 'Oswald', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 8, letterSpacing: '0.05em' }}>Carrier / Vehicle</div>
+            <div style={{ textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 8, letterSpacing: '0.05em' }}>Carrier / Vehicle</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              <input className="inp" value={form.carrier_name} onChange={e => setForm(f => ({ ...f, carrier_name: e.target.value }))} placeholder="Driver Name" style={{ fontSize: '0.82rem' }} />
-              <input className="inp" value={form.carrier_company} onChange={e => setForm(f => ({ ...f, carrier_company: e.target.value }))} placeholder="Transporter" style={{ fontSize: '0.82rem' }} />
-              <input className="inp" value={form.vehicle_no} onChange={e => setForm(f => ({ ...f, vehicle_no: e.target.value }))} placeholder="Vehicle No" style={{ fontSize: '0.82rem', fontFamily: 'DM Mono' }} />
-              <input className="inp" value={form.carrier_phone} onChange={e => setForm(f => ({ ...f, carrier_phone: e.target.value }))} placeholder="Phone" style={{ fontSize: '0.82rem' }} />
+              <input className="inp" value={form.carrier_name} onChange={e => setForm(f => ({ ...f, carrier_name: e.target.value }))} placeholder="Driver Name"  />
+              <input className="inp" value={form.carrier_company} onChange={e => setForm(f => ({ ...f, carrier_company: e.target.value }))} placeholder="Transporter"  />
+              <input className="inp" value={form.vehicle_no} onChange={e => setForm(f => ({ ...f, vehicle_no: e.target.value }))} placeholder="Vehicle No"  />
+              <input className="inp" value={form.carrier_phone} onChange={e => setForm(f => ({ ...f, carrier_phone: e.target.value }))} placeholder="Phone"  />
             </div>
           </div>
 
@@ -350,35 +349,35 @@ function GatePassFormModal({ items, assets, sites = [], user, cc, onClose, onSav
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
               <label className="lbl" style={{ margin: 0 }}>Items *</label>
-              <button onClick={addLine} className="btn-ghost" style={{ padding: '4px 10px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: 4 }}><Plus size={12} /> Add</button>
+              <button onClick={addLine} className="btn-ghost" style={{ padding: '4px 10px', display: 'flex', alignItems: 'center', gap: 4 }}><Plus size={12} /> Add</button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {lineItems.map((li, i) => (
                 <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'flex-end' }}>
                   <div style={{ flex: 2 }}>
-                    {i === 0 && <label style={{ fontSize: '0.62rem', color: 'var(--text-3)', display: 'block', marginBottom: 2 }}>Item / Description</label>}
+                    {i === 0 && <label style={{ color: 'var(--text-3)', display: 'block', marginBottom: 2 }}>Item / Description</label>}
                     <div style={{ display: 'flex', gap: 4 }}>
-                      <select className="sel" style={{ width: 140, fontSize: '0.75rem', flexShrink: 0 }}
+                      <select className="sel" style={{ width: 140, flexShrink: 0 }}
                         value={li.inventory_item_id ? `inv:${li.inventory_item_id}` : li.asset_id ? `asset:${li.asset_id}` : ''}
                         onChange={e => pickItem(i, e.target.value)}>
                         <option value="">Custom</option>
                         {(items || []).length > 0 && <optgroup label="Materials">
-                          {items.map(it => <option key={it.id} value={`inv:${it.id}`}>{it.material_code ? `${it.material_code} — ` : ''}{it.material_name || it.item_name || ''}</option>)}
+                          {items.map(it => <option key={it.id} value={`inv:${it.id}`}>{it.material_code ? `${it.material_code} - ` : ''}{it.material_name || it.item_name || ''}</option>)}
                         </optgroup>}
                         {(assets || []).length > 0 && <optgroup label="Assets">
-                          {assets.map(a => <option key={a.id} value={`asset:${a.id}`}>{a.asset_name} — {a.asset_code}</option>)}
+                          {assets.map(a => <option key={a.id} value={`asset:${a.id}`}>{a.asset_name} - {a.asset_code}</option>)}
                         </optgroup>}
                       </select>
-                      <input className="inp" value={li.description} onChange={e => updateLine(i, 'description', e.target.value)} placeholder="Description" style={{ fontSize: '0.82rem', flex: 1 }} />
+                      <input className="inp" value={li.description} onChange={e => updateLine(i, 'description', e.target.value)} placeholder="Description" style={{ flex: 1 }} />
                     </div>
                   </div>
                   <div style={{ width: 60 }}>
-                    {i === 0 && <label style={{ fontSize: '0.62rem', color: 'var(--text-3)', display: 'block', marginBottom: 2 }}>Qty</label>}
-                    <input className="inp" type="number" min="1" value={li.quantity} onChange={e => updateLine(i, 'quantity', e.target.value)} style={{ fontSize: '0.82rem', textAlign: 'center' }} />
+                    {i === 0 && <label style={{ color: 'var(--text-3)', display: 'block', marginBottom: 2 }}>Qty</label>}
+                    <input className="inp" type="number" min="1" value={li.quantity} onChange={e => updateLine(i, 'quantity', e.target.value)} style={{ textAlign: 'center' }} />
                   </div>
                   <div style={{ width: 60 }}>
-                    {i === 0 && <label style={{ fontSize: '0.62rem', color: 'var(--text-3)', display: 'block', marginBottom: 2 }}>Unit</label>}
-                    <input className="inp" value={li.unit} onChange={e => updateLine(i, 'unit', e.target.value)} style={{ fontSize: '0.82rem' }} />
+                    {i === 0 && <label style={{ color: 'var(--text-3)', display: 'block', marginBottom: 2 }}>Unit</label>}
+                    <input className="inp" value={li.unit} onChange={e => updateLine(i, 'unit', e.target.value)}  />
                   </div>
                   {lineItems.length > 1 && (
                     <button onClick={() => removeLine(i)} className="btn-ghost" style={{ padding: 6, color: 'var(--red)', flexShrink: 0 }}><Trash2 size={13} /></button>
@@ -389,7 +388,7 @@ function GatePassFormModal({ items, assets, sites = [], user, cc, onClose, onSav
           </div>
 
           {/* Remarks */}
-          <div><label className="lbl">Remarks</label><textarea className="inp" rows={2} value={form.remarks} onChange={e => setForm(f => ({ ...f, remarks: e.target.value }))} placeholder="Additional notes…" style={{ resize: 'vertical', fontSize: '0.82rem' }} /></div>
+          <div><label className="lbl">Remarks</label><textarea className="inp" rows={2} value={form.remarks} onChange={e => setForm(f => ({ ...f, remarks: e.target.value }))} placeholder="Additional notes…" style={{ resize: 'vertical', }} /></div>
 
           {/* Actions */}
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 4 }}>
@@ -429,10 +428,10 @@ function GatePassDetailModal({ gp, gpItems, loading, user, isAdmin, isMod, cc, o
   }
 
   function printGatePass() {
-    const itemsHtml = gpItems.map((it, i) => `<tr><td>${i + 1}</td><td>${it.description}</td><td style="text-align:center">${it.quantity}</td><td>${it.unit}</td><td>${it.serial_numbers || '—'}</td></tr>`).join('')
-    const html = `<!DOCTYPE html><html><head><title>Gate Pass — ${gp.pass_no}</title>
+    const itemsHtml = gpItems.map((it, i) => `<tr><td>${i + 1}</td><td>${it.description}</td><td style="text-align:center">${it.quantity}</td><td>${it.unit}</td><td>${it.serial_numbers || '-'}</td></tr>`).join('')
+    const html = `<!DOCTYPE html><html><head><title>Gate Pass - ${gp.pass_no}</title>
     <style>
-      *{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;padding:30px;color:#1a1a2e;max-width:800px;margin:0 auto}
+      *{margin:0;padding:0;box-sizing:border-box}body{padding:30px;color:#1a1a2e;max-width:800px;margin:0 auto}
       .header{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #4f7eff;padding-bottom:16px;margin-bottom:20px}
       .pass-no{font-size:1.8rem;font-weight:800;color:#4f7eff;letter-spacing:0.05em}
       .badge{display:inline-block;padding:4px 12px;border-radius:4px;font-size:0.75rem;font-weight:700;text-transform:uppercase}
@@ -460,18 +459,18 @@ function GatePassDetailModal({ gp, gpItems, loading, user, isAdmin, isMod, cc, o
     </div>
     <div class="section">
       <div class="section-title">General Information</div>
-      <div class="row"><span class="label">Site:</span><span class="value">${gp.site || '—'}</span></div>
-      <div class="row"><span class="label">Gate:</span><span class="value">${gp.gate_name || '—'}</span></div>
-      <div class="row"><span class="label">Purpose:</span><span class="value">${gp.purpose || '—'}</span></div>
-      <div class="row"><span class="label">${gp.pass_type === 'material_in' ? 'Source' : 'Destination'}:</span><span class="value">${gp.destination || gp.source || '—'}</span></div>
+      <div class="row"><span class="label">Site:</span><span class="value">${gp.site || '-'}</span></div>
+      <div class="row"><span class="label">Gate:</span><span class="value">${gp.gate_name || '-'}</span></div>
+      <div class="row"><span class="label">Purpose:</span><span class="value">${gp.purpose || '-'}</span></div>
+      <div class="row"><span class="label">${gp.pass_type === 'material_in' ? 'Source' : 'Destination'}:</span><span class="value">${gp.destination || gp.source || '-'}</span></div>
       ${gp.expected_at ? `<div class="row"><span class="label">Expected:</span><span class="value">${new Date(gp.expected_at).toLocaleString()}</span></div>` : ''}
     </div>
     <div class="section">
       <div class="section-title">Carrier / Vehicle</div>
-      <div class="row"><span class="label">Name:</span><span class="value">${gp.carrier_name || '—'}</span></div>
-      <div class="row"><span class="label">Company:</span><span class="value">${gp.carrier_company || '—'}</span></div>
-      <div class="row"><span class="label">Vehicle:</span><span class="value">${gp.vehicle_no || '—'}</span></div>
-      <div class="row"><span class="label">Phone:</span><span class="value">${gp.carrier_phone || '—'}</span></div>
+      <div class="row"><span class="label">Name:</span><span class="value">${gp.carrier_name || '-'}</span></div>
+      <div class="row"><span class="label">Company:</span><span class="value">${gp.carrier_company || '-'}</span></div>
+      <div class="row"><span class="label">Vehicle:</span><span class="value">${gp.vehicle_no || '-'}</span></div>
+      <div class="row"><span class="label">Phone:</span><span class="value">${gp.carrier_phone || '-'}</span></div>
     </div>
     <div class="section">
       <div class="section-title">Materials</div>
@@ -480,8 +479,8 @@ function GatePassDetailModal({ gp, gpItems, loading, user, isAdmin, isMod, cc, o
     </div>
     ${gp.remarks ? `<div class="section"><div class="section-title">Remarks</div><p style="font-size:0.88rem">${gp.remarks}</p></div>` : ''}
     <div class="sig-row">
-      <div class="sig-box"><div class="sig-label">Requested By</div><div style="font-size:0.82rem;margin-top:4px">${gp.requester?.full_name || '—'}</div></div>
-      <div class="sig-box"><div class="sig-label">Approved By</div><div style="font-size:0.82rem;margin-top:4px">${gp.approver?.full_name || '—'}</div></div>
+      <div class="sig-box"><div class="sig-label">Requested By</div><div style="font-size:0.82rem;margin-top:4px">${gp.requester?.full_name || '-'}</div></div>
+      <div class="sig-box"><div class="sig-label">Approved By</div><div style="font-size:0.82rem;margin-top:4px">${gp.approver?.full_name || '-'}</div></div>
       <div class="sig-box"><div class="sig-label">Gate Security</div></div>
     </div>
     <div class="footer">Gate Pass ${gp.pass_no} · Generated on ${new Date().toLocaleString()} · Strongbuilt</div>
@@ -508,12 +507,12 @@ function GatePassDetailModal({ gp, gpItems, loading, user, isAdmin, isMod, cc, o
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 34, height: 34, borderRadius: 8, background: tc.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: tc.color }}><TIcon size={16} /></div>
             <div>
-              <div style={{ fontFamily: 'DM Mono', fontWeight: 700, fontSize: '0.9rem', color: 'var(--accent)' }}>{gp.pass_no}</div>
-              <div style={{ fontSize: '0.68rem', color: 'var(--text-3)' }}>{tc.label}</div>
+              <div style={{ color: 'var(--accent)' }}>{gp.pass_no}</div>
+              <div style={{ color: 'var(--text-3)' }}>{tc.label}</div>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', padding: '3px 8px', borderRadius: 4, color: sc.color, background: sc.bg }}>{sc.label}</span>
+            <span style={{ textTransform: 'uppercase', padding: '3px 8px', borderRadius: 4, color: sc.color, background: sc.bg }}>{sc.label}</span>
             <button onClick={onClose} className="btn-ghost" style={{ padding: 6 }}><X size={16} /></button>
           </div>
         </div>
@@ -531,8 +530,8 @@ function GatePassDetailModal({ gp, gpItems, loading, user, isAdmin, isMod, cc, o
               { l: 'Date', v: new Date(gp.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) },
             ].filter(x => x.v).map(x => (
               <div key={x.l} style={x.full ? { gridColumn: '1 / -1' } : {}}>
-                <div style={{ fontSize: '0.62rem', textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', marginBottom: 2 }}>{x.l}</div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-0)', fontWeight: 600 }}>{x.v}</div>
+                <div style={{ textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', marginBottom: 2 }}>{x.l}</div>
+                <div style={{ color: 'var(--text-0)', }}>{x.v}</div>
               </div>
             ))}
           </div>
@@ -540,11 +539,11 @@ function GatePassDetailModal({ gp, gpItems, loading, user, isAdmin, isMod, cc, o
           {/* Carrier */}
           {(gp.carrier_name || gp.vehicle_no) && (
             <div style={{ background: 'var(--bg-3)', borderRadius: 10, padding: '12px 14px', marginBottom: 16 }}>
-              <div style={{ fontFamily: 'Oswald', fontSize: '0.68rem', textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 6, letterSpacing: '0.05em' }}>Carrier / Vehicle</div>
-              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: '0.82rem', color: 'var(--text-0)' }}>
+              <div style={{ textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 6, letterSpacing: '0.05em' }}>Carrier / Vehicle</div>
+              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', color: 'var(--text-0)' }}>
                 {gp.carrier_name && <span><strong>Name:</strong> {gp.carrier_name}</span>}
                 {gp.carrier_company && <span><strong>Company:</strong> {gp.carrier_company}</span>}
-                {gp.vehicle_no && <span><strong>Vehicle:</strong> <span style={{ fontFamily: 'DM Mono' }}>{gp.vehicle_no}</span></span>}
+                {gp.vehicle_no && <span><strong>Vehicle:</strong> <span >{gp.vehicle_no}</span></span>}
                 {gp.carrier_phone && <span><strong>Phone:</strong> {gp.carrier_phone}</span>}
               </div>
             </div>
@@ -552,23 +551,23 @@ function GatePassDetailModal({ gp, gpItems, loading, user, isAdmin, isMod, cc, o
 
           {/* Items Table */}
           <div style={{ marginBottom: 16 }}>
-            <div style={{ fontFamily: 'Oswald', fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 8, letterSpacing: '0.05em' }}>Materials ({gpItems.length})</div>
+            <div style={{ textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 8, letterSpacing: '0.05em' }}>Materials ({gpItems.length})</div>
             {loading ? (
               <div style={{ padding: 30, textAlign: 'center' }}><Loader2 size={20} style={{ animation: 'spin 1s linear infinite', color: 'var(--accent)' }} /></div>
             ) : gpItems.length === 0 ? (
-              <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-3)', fontSize: '0.82rem' }}>No items</div>
+              <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-3)', }}>No items</div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {gpItems.map((it, i) => (
                   <div key={it.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: 'var(--bg-3)', borderRadius: 8 }}>
-                    <span style={{ fontFamily: 'DM Mono', fontSize: '0.7rem', color: 'var(--text-3)', width: 20 }}>{i + 1}</span>
+                    <span style={{ color: 'var(--text-3)', width: 20 }}>{i + 1}</span>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-0)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.description}</div>
-                      {it.serial_numbers && <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', fontFamily: 'DM Mono' }}>{it.serial_numbers}</div>}
+                      <div style={{ color: 'var(--text-0)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.description}</div>
+                      {it.serial_numbers && <div style={{ color: 'var(--text-3)', }}>{it.serial_numbers}</div>}
                     </div>
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                      <span style={{ fontFamily: 'Oswald', fontSize: '1rem', fontWeight: 700, color: 'var(--text-0)' }}>{it.quantity}</span>
-                      <span style={{ fontSize: '0.65rem', color: 'var(--text-3)', marginLeft: 3 }}>{it.unit}</span>
+                      <span style={{ color: 'var(--text-0)' }}>{it.quantity}</span>
+                      <span style={{ color: 'var(--text-3)', marginLeft: 3 }}>{it.unit}</span>
                     </div>
                   </div>
                 ))}
@@ -578,12 +577,12 @@ function GatePassDetailModal({ gp, gpItems, loading, user, isAdmin, isMod, cc, o
 
           {/* Remarks */}
           {gp.remarks && (
-            <div style={{ padding: '10px 14px', background: 'var(--bg-3)', borderRadius: 8, marginBottom: 16, fontSize: '0.82rem', color: 'var(--text-2)' }}>
+            <div style={{ padding: '10px 14px', background: 'var(--bg-3)', borderRadius: 8, marginBottom: 16, color: 'var(--text-2)' }}>
               <strong>Remarks:</strong> {gp.remarks}
             </div>
           )}
           {gp.approval_notes && (
-            <div style={{ padding: '10px 14px', background: 'rgba(34,197,94,0.05)', borderRadius: 8, border: '1px solid rgba(34,197,94,0.2)', marginBottom: 16, fontSize: '0.82rem', color: 'var(--text-2)' }}>
+            <div style={{ padding: '10px 14px', background: 'rgba(34,197,94,0.05)', borderRadius: 8, border: '1px solid rgba(34,197,94,0.2)', marginBottom: 16, color: 'var(--text-2)' }}>
               <strong>Approval Notes:</strong> {gp.approval_notes}
             </div>
           )}
@@ -598,28 +597,28 @@ function GatePassDetailModal({ gp, gpItems, loading, user, isAdmin, isMod, cc, o
 
           {/* Actions */}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', paddingTop: 4 }}>
-            <button onClick={printGatePass} className="btn-ghost" style={{ padding: '8px 14px', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: 5 }}><Printer size={14} /> Print</button>
-            <button onClick={downloadExcel} className="btn-ghost" style={{ padding: '8px 14px', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: 5 }}><Download size={14} /> Excel</button>
+            <button onClick={printGatePass} className="btn-ghost" style={{ padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 5 }}><Printer size={14} /> Print</button>
+            <button onClick={downloadExcel} className="btn-ghost" style={{ padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 5 }}><Download size={14} /> Excel</button>
 
             <div style={{ flex: 1 }} />
 
             {gp.status === 'pending' && (isAdmin || isMod) && (
               <>
-                <button onClick={() => handleAction('rejected')} disabled={actionLoading} className="btn-ghost" style={{ padding: '8px 14px', fontSize: '0.78rem', color: 'var(--red)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                <button onClick={() => handleAction('rejected')} disabled={actionLoading} className="btn-ghost" style={{ padding: '8px 14px', color: 'var(--red)', display: 'flex', alignItems: 'center', gap: 5 }}>
                   {actionLoading === 'rejected' ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <XCircle size={14} />} Reject
                 </button>
-                <button onClick={() => handleAction('approved')} disabled={actionLoading} className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.78rem', background: 'var(--green)', borderColor: 'var(--green)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                <button onClick={() => handleAction('approved')} disabled={actionLoading} className="btn-primary" style={{ padding: '8px 16px', background: 'var(--green)', borderColor: 'var(--green)', display: 'flex', alignItems: 'center', gap: 5 }}>
                   {actionLoading === 'approved' ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <CheckCircle2 size={14} />} Approve
                 </button>
               </>
             )}
             {gp.status === 'approved' && (isAdmin || isMod) && (
-              <button onClick={() => handleAction('completed')} disabled={actionLoading} className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: 5 }}>
+              <button onClick={() => handleAction('completed')} disabled={actionLoading} className="btn-primary" style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: 5 }}>
                 {actionLoading === 'completed' ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Check size={14} />} Mark Completed
               </button>
             )}
             {gp.status === 'pending' && gp.requested_by === user.id && (
-              <button onClick={() => handleAction('cancelled')} disabled={actionLoading} className="btn-ghost" style={{ padding: '8px 14px', fontSize: '0.78rem', color: 'var(--red)' }}>Cancel</button>
+              <button onClick={() => handleAction('cancelled')} disabled={actionLoading} className="btn-ghost" style={{ padding: '8px 14px', color: 'var(--red)' }}>Cancel</button>
             )}
           </div>
         </div>

@@ -12,8 +12,8 @@ function SectionHead({ icon: Icon, title, sub, color = 'var(--accent)' }) {
         <Icon size={16} style={{ color }}/>
       </div>
       <div>
-        <h2 style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '0.95rem', letterSpacing: '0.06em', color: 'var(--text-0)', margin: 0 }}>{title}</h2>
-        {sub && <p style={{ fontFamily: 'DM Sans', fontSize: '0.73rem', color: 'var(--text-3)', margin: 0, marginTop: 1 }}>{sub}</p>}
+        <h2 style={{ letterSpacing: '0.06em', color: 'var(--text-0)', margin: 0 }}>{title}</h2>
+        {sub && <p style={{ color: 'var(--text-3)', margin: 0, marginTop: 1 }}>{sub}</p>}
       </div>
     </div>
   )
@@ -86,22 +86,22 @@ export default function SettingsManager({
   if (tab === 'fields') {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        {/* Company Code — full-width */}
+        {/* Company Code - full-width */}
         <div style={{ gridColumn: '1 / -1', background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 16, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.1)' }}>
-          <SectionHead icon={Hash} title="ASSET CODE FORMAT" sub="Company prefix used in auto-generated asset codes — format: CODE/CATEGORY/NAME/001" color="var(--accent)"/>
+          <SectionHead icon={Hash} title="ASSET CODE FORMAT" sub="Company prefix used in auto-generated asset codes - format: CODE/CATEGORY/NAME/001" color="var(--accent)"/>
           <div style={{ padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ flex: 1, maxWidth: 240 }}>
-              <label style={{ fontFamily: 'DM Sans', fontSize: '0.75rem', color: 'var(--text-3)', display: 'block', marginBottom: 5, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Company Code</label>
+              <label style={{ color: 'var(--text-3)', display: 'block', marginBottom: 5, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Company Code</label>
               <input
                 value={settings?.company_code || ''}
                 onChange={e => setSettings(s => ({ ...s, company_code: e.target.value.toUpperCase().replace(/[^A-Z0-9&]/g, '') }))}
                 placeholder="e.g. SBC"
                 maxLength={8}
-                style={{ fontFamily: 'DM Mono', fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-0)', background: 'var(--bg-3)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', width: '100%', outline: 'none', letterSpacing: '0.1em' }}
+                style={{ color: 'var(--text-0)', background: 'var(--bg-3)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', width: '100%', outline: 'none', letterSpacing: '0.1em' }}
               />
             </div>
-            <div style={{ fontFamily: 'DM Mono', fontSize: '0.8rem', color: 'var(--text-3)', background: 'var(--bg-3)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 14px', marginTop: 20 }}>
-              Preview: <span style={{ color: 'var(--accent)', fontWeight: 700 }}>{settings?.company_code || 'SBC'}/P&M/BBM/001</span>
+            <div style={{ color: 'var(--text-3)', background: 'var(--bg-3)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 14px', marginTop: 20 }}>
+              Preview: <span style={{ color: 'var(--accent)', }}>{settings?.company_code || 'SBC'}/P&M/BBM/001</span>
             </div>
           </div>
         </div>
@@ -116,19 +116,19 @@ export default function SettingsManager({
                 <div key={f.key} style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   padding: '11px 18px', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none',
-                  background: hidden ? 'rgba(239,68,68,0.04)' : 'transparent',
+                  background: hidden ? 'var(--status-danger-soft)' : 'transparent',
                 }}>
                   <div>
-                    <p style={{ fontFamily: 'DM Sans', fontSize: '0.85rem', fontWeight: 500, color: hidden ? 'var(--text-3)' : 'var(--text-0)', margin: 0, textDecoration: hidden ? 'line-through' : 'none' }}>{f.label}</p>
-                    <p style={{ fontFamily: 'DM Mono', fontSize: '0.65rem', color: 'var(--text-3)', margin: 0, marginTop: 1 }}>{f.key}</p>
+                    <p style={{ color: hidden ? 'var(--text-3)' : 'var(--text-0)', margin: 0, textDecoration: hidden ? 'line-through' : 'none' }}>{f.label}</p>
+                    <p style={{ color: 'var(--text-3)', margin: 0, marginTop: 1 }}>{f.key}</p>
                   </div>
                   <button onClick={() => toggleHideField(f.key)} style={{
                     display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px',
                     borderRadius: 7, border: '1px solid', cursor: 'pointer',
-                    fontSize: '0.72rem', fontFamily: 'DM Sans', fontWeight: 600, transition: 'all 0.15s',
-                    background: hidden ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.08)',
+                    transition: 'all 0.15s',
+                    background: hidden ? 'var(--status-danger-soft)' : 'rgba(34,197,94,0.08)',
                     color: hidden ? 'var(--red)' : 'var(--green)',
-                    borderColor: hidden ? 'rgba(239,68,68,0.25)' : 'rgba(34,197,94,0.25)',
+                    borderColor: hidden ? 'var(--status-danger-soft)' : 'rgba(34,197,94,0.25)',
                   }}>
                     {hidden ? <><EyeOff size={11}/> Hidden</> : <><Eye size={11}/> Visible</>}
                   </button>
@@ -148,16 +148,16 @@ export default function SettingsManager({
                 <div key={f.key} style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   padding: '11px 18px', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none',
-                  background: !visible ? 'rgba(239,68,68,0.03)' : 'transparent',
+                  background: !visible ? 'var(--status-danger-soft)' : 'transparent',
                 }}>
-                  <p style={{ fontFamily: 'DM Sans', fontSize: '0.85rem', fontWeight: 500, color: visible ? 'var(--text-0)' : 'var(--text-3)', margin: 0, textDecoration: !visible ? 'line-through' : 'none' }}>{f.label}</p>
+                  <p style={{ color: visible ? 'var(--text-0)' : 'var(--text-3)', margin: 0, textDecoration: !visible ? 'line-through' : 'none' }}>{f.label}</p>
                   <button onClick={() => toggleUserVisible(f.key)} style={{
                     display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px',
                     borderRadius: 7, border: '1px solid', cursor: 'pointer',
-                    fontSize: '0.72rem', fontFamily: 'DM Sans', fontWeight: 600, transition: 'all 0.15s',
-                    background: visible ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
+                    transition: 'all 0.15s',
+                    background: visible ? 'rgba(34,197,94,0.08)' : 'var(--status-danger-soft)',
                     color: visible ? 'var(--green)' : 'var(--red)',
-                    borderColor: visible ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)',
+                    borderColor: visible ? 'rgba(34,197,94,0.25)' : 'var(--status-danger-soft)',
                   }}>
                     {visible ? <><Eye size={11}/> Shown</> : <><EyeOff size={11}/> Hidden</>}
                   </button>
@@ -166,7 +166,7 @@ export default function SettingsManager({
             })}
           </div>
           <div style={{ padding: '10px 18px', background: 'var(--bg-3)', borderTop: '1px solid var(--border)' }}>
-            <p style={{ color: 'var(--text-3)', fontSize: '0.7rem', fontFamily: 'DM Sans', margin: 0 }}>
+            <p style={{ color: 'var(--text-3)', margin: 0 }}>
               Asset Code, Name and Status are always shown on scan pages.
             </p>
           </div>
@@ -210,7 +210,7 @@ export default function SettingsManager({
                 </div>
               )}
             </div>
-            <button onClick={addCustomField} disabled={!newField.label.trim()} className="btn-primary" style={{ fontSize: '0.82rem', gap: 7 }}>
+            <button onClick={addCustomField} disabled={!newField.label.trim()} className="btn-primary" style={{ gap: 7 }}>
               <Plus size={14}/> Add Field
             </button>
           </div>
@@ -218,12 +218,12 @@ export default function SettingsManager({
 
         {/* Existing custom fields */}
         <div style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 16, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.1)' }}>
-          <SectionHead icon={Database} title="EXISTING CUSTOM FIELDS" sub={`${(settings?.custom_fields || []).length} field${(settings?.custom_fields || []).length !== 1 ? 's' : ''} defined`} color="#60a5fa"/>
+          <SectionHead icon={Database} title="EXISTING CUSTOM FIELDS" sub={`${(settings?.custom_fields || []).length} field${(settings?.custom_fields || []).length !== 1 ? 's' : ''} defined`} color='var(--status-info)'/>
           {(settings?.custom_fields || []).length === 0 ? (
             <div style={{ padding: '48px 20px', textAlign: 'center' }}>
               <Database size={32} style={{ color: 'var(--text-3)', marginBottom: 12 }}/>
-              <p style={{ color: 'var(--text-2)', fontFamily: 'DM Sans', fontWeight: 600, marginBottom: 4 }}>No custom fields yet</p>
-              <p style={{ color: 'var(--text-3)', fontFamily: 'DM Sans', fontSize: '0.8rem' }}>Add one above to extend all assets</p>
+              <p style={{ color: 'var(--text-2)', marginBottom: 4 }}>No custom fields yet</p>
+              <p style={{ color: 'var(--text-3)', }}>Add one above to extend all assets</p>
             </div>
           ) : (
             <div>
@@ -240,22 +240,21 @@ export default function SettingsManager({
                       <Database size={14} style={{ color: 'var(--accent)' }}/>
                     </div>
                     <div>
-                      <p style={{ fontFamily: 'DM Sans', fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-0)', margin: 0, marginBottom: 3 }}>{f.label}</p>
+                      <p style={{ color: 'var(--text-0)', margin: 0, marginBottom: 3 }}>{f.label}</p>
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                        <span style={{ fontFamily: 'DM Mono', fontSize: '0.67rem', color: 'var(--accent-light)', background: 'var(--accent-glow)', padding: '1px 6px', borderRadius: 4 }}>{f.key}</span>
-                        <span style={{ fontFamily: 'DM Sans', fontSize: '0.67rem', color: 'var(--text-3)', background: 'var(--bg-3)', padding: '1px 6px', borderRadius: 4, border: '1px solid var(--border)' }}>{f.type}</span>
+                        <span style={{ color: 'var(--accent-light)', background: 'var(--accent-glow)', padding: '1px 6px', borderRadius: 4 }}>{f.key}</span>
+                        <span style={{ color: 'var(--text-3)', background: 'var(--bg-3)', padding: '1px 6px', borderRadius: 4, border: '1px solid var(--border)' }}>{f.type}</span>
                         {f.options && f.options.map(o => (
-                          <span key={o} style={{ fontFamily: 'DM Sans', fontSize: '0.67rem', color: 'var(--text-3)', background: 'var(--bg-4)', padding: '1px 6px', borderRadius: 4 }}>{o}</span>
+                          <span key={o} style={{ color: 'var(--text-3)', background: 'var(--bg-4)', padding: '1px 6px', borderRadius: 4 }}>{o}</span>
                         ))}
                       </div>
                     </div>
                   </div>
                   <button onClick={() => removeCustomField(f.key)} style={{
                     display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px',
-                    borderRadius: 8, border: '1px solid rgba(239,68,68,0.25)',
-                    background: 'rgba(239,68,68,0.08)', color: 'var(--red)',
-                    cursor: 'pointer', fontSize: '0.75rem', fontFamily: 'DM Sans', fontWeight: 600,
-                  }}>
+                    borderRadius: 8, border: '1px solid var(--status-danger-soft)',
+                    background: 'var(--status-danger-soft)', color: 'var(--red)',
+                    cursor: 'pointer', }}>
                     <Trash2 size={12}/> Remove
                   </button>
                 </div>
@@ -270,13 +269,13 @@ export default function SettingsManager({
   if (tab === 'qrconfig' && isSuperAdmin) {
     return (
       <div className="card" style={{ overflow: 'hidden' }}>
-        <SectionHead icon={Hash} title="QR CODE SCAN CONFIGURATION" sub="Control what data is displayed when someone scans an asset's QR code" color="#ef4444"/>
+        <SectionHead icon={Hash} title="QR CODE SCAN CONFIGURATION" sub="Control what data is displayed when someone scans an asset's QR code" color='var(--status-danger)'/>
         <div style={{ padding: 20 }}>
           {qrConfig ? (
             <>
               {/* Visible fields on QR scan */}
-              <h3 style={{ fontFamily: 'Oswald', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-0)', marginBottom: 10, letterSpacing: '0.04em' }}>FIELDS SHOWN ON QR SCAN</h3>
-              <p style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans', marginBottom: 14 }}>
+              <h3 style={{ color: 'var(--text-0)', marginBottom: 10, letterSpacing: '0.04em' }}>FIELDS SHOWN ON QR SCAN</h3>
+              <p style={{ color: 'var(--text-3)', marginBottom: 14 }}>
                 Toggle which data fields appear when an end-user scans an asset's QR code.
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 24 }}>
@@ -302,8 +301,8 @@ export default function SettingsManager({
                   return (
                     <div key={f.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'var(--bg-3)', borderRadius: 10, border: '1px solid var(--border)' }}>
                       <div>
-                        <span style={{ fontFamily: 'DM Sans', fontWeight: 600, fontSize: '0.82rem', color: 'var(--text-0)' }}>{f.label}</span>
-                        <span style={{ fontSize: '0.65rem', color: 'var(--text-3)', fontFamily: 'DM Mono', marginLeft: 8 }}>{f.key}</span>
+                        <span style={{ color: 'var(--text-0)' }}>{f.label}</span>
+                        <span style={{ color: 'var(--text-3)', marginLeft: 8 }}>{f.key}</span>
                       </div>
                       <Toggle on={on} onChange={(val) => {
                         setQrConfig(prev => ({
@@ -319,7 +318,7 @@ export default function SettingsManager({
               </div>
 
               {/* Additional options */}
-              <h3 style={{ fontFamily: 'Oswald', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-0)', marginBottom: 10, letterSpacing: '0.04em' }}>ADDITIONAL OPTIONS</h3>
+              <h3 style={{ color: 'var(--text-0)', marginBottom: 10, letterSpacing: '0.04em' }}>ADDITIONAL OPTIONS</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 24 }}>
                 {[
                   { key: 'show_photo', label: 'Show Asset Photo', desc: 'Display main asset photo on scan page' },
@@ -328,8 +327,8 @@ export default function SettingsManager({
                 ].map(opt => (
                   <div key={opt.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'var(--bg-3)', borderRadius: 10, border: '1px solid var(--border)' }}>
                     <div>
-                      <span style={{ fontFamily: 'DM Sans', fontWeight: 600, fontSize: '0.82rem', color: 'var(--text-0)' }}>{opt.label}</span>
-                      <p style={{ fontSize: '0.68rem', color: 'var(--text-3)', fontFamily: 'DM Sans', margin: '2px 0 0' }}>{opt.desc}</p>
+                      <span style={{ color: 'var(--text-0)' }}>{opt.label}</span>
+                      <p style={{ color: 'var(--text-3)', margin: '2px 0 0' }}>{opt.desc}</p>
                     </div>
                     <Toggle on={!!qrConfig[opt.key]} onChange={(val) => {
                       setQrConfig(prev => ({ ...prev, [opt.key]: val }))
@@ -339,7 +338,7 @@ export default function SettingsManager({
               </div>
 
               {/* Dynamic Sticker Badge Preview & Thermal Printer Setup */}
-              <h3 style={{ fontFamily: 'Oswald', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-0)', marginBottom: 10, letterSpacing: '0.04em' }}>
+              <h3 style={{ color: 'var(--text-0)', marginBottom: 10, letterSpacing: '0.04em' }}>
                 DYNAMIC STICKER DESIGNER PREVIEW & THERMAL PRINTER SETUP
               </h3>
 
@@ -352,23 +351,23 @@ export default function SettingsManager({
                     value={qrConfig.thermal_printer_ip || '192.168.1.150:9100'}
                     onChange={e => setQrConfig(prev => ({ ...prev, thermal_printer_ip: e.target.value }))}
                     placeholder="e.g. 192.168.1.150:9100"
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-1)', fontFamily: 'DM Mono', fontSize: '0.82rem', color: 'var(--text-1)' }}
+                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-1)', color: 'var(--text-1)' }}
                   />
-                  <span style={{ fontSize: '0.68rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>
+                  <span style={{ color: 'var(--text-3)', }}>
                     Direct socket RAW printing supported for Zebra ZD420, S4M, and TSPL industrial label printers.
                   </span>
                 </div>
 
                 {/* Badge Live Preview Box */}
                 <div style={{ padding: 14, borderRadius: 10, background: '#ffffff', color: '#000000', border: '2px solid var(--border)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, textAlign: 'center' }}>
-                  <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <span style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     {qrConfig.custom_header || 'STRONG BUILT'}
                   </span>
-                  <div style={{ width: 64, height: 64, background: '#000000', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontSize: '0.6rem', fontWeight: 900, fontFamily: 'DM Mono' }}>
+                  <div style={{ width: 64, height: 64, background: '#000000', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', }}>
                     [ QR CODE ]
                   </div>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 900, fontFamily: 'DM Mono' }}>AST-2026-8809</span>
-                  <span style={{ fontSize: '0.58rem', opacity: 0.8 }}>{qrConfig.custom_footer || 'Property of Enterprise'}</span>
+                  <span >AST-2026-8809</span>
+                  <span style={{ opacity: 0.8 }}>{qrConfig.custom_footer || 'Property of Enterprise'}</span>
                 </div>
               </div>
 
@@ -378,13 +377,13 @@ export default function SettingsManager({
                   <label className="lbl">Custom Header Text</label>
                   <input type="text" value={qrConfig.custom_header || ''} onChange={e => setQrConfig(prev => ({ ...prev, custom_header: e.target.value }))}
                     placeholder="e.g. STRONG BUILT ENGINEERING"
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-3)', fontFamily: 'DM Sans', fontSize: '0.82rem', color: 'var(--text-1)' }} />
+                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-3)', color: 'var(--text-1)' }} />
                 </div>
                 <div>
                   <label className="lbl">Custom Footer Text</label>
                   <input type="text" value={qrConfig.custom_footer || ''} onChange={e => setQrConfig(prev => ({ ...prev, custom_footer: e.target.value }))}
                     placeholder="e.g. Property of Strong Built"
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-3)', fontFamily: 'DM Sans', fontSize: '0.82rem', color: 'var(--text-1)' }} />
+                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-3)', color: 'var(--text-1)' }} />
                 </div>
               </div>
 
@@ -396,12 +395,12 @@ export default function SettingsManager({
                   setSaved(true); setTimeout(() => setSaved(false), 2500)
                 } catch (e) { alert('Failed: ' + e.message) }
                 setSaving(false)
-              }} disabled={saving} className="btn-primary" style={{ padding: '9px 20px', gap: 7, fontWeight: 700 }}>
+              }} disabled={saving} className="btn-primary" style={{ padding: '9px 20px', gap: 7, }}>
                 {saving ? 'Saving…' : <><Save size={14}/> Save QR Configuration</>}
               </button>
             </>
           ) : (
-            <p style={{ color: 'var(--text-3)', fontFamily: 'DM Sans', textAlign: 'center', padding: 30 }}>Loading QR configuration...</p>
+            <p style={{ color: 'var(--text-3)', textAlign: 'center', padding: 30 }}>Loading QR configuration...</p>
           )}
         </div>
       </div>

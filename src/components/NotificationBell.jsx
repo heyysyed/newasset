@@ -23,7 +23,7 @@ export default function NotificationBell() {
   const dropdownRef = useRef(null)
   const navigate = useNavigate()
 
-  // Position dropdown using fixed coords — flip upward if near bottom of viewport
+  // Position dropdown using fixed coords - flip upward if near bottom of viewport
   function openDropdown() {
     if (btnRef.current) {
       const rect = btnRef.current.getBoundingClientRect()
@@ -77,13 +77,13 @@ export default function NotificationBell() {
     >
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-        <span style={{ fontFamily: 'DM Sans', fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-0)' }}>
+        <span style={{ color: 'var(--text-0)' }}>
           Notifications{unreadCount > 0 && <span style={{ color: 'var(--accent)', marginLeft: 5 }}>({unreadCount})</span>}
         </span>
         <div style={{ display: 'flex', gap: 4 }}>
           {unreadCount > 0 && (
             <button onClick={() => markRead()} className="btn-ghost" title="Mark all read"
-              style={{ padding: '3px 8px', fontSize: '0.65rem', gap: 3, border: 'none', display: 'flex', alignItems: 'center' }}>
+              style={{ padding: '3px 8px', gap: 3, border: 'none', display: 'flex', alignItems: 'center' }}>
               <CheckCheck size={11} /> All read
             </button>
           )}
@@ -96,7 +96,7 @@ export default function NotificationBell() {
       {/* List */}
       <div style={{ overflowY: 'auto', flex: 1 }}>
         {notifications.length === 0 ? (
-          <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-3)', fontFamily: 'DM Sans', fontSize: '0.8rem' }}>
+          <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-3)', }}>
             <Bell size={28} style={{ opacity: 0.2, display: 'block', margin: '0 auto 8px' }} />
             <p style={{ margin: 0 }}>No notifications yet</p>
           </div>
@@ -108,11 +108,11 @@ export default function NotificationBell() {
               style={{
                 display: 'flex', gap: 10, padding: '10px 14px',
                 cursor: 'pointer', borderBottom: '1px solid var(--border)',
-                background: n.is_read ? 'transparent' : 'rgba(79,126,255,0.05)',
+                background: n.is_read ? 'transparent' : 'var(--accent-soft)',
                 transition: 'background 0.15s',
               }}
               onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-3)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = n.is_read ? 'transparent' : 'rgba(79,126,255,0.05)' }}
+              onMouseLeave={e => { e.currentTarget.style.background = n.is_read ? 'transparent' : 'var(--accent-soft)' }}
             >
               <div style={{
                 width: 8, height: 8, borderRadius: '50%', flexShrink: 0, marginTop: 5,
@@ -120,18 +120,17 @@ export default function NotificationBell() {
                 opacity: n.is_read ? 0.3 : 1,
               }} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: 'DM Sans', fontWeight: 600, fontSize: '0.78rem', color: 'var(--text-0)', marginBottom: 2 }}>
+                <div style={{ color: 'var(--text-0)', marginBottom: 2 }}>
                   {n.title}
                 </div>
                 <div style={{
-                  fontFamily: 'DM Sans', fontSize: '0.72rem', color: 'var(--text-2)',
-                  marginBottom: 3, lineHeight: 1.4,
-                  overflow: 'hidden', display: '-webkit-box',
+                  color: 'var(--text-2)',
+                  marginBottom: 3, overflow: 'hidden', display: '-webkit-box',
                   WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
                 }}>
                   {n.body}
                 </div>
-                <div style={{ fontFamily: 'DM Mono', fontSize: '0.62rem', color: 'var(--text-3)' }}>
+                <div style={{ color: 'var(--text-3)' }}>
                   {n.created_at ? timeAgo(n.created_at) : ''}
                 </div>
               </div>
@@ -162,11 +161,10 @@ export default function NotificationBell() {
         {unreadCount > 0 && (
           <span style={{
             position: 'absolute', top: 0, right: 0,
-            background: '#ef4444', color: 'white',
+            background: 'var(--status-danger)', color: 'white',
             borderRadius: '50%', width: 14, height: 14,
-            fontSize: '0.55rem', fontWeight: 700, fontFamily: 'DM Sans',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            lineHeight: 1, pointerEvents: 'none', border: '1.5px solid var(--bg-1)'
+            pointerEvents: 'none', border: '1.5px solid var(--bg-1)'
           }}>
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>

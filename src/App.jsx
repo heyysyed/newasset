@@ -50,11 +50,11 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <div style={{ padding: '40px 24px', textAlign: 'center', background: 'var(--bg-2)', borderRadius: 16, border: '1px solid var(--border)', margin: '20px auto', maxWidth: 600, boxShadow: 'var(--clay-shadow)' }}>
-          <h2 style={{ fontFamily: 'Oswald', color: '#ef4444', fontSize: '1.4rem', margin: '0 0 10px' }}>SOMETHING WENT WRONG</h2>
-          <p style={{ fontFamily: 'DM Sans', color: 'var(--text-2)', fontSize: '0.85rem', marginBottom: 20 }}>
+          <h2 style={{ color: 'var(--status-danger)', margin: '0 0 10px' }}>SOMETHING WENT WRONG</h2>
+          <p style={{ color: 'var(--text-2)', marginBottom: 20 }}>
             {this.state.error?.message || 'An unexpected error occurred while rendering this section.'}
           </p>
-          <button onClick={() => { this.setState({ hasError: false, error: null }); window.location.reload() }} className="btn-primary" style={{ fontSize: '0.8rem', padding: '8px 20px', gap: 6 }}>
+          <button onClick={() => { this.setState({ hasError: false, error: null }); window.location.reload() }} className="btn-primary" style={{ padding: '8px 20px', gap: 6 }}>
             Reload Page
           </button>
         </div>
@@ -78,7 +78,7 @@ function Guard({ children, require: req }) {
       <div style={{ textAlign:'center' }}>
         <div style={{ width:36, height:36, border:'2px solid var(--accent)', borderTopColor:'transparent', borderRadius:'50%', animation:'spin 0.8s linear infinite', margin:'0 auto 12px' }} />
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-        <p style={{ color:'var(--text-2)', fontFamily:'DM Sans' }}>Loading…</p>
+        <p style={{ color:'var(--text-2)', }}>Loading…</p>
       </div>
     </div>
   )
@@ -88,7 +88,7 @@ function Guard({ children, require: req }) {
   return children
 }
 
-// Route-level permission guard — redirects normal users to checklists
+// Route-level permission guard - redirects normal users to checklists
 function PermGuard({ check, children, fallback = '/audit' }) {
   const auth = useAuth()
   if (auth.loading) return null
@@ -102,7 +102,7 @@ function AppRoutes() {
     <Suspense fallback={<SkeletonLoader />}>
       <Routes>
         <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage />} />
-        {/* Public QR scan view — no login needed */}
+        {/* Public QR scan view - no login needed */}
         <Route path="/scan/:id" element={<PublicAssetView />} />
         <Route path="/" element={<Guard><Layout /></Guard>}>
           <Route index element={
@@ -142,11 +142,13 @@ function AppRoutes() {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <HashRouter>
+      <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <AuthProvider>
           <NotificationProvider>
             <ImportProvider>
-              <AppRoutes />
+              <ErrorBoundary>
+                <AppRoutes />
+              </ErrorBoundary>
             </ImportProvider>
           </NotificationProvider>
         </AuthProvider>

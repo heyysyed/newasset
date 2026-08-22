@@ -4,7 +4,7 @@ import { Building2, Layers, Package, IndianRupee, ChevronRight, Check } from 'lu
 import { formatCurrency, calculateBookValue } from '../../lib/depreciation'
 import { supabase } from '../../lib/supabase'
 
-const SITE_COLORS = ['#2563eb', '#059669', '#d97706', '#0891b2', '#7c3aed', '#dc2626', '#db2777', '#475569', '#16a34a', '#ca8a04']
+const SITE_COLORS = ['var(--accent)', '#059669', 'var(--status-warning)', '#0891b2', '#7c3aed', 'var(--status-danger)', '#db2777', '#475569', 'var(--status-success)', '#ca8a04']
 
 export default function SiteValuationMatrix({ assets = [], selectedSite, onSelectSite }) {
   const [metricMode, setMetricMode] = useState('combined') // 'combined' | 'machinery' | 'bulk' | 'count'
@@ -19,7 +19,7 @@ export default function SiteValuationMatrix({ assets = [], selectedSite, onSelec
     try {
       const [bRes, tRes] = await Promise.all([
         supabase.from('bulk_site_stock').select('*, bulk_items(*)'),
-        supabase.from('maintenance_tickets').select('id, site_name, status, assets(site)').neq('status', 'resolved')
+        supabase.from('maintenance_tickets').select('id, status, assets(site)').neq('status', 'resolved')
       ])
       setBulkStock(bRes.data || [])
       setTickets(tRes.data || [])
@@ -138,15 +138,15 @@ export default function SiteValuationMatrix({ assets = [], selectedSite, onSelec
     const siteObj = siteMatrixData.find(s => s.site === siteName) || {}
 
     return (
-      <div style={{ background: '#0f172a', color: '#fff', padding: '10px 14px', borderRadius: 10, fontSize: '0.8rem', fontFamily: 'DM Sans', boxShadow: '0 4px 14px rgba(0,0,0,0.18)', border: '1px solid rgba(255,255,255,0.1)' }}>
-        <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#60a5fa', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div style={{ background: '#0f172a', color: '#fff', padding: '10px 14px', borderRadius: 10, boxShadow: '0 4px 14px rgba(0,0,0,0.18)', border: '1px solid rgba(255,255,255,0.1)' }}>
+        <div style={{ color: 'var(--status-info)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
           <Building2 size={14} /> {siteName}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <div>Machinery Net Value: <strong style={{ color: '#34d399', fontFamily: 'DM Mono' }}>{formatIndianCurrencyCompact(siteObj.machineryValue)}</strong></div>
-          <div>Bulk Inventory Value: <strong style={{ color: '#fbbf24', fontFamily: 'DM Mono' }}>{formatIndianCurrencyCompact(siteObj.bulkValue)}</strong></div>
-          <div>Total Asset Count: <strong style={{ color: '#fff', fontFamily: 'DM Mono' }}>{siteObj.assetCount} units</strong></div>
-          {siteObj.openTickets > 0 && <div style={{ color: '#f87171', fontWeight: 700 }}>Open Repair Tickets: {siteObj.openTickets}</div>}
+          <div>Machinery Net Value: <strong style={{ color: '#34d399', }}>{formatIndianCurrencyCompact(siteObj.machineryValue)}</strong></div>
+          <div>Bulk Inventory Value: <strong style={{ color: '#fbbf24', }}>{formatIndianCurrencyCompact(siteObj.bulkValue)}</strong></div>
+          <div>Total Asset Count: <strong style={{ color: '#fff', }}>{siteObj.assetCount} units</strong></div>
+          {siteObj.openTickets > 0 && <div style={{ color: '#f87171', }}>Open Repair Tickets: {siteObj.openTickets}</div>}
         </div>
       </div>
     )
@@ -158,10 +158,10 @@ export default function SiteValuationMatrix({ assets = [], selectedSite, onSelec
       {/* Header & Metric Toggle Bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
         <div>
-          <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Building2 size={18} color="#2563eb" /> Site Asset & Valuation Matrix
+          <h3 style={{ margin: 0, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Building2 size={18} color='var(--accent)' /> Site Asset & Valuation Matrix
           </h3>
-          <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', fontFamily: 'DM Sans' }}>
+          <p style={{ margin: 0, color: '#64748b', }}>
             Multi-site capital breakdown combining heavy machinery book value and live bulk inventory stock
           </p>
         </div>
@@ -179,12 +179,10 @@ export default function SiteValuationMatrix({ assets = [], selectedSite, onSelec
               onClick={() => setMetricMode(m.id)}
               style={{
                 padding: '6px 12px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
                 borderRadius: 6,
                 border: 'none',
                 cursor: 'pointer',
-                background: metricMode === m.id ? '#2563eb' : 'transparent',
+                background: metricMode === m.id ? 'var(--accent)' : 'transparent',
                 color: metricMode === m.id ? '#ffffff' : '#64748b',
                 transition: 'all 0.15s'
               }}
@@ -223,13 +221,13 @@ export default function SiteValuationMatrix({ assets = [], selectedSite, onSelec
           </ResponsiveContainer>
 
           <div style={{ position: 'absolute', textAlign: 'center', pointerEvents: 'none' }}>
-            <div style={{ fontSize: '0.68rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 700, letterSpacing: '0.05em' }}>
+            <div style={{ textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
               {metricMode === 'count' ? 'TOTAL UNITS' : 'TOTAL VALUATION'}
             </div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 700, fontFamily: 'Oswald', color: '#0f172a', lineHeight: 1.1 }}>
+            <div style={{ color: '#0f172a', }}>
               {metricMode === 'count' ? totalMatrixValue : formatIndianCurrencyCompact(totalMatrixValue)}
             </div>
-            <div style={{ fontSize: '0.65rem', color: '#2563eb', fontWeight: 600, marginTop: 2 }}>
+            <div style={{ color: 'var(--accent)', marginTop: 2 }}>
               {siteMatrixData.length} Active Sites
             </div>
           </div>
@@ -240,10 +238,10 @@ export default function SiteValuationMatrix({ assets = [], selectedSite, onSelec
           <table className="tbl" style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                <th style={{ padding: '8px 12px', fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase' }}>Site Name</th>
-                <th style={{ padding: '8px 12px', fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', textAlign: 'right' }}>Machinery (₹)</th>
-                <th style={{ padding: '8px 12px', fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', textAlign: 'right' }}>Bulk Stock (₹)</th>
-                <th style={{ padding: '8px 12px', fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', textAlign: 'right' }}>Total Valuation</th>
+                <th style={{ padding: '8px 12px', color: '#64748b', textTransform: 'uppercase' }}>Site Name</th>
+                <th style={{ padding: '8px 12px', color: '#64748b', textTransform: 'uppercase', textAlign: 'right' }}>Machinery (₹)</th>
+                <th style={{ padding: '8px 12px', color: '#64748b', textTransform: 'uppercase', textAlign: 'right' }}>Bulk Stock (₹)</th>
+                <th style={{ padding: '8px 12px', color: '#64748b', textTransform: 'uppercase', textAlign: 'right' }}>Total Valuation</th>
               </tr>
             </thead>
             <tbody>
@@ -256,21 +254,21 @@ export default function SiteValuationMatrix({ assets = [], selectedSite, onSelec
                     style={{
                       cursor: 'pointer',
                       background: isSelected ? 'rgba(37,99,235,0.08)' : '#ffffff',
-                      borderLeft: isSelected ? '4px solid #2563eb' : '4px solid transparent',
+                      borderLeft: isSelected ? '4px solid var(--accent)' : '4px solid transparent',
                       transition: 'background 0.15s'
                     }}
                   >
-                    <td style={{ padding: '10px 12px', fontWeight: 700, fontSize: '0.82rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <td style={{ padding: '10px 12px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span style={{ width: 8, height: 8, borderRadius: '50%', background: SITE_COLORS[idx % SITE_COLORS.length] }} />
                       {row.site}
                     </td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', fontSize: '0.8rem', fontFamily: 'DM Mono', color: '#475569' }}>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', color: '#475569' }}>
                       {formatIndianCurrencyCompact(row.machineryValue)}
                     </td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', fontSize: '0.8rem', fontFamily: 'DM Mono', color: '#475569' }}>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', color: '#475569' }}>
                       {formatIndianCurrencyCompact(row.bulkValue)}
                     </td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', fontSize: '0.82rem', fontFamily: 'Oswald', fontWeight: 700, color: '#0f172a' }}>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', color: '#0f172a' }}>
                       {formatIndianCurrencyCompact(row.combinedValuation)}
                     </td>
                   </tr>

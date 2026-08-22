@@ -25,10 +25,10 @@ export default function InventoryStats({ items, transactions, assets = [] }) {
           }}>
             <s.icon size={18} />
           </div>
-          <div style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-0)', fontFamily: 'Oswald', letterSpacing: '0.02em', lineHeight: 1 }}>
+          <div style={{ color: 'var(--text-0)', letterSpacing: '0.02em', }}>
             {s.val}
           </div>
-          <div className="lbl" style={{ marginTop: 4, fontSize: '0.62rem' }}>{s.label}</div>
+          <div className="lbl" style={{ marginTop: 4, }}>{s.label}</div>
         </div>
       ))}
       <style>{`

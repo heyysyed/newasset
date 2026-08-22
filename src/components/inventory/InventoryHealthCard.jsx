@@ -24,8 +24,7 @@ export default function InventoryHealthCard({ current, reorder, unit }) {
     <div style={{ padding: '4px 0', minWidth: 140 }}>
       <div style={{ 
         display: 'flex', alignItems: 'center', gap: 6, 
-        color: status.color, fontSize: '0.65rem', 
-        fontWeight: 800, textTransform: 'uppercase', 
+        color: status.color, textTransform: 'uppercase', 
         letterSpacing: '1px', marginBottom: 6 
       }}>
         <status.icon size={12} />
@@ -44,9 +43,8 @@ export default function InventoryHealthCard({ current, reorder, unit }) {
       <div style={{ 
         marginTop: 6, display: 'flex', 
         justifyContent: 'space-between', 
-        fontSize: '0.7rem', color: 'var(--text-3)',
-        fontFamily: 'DM Mono'
-      }}>
+        color: 'var(--text-3)',
+        }}>
         <span>{stock} {unit}</span>
         <span>Min: {min}</span>
       </div>

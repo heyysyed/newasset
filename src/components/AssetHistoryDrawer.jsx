@@ -60,10 +60,10 @@ export default function AssetHistoryDrawer({ assetId, onClose }) {
       >
         <div className="card-header" style={{ padding: '24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <h3 style={{ margin: 0, fontFamily: 'Oswald', letterSpacing: '0.04em', fontSize: '1.4rem', color: 'var(--text-0)', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <h3 style={{ margin: 0, letterSpacing: '0.04em', color: 'var(--text-0)', display: 'flex', alignItems: 'center', gap: 10 }}>
               <Clock size={20} style={{ color: 'var(--accent)' }} /> ASSET TIMELINE
             </h3>
-            <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'var(--text-2)' }}>Complete history and audit trail</p>
+            <p style={{ margin: '4px 0 0', color: 'var(--text-2)' }}>Complete history and audit trail</p>
           </div>
           <button onClick={onClose} className="btn-ghost" style={{ padding: 8, borderRadius: '50%' }}><X size={18} /></button>
         </div>
@@ -99,24 +99,24 @@ export default function AssetHistoryDrawer({ assetId, onClose }) {
                   {/* Event Content */}
                   <div style={{ flex: 1, background: 'var(--bg-1)', border: '1px solid var(--border)', borderRadius: 16, padding: 16, boxShadow: 'var(--clay-inset)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-                      <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-0)' }}>{ev.title}</h4>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontWeight: 600 }}>
+                      <h4 style={{ margin: 0, color: 'var(--text-0)' }}>{ev.title}</h4>
+                      <span style={{ color: 'var(--text-3)', }}>
                         {ev.date.toLocaleDateString()} {ev.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
                     
-                    <p style={{ margin: '0 0 10px', fontSize: '0.8rem', color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <p style={{ margin: '0 0 10px', color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)' }} />
                       By: {ev.user}
                     </p>
                     
                     {/* Render details if available */}
                     {ev.details && Object.keys(ev.details).length > 0 && (
-                      <div style={{ background: 'var(--bg-2)', padding: '10px 14px', borderRadius: 10, fontSize: '0.75rem', fontFamily: 'DM Mono', color: 'var(--text-1)', border: '1px dashed var(--border)' }}>
+                      <div style={{ background: 'var(--bg-2)', padding: '10px 14px', borderRadius: 10, color: 'var(--text-1)', border: '1px dashed var(--border)' }}>
                         {Object.entries(ev.details).map(([k, v]) => (
                           <div key={k} style={{ display: 'flex', gap: 10, marginBottom: 4 }}>
                             <span style={{ color: 'var(--text-3)', width: '35%', flexShrink: 0 }}>{k.replace(/_/g, ' ')}:</span>
-                            <span style={{ fontWeight: 600 }}>{typeof v === 'object' ? JSON.stringify(v) : String(v)}</span>
+                            <span >{typeof v === 'object' ? JSON.stringify(v) : String(v)}</span>
                           </div>
                         ))}
                       </div>

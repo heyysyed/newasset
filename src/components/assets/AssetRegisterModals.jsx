@@ -28,7 +28,7 @@ export default function AssetRegisterModals({
             </div>
             <form onSubmit={handleBulkMaintenance}>
               <div className="modal-body" style={{ padding: 20 }}>
-                <p style={{ margin: '0 0 16px', fontSize: '0.85rem', color: 'var(--text-2)' }}>
+                <p style={{ margin: '0 0 16px', color: 'var(--text-2)' }}>
                   Creating tickets for <strong>{selectedSize}</strong> selected assets.
                 </p>
                 <div style={{ marginBottom: 16 }}>
@@ -84,7 +84,7 @@ export default function AssetRegisterModals({
       {showBulkStatus && (
         <div className="modal-bg" style={{ zIndex: 2000 }} onClick={() => setShowBulkStatus(false)}>
           <div className="modal" style={{ maxWidth: 400, width: '95%', padding: 32 }} onClick={e => e.stopPropagation()}>
-            <h2 style={{ fontFamily: 'Oswald', fontSize: '1.1rem', margin: '0 0 20px' }}>CHANGE STATUS ({selectedSize} assets)</h2>
+            <h2 style={{ margin: '0 0 20px' }}>CHANGE STATUS ({selectedSize} assets)</h2>
             <select className="sel" value={bulkStatusVal} onChange={e => setBulkStatusVal(e.target.value)} style={{ width: '100%', marginBottom: 16 }}>
               <option value="">Select new status…</option>
               {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
@@ -103,7 +103,7 @@ export default function AssetRegisterModals({
       {showBulkTransfer && (
         <div className="modal-bg" style={{ zIndex: 2000 }} onClick={() => setShowBulkTransfer(false)}>
           <div className="modal" style={{ maxWidth: 400, width: '95%', padding: 32 }} onClick={e => e.stopPropagation()}>
-            <h2 style={{ fontFamily: 'Oswald', fontSize: '1.1rem', margin: '0 0 20px' }}>TRANSFER {selectedSize} ASSETS</h2>
+            <h2 style={{ margin: '0 0 20px' }}>TRANSFER {selectedSize} ASSETS</h2>
             <label className="lbl">Destination Site</label>
             <select className="sel" value={bulkTransferSite} onChange={e => setBulkTransferSite(e.target.value)} style={{ width: '100%', marginBottom: 16 }}>
               <option value="">Select site…</option>
@@ -124,8 +124,8 @@ export default function AssetRegisterModals({
         <div className="modal-bg" style={{ zIndex: 2000 }} onClick={() => setShowAssignGroup(false)}>
           <div className="modal" style={{ maxWidth: 460, width: '95%', padding: 0, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
             <div style={{ padding: '24px 24px 16px' }}>
-              <h2 style={{ fontFamily: 'Oswald', fontSize: '1.2rem', margin: '0 0 8px', letterSpacing: '0.05em', color: 'var(--text-0)' }}>ASSIGN GROUP</h2>
-              <p style={{ fontFamily: 'DM Sans', fontSize: '0.85rem', color: 'var(--text-2)', margin: 0 }}>
+              <h2 style={{ margin: '0 0 8px', letterSpacing: '0.05em', color: 'var(--text-0)' }}>ASSIGN GROUP</h2>
+              <p style={{ color: 'var(--text-2)', margin: 0 }}>
                 Group <strong>{assignGroupAssets.length} asset{assignGroupAssets.length > 1 ? 's' : ''}</strong> under a common name.
               </p>
             </div>
@@ -134,13 +134,13 @@ export default function AssetRegisterModals({
               <div style={{ display: 'flex', background: 'var(--bg-3)', padding: 4, borderRadius: 12, gap: 4 }}>
                 <button 
                   onClick={() => setAssignGroupTab('existing')}
-                  style={{ flex: 1, padding: '8px 12px', fontSize: '0.85rem', fontWeight: 600, borderRadius: 8, transition: 'all 0.2s', background: assignGroupTab === 'existing' ? 'var(--accent)' : 'transparent', color: assignGroupTab === 'existing' ? 'white' : 'var(--text-2)', border: 'none', cursor: 'pointer' }}
+                  style={{ flex: 1, padding: '8px 12px', borderRadius: 8, transition: 'all 0.2s', background: assignGroupTab === 'existing' ? 'var(--accent)' : 'transparent', color: assignGroupTab === 'existing' ? 'white' : 'var(--text-2)', border: 'none', cursor: 'pointer' }}
                 >
                   Select Existing
                 </button>
                 <button 
                   onClick={() => setAssignGroupTab('new')}
-                  style={{ flex: 1, padding: '8px 12px', fontSize: '0.85rem', fontWeight: 600, borderRadius: 8, transition: 'all 0.2s', background: assignGroupTab === 'new' ? 'var(--accent)' : 'transparent', color: assignGroupTab === 'new' ? 'white' : 'var(--text-2)', border: 'none', cursor: 'pointer' }}
+                  style={{ flex: 1, padding: '8px 12px', borderRadius: 8, transition: 'all 0.2s', background: assignGroupTab === 'new' ? 'var(--accent)' : 'transparent', color: assignGroupTab === 'new' ? 'white' : 'var(--text-2)', border: 'none', cursor: 'pointer' }}
                 >
                   Create New
                 </button>
@@ -157,7 +157,7 @@ export default function AssetRegisterModals({
                       onChange={e => setAssignGroupSearch(e.target.value)} 
                       placeholder="Search groups..." 
                       className="inp" 
-                      style={{ paddingLeft: 34, width: '100%', borderRadius: 8, fontSize: '0.85rem', minHeight: 38 }} 
+                      style={{ paddingLeft: 34, width: '100%', borderRadius: 8, minHeight: 38 }} 
                     />
                   </div>
                   <div style={{ flex: 1, overflowY: 'auto', maxHeight: 220, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg-1)' }}>
@@ -170,13 +170,13 @@ export default function AssetRegisterModals({
                           onChange={() => setAssignGroupSelected(name)} 
                           style={{ width: 16, height: 16, accentColor: 'var(--accent)' }} 
                         />
-                        <span style={{ fontFamily: 'DM Sans', fontSize: '0.85rem', fontWeight: assignGroupSelected === name ? 700 : 500, color: assignGroupSelected === name ? 'var(--accent)' : 'var(--text-0)' }}>
+                        <span style={{ fontWeight: assignGroupSelected === name ? 700 : 500, color: assignGroupSelected === name ? 'var(--accent)' : 'var(--text-0)' }}>
                           {name}
                         </span>
                       </label>
                     ))}
                     {uniqueGroupNames.filter(n => n.toLowerCase().includes(assignGroupSearch.toLowerCase())).length === 0 && (
-                      <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-3)', fontSize: '0.8rem', fontFamily: 'DM Sans' }}>No matching groups found.</div>
+                      <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-3)', }}>No matching groups found.</div>
                     )}
                   </div>
                 </div>
@@ -189,7 +189,7 @@ export default function AssetRegisterModals({
                     onChange={e => setAssignGroupNewName(e.target.value)} 
                     placeholder="Enter new common name..." 
                     className="inp" 
-                    style={{ width: '100%', fontSize: '0.9rem', padding: '10px 14px' }} 
+                    style={{ width: '100%', padding: '10px 14px' }} 
                   />
                 </div>
               )}
@@ -209,8 +209,8 @@ export default function AssetRegisterModals({
       {cloneAsset && (
         <div className="modal-bg" style={{ zIndex: 2000 }} onClick={() => setCloneAsset(null)}>
           <div className="modal" style={{ maxWidth: 420, width: '95%', padding: 32 }} onClick={e => e.stopPropagation()}>
-            <h2 style={{ fontFamily: 'Oswald', fontSize: '1.1rem', margin: '0 0 16px' }}>CLONE ASSET</h2>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-2)', marginBottom: 16, fontFamily: 'DM Sans' }}>
+            <h2 style={{ margin: '0 0 16px' }}>CLONE ASSET</h2>
+            <p style={{ color: 'var(--text-2)', marginBottom: 16, }}>
               Create a duplicate of <strong>{cloneAsset.asset_name}</strong> ({cloneAsset.asset_code}) with a new auto-generated asset code?
             </p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
@@ -250,20 +250,20 @@ function PDFReportModal({ onClose, onExport, activeFilters }) {
         {/* Header */}
         <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-            <h2 style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.08em', color: 'var(--text-0)', margin: 0, textTransform: 'uppercase' }}>
+            <h2 style={{ letterSpacing: '0.08em', color: 'var(--text-0)', margin: 0, textTransform: 'uppercase' }}>
               Export PDF Report
             </h2>
             <button onClick={onClose} style={{ background: 'var(--bg-3)', border: '1px solid var(--border)', borderRadius: 8, width: 30, height: 30, cursor: 'pointer', color: 'var(--text-3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <X size={14} />
             </button>
           </div>
-          <p style={{ fontFamily: 'DM Sans', fontSize: '0.78rem', color: 'var(--text-2)', margin: 0 }}>
+          <p style={{ color: 'var(--text-2)', margin: 0 }}>
             Select report type to generate
           </p>
           {activeFiltersList.length > 0 && (
             <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 5 }}>
               {activeFiltersList.map(f => (
-                <span key={f} style={{ fontFamily: 'DM Sans', fontSize: '0.68rem', fontWeight: 600, padding: '3px 10px', background: 'var(--bg-3)', borderRadius: 6, color: 'var(--text-1)', border: '1px solid var(--border)' }}>{f}</span>
+                <span key={f} style={{ padding: '3px 10px', background: 'var(--bg-3)', borderRadius: 6, color: 'var(--text-1)', border: '1px solid var(--border)' }}>{f}</span>
               ))}
             </div>
           )}
@@ -296,10 +296,10 @@ function PDFReportModal({ onClose, onExport, activeFilters }) {
                   <Icon size={18} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: 'DM Sans', fontWeight: 700, fontSize: '0.85rem', color: isSelected ? 'var(--accent)' : 'var(--text-0)' }}>
+                  <div style={{ color: isSelected ? 'var(--accent)' : 'var(--text-0)' }}>
                     {r.title}
                   </div>
-                  <div style={{ fontFamily: 'DM Sans', fontSize: '0.72rem', color: 'var(--text-3)', lineHeight: 1.4, marginTop: 2 }}>
+                  <div style={{ color: 'var(--text-3)', marginTop: 2 }}>
                     {r.desc}
                   </div>
                 </div>
@@ -315,11 +315,11 @@ function PDFReportModal({ onClose, onExport, activeFilters }) {
 
         {/* Footer */}
         <div style={{ padding: '14px 20px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8 }}>
-          <button onClick={onClose} className="btn-ghost" style={{ fontSize: '0.82rem', padding: '8px 16px' }}>Cancel</button>
+          <button onClick={onClose} className="btn-ghost" style={{ padding: '8px 16px' }}>Cancel</button>
           <button
             onClick={() => onExport(selected)}
             className="btn-primary"
-            style={{ gap: 6, fontSize: '0.82rem', padding: '8px 20px', borderRadius: 8 }}
+            style={{ gap: 6, padding: '8px 20px', borderRadius: 8 }}
           >
             <Download size={14} /> Download PDF
           </button>

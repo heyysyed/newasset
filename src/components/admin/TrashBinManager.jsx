@@ -21,25 +21,25 @@ export default function TrashBinManager({
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Archive size={16} style={{ color: 'var(--text-3)' }} />
           <div>
-            <h3 style={{ fontFamily: 'Oswald', fontSize: '0.85rem', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Deleted Assets Archive & Recovery</h3>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>Soft-deleted assets backed up here with 1-click restore & cascade recovery.</span>
+            <h3 style={{ margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Deleted Assets Archive & Recovery</h3>
+            <span style={{ color: 'var(--text-3)', }}>Soft-deleted assets backed up here with 1-click restore & cascade recovery.</span>
           </div>
         </div>
 
         {/* TTL Auto-Purge Setting */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Clock size={14} style={{ color: 'var(--accent)' }} />
-          <span style={{ fontSize: '0.72rem', color: 'var(--text-2)', fontFamily: 'DM Sans' }}>TTL Auto-Purge:</span>
+          <span style={{ color: 'var(--text-2)', }}>TTL Auto-Purge:</span>
           <select
             value={ttlDays}
             onChange={e => setTtlDays(Number(e.target.value))}
-            style={{ padding: '4px 8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-1)', fontSize: '0.75rem', color: 'var(--text-0)', outline: 'none' }}
+            style={{ padding: '4px 8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-1)', color: 'var(--text-0)', outline: 'none' }}
           >
             <option value={30}>Auto-Purge in 30 Days</option>
             <option value={60}>Auto-Purge in 60 Days</option>
             <option value={90}>Auto-Purge in 90 Days</option>
           </select>
-          <span style={{ fontSize: '0.78rem', fontFamily: 'DM Mono', color: 'var(--text-3)', fontWeight: 600, marginLeft: 8 }}>{deletedAssets.length} items</span>
+          <span style={{ color: 'var(--text-3)', marginLeft: 8 }}>{deletedAssets.length} items</span>
         </div>
       </div>
 
@@ -50,7 +50,7 @@ export default function TrashBinManager({
       ) : deletedAssets.length === 0 ? (
         <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-3)' }}>
           <Trash2 size={32} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
-          <p style={{ fontFamily: 'DM Sans', fontSize: '0.88rem' }}>Trash is empty. Deleted assets will appear here.</p>
+          <p >Trash is empty. Deleted assets will appear here.</p>
         </div>
       ) : (
         <div>
@@ -59,28 +59,28 @@ export default function TrashBinManager({
               display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px',
               borderBottom: idx < deletedAssets.length - 1 ? '1px solid var(--border)' : 'none',
             }}>
-              <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--status-danger-soft)', border: '1px solid var(--status-danger-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <PackageIcon size={15} style={{ color: 'var(--red)' }} />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                  <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-0)' }}>{d.asset_name || 'Unnamed'}</span>
-                  <span style={{ fontFamily: 'DM Mono', fontSize: '0.68rem', color: 'var(--accent)', background: 'var(--accent-glow)', padding: '1px 6px', borderRadius: 4 }}>{d.asset_code}</span>
-                  {d.category && <span style={{ fontSize: '0.65rem', color: 'var(--text-3)', background: 'var(--bg-3)', padding: '1px 6px', borderRadius: 4 }}>{d.category}</span>}
+                  <span style={{ color: 'var(--text-0)' }}>{d.asset_name || 'Unnamed'}</span>
+                  <span style={{ color: 'var(--accent)', background: 'var(--accent-glow)', padding: '1px 6px', borderRadius: 4 }}>{d.asset_code}</span>
+                  {d.category && <span style={{ color: 'var(--text-3)', background: 'var(--bg-3)', padding: '1px 6px', borderRadius: 4 }}>{d.category}</span>}
                 </div>
-                <div style={{ display: 'flex', gap: 12, fontSize: '0.72rem', color: 'var(--text-3)', marginTop: 3, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 12, color: 'var(--text-3)', marginTop: 3, flexWrap: 'wrap' }}>
                   {d.site && <span>Site: {d.site}</span>}
-                  {d.purchase_value && <span style={{ fontFamily: 'DM Mono' }}>{formatCurrency(d.purchase_value)}</span>}
+                  {d.purchase_value && <span >{formatCurrency(d.purchase_value)}</span>}
                   <span>Deleted {new Date(d.deleted_at).toLocaleDateString()}</span>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
                 <button onClick={() => handleRestore(d.id)} disabled={restoring[d.id]}
-                  className="btn-primary" style={{ padding: '7px 14px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: 5, background: 'var(--green)', borderColor: 'var(--green)' }}>
+                  className="btn-primary" style={{ padding: '7px 14px', display: 'flex', alignItems: 'center', gap: 5, background: 'var(--green)', borderColor: 'var(--green)' }}>
                   {restoring[d.id] ? <RefreshCw size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <RotateCcw size={12} />} Cascade Restore
                 </button>
                 <button onClick={() => handlePermanentDelete(d.id)}
-                  className="btn-danger" style={{ padding: '7px 10px', fontSize: '0.75rem' }}>
+                  className="btn-danger" style={{ padding: '7px 10px', }}>
                   <Trash2 size={12} />
                 </button>
               </div>

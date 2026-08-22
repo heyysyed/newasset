@@ -121,9 +121,15 @@ export async function updateSettings(updates) {
   return data
 }
 
+export const getAssetSelectCols = (canViewFinancials = false) => {
+  const base = 'id, asset_code, asset_name, make, model_no, purchase_order_no, serial_no, capacity, status, category, site, type_code, purchase_date, location, department, assigned_to, notes, custom_fields, latitude, longitude, warranty_expiry, disposal_date, disposal_reason, checklist_template_id, quantity, parent_asset_id, added_on, updated_at, added_by'
+  const fin = ', purchase_value, salvage_value, useful_life_years, depreciation_method, depreciation_rate_percent'
+  return canViewFinancials ? `${base}${fin}` : base
+}
+
 // ── ASSETS ───────────────────────────────────────────────
-export async function fetchAssets(filters = {}, cc) {
-  let q = supabase.from('assets').select('*').order('added_on', { ascending: false }).or('notes.is.null,notes.not.ilike.%[Migrated to Bulk Module]%')
+export async function fetchAssets(filters = {}, cc, selectCols = '*') {
+  let q = supabase.from('assets').select(selectCols).order('added_on', { ascending: false }).or('notes.is.null,notes.not.ilike.%[Migrated to Bulk Module]%')
   if (cc) q = q.eq('company_code', cc)
   if (filters.status   && filters.status !== 'All') q = q.eq('status', filters.status)
   if (filters.category && filters.category !== 'All') q = q.eq('category', filters.category)
@@ -141,9 +147,9 @@ export async function fetchAssets(filters = {}, cc) {
   return data
 }
 
-export async function fetchAsset(id) {
+export async function fetchAsset(id, selectCols = '*') {
   const { data, error } = await supabase.from('assets')
-    .select('*, profiles!assigned_to(id, full_name, email), employees!assigned_employee_id(id, employee_code, full_name, email, department)')
+    .select(`${selectCols}, profiles!assigned_to(id, full_name, email), employees!assigned_employee_id(id, employee_code, full_name, email, department)`)
     .eq('id', id)
     .single()
   if (error) throw error
@@ -309,7 +315,7 @@ async function getCachedSites() {
   }
 }
 
-export async function fetchAssetsPaginated(filters = {}, page = 0, pageSize = 50, cc = null) {
+export async function fetchAssetsPaginated(filters = {}, page = 0, pageSize = 50, cc = null, selectCols = '*') {
   const from = page * pageSize
   const to = from + pageSize - 1
 
@@ -334,7 +340,7 @@ export async function fetchAssetsPaginated(filters = {}, page = 0, pageSize = 50
   }
 
   let q = supabase.from('assets')
-    .select('*, profiles!assigned_to(id, full_name, email), employees!assigned_employee_id(id, employee_code, full_name, email, department)', { count: 'exact' })
+    .select(`${selectCols}, profiles!assigned_to(id, full_name, email), employees!assigned_employee_id(id, employee_code, full_name, email, department)`, { count: 'exact' })
     .or('notes.is.null,notes.not.ilike.%[Migrated to Bulk Module]%')
     .order('added_on', { ascending: false })
     .range(from, to)
@@ -700,14 +706,33 @@ export async function fetchFilterOptions() {
     supabase.from('sites').select('id, name, site_code').order('name'),
   ])
   if (assetsRes.error) throw assetsRes.error
-  const allSites = [
-    ...(sitesRes.data || []).map(s => s.site_code ? `[${s.site_code}] ${s.name}` : s.name),
+  
+  const dbSites = sitesRes.data || []
+  const formattedDbSites = dbSites.map(s => s.site_code ? `[${s.site_code}] ${s.name}` : s.name)
+  
+  const rawSites = [
     ...(assetsRes.data || []).map(a => a.site),
     ...(invRes.data || []).map(a => a.location),
   ].filter(Boolean)
+
+  const uniqueSites = new Set(formattedDbSites)
+
+  rawSites.forEach(rawSite => {
+    let matched = false
+    for (const dbSite of dbSites) {
+      if (isSiteMatch(rawSite, dbSite.name) || (dbSite.site_code && isSiteMatch(rawSite, dbSite.site_code))) {
+        matched = true
+        break
+      }
+    }
+    if (!matched) {
+      uniqueSites.add(rawSite)
+    }
+  })
+
   return {
     categories: [...new Set((assetsRes.data || []).map(a => a.category).filter(Boolean))].sort(),
-    sites: [...new Set(allSites)].sort(),
+    sites: [...uniqueSites].sort(),
   }
 }
 

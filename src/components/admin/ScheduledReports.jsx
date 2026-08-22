@@ -8,8 +8,8 @@ function SectionHead({ icon: Icon, title, sub, color = 'var(--accent)' }) {
         <Icon size={16} style={{ color }}/>
       </div>
       <div>
-        <h2 style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 700, fontSize: '0.95rem', letterSpacing: '0.06em', color: 'var(--text-0)', margin: 0 }}>{title}</h2>
-        {sub && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.73rem', color: 'var(--text-3)', margin: 0, marginTop: 1 }}>{sub}</p>}
+        <h2 style={{ letterSpacing: '0.06em', color: 'var(--text-0)', margin: 0 }}>{title}</h2>
+        {sub && <p style={{ color: 'var(--text-3)', margin: 0, marginTop: 1 }}>{sub}</p>}
       </div>
     </div>
   )
@@ -62,18 +62,18 @@ export default function ScheduledReports({ settings, setSettings }) {
 
   return (
     <div className="card" style={{ overflow: 'hidden' }}>
-      <SectionHead icon={FileSpreadsheet} title="SCHEDULED REPORTING" sub="Configure automated reports to be emailed at set intervals" color="#8b5cf6" />
+      <SectionHead icon={FileSpreadsheet} title="SCHEDULED REPORTING" sub="Configure automated reports to be emailed at set intervals" color='var(--status-special)' />
       
       <div style={{ padding: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-          <button onClick={handleAddNew} disabled={editingId !== null} className="btn-primary" style={{ padding: '8px 14px', fontSize: '0.78rem' }}>
+          <button onClick={handleAddNew} disabled={editingId !== null} className="btn-primary" style={{ padding: '8px 14px', }}>
             <Plus size={14} /> New Schedule
           </button>
         </div>
 
         {editingId && (
           <div style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 20 }}>
-            <h4 style={{ margin: '0 0 16px', fontFamily: "'Oswald', sans-serif", fontSize: '0.9rem', color: 'var(--text-0)' }}>
+            <h4 style={{ margin: '0 0 16px', color: 'var(--text-0)' }}>
               {editingId === 'new' ? 'Create New Report' : 'Edit Report'}
             </h4>
             
@@ -126,7 +126,7 @@ export default function ScheduledReports({ settings, setSettings }) {
         {reports.length === 0 && !editingId ? (
           <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-3)' }}>
             <FileSpreadsheet size={32} style={{ opacity: 0.3, margin: '0 auto 12px' }} />
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.88rem' }}>No automated reports scheduled yet.</p>
+            <p >No automated reports scheduled yet.</p>
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
@@ -134,8 +134,8 @@ export default function ScheduledReports({ settings, setSettings }) {
               <div key={r.id} style={{ padding: 16, background: 'var(--bg-1)', borderRadius: 12, border: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                   <div>
-                    <h5 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-0)' }}>{r.name}</h5>
-                    <p style={{ margin: '2px 0 0', fontSize: '0.72rem', color: 'var(--text-3)' }}>Module: <strong style={{ color: 'var(--accent)' }}>{r.module.toUpperCase()}</strong></p>
+                    <h5 style={{ margin: 0, color: 'var(--text-0)' }}>{r.name}</h5>
+                    <p style={{ margin: '2px 0 0', color: 'var(--text-3)' }}>Module: <strong style={{ color: 'var(--accent)' }}>{r.module.toUpperCase()}</strong></p>
                   </div>
                   <div style={{ display: 'flex', gap: 6 }}>
                     <button onClick={() => handleEdit(r)} className="btn-ghost" style={{ padding: 6 }}><Edit2 size={13} /></button>
@@ -143,11 +143,11 @@ export default function ScheduledReports({ settings, setSettings }) {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.75rem', color: 'var(--text-2)', marginBottom: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-2)', marginBottom: 6 }}>
                   <Clock size={12} style={{ color: 'var(--cyan)' }} />
                   <span>Runs <strong style={{ textTransform: 'capitalize' }}>{r.frequency}</strong> as <strong>{r.format.toUpperCase()}</strong></span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: '0.75rem', color: 'var(--text-2)' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, color: 'var(--text-2)' }}>
                   <Mail size={12} style={{ color: 'var(--amber)', marginTop: 2 }} />
                   <span style={{ wordBreak: 'break-all' }}>{(r.recipients || []).join(', ')}</span>
                 </div>

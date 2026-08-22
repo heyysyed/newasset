@@ -3,7 +3,7 @@ import { CheckCircle2, AlertCircle, ShieldCheck } from 'lucide-react'
 import SelfieCapture from './SelfieCapture'
 
 /**
- * VerificationBlock — legal-grade sign-off for checklist submissions.
+ * VerificationBlock - legal-grade sign-off for checklist submissions.
  *
  * Inspector mode (profileName set):
  *   - Typed full name must match profile name exactly
@@ -13,7 +13,7 @@ import SelfieCapture from './SelfieCapture'
  * Incharge mode (profileName null):
  *   - Same but name/designation are free text
  *
- * onChange(data | null) — null until name + checkbox are complete.
+ * onChange(data | null) - null until name + checkbox are complete.
  * data = { verifiedName, designation, verifiedAt, selfieUrl }
  */
 export default function VerificationBlock({ profileName, userId, onChange }) {
@@ -50,7 +50,7 @@ export default function VerificationBlock({ profileName, userId, onChange }) {
           <div style={{ position: 'relative' }}>
             <input className="inp" placeholder={profileName} value={name}
               onChange={e => setName(e.target.value)}
-              style={{ fontFamily: 'DM Sans', fontSize: '0.82rem', paddingRight: 34,
+              style={{ paddingRight: 34,
                 borderColor: name ? (nameOk ? 'var(--green)' : 'var(--red)') : undefined }}
             />
             {name && (
@@ -60,7 +60,7 @@ export default function VerificationBlock({ profileName, userId, onChange }) {
             )}
           </div>
           {name && !nameOk && (
-            <p style={{ fontSize: '0.68rem', color: 'var(--red)', fontFamily: 'DM Sans', marginTop: 3 }}>
+            <p style={{ color: 'var(--red)', marginTop: 3 }}>
               Must match your profile name: <strong>{profileName}</strong>
             </p>
           )}
@@ -71,13 +71,13 @@ export default function VerificationBlock({ profileName, userId, onChange }) {
             <label className="lbl">Full Name <span style={{ color: 'var(--red)' }}>*</span></label>
             <input className="inp" placeholder="Incharge full name" value={name}
               onChange={e => setName(e.target.value)}
-              style={{ fontFamily: 'DM Sans', fontSize: '0.82rem' }} />
+               />
           </div>
           <div>
             <label className="lbl">Designation</label>
             <input className="inp" placeholder="e.g. Site Manager" value={designation}
               onChange={e => setDesignation(e.target.value)}
-              style={{ fontFamily: 'DM Sans', fontSize: '0.82rem' }} />
+               />
           </div>
         </div>
       )}
@@ -86,7 +86,7 @@ export default function VerificationBlock({ profileName, userId, onChange }) {
       <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, cursor: 'pointer' }}>
         <input type="checkbox" checked={certified} onChange={e => setCertified(e.target.checked)}
           style={{ marginTop: 2, flexShrink: 0, accentColor: 'var(--accent)', width: 14, height: 14 }} />
-        <span style={{ fontSize: '0.72rem', color: 'var(--text-1)', fontFamily: 'DM Sans', lineHeight: 1.5 }}>
+        <span style={{ color: 'var(--text-1)', }}>
           {isInspector
             ? 'I certify that I have personally conducted this inspection and all information provided is accurate and complete.'
             : 'I confirm that I have reviewed and approved this inspection report.'}
@@ -95,7 +95,7 @@ export default function VerificationBlock({ profileName, userId, onChange }) {
 
       {/* ── Selfie verification ──────────────────────────────────────────── */}
       <div style={{ borderTop: '1px dashed var(--border)', paddingTop: 10 }}>
-        <div style={{ fontSize: '0.65rem', fontFamily: 'DM Sans', color: 'var(--text-3)', marginBottom: 7, textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 600 }}>
+        <div style={{ color: 'var(--text-3)', marginBottom: 7, textTransform: 'uppercase', letterSpacing: '0.07em', }}>
           📷 Identity Selfie
         </div>
         <SelfieCapture
@@ -115,11 +115,11 @@ export default function VerificationBlock({ profileName, userId, onChange }) {
             <ShieldCheck size={18} style={{ color: 'var(--green)', flexShrink: 0 }} />
           )}
           <div>
-            <div style={{ fontSize: '0.75rem', fontFamily: 'DM Sans', fontWeight: 700, color: 'var(--green)' }}>
-              Verified — {name.trim()}{designation ? ` · ${designation}` : ''}
-              {selfieUrl && <span style={{ marginLeft: 6, fontSize: '0.65rem', background: 'var(--green)', color: '#fff', padding: '1px 6px', borderRadius: 10 }}>+ Selfie</span>}
+            <div style={{ color: 'var(--green)' }}>
+              Verified - {name.trim()}{designation ? ` · ${designation}` : ''}
+              {selfieUrl && <span style={{ marginLeft: 6, background: 'var(--green)', color: '#fff', padding: '1px 6px', borderRadius: 10 }}>+ Selfie</span>}
             </div>
-            <div style={{ fontSize: '0.65rem', fontFamily: 'DM Mono', color: 'var(--text-3)', marginTop: 1 }}>
+            <div style={{ color: 'var(--text-3)', marginTop: 1 }}>
               {new Date().toLocaleString()}
             </div>
           </div>

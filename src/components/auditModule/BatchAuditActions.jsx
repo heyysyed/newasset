@@ -27,7 +27,7 @@ export default function BatchAuditActions({ unverifiedItems, onBatchVerify }) {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <Zap size={16} style={{ color: 'var(--accent)' }} />
-        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-0)', fontFamily: 'DM Sans' }}>
+        <span style={{ color: 'var(--text-0)', }}>
           Batch Fast Audit ({unverifiedItems.length} pending items remaining)
         </span>
       </div>
@@ -37,7 +37,7 @@ export default function BatchAuditActions({ unverifiedItems, onBatchVerify }) {
         disabled={loading}
         className="btn-primary"
         style={{
-          padding: '6px 14px', fontSize: '0.78rem', fontWeight: 700, borderRadius: 8,
+          padding: '6px 14px', borderRadius: 8,
           background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none',
           display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 2px 8px rgba(16,185,129,0.3)'
         }}

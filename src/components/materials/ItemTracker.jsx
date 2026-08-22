@@ -9,12 +9,12 @@ import * as XLSX from 'xlsx';
 /* ── helpers ──────────────────────────────────────────────── */
 
 function fmtDate(d) {
-  if (!d) return '—';
+  if (!d) return '-';
   return new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 function fmtCurrency(v) {
-  if (v == null) return '—';
+  if (v == null) return '-';
   return '₹' + Number(v).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
 
@@ -28,12 +28,12 @@ function fmtQty(v) {
 const TypeBadge = ({ type }) => {
   const map = {
     purchase:       { bg: 'var(--green-dim)',  color: 'var(--green)',  border: 'rgba(0,185,107,0.25)' },
-    transfer:       { bg: 'var(--accent-glow)', color: 'var(--accent)', border: 'rgba(79,126,255,0.25)' },
-    issue:          { bg: 'var(--amber-dim)',  color: '#c97b00',       border: 'rgba(245,158,11,0.25)' },
+    transfer:       { bg: 'var(--accent-glow)', color: 'var(--accent)', border: 'var(--accent-soft)' },
+    issue:          { bg: 'var(--amber-dim)',  color: '#c97b00',       border: 'var(--status-warning-soft)' },
     return:         { bg: 'var(--cyan-dim)',   color: 'var(--cyan)',   border: 'rgba(6,182,212,0.25)' },
-    consumption:    { bg: 'var(--red-dim)',    color: 'var(--red)',    border: 'rgba(239,68,68,0.2)' },
+    consumption:    { bg: 'var(--red-dim)',    color: 'var(--red)',    border: 'var(--status-danger-soft)' },
     requisition:    { bg: 'var(--purple-dim)', color: 'var(--purple)', border: 'rgba(139,92,246,0.25)' },
-    adjustment_out: { bg: 'var(--red-dim)',    color: 'var(--red)',    border: 'rgba(239,68,68,0.2)' },
+    adjustment_out: { bg: 'var(--red-dim)',    color: 'var(--red)',    border: 'var(--status-danger-soft)' },
   };
   const m = map[type] || { bg: 'var(--bg-3)', color: 'var(--text-2)', border: 'var(--border)' };
   return (
@@ -200,7 +200,7 @@ export default function ItemTracker({ materials = [], stock = [], txns = [] }) {
       <div style={{ display:'flex', gap:10, alignItems:'center', flexWrap:'wrap' }}>
         <select className="sel" value={selectedId || ''} onChange={e => setSelectedId(e.target.value || null)}
           style={{ flex:1, minWidth:200 }}>
-          <option value="">— Choose a material —</option>
+          <option value="">- Choose a material -</option>
           {materials.map(m => (
             <option key={m.id} value={m.id}>
               {m.material_name || m.name}{(m.material_code || m.code) ? ` (${m.material_code || m.code})` : ''}
@@ -222,7 +222,7 @@ export default function ItemTracker({ materials = [], stock = [], txns = [] }) {
             alignItems:'center', justifyContent:'center', marginBottom:14, boxShadow:'var(--clay-inset)' }}>
             <Search size={26} style={{ color:'var(--text-3)' }}/>
           </div>
-          <p style={{ color:'var(--text-3)', fontFamily:'DM Sans', fontSize:'0.88rem' }}>
+          <p style={{ color:'var(--text-3)', }}>
             Select a material to view its complete tracking history
           </p>
         </div>
@@ -241,15 +241,15 @@ export default function ItemTracker({ materials = [], stock = [], txns = [] }) {
                   <Package size={18} style={{ color:'var(--accent)' }}/>
                 </div>
                 <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontFamily:'Oswald', fontWeight:700, fontSize:'1.1rem', color:'var(--text-0)' }}>
+                  <div style={{ color:'var(--text-0)' }}>
                     {selected.material_name || selected.name}
                   </div>
                   <div style={{ display:'flex', gap:8, alignItems:'center', marginTop:2 }}>
-                    <code style={{ fontSize:'0.72rem', background:'var(--bg-3)', padding:'2px 8px', borderRadius:6,
-                      fontFamily:'DM Mono', color:'var(--text-2)', border:'1px solid var(--border)' }}>
+                    <code style={{ background:'var(--bg-3)', padding:'2px 8px', borderRadius:6,
+                      color:'var(--text-2)', border:'1px solid var(--border)' }}>
                       {selected.material_code || selected.code}
                     </code>
-                    <span style={{ fontSize:'0.75rem', color:'var(--text-3)' }}>{selected.category} · {selected.unit}</span>
+                    <span style={{ color:'var(--text-3)' }}>{selected.category} · {selected.unit}</span>
                   </div>
                 </div>
               </div>
@@ -263,13 +263,13 @@ export default function ItemTracker({ materials = [], stock = [], txns = [] }) {
                 ].map(m => (
                   <div key={m.label} style={{ padding:'10px 12px', borderRadius:10, background:'var(--bg-3)',
                     border:'1px solid var(--border)' }}>
-                    <div style={{ fontFamily:'Oswald', fontWeight:700, fontSize:'1rem', color:m.color, lineHeight:1 }}>{m.val}</div>
-                    <div style={{ fontFamily:'DM Sans', fontSize:'0.65rem', color:'var(--text-3)', marginTop:3 }}>{m.label}</div>
+                    <div style={{ color:m.color, }}>{m.val}</div>
+                    <div style={{ color:'var(--text-3)', marginTop:3 }}>{m.label}</div>
                   </div>
                 ))}
               </div>
               {selected.description && (
-                <p style={{ margin:'12px 0 0', fontSize:'0.78rem', color:'var(--text-2)', fontFamily:'DM Sans', lineHeight:1.5 }}>
+                <p style={{ margin:'12px 0 0', color:'var(--text-2)', }}>
                   {selected.description}
                 </p>
               )}
@@ -280,7 +280,7 @@ export default function ItemTracker({ materials = [], stock = [], txns = [] }) {
                   background:'rgba(6,182,212,0.04)', border:'1.5px solid rgba(6,182,212,0.15)' }}>
                   <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:10 }}>
                     <Activity size={14} style={{ color:'var(--cyan)' }}/>
-                    <span style={{ fontFamily:'Oswald', fontSize:'0.78rem', fontWeight:600, color:'var(--cyan)', letterSpacing:'0.03em' }}>
+                    <span style={{ color:'var(--cyan)', letterSpacing:'0.03em' }}>
                       REUSABLE ITEM UTILIZATION
                     </span>
                   </div>
@@ -292,14 +292,14 @@ export default function ItemTracker({ materials = [], stock = [], txns = [] }) {
                       { label:'Return Rate', val: `${summary.returnRate}%`, color: summary.returnRate >= 80 ? 'var(--green)' : summary.returnRate >= 50 ? 'var(--amber)' : 'var(--red)' },
                     ].map(m => (
                       <div key={m.label} style={{ padding:'8px 10px', borderRadius:8, background:'var(--bg-1)', border:'1px solid var(--border)', textAlign:'center' }}>
-                        <div style={{ fontFamily:'Oswald', fontWeight:700, fontSize:'0.95rem', color:m.color, lineHeight:1 }}>{m.val}</div>
-                        <div style={{ fontFamily:'DM Sans', fontSize:'0.58rem', color:'var(--text-3)', marginTop:3 }}>{m.label}</div>
+                        <div style={{ color:m.color, }}>{m.val}</div>
+                        <div style={{ color:'var(--text-3)', marginTop:3 }}>{m.label}</div>
                       </div>
                     ))}
                   </div>
                   {summary.currentlyOut > 0 && (
-                    <div style={{ marginTop:8, fontSize:'0.72rem', color:'var(--red)', fontFamily:'DM Sans', display:'flex', alignItems:'center', gap:4 }}>
-                      <Activity size={11}/> {fmtQty(summary.currentlyOut)} {selected.unit || 'units'} still out — pending return
+                    <div style={{ marginTop:8, color:'var(--red)', display:'flex', alignItems:'center', gap:4 }}>
+                      <Activity size={11}/> {fmtQty(summary.currentlyOut)} {selected.unit || 'units'} still out - pending return
                     </div>
                   )}
                 </div>
@@ -308,15 +308,15 @@ export default function ItemTracker({ materials = [], stock = [], txns = [] }) {
 
             {/* Right: sites */}
             <div className="card" style={{ flex:'1 1 280px', padding:'18px 20px' }}>
-              <div style={{ fontFamily:'Oswald', fontWeight:600, fontSize:'0.82rem', color:'var(--text-0)',
+              <div style={{ color:'var(--text-0)',
                 letterSpacing:'0.03em', marginBottom:12, display:'flex', alignItems:'center', gap:6 }}>
                 <MapPin size={15} style={{ color:'var(--accent)' }}/> Stock by Site
-                <span style={{ marginLeft:'auto', fontSize:'0.7rem', color:'var(--text-3)', fontFamily:'DM Sans', fontWeight:400 }}>
+                <span style={{ marginLeft:'auto', color:'var(--text-3)', }}>
                   {summary.sitesPresent} site{summary.sitesPresent !== 1 ? 's' : ''}
                 </span>
               </div>
               {matStock.length === 0 ? (
-                <p style={{ color:'var(--text-3)', fontSize:'0.82rem', fontFamily:'DM Sans', textAlign:'center', padding:'20px 0' }}>No stock</p>
+                <p style={{ color:'var(--text-3)', textAlign:'center', padding:'20px 0' }}>No stock</p>
               ) : (
                 <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
                   {matStock.map((row, i) => {
@@ -331,16 +331,16 @@ export default function ItemTracker({ materials = [], stock = [], txns = [] }) {
                       <div key={row.id || i} style={{ padding:'10px 12px', borderRadius:10, background:'var(--bg-1)',
                         border:'1.5px solid var(--border)' }}>
                         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
-                          <span style={{ fontFamily:'DM Sans', fontWeight:600, fontSize:'0.85rem', color:'var(--text-0)' }}>
+                          <span style={{ color:'var(--text-0)' }}>
                             {row.site || `Site ${i+1}`}
                           </span>
-                          <span style={{ fontFamily:'Oswald', fontWeight:700, fontSize:'0.95rem', color:barColor }}>{fmtQty(qty)}</span>
+                          <span style={{ color:barColor }}>{fmtQty(qty)}</span>
                         </div>
                         <div style={{ height:4, borderRadius:2, background:'var(--bg-4)', overflow:'hidden' }}>
                           <div style={{ height:'100%', width:`${barPct}%`, borderRadius:2,
                             background:`linear-gradient(90deg, ${barColor}, ${barColor}80)`, transition:'width 0.3s' }}/>
                         </div>
-                        <div style={{ display:'flex', justifyContent:'space-between', marginTop:4, fontSize:'0.68rem', color:'var(--text-3)', fontFamily:'DM Sans' }}>
+                        <div style={{ display:'flex', justifyContent:'space-between', marginTop:4, color:'var(--text-3)', }}>
                           <span>{fmtCurrency(value)}</span>
                           {reorder > 0 && <span>Reorder: {fmtQty(reorder)}</span>}
                         </div>
@@ -356,7 +356,7 @@ export default function ItemTracker({ materials = [], stock = [], txns = [] }) {
           <div className="card" style={{ padding:'18px 20px' }}>
             <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:16 }}>
               <ArrowRightLeft size={16} style={{ color:'var(--accent)' }}/>
-              <span style={{ fontFamily:'Oswald', fontWeight:600, fontSize:'0.85rem', color:'var(--text-0)', letterSpacing:'0.03em' }}>
+              <span style={{ color:'var(--text-0)', letterSpacing:'0.03em' }}>
                 Transaction Timeline
               </span>
               <span className="badge" style={{ background:'var(--bg-3)', color:'var(--text-2)', marginLeft:'auto' }}>
@@ -365,7 +365,7 @@ export default function ItemTracker({ materials = [], stock = [], txns = [] }) {
             </div>
 
             {matTxns.length === 0 ? (
-              <p style={{ textAlign:'center', color:'var(--text-3)', fontFamily:'DM Sans', fontSize:'0.85rem', padding:'24px 0' }}>
+              <p style={{ textAlign:'center', color:'var(--text-3)', padding:'24px 0' }}>
                 No transactions recorded for this material.
               </p>
             ) : (
@@ -397,13 +397,13 @@ export default function ItemTracker({ materials = [], stock = [], txns = [] }) {
                       {/* Content */}
                       <div style={{ background:'var(--bg-1)', border:'1.5px solid var(--border)', borderRadius:10, padding:'10px 14px' }}>
                         <div style={{ display:'flex', flexWrap:'wrap', alignItems:'center', gap:8 }}>
-                          <span style={{ fontFamily:'DM Mono', fontSize:'0.72rem', color:'var(--text-3)' }}>{fmtDate(date)}</span>
+                          <span style={{ color:'var(--text-3)' }}>{fmtDate(date)}</span>
                           <TypeBadge type={type}/>
-                          <span style={{ fontFamily:'Oswald', fontWeight:700, fontSize:'0.92rem', color:'var(--text-0)', marginLeft:'auto' }}>
+                          <span style={{ color:'var(--text-0)', marginLeft:'auto' }}>
                             {qty != null ? `${fmtQty(qty)} ${selected.unit || ''}` : ''}
                           </span>
                         </div>
-                        <div style={{ display:'flex', flexWrap:'wrap', gap:10, marginTop:6, fontSize:'0.75rem', color:'var(--text-2)', fontFamily:'DM Sans' }}>
+                        <div style={{ display:'flex', flexWrap:'wrap', gap:10, marginTop:6, color:'var(--text-2)', }}>
                           {(fromSite || toSite) && (
                             <span style={{ display:'inline-flex', alignItems:'center', gap:3 }}>
                               <MapPin size={11}/>

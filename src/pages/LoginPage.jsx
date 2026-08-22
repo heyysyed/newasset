@@ -155,8 +155,7 @@ export default function LoginPage() {
             <img src={companyLogo} alt="Strongbuilt" className="login-logo" />
           </div>
           <p style={{
-            color: 'var(--text-1)', fontSize: '0.88rem', fontFamily: 'DM Sans',
-            fontWeight: 500, letterSpacing: '0.01em', lineHeight: 1.4, marginTop: 0,
+            color: 'var(--text-1)', letterSpacing: '0.01em', marginTop: 0,
           }}>
             Strongbuilt Constructions Pvt. Ltd.
           </p>
@@ -182,13 +181,13 @@ export default function LoginPage() {
             {error && (
               <div className="login-alert login-alert-error">
                 <AlertCircle size={15} style={{ flexShrink: 0 }} />
-                <p style={{ margin: 0, fontSize: '0.83rem', fontFamily: 'DM Sans' }}>{error}</p>
+                <p style={{ margin: 0, }}>{error}</p>
               </div>
             )}
             {success && (
               <div className="login-alert login-alert-success">
                 <CheckCircle2 size={15} style={{ flexShrink: 0 }} />
-                <p style={{ margin: 0, fontSize: '0.83rem', fontFamily: 'DM Sans' }}>{success}</p>
+                <p style={{ margin: 0, }}>{success}</p>
               </div>
             )}
 
@@ -225,7 +224,7 @@ export default function LoginPage() {
               <>
                 {/* Profile photo */}
                 <div style={{ borderTop: '1px dashed var(--border)', paddingTop: 16 }}>
-                  <label className="lbl" style={{ marginBottom: 8 }}>Profile Photo <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>(optional — must show your face)</span></label>
+                  <label className="lbl" style={{ marginBottom: 8 }}>Profile Photo <span style={{ color: 'var(--text-3)', }}>(optional - must show your face)</span></label>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     {photoPreview
                       ? <img src={photoPreview} alt="Preview"
@@ -234,7 +233,7 @@ export default function LoginPage() {
                           {photoChecking ? <Loader size={18} style={{ color: 'var(--accent)', animation: 'spin 0.8s linear infinite' }} /> : <Camera size={18} style={{ color: 'var(--text-3)' }} />}
                         </div>
                     }
-                    <label className="btn-ghost" style={{ cursor: photoChecking ? 'default' : 'pointer', fontSize: '0.78rem', padding: '7px 14px', display: 'inline-flex', alignItems: 'center', gap: 6, border: '1px dashed var(--border)', borderRadius: 8 }}>
+                    <label className="btn-ghost" style={{ cursor: photoChecking ? 'default' : 'pointer', padding: '7px 14px', display: 'inline-flex', alignItems: 'center', gap: 6, border: '1px dashed var(--border)', borderRadius: 8 }}>
                       <Camera size={13} /> {photoChecking ? 'Checking…' : photoPreview ? 'Change Photo' : 'Upload Photo'}
                       <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoFile} disabled={photoChecking} />
                     </label>
@@ -242,24 +241,24 @@ export default function LoginPage() {
                   {photoError && (
                     <div style={{ marginTop: 7, background: 'var(--red-dim)', border: '1px solid rgba(255,77,77,0.3)', borderRadius: 7, padding: '7px 10px', display: 'flex', alignItems: 'flex-start', gap: 6 }}>
                       <AlertCircle size={12} style={{ color: 'var(--red)', flexShrink: 0, marginTop: 1 }} />
-                      <p style={{ color: 'var(--red)', fontSize: '0.72rem', fontFamily: 'DM Sans', margin: 0 }}>{photoError}</p>
+                      <p style={{ color: 'var(--red)', margin: 0 }}>{photoError}</p>
                     </div>
                   )}
                 </div>
 
                 {/* Signature upload */}
                 <div>
-                  <label className="lbl" style={{ marginBottom: 6 }}>Signature <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>(optional — white/light background)</span></label>
+                  <label className="lbl" style={{ marginBottom: 6 }}>Signature <span style={{ color: 'var(--text-3)', }}>(optional - white/light background)</span></label>
                   <div style={{ border: `1.5px solid ${sigError ? 'var(--red)' : sigUploadPrev ? 'var(--green)' : 'var(--border)'}`, borderRadius: 10, background: 'var(--bg-1)', overflow: 'hidden', transition: 'border-color 0.2s' }}>
                     {sigUploadPrev ? (
                       <div style={{ padding: 12 }}>
                         <img src={sigUploadPrev} alt="Signature" style={{ maxHeight: 70, maxWidth: '100%', display: 'block', margin: '0 auto' }} />
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
-                          <span style={{ fontSize: '0.65rem', fontFamily: 'DM Sans', fontWeight: 600, color: 'var(--green)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <span style={{ color: 'var(--green)', display: 'flex', alignItems: 'center', gap: 4 }}>
                             <CheckCircle2 size={10}/> {sigUploadFile?.name}
                           </span>
                           <button type="button" onClick={() => { setSigUploadFile(null); setSigUploadPrev(null); setSigError('') }} className="btn-ghost"
-                            style={{ padding: '2px 7px', fontSize: '0.62rem', border: 'none', background: 'transparent', fontFamily: 'DM Sans' }}>
+                            style={{ padding: '2px 7px', border: 'none', background: 'transparent', }}>
                             <RotateCcw size={9}/> Remove
                           </button>
                         </div>
@@ -270,10 +269,10 @@ export default function LoginPage() {
                           ? <Loader size={20} style={{ color: 'var(--accent)', animation: 'spin 0.8s linear infinite' }} />
                           : <Upload size={20} style={{ color: 'var(--text-3)' }} />
                         }
-                        <span style={{ fontSize: '0.75rem', fontFamily: 'DM Sans', color: 'var(--text-2)' }}>
+                        <span style={{ color: 'var(--text-2)' }}>
                           {sigChecking ? 'Verifying signature…' : 'Click to upload signature image'}
                         </span>
-                        <span style={{ fontSize: '0.62rem', fontFamily: 'DM Sans', color: 'var(--text-3)' }}>JPG, PNG, WEBP — white/light background required</span>
+                        <span style={{ color: 'var(--text-3)' }}>JPG, PNG, WEBP - white/light background required</span>
                         <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleSigUpload} disabled={sigChecking} />
                       </label>
                     )}
@@ -281,7 +280,7 @@ export default function LoginPage() {
                   {sigError && (
                     <div style={{ marginTop: 6, background: 'var(--red-dim)', border: '1px solid rgba(255,77,77,0.3)', borderRadius: 7, padding: '7px 10px', display: 'flex', alignItems: 'flex-start', gap: 6 }}>
                       <AlertCircle size={12} style={{ color: 'var(--red)', flexShrink: 0, marginTop: 1 }} />
-                      <p style={{ color: 'var(--red)', fontSize: '0.72rem', fontFamily: 'DM Sans', margin: 0 }}>{sigError}</p>
+                      <p style={{ color: 'var(--red)', margin: 0 }}>{sigError}</p>
                     </div>
                   )}
                 </div>
@@ -298,7 +297,7 @@ export default function LoginPage() {
             {tab === 'login' && (
               <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                color: 'var(--text-3)', fontSize: '0.76rem', fontFamily: 'DM Sans', marginTop: 2,
+                color: 'var(--text-3)', marginTop: 2,
               }}>
                 <Shield size={12} />
                 <span>Admin role assignment required after registration</span>
@@ -310,12 +309,10 @@ export default function LoginPage() {
         {/* Footer */}
         <div style={{ textAlign: 'center', marginTop: 28 }}>
           <p style={{
-            color: 'var(--text-2)', fontSize: '0.72rem', fontFamily: 'DM Sans',
-            letterSpacing: '0.04em', textTransform: 'uppercase', fontWeight: 500,
-          }}>
+            color: 'var(--text-2)', letterSpacing: '0.04em', textTransform: 'uppercase', }}>
             Strongbuilt Asset Management System
           </p>
-          <p style={{ color: 'var(--text-3)', fontSize: '0.68rem', fontFamily: 'DM Sans', marginTop: 4 }}>
+          <p style={{ color: 'var(--text-3)', marginTop: 4 }}>
             v2.0
           </p>
         </div>
@@ -343,7 +340,7 @@ export default function LoginPage() {
         }
         .login-bg-orb-1 {
           width: 500px; height: 500px;
-          background: radial-gradient(circle, rgba(79,126,255,0.15) 0%, transparent 70%);
+          background: radial-gradient(circle, var(--accent-soft) 0%, transparent 70%);
           top: -150px; right: -100px;
           animation: loginFloat 20s ease-in-out infinite;
         }
@@ -366,8 +363,8 @@ export default function LoginPage() {
           position: absolute;
           inset: 0;
           background-image:
-            linear-gradient(rgba(79,126,255,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(79,126,255,0.03) 1px, transparent 1px);
+            linear-gradient(var(--accent-soft) 1px, transparent 1px),
+            linear-gradient(90deg, var(--accent-soft) 1px, transparent 1px);
           background-size: 40px 40px;
           pointer-events: none;
         }
@@ -389,7 +386,7 @@ export default function LoginPage() {
           align-items: center;
           justify-content: center;
           box-shadow:
-            8px 8px 28px rgba(79,126,255,0.18),
+            8px 8px 28px var(--accent-soft),
             -4px -4px 16px rgba(255,255,255,0.9),
             inset 0 1px 0 rgba(255,255,255,0.8);
           overflow: hidden;
@@ -409,7 +406,7 @@ export default function LoginPage() {
           border: 2px solid var(--border);
           border-radius: 24px;
           box-shadow:
-            10px 10px 40px rgba(79,126,255,0.12),
+            10px 10px 40px var(--accent-soft),
             -4px -4px 20px rgba(255,255,255,0.8),
             0 1px 0 rgba(255,255,255,0.6) inset;
           position: relative;
@@ -434,7 +431,7 @@ export default function LoginPage() {
           background: none;
           border: none;
           cursor: pointer;
-          font-family: 'Oswald', sans-serif;
+          font-family: var(--font-sans);
           font-weight: 500;
           font-size: 0.88rem;
           letter-spacing: 0.07em;
@@ -462,7 +459,7 @@ export default function LoginPage() {
         }
         .login-alert-error {
           background: var(--red-dim);
-          border: 1px solid rgba(239,68,68,0.2);
+          border: 1px solid var(--status-danger-soft);
           color: var(--red);
         }
         .login-alert-success {
@@ -486,10 +483,10 @@ export default function LoginPage() {
           border: none;
           background: linear-gradient(135deg, var(--accent) 0%, #6b96ff 50%, #5a8aff 100%);
           color: white;
-          font-family: 'DM Sans', sans-serif;
+          font-family: var(--font-sans);
           transition: all 0.3s ease;
           box-shadow:
-            0 4px 16px rgba(79,126,255,0.35),
+            0 4px 16px var(--accent-soft),
             0 1px 0 rgba(255,255,255,0.2) inset;
           min-height: 48px;
           margin-top: 6px;
@@ -509,7 +506,7 @@ export default function LoginPage() {
         .login-submit-btn:hover:not(:disabled) {
           transform: translateY(-2px);
           box-shadow:
-            0 8px 28px rgba(79,126,255,0.45),
+            0 8px 28px var(--accent-soft),
             0 1px 0 rgba(255,255,255,0.2) inset;
         }
         .login-submit-btn:active:not(:disabled) {

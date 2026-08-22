@@ -6,7 +6,7 @@ export default function SignaturePad({ onSave, onClear, label = 'Sign here' }) {
   const sigCanvas = useRef(null)
   const [captured, setCaptured] = useState(false)
 
-  // Auto-save every time the user lifts the pen — no separate Save button needed
+  // Auto-save every time the user lifts the pen - no separate Save button needed
   const handleEnd = () => {
     if (!sigCanvas.current || sigCanvas.current.isEmpty()) return
     const dataURL = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png')
@@ -45,10 +45,9 @@ export default function SignaturePad({ onSave, onClear, label = 'Sign here' }) {
             position: 'absolute', top: '50%', left: '50%',
             transform: 'translate(-50%, -50%)',
             pointerEvents: 'none', userSelect: 'none',
-            fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, opacity: 0.5,
+            color: 'var(--text-3)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, opacity: 0.5,
           }}>
-            <span style={{ fontSize: '1.4rem' }}>✍️</span>
+            <span >✍️</span>
             Sign here
           </div>
         )}
@@ -62,16 +61,16 @@ export default function SignaturePad({ onSave, onClear, label = 'Sign here' }) {
           borderTop: '1px solid var(--border)',
         }}>
           {captured
-            ? <span style={{ fontSize: '0.68rem', color: 'var(--green)', fontFamily: 'DM Sans', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+            ? <span style={{ color: 'var(--green)', display: 'flex', alignItems: 'center', gap: 4 }}>
                 <CheckCircle2 size={11} /> Signature captured
               </span>
-            : <span style={{ fontSize: '0.68rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>Draw your signature above</span>
+            : <span style={{ color: 'var(--text-3)', }}>Draw your signature above</span>
           }
           <button
             type="button"
             onClick={clear}
             className="btn-ghost"
-            style={{ padding: '3px 9px', fontSize: '0.68rem', fontFamily: 'DM Sans', border: 'none', background: 'transparent' }}
+            style={{ padding: '3px 9px', border: 'none', background: 'transparent' }}
           >
             <RotateCcw size={11} /> Clear
           </button>

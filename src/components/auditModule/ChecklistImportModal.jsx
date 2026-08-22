@@ -158,8 +158,8 @@ export default function ChecklistImportModal({ onImport, onClose }) {
   }
 
   const FREQ_COLORS = {
-    daily: { bg: 'rgba(239,68,68,0.1)', color: 'var(--red)' },
-    weekly: { bg: 'rgba(245,158,11,0.1)', color: 'var(--amber)' },
+    daily: { bg: 'var(--status-danger-soft)', color: 'var(--red)' },
+    weekly: { bg: 'var(--status-warning-soft)', color: 'var(--amber)' },
     monthly: { bg: 'rgba(14,165,233,0.1)', color: 'var(--accent)' },
   }
 
@@ -173,8 +173,8 @@ export default function ChecklistImportModal({ onImport, onClose }) {
               <FileSpreadsheet size={18} />
             </div>
             <div>
-              <h2 className="font-display" style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.04em', margin: 0 }}>IMPORT CHECKLISTS</h2>
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>Upload Excel with maintenance checklists</span>
+              <h2 className="font-display" style={{ letterSpacing: '0.04em', margin: 0 }}>IMPORT CHECKLISTS</h2>
+              <span style={{ color: 'var(--text-3)', }}>Upload Excel with maintenance checklists</span>
             </div>
           </div>
           <button onClick={onClose} className="btn-ghost" style={{ padding: 6 }}><X size={16} /></button>
@@ -183,8 +183,7 @@ export default function ChecklistImportModal({ onImport, onClose }) {
         <div style={{ padding: 20, overflowY: 'auto', maxHeight: 'calc(85vh - 140px)' }}>
           {/* Download template */}
           <button onClick={downloadTemplate} className="btn-ghost" style={{
-            width: '100%', padding: '10px 14px', marginBottom: 14, fontSize: '0.78rem',
-            border: '1px dashed var(--border)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            width: '100%', padding: '10px 14px', marginBottom: 14, border: '1px dashed var(--border)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
           }}>
             <Download size={14} style={{ color: 'var(--accent)' }} /> Download Excel Template
           </button>
@@ -192,8 +191,7 @@ export default function ChecklistImportModal({ onImport, onClose }) {
           {/* File input */}
           <input type="file" ref={fileRef} accept=".xlsx,.xls,.csv" onChange={handleFile} style={{ display: 'none' }} />
           <button onClick={() => fileRef.current?.click()} className="btn-ghost" style={{
-            width: '100%', padding: '24px', marginBottom: 14, fontSize: '0.82rem',
-            border: '2px dashed var(--border)', borderRadius: 12, display: 'flex', flexDirection: 'column',
+            width: '100%', padding: '24px', marginBottom: 14, border: '2px dashed var(--border)', borderRadius: 12, display: 'flex', flexDirection: 'column',
             alignItems: 'center', gap: 8, color: 'var(--text-2)',
           }}>
             <Upload size={24} style={{ color: 'var(--accent)' }} />
@@ -201,9 +199,9 @@ export default function ChecklistImportModal({ onImport, onClose }) {
           </button>
 
           {error && (
-            <div style={{ padding: 10, borderRadius: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ padding: 10, borderRadius: 8, background: 'var(--status-danger-soft)', border: '1px solid var(--status-danger-soft)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
               <AlertCircle size={14} style={{ color: 'var(--red)' }} />
-              <span style={{ fontSize: '0.75rem', color: 'var(--red)', fontFamily: 'DM Sans' }}>{error}</span>
+              <span style={{ color: 'var(--red)', }}>{error}</span>
             </div>
           )}
 
@@ -219,15 +217,15 @@ export default function ChecklistImportModal({ onImport, onClose }) {
                     background: 'var(--bg-2)', marginBottom: 8,
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <span style={{ fontFamily: 'Oswald', fontWeight: 600, fontSize: '0.85rem' }}>{cl.name}</span>
+                      <span >{cl.name}</span>
                       <span style={{
-                        fontSize: '0.62rem', padding: '2px 8px', borderRadius: 10,
-                        fontFamily: 'DM Sans', fontWeight: 600, textTransform: 'uppercase',
+                        padding: '2px 8px', borderRadius: 10,
+                        textTransform: 'uppercase',
                         background: fc.bg, color: fc.color,
                       }}>{cl.frequency}</span>
                     </div>
                     {cl.category && (
-                      <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>Category: {cl.category}</span>
+                      <span style={{ color: 'var(--text-3)', }}>Category: {cl.category}</span>
                     )}
                     {(() => {
                       const sections = [...new Set(cl.items.map(it => it.section).filter(Boolean))]
@@ -235,14 +233,13 @@ export default function ChecklistImportModal({ onImport, onClose }) {
                         <div style={{ marginTop: 6, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                           {sections.map((sec, si) => (
                             <span key={si} style={{
-                              fontSize: '0.62rem', padding: '2px 7px', borderRadius: 6,
-                              background: 'var(--bg-3)', color: 'var(--text-3)', fontFamily: 'DM Sans',
-                            }}>{sec} ({cl.items.filter(it => it.section === sec).length})</span>
+                              padding: '2px 7px', borderRadius: 6,
+                              background: 'var(--bg-3)', color: 'var(--text-3)', }}>{sec} ({cl.items.filter(it => it.section === sec).length})</span>
                           ))}
                         </div>
                       ) : null
                     })()}
-                    <div style={{ marginTop: 6, fontSize: '0.72rem', color: 'var(--text-2)', fontFamily: 'DM Sans' }}>
+                    <div style={{ marginTop: 6, color: 'var(--text-2)', }}>
                       {cl.items.length} inspection items · Pass / Fail / N/A format
                     </div>
                   </div>
@@ -257,8 +254,8 @@ export default function ChecklistImportModal({ onImport, onClose }) {
           padding: '14px 20px', borderTop: '1px solid var(--border)', background: 'var(--bg-2)',
           display: 'flex', gap: 8, justifyContent: 'flex-end',
         }}>
-          <button onClick={onClose} className="btn-ghost" style={{ fontSize: '0.82rem' }}>Cancel</button>
-          <button onClick={handleImport} disabled={!parsed.length || importing} className="btn-primary" style={{ fontSize: '0.82rem' }}>
+          <button onClick={onClose} className="btn-ghost" >Cancel</button>
+          <button onClick={handleImport} disabled={!parsed.length || importing} className="btn-primary" >
             {importing ? 'Importing...' : <><CheckCircle2 size={13} /> Import {parsed.length} Checklist(s)</>}
           </button>
         </div>

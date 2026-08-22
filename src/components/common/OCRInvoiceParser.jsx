@@ -39,18 +39,18 @@ export default function OCRInvoiceParser({ onParsedData }) {
   }
 
   return (
-    <div style={{ padding: 16, background: 'rgba(79,126,255,0.05)', borderRadius: 14, border: '1px dashed rgba(79,126,255,0.3)', marginBottom: 16 }}>
+    <div style={{ padding: 16, background: 'var(--accent-soft)', borderRadius: 14, border: '1px dashed var(--accent-soft)', marginBottom: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Sparkles size={16} color="var(--accent)" />
-          <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-0)', fontFamily: 'DM Sans' }}>
+          <span style={{ color: 'var(--text-0)', }}>
             AI OCR Document / Receipt Auto-Fill
           </span>
         </div>
         {loading && <Loader2 size={16} className="spin" color="var(--accent)" />}
       </div>
 
-      <p style={{ margin: '0 0 12px 0', fontSize: '0.78rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>
+      <p style={{ margin: '0 0 12px 0', color: 'var(--text-3)', }}>
         Upload a purchase invoice, receipt, or equipment nameplate photo to auto-extract asset details.
       </p>
 
@@ -64,9 +64,7 @@ export default function OCRInvoiceParser({ onParsedData }) {
           borderRadius: 8, 
           border: '1px solid var(--border)', 
           cursor: 'pointer',
-          fontSize: '0.82rem',
-          fontWeight: 600
-        }}
+          }}
       >
         <Upload size={14} color="var(--accent)" /> Upload Invoice / Photo
         <input type="file" accept="image/*,.pdf" onChange={handleFileUpload} style={{ display: 'none' }} />
@@ -76,11 +74,11 @@ export default function OCRInvoiceParser({ onParsedData }) {
         <div style={{ marginTop: 12, padding: 10, background: 'var(--bg-2)', borderRadius: 10, border: '1px solid var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <CheckCircle2 size={16} color="var(--green)" />
-            <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-0)' }}>
+            <span style={{ color: 'var(--text-0)' }}>
               Extracted: {extractedInfo.model} • ₹{extractedInfo.purchase_cost.toLocaleString('en-IN')}
             </span>
           </div>
-          <span style={{ fontSize: '0.7rem', color: 'var(--green)', fontWeight: 700 }}>Auto-Filled</span>
+          <span style={{ color: 'var(--green)', }}>Auto-Filled</span>
         </div>
       )}
     </div>

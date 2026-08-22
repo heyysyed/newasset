@@ -43,10 +43,10 @@ export default function InventoryParetoChart() {
     if (!active || !payload?.length) return null
     const item = payload[0].payload
     return (
-      <div style={{ background: '#0f172a', color: '#fff', padding: '8px 12px', borderRadius: 8, fontSize: '0.8rem', fontFamily: 'DM Sans', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
-        <div style={{ fontWeight: 700, color: '#60a5fa' }}>{item.name}</div>
-        <div>Stock Value: <strong style={{ color: '#34d399', fontFamily: 'DM Mono' }}>{formatCurrency(item.value)}</strong></div>
-        <div>Cumulative Share: <strong style={{ color: '#fbbf24', fontFamily: 'DM Mono' }}>{item.cumulativePct}%</strong></div>
+      <div style={{ background: '#0f172a', color: '#fff', padding: '8px 12px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+        <div style={{ color: 'var(--status-info)' }}>{item.name}</div>
+        <div>Stock Value: <strong style={{ color: '#34d399', }}>{formatCurrency(item.value)}</strong></div>
+        <div>Cumulative Share: <strong style={{ color: '#fbbf24', }}>{item.cumulativePct}%</strong></div>
       </div>
     )
   }
@@ -55,10 +55,10 @@ export default function InventoryParetoChart() {
     <div className="card" style={{ padding: 20, background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
         <div>
-          <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <h3 style={{ margin: 0, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Inventory Pareto (80/20) Analysis
           </h3>
-          <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>Bar = Category Value (₹) | Line = Cumulative %</p>
+          <p style={{ margin: 0, color: '#64748b' }}>Bar = Category Value (₹) | Line = Cumulative %</p>
         </div>
         <Layers size={18} color="#7c3aed" />
       </div>
@@ -71,7 +71,7 @@ export default function InventoryParetoChart() {
             <YAxis yAxisId="left" stroke="#64748b" fontSize={10} tickLine={false} tickFormatter={(v) => `₹${(v/1000).toFixed(0)}k`} />
             <YAxis yAxisId="right" orientation="right" domain={[0, 100]} stroke="#7c3aed" fontSize={10} tickLine={false} tickFormatter={(v) => `${v}%`} />
             <Tooltip content={<CustomTooltip />} />
-            <Bar yAxisId="left" dataKey="value" fill="#2563eb" radius={[4, 4, 0, 0]} />
+            <Bar yAxisId="left" dataKey="value" fill='var(--accent)' radius={[4, 4, 0, 0]} />
             <Line yAxisId="right" type="monotone" dataKey="cumulativePct" stroke="#7c3aed" strokeWidth={2} dot={{ r: 3, fill: '#7c3aed' }} />
           </ComposedChart>
         </ResponsiveContainer>

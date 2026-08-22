@@ -3,13 +3,13 @@ import { Camera, RotateCcw, Check, X, UserCircle2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 
 /**
- * SelfieCapture — opens device camera, captures a photo, uploads to Supabase Storage.
+ * SelfieCapture - opens device camera, captures a photo, uploads to Supabase Storage.
  * Optional: save the photo as the user's profile picture.
  *
  * Props:
- *   userId       — logged-in user id (for profile photo save)
- *   onCapture(url) — called when photo is confirmed & uploaded
- *   onClear()    — called when selfie is removed
+ *   userId       - logged-in user id (for profile photo save)
+ *   onCapture(url) - called when photo is confirmed & uploaded
+ *   onClear()    - called when selfie is removed
  */
 export default function SelfieCapture({ userId, onCapture, onClear }) {
   const videoRef  = useRef(null)
@@ -123,15 +123,15 @@ export default function SelfieCapture({ userId, onCapture, onClear }) {
           style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--green)', boxShadow: '0 2px 8px rgba(0,185,107,0.25)' }}
         />
         <div>
-          <div style={{ fontSize: '0.72rem', fontFamily: 'DM Sans', fontWeight: 700, color: 'var(--green)', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div style={{ color: 'var(--green)', display: 'flex', alignItems: 'center', gap: 4 }}>
             <Check size={12} /> Selfie verified
           </div>
           {saveToProfile && (
-            <div style={{ fontSize: '0.65rem', fontFamily: 'DM Sans', color: 'var(--text-3)', marginTop: 1 }}>Saved to profile</div>
+            <div style={{ color: 'var(--text-3)', marginTop: 1 }}>Saved to profile</div>
           )}
         </div>
         <button type="button" onClick={clear} className="btn-ghost"
-          style={{ padding: '4px 9px', fontSize: '0.68rem', color: 'var(--red)', marginLeft: 'auto' }}>
+          style={{ padding: '4px 9px', color: 'var(--red)', marginLeft: 'auto' }}>
           <X size={11} /> Remove
         </button>
       </div>
@@ -158,20 +158,20 @@ export default function SelfieCapture({ userId, onCapture, onClear }) {
         <label style={{ display: 'flex', alignItems: 'center', gap: 7, cursor: 'pointer', marginBottom: 10 }}>
           <input type="checkbox" checked={saveToProfile} onChange={e => setSaveToProfile(e.target.checked)}
             style={{ accentColor: 'var(--accent)', width: 13, height: 13 }} />
-          <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans', color: 'var(--text-1)' }}>
+          <span style={{ color: 'var(--text-1)' }}>
             Save as my profile photo
           </span>
         </label>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button type="button" onClick={retake} className="btn-ghost" style={{ fontSize: '0.75rem' }}>
+          <button type="button" onClick={retake} className="btn-ghost" >
             <RotateCcw size={12} /> Retake
           </button>
           <button type="button" onClick={confirmPhoto} disabled={uploading}
-            className="btn-primary" style={{ fontSize: '0.75rem' }}>
+            className="btn-primary" >
             <Check size={12} /> {uploading ? 'Uploading…' : 'Use this photo'}
           </button>
         </div>
-        {error && <p style={{ fontSize: '0.68rem', color: 'var(--red)', fontFamily: 'DM Sans', marginTop: 6 }}>{error}</p>}
+        {error && <p style={{ color: 'var(--red)', marginTop: 6 }}>{error}</p>}
       </div>
     )
   }
@@ -194,17 +194,17 @@ export default function SelfieCapture({ userId, onCapture, onClear }) {
             <div style={{ width: '55%', height: '75%', borderRadius: '50%', border: '2px dashed rgba(255,255,255,0.5)' }} />
           </div>
           <div style={{ position: 'absolute', bottom: 8, left: 0, right: 0, textAlign: 'center' }}>
-            <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.7)', fontFamily: 'DM Sans', background: 'rgba(0,0,0,0.4)', padding: '2px 8px', borderRadius: 10 }}>
+            <span style={{ color: 'rgba(255,255,255,0.7)', background: 'rgba(0,0,0,0.4)', padding: '2px 8px', borderRadius: 10 }}>
               Centre your face in the oval
             </span>
           </div>
         </div>
         <canvas ref={canvasRef} style={{ display: 'none' }} />
         <div style={{ display: 'flex', gap: 8 }}>
-          <button type="button" onClick={capture} className="btn-primary" style={{ fontSize: '0.78rem', flex: 1 }}>
+          <button type="button" onClick={capture} className="btn-primary" style={{ flex: 1 }}>
             <Camera size={13} /> Capture
           </button>
-          <button type="button" onClick={clear} className="btn-ghost" style={{ fontSize: '0.78rem' }}>
+          <button type="button" onClick={clear} className="btn-ghost" >
             <X size={13} /> Cancel
           </button>
         </div>
@@ -216,12 +216,12 @@ export default function SelfieCapture({ userId, onCapture, onClear }) {
   return (
     <div>
       <button type="button" onClick={startCamera} className="btn-ghost"
-        style={{ fontSize: '0.78rem', padding: '7px 14px', display: 'flex', alignItems: 'center', gap: 7, width: '100%', justifyContent: 'center', border: '1px dashed var(--border)', borderRadius: 10 }}>
+        style={{ padding: '7px 14px', display: 'flex', alignItems: 'center', gap: 7, width: '100%', justifyContent: 'center', border: '1px dashed var(--border)', borderRadius: 10 }}>
         <Camera size={14} style={{ color: 'var(--cyan)' }} />
-        <span style={{ fontFamily: 'DM Sans' }}>Add Selfie Verification</span>
-        <span style={{ fontSize: '0.65rem', color: 'var(--text-3)', marginLeft: 4 }}>(optional · enhanced proof)</span>
+        <span >Add Selfie Verification</span>
+        <span style={{ color: 'var(--text-3)', marginLeft: 4 }}>(optional · enhanced proof)</span>
       </button>
-      {error && <p style={{ fontSize: '0.68rem', color: 'var(--red)', fontFamily: 'DM Sans', marginTop: 6 }}>{error}</p>}
+      {error && <p style={{ color: 'var(--red)', marginTop: 6 }}>{error}</p>}
     </div>
   )
 }

@@ -16,10 +16,12 @@ import { useAuth } from '../context/AuthContext'
 import QRScanner from '../components/checklist/QRScanner'
 import { formatCurrency } from '../lib/depreciation'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
+import { useIsMobile } from '../hooks/useBreakpoint'
+import MobileMaintenancePage from '../components/mobile/MobileMaintenancePage'
 
 // ── Constants ──────────────────────────────────────────────────────────────
 const SLA_HOURS = { critical: 4, high: 24, normal: 72, low: 168 }
-const CHART_COLORS = ['#4f7eff', '#34d399', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#f97316']
+const CHART_COLORS = ['#4f7eff', '#34d399', 'var(--status-warning)', 'var(--status-danger)', 'var(--status-special)', '#06b6d4', '#ec4899', '#f97316']
 const FREQ_MAP = { daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly', quarterly: 'Quarterly', yearly: 'Yearly', one_time: 'One-time' }
 
 // ── Reusable Components ────────────────────────────────────────────────────
@@ -34,19 +36,19 @@ const TabBtn = ({ active, onClick, icon: Icon, label, count, badge }) => (
 
 const StatusBadge = ({ status }) => {
   const S = {
-    open: { color: 'var(--red)', bg: 'rgba(239,68,68,0.1)', label: 'Open' },
+    open: { color: 'var(--red)', bg: 'var(--status-danger-soft)', label: 'Open' },
     assigned: { color: 'var(--cyan)', bg: 'rgba(6,182,212,0.1)', label: 'Assigned' },
     working: { color: 'var(--accent)', bg: 'rgba(14,165,233,0.1)', label: 'In Progress' },
     resolved: { color: 'var(--green)', bg: 'rgba(34,197,94,0.1)', label: 'Resolved' },
     scheduled: { color: 'var(--accent)', bg: 'rgba(14,165,233,0.1)', label: 'Scheduled' },
-    overdue: { color: 'var(--red)', bg: 'rgba(239,68,68,0.08)', label: 'Overdue' },
+    overdue: { color: 'var(--red)', bg: 'var(--status-danger-soft)', label: 'Overdue' },
   }[status?.toLowerCase()] || { color: 'var(--text-3)', bg: 'var(--bg-3)', label: status }
-  return <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: S.color, background: S.bg, padding: '2px 8px', borderRadius: 4, whiteSpace: 'nowrap', border: `1px solid ${S.color}20` }}>{S.label}</span>
+  return <span style={{ textTransform: 'uppercase', letterSpacing: '0.05em', color: S.color, background: S.bg, padding: '2px 8px', borderRadius: 4, whiteSpace: 'nowrap', border: `1px solid ${S.color}20` }}>{S.label}</span>
 }
 
 const PriorityBadge = ({ level }) => {
-  const P = { critical: { color: '#dc2626', label: 'Critical' }, high: { color: 'var(--red)', label: 'High' }, medium: { color: 'var(--accent)', label: 'Medium' }, normal: { color: 'var(--accent)', label: 'Normal' }, low: { color: 'var(--green)', label: 'Low' } }[level?.toLowerCase()] || { color: 'var(--text-3)', label: level }
-  return <span style={{ color: P.color, fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{P.label}</span>
+  const P = { critical: { color: 'var(--status-danger)', label: 'Critical' }, high: { color: 'var(--red)', label: 'High' }, medium: { color: 'var(--accent)', label: 'Medium' }, normal: { color: 'var(--accent)', label: 'Normal' }, low: { color: 'var(--green)', label: 'Low' } }[level?.toLowerCase()] || { color: 'var(--text-3)', label: level }
+  return <span style={{ color: P.color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{P.label}</span>
 }
 
 const SLAIndicator = ({ sla_due_at, status, resolved_at }) => {
@@ -55,23 +57,23 @@ const SLAIndicator = ({ sla_due_at, status, resolved_at }) => {
   const due = new Date(sla_due_at)
   if (status === 'resolved') {
     const met = resolved_at ? new Date(resolved_at) <= due : false
-    return <span style={{ fontSize: '0.62rem', fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: met ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: met ? 'var(--green)' : 'var(--red)' }}>{met ? 'SLA MET' : 'SLA BREACHED'}</span>
+    return <span style={{ padding: '2px 6px', borderRadius: 4, background: met ? 'rgba(34,197,94,0.1)' : 'var(--status-danger-soft)', color: met ? 'var(--green)' : 'var(--red)' }}>{met ? 'SLA MET' : 'SLA BREACHED'}</span>
   }
   const remaining = due - now
-  if (remaining <= 0) return <span style={{ fontSize: '0.62rem', fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: 'rgba(239,68,68,0.1)', color: 'var(--red)', animation: 'pulse 2s infinite' }}>SLA BREACHED</span>
+  if (remaining <= 0) return <span style={{ padding: '2px 6px', borderRadius: 4, background: 'var(--status-danger-soft)', color: 'var(--red)', animation: 'pulse 2s infinite' }}>SLA BREACHED</span>
   const hrs = Math.floor(remaining / 3600000)
-  const color = hrs < 4 ? 'var(--red)' : hrs < 12 ? '#f59e0b' : 'var(--text-3)'
-  return <span style={{ fontSize: '0.62rem', fontWeight: 600, color }}>{hrs}h left</span>
+  const color = hrs < 4 ? 'var(--red)' : hrs < 12 ? 'var(--status-warning)' : 'var(--text-3)'
+  return <span style={{ color }}>{hrs}h left</span>
 }
 
 const WarrantyBadge = ({ warrantyExpiry }) => {
   if (!warrantyExpiry) return null
   const active = new Date(warrantyExpiry) > new Date()
-  return <span style={{ fontSize: '0.62rem', fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: active ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.05)', color: active ? 'var(--green)' : 'var(--text-3)', border: `1px solid ${active ? 'var(--green)' : 'var(--border)'}30` }}>{active ? `Warranty until ${new Date(warrantyExpiry).toLocaleDateString()}` : 'Out of Warranty'}</span>
+  return <span style={{ padding: '2px 6px', borderRadius: 4, background: active ? 'rgba(34,197,94,0.08)' : 'var(--status-danger-soft)', color: active ? 'var(--green)' : 'var(--text-3)', border: `1px solid ${active ? 'var(--green)' : 'var(--border)'}30` }}>{active ? `Warranty until ${new Date(warrantyExpiry).toLocaleDateString()}` : 'Out of Warranty'}</span>
 }
 
 function formatDowntime(start, end) {
-  if (!start) return '—'
+  if (!start) return '-'
   const ms = (end ? new Date(end) : new Date()) - new Date(start)
   const hrs = Math.floor(ms / 3600000)
   const mins = Math.floor((ms % 3600000) / 60000)
@@ -82,7 +84,7 @@ function formatDowntime(start, end) {
 function Toast({ message, type, onDone }) {
   useEffect(() => { const t = setTimeout(onDone, 3000); return () => clearTimeout(t) }, [onDone])
   const bg = type === 'success' ? 'var(--green)' : type === 'error' ? 'var(--red)' : 'var(--accent)'
-  return <div style={{ position: 'fixed', top: 24, right: 24, zIndex: 9999, background: bg, color: 'white', padding: '12px 20px', borderRadius: 10, fontFamily: 'DM Sans', fontWeight: 600, fontSize: '0.85rem', boxShadow: '0 8px 32px rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', gap: 10, animation: 'slideIn 0.3s ease' }}>
+  return <div style={{ position: 'fixed', top: 24, right: 24, zIndex: 9999, background: bg, color: 'white', padding: '12px 20px', borderRadius: 10, boxShadow: '0 8px 32px rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', gap: 10, animation: 'slideIn 0.3s ease' }}>
     {type === 'success' ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}{message}
   </div>
 }
@@ -90,8 +92,9 @@ function Toast({ message, type, onDone }) {
 // ── Main Page ──────────────────────────────────────────────────────────────
 
 export default function MaintenancePage() {
-  const { user, isAdmin, currentCompany } = useAuth()
+  const { user, isAdmin, currentCompany, isMod, can } = useAuth()
   const cc = currentCompany?.code
+  const isMobile = useIsMobile()
   const [activeTab, setActiveTab] = useState('dashboard')
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -402,8 +405,8 @@ export default function MaintenancePage() {
 
   function generateWorkOrder(t) {
     const asset = t.assets || {}
-    const html = `<!DOCTYPE html><html><head><title>Work Order — ${t.ticket_no}</title>
-    <style>body{font-family:'Segoe UI',sans-serif;padding:40px;color:#1a1a2e;max-width:800px;margin:0 auto}
+    const html = `<!DOCTYPE html><html><head><title>Work Order - ${t.ticket_no}</title>
+    <style>body{padding:40px;color:#1a1a2e;max-width:800px;margin:0 auto}
     h1{font-size:1.5rem;margin-bottom:0}h2{font-size:1rem;margin-top:24px;border-bottom:2px solid #4f7eff;padding-bottom:4px;color:#4f7eff}
     .meta{color:#666;font-size:0.82rem}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
     .field{padding:8px 12px;background:#f8fafc;border-radius:6px;border:1px solid #e5e7eb}
@@ -413,19 +416,19 @@ export default function MaintenancePage() {
     @media print{body{padding:20px}}</style></head><body>
     <div style="display:flex;justify-content:space-between;align-items:flex-start">
       <div><h1>WORK ORDER</h1><p class="meta">${t.ticket_no} · Generated ${new Date().toLocaleDateString()}</p></div>
-      <div style="text-align:right"><div style="font-size:0.72rem;color:#666">Priority</div><div style="font-size:1.2rem;font-weight:700;color:${t.priority === 'high' || t.priority === 'critical' ? '#dc2626' : '#4f7eff'}">${(t.priority || 'normal').toUpperCase()}</div></div>
+      <div style="text-align:right"><div style="font-size:0.72rem;color:#666">Priority</div><div style="font-size:1.2rem;font-weight:700;color:${t.priority === 'high' || t.priority === 'critical' ? 'var(--status-danger)' : '#4f7eff'}">${(t.priority || 'normal').toUpperCase()}</div></div>
     </div>
     <h2>Asset Details</h2>
     <div class="grid">
-      <div class="field"><div class="field-label">Asset Name</div><div class="field-value">${asset.asset_name || '—'}</div></div>
-      <div class="field"><div class="field-label">Asset Code</div><div class="field-value">${asset.asset_code || '—'}</div></div>
-      <div class="field"><div class="field-label">Site</div><div class="field-value">${asset.site || '—'}</div></div>
-      <div class="field"><div class="field-label">Category</div><div class="field-value">${asset.category || '—'}</div></div>
+      <div class="field"><div class="field-label">Asset Name</div><div class="field-value">${asset.asset_name || '-'}</div></div>
+      <div class="field"><div class="field-label">Asset Code</div><div class="field-value">${asset.asset_code || '-'}</div></div>
+      <div class="field"><div class="field-label">Site</div><div class="field-value">${asset.site || '-'}</div></div>
+      <div class="field"><div class="field-label">Category</div><div class="field-value">${asset.category || '-'}</div></div>
     </div>
     <h2>Issue Details</h2>
     <div class="grid">
-      <div class="field"><div class="field-label">Type</div><div class="field-value">${t.ticket_type || '—'}</div></div>
-      <div class="field"><div class="field-label">Status</div><div class="field-value">${t.status || '—'}</div></div>
+      <div class="field"><div class="field-label">Type</div><div class="field-value">${t.ticket_type || '-'}</div></div>
+      <div class="field"><div class="field-label">Status</div><div class="field-value">${t.status || '-'}</div></div>
     </div>
     <div class="field" style="margin-top:12px"><div class="field-label">Title</div><div class="field-value">${t.title}</div></div>
     <div class="field" style="margin-top:8px"><div class="field-label">Description</div><div class="field-value">${t.description || 'No description provided'}</div></div>
@@ -510,24 +513,24 @@ export default function MaintenancePage() {
         { label: 'Overdue Tasks', val: overdueSchedules.length, color: 'var(--red)' },
         { label: 'SLA Breaches', val: slaBreached.length, color: slaBreached.length > 0 ? 'var(--red)' : 'var(--green)' },
         { label: 'Total Cost', val: formatCurrency(totalCost), color: 'var(--text-0)' },
-        { label: 'Avg Downtime', val: (() => { const resolved = tickets.filter(t => t.downtime_start && t.downtime_end); if (!resolved.length) return '—'; const avg = resolved.reduce((a, t) => a + (new Date(t.downtime_end) - new Date(t.downtime_start)), 0) / resolved.length; return `${Math.round(avg / 3600000)}h` })(), color: 'var(--accent)' },
+        { label: 'Avg Downtime', val: (() => { const resolved = tickets.filter(t => t.downtime_start && t.downtime_end); if (!resolved.length) return '-'; const avg = resolved.reduce((a, t) => a + (new Date(t.downtime_end) - new Date(t.downtime_start)), 0) / resolved.length; return `${Math.round(avg / 3600000)}h` })(), color: 'var(--accent)' },
       ].map(stat => (
         <div key={stat.label} className="card" style={{ padding: 20 }}>
-          <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, color: 'var(--text-3)' }}>{stat.label}</div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 700, marginTop: 4, color: stat.color, fontFamily: 'Oswald' }}>{stat.val}</div>
+          <div style={{ textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-3)' }}>{stat.label}</div>
+          <div style={{ marginTop: 4, color: stat.color }}>{stat.val}</div>
         </div>
       ))}
 
       {/* Urgent tickets */}
       <div className="card" style={{ gridColumn: '1 / -1', padding: 20 }}>
-        <h3 style={{ fontFamily: 'Oswald', textTransform: 'uppercase', fontSize: '0.85rem', marginBottom: 16 }}>Urgent Tickets</h3>
+        <h3 style={{ textTransform: 'uppercase', marginBottom: 16 }}>Urgent Tickets</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {tickets.filter(t => (t.priority === 'high' || t.priority === 'critical') && t.status !== 'resolved').slice(0, 5).map(t => (
-            <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: 'rgba(239,68,68,0.04)', borderRadius: 8, border: '1px solid rgba(239,68,68,0.1)', cursor: 'pointer' }} onClick={() => openTicketDetail(t)}>
+            <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: 'var(--status-danger-soft)', borderRadius: 8, border: '1px solid var(--status-danger-soft)', cursor: 'pointer' }} onClick={() => openTicketDetail(t)}>
               <AlertTriangle size={14} style={{ color: 'var(--red)', flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: '0.82rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.assets?.asset_name} — {t.title}</div>
-                <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', display: 'flex', gap: 10 }}>
+                <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.assets?.asset_name} - {t.title}</div>
+                <div style={{ color: 'var(--text-3)', display: 'flex', gap: 10 }}>
                   <span>{t.ticket_no}</span>
                   <SLAIndicator sla_due_at={t.sla_due_at} status={t.status} resolved_at={t.resolved_at} />
                 </div>
@@ -535,26 +538,26 @@ export default function MaintenancePage() {
               <StatusBadge status={t.status} />
             </div>
           ))}
-          {tickets.filter(t => (t.priority === 'high' || t.priority === 'critical') && t.status !== 'resolved').length === 0 && <div style={{ color: 'var(--text-3)', fontSize: '0.8rem' }}>No urgent tickets!</div>}
+          {tickets.filter(t => (t.priority === 'high' || t.priority === 'critical') && t.status !== 'resolved').length === 0 && <div style={{ color: 'var(--text-3)', }}>No urgent tickets!</div>}
         </div>
       </div>
 
       {/* Upcoming schedules */}
       <div className="card" style={{ gridColumn: '1 / -1', padding: 20 }}>
-        <h3 style={{ fontFamily: 'Oswald', textTransform: 'uppercase', fontSize: '0.85rem', marginBottom: 16 }}>Upcoming Schedules</h3>
+        <h3 style={{ textTransform: 'uppercase', marginBottom: 16 }}>Upcoming Schedules</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {schedules.slice(0, 5).map(s => {
             const overdue = new Date(s.next_due) < new Date()
             return (
               <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ width: 32, height: 32, borderRadius: 6, background: overdue ? 'rgba(239,68,68,0.08)' : 'var(--bg-3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 32, height: 32, borderRadius: 6, background: overdue ? 'var(--status-danger-soft)' : 'var(--bg-3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Calendar size={14} style={{ color: overdue ? 'var(--red)' : 'var(--text-3)' }} />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '0.82rem', fontWeight: 600 }}>{s.assets?.asset_name}</div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>{s.title}</div>
+                  <div >{s.assets?.asset_name}</div>
+                  <div style={{ color: 'var(--text-3)' }}>{s.title}</div>
                 </div>
-                <div style={{ fontSize: '0.75rem', fontFamily: 'DM Mono', fontWeight: 600, color: overdue ? 'var(--red)' : 'var(--text-3)' }}>{new Date(s.next_due).toLocaleDateString()}</div>
+                <div style={{ color: overdue ? 'var(--red)' : 'var(--text-3)' }}>{new Date(s.next_due).toLocaleDateString()}</div>
               </div>
             )
           })}
@@ -569,25 +572,25 @@ export default function MaintenancePage() {
     <div>
       {/* Filters */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8, marginBottom: 14, alignItems: 'center' }}>
-        <select className="sel" value={fStatus} onChange={e => setFStatus(e.target.value)} style={{ height: 36, fontSize: '0.78rem' }}>
+        <select className="sel" value={fStatus} onChange={e => setFStatus(e.target.value)} style={{ height: 36, }}>
           <option value="all">All Statuses</option>
           <option value="open">Open</option><option value="assigned">Assigned</option><option value="working">In Progress</option><option value="resolved">Resolved</option>
         </select>
-        <select className="sel" value={fPriority} onChange={e => setFPriority(e.target.value)} style={{ height: 36, fontSize: '0.78rem' }}>
+        <select className="sel" value={fPriority} onChange={e => setFPriority(e.target.value)} style={{ height: 36, }}>
           <option value="all">All Priorities</option>
           <option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="critical">Critical</option>
         </select>
-        <select className="sel" value={fType} onChange={e => setFType(e.target.value)} style={{ height: 36, fontSize: '0.78rem' }}>
+        <select className="sel" value={fType} onChange={e => setFType(e.target.value)} style={{ height: 36, }}>
           <option value="all">All Types</option>
           <option value="breakdown">Breakdown</option><option value="fault">Fault</option><option value="inspection">Inspection</option><option value="damage">Damage</option><option value="scheduled">Scheduled</option>
         </select>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <div style={{ display: 'flex', gap: 4, background: 'var(--bg-2)', padding: 4, borderRadius: 8 }}>
-          <button onClick={() => setTicketView('list')} className={ticketView === 'list' ? 'btn-primary' : 'btn-ghost'} style={{ padding: '6px 12px', fontSize: '0.75rem' }}>List View</button>
-          <button onClick={() => setTicketView('kanban')} className={ticketView === 'kanban' ? 'btn-primary' : 'btn-ghost'} style={{ padding: '6px 12px', fontSize: '0.75rem' }}>Kanban Board</button>
+          <button onClick={() => setTicketView('list')} className={ticketView === 'list' ? 'btn-primary' : 'btn-ghost'} style={{ padding: '6px 12px', }}>List View</button>
+          <button onClick={() => setTicketView('kanban')} className={ticketView === 'kanban' ? 'btn-primary' : 'btn-ghost'} style={{ padding: '6px 12px', }}>Kanban Board</button>
         </div>
-        <div style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>{filteredTickets.length} tickets</div>
+        <div style={{ color: 'var(--text-3)' }}>{filteredTickets.length} tickets</div>
       </div>
 
       {ticketView === 'kanban' ? (
@@ -604,9 +607,9 @@ export default function MaintenancePage() {
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, padding: '0 4px' }}>
-                  <h3 style={{ margin: 0, fontSize: '0.8rem', textTransform: 'uppercase', fontFamily: 'Oswald', color: 'var(--text-1)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <h3 style={{ margin: 0, textTransform: 'uppercase', color: 'var(--text-1)', display: 'flex', alignItems: 'center', gap: 8 }}>
                     {colStatus.replace('_', ' ')}
-                    <span style={{ background: 'var(--bg-3)', padding: '2px 6px', borderRadius: 10, fontSize: '0.65rem' }}>{colTickets.length}</span>
+                    <span style={{ background: 'var(--bg-3)', padding: '2px 6px', borderRadius: 10, }}>{colTickets.length}</span>
                   </h3>
                 </div>
                 {colTickets.map(t => (
@@ -614,18 +617,18 @@ export default function MaintenancePage() {
                     onClick={() => openTicketDetail(t)}
                     style={{ background: 'white', padding: 16, borderRadius: 8, boxShadow: '0 2px 4px rgba(0,0,0,0.04)', border: '1px solid var(--border)', cursor: 'grab', position: 'relative' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                      <span className="font-mono" style={{ fontSize: '0.65rem', color: 'var(--text-3)' }}>{t.ticket_no}</span>
+                      <span className="font-mono" style={{ color: 'var(--text-3)' }}>{t.ticket_no}</span>
                       <PriorityBadge level={t.priority} />
                     </div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-0)', marginBottom: 4 }}>{t.assets?.asset_name}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-2)', marginBottom: 12 }}>{t.title}</div>
+                    <div style={{ color: 'var(--text-0)', marginBottom: 4 }}>{t.assets?.asset_name}</div>
+                    <div style={{ color: 'var(--text-2)', marginBottom: 12 }}>{t.title}</div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
                       <SLAIndicator sla_due_at={t.sla_due_at} status={t.status} resolved_at={t.resolved_at} />
                       {t.assignee?.full_name ? (
-                        <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--accent)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 700 }} title={t.assignee.full_name}>
+                        <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--accent)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', }} title={t.assignee.full_name}>
                           {t.assignee.full_name[0].toUpperCase()}
                         </div>
-                      ) : <span style={{ fontSize: '0.65rem', color: 'var(--text-3)' }}>Unassigned</span>}
+                      ) : <span style={{ color: 'var(--text-3)' }}>Unassigned</span>}
                     </div>
                   </div>
                 ))}
@@ -638,27 +641,27 @@ export default function MaintenancePage() {
 
       {/* Desktop table */}
       <div className="card desktop-table" style={{ overflow: 'hidden' }}>
-        <div className="card-header" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', color: 'var(--text-3)', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        <div className="card-header" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
           <span>Asset / Issue</span><span>Priority</span><span>SLA</span><span>Assigned</span><span>Status</span><span style={{ textAlign: 'right' }}>Actions</span>
         </div>
         {filteredTickets.map((t, idx) => (
           <div key={t.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', alignItems: 'center', padding: '14px 20px', borderBottom: idx < filteredTickets.length - 1 ? '1px solid var(--border)' : 'none', cursor: 'pointer' }} onClick={() => openTicketDetail(t)}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontWeight: 600, color: 'var(--text-1)', fontSize: '0.875rem' }}>{t.assets?.asset_name}</span>
+                <span style={{ color: 'var(--text-1)', }}>{t.assets?.asset_name}</span>
                 <WarrantyBadge warrantyExpiry={t.assets?.warranty_expiry} />
               </div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans', display: 'flex', gap: 8, alignItems: 'center', marginTop: 2 }}>
-                <span className="font-mono" style={{ fontSize: '0.68rem' }}>{t.ticket_no}</span>
+              <div style={{ color: 'var(--text-3)', display: 'flex', gap: 8, alignItems: 'center', marginTop: 2 }}>
+                <span className="font-mono" >{t.ticket_no}</span>
                 <span>{t.title}</span>
               </div>
             </div>
             <div><PriorityBadge level={t.priority} /></div>
             <div><SLAIndicator sla_due_at={t.sla_due_at} status={t.status} resolved_at={t.resolved_at} /></div>
-            <div style={{ fontSize: '0.82rem', color: 'var(--text-2)' }}>{t.assignee?.full_name || '—'}</div>
+            <div style={{ color: 'var(--text-2)' }}>{t.assignee?.full_name || '-'}</div>
             <div><StatusBadge status={t.status} /></div>
             <div style={{ textAlign: 'right', display: 'flex', gap: 6, justifyContent: 'flex-end' }} onClick={e => e.stopPropagation()}>
-              {t.status !== 'resolved' && <button className="btn-primary" style={{ padding: '4px 10px', fontSize: '0.7rem' }} onClick={() => { setLogForm({ work_done: '', cost: 0, vendor_id: '', parts_used: [] }); setShowLogForm({ type: 'ticket', data: t }) }}>Resolve</button>}
+              {t.status !== 'resolved' && <button className="btn-primary" style={{ padding: '4px 10px', }} onClick={() => { setLogForm({ work_done: '', cost: 0, vendor_id: '', parts_used: [] }); setShowLogForm({ type: 'ticket', data: t }) }}>Resolve</button>}
               <button className="btn-ghost" style={{ padding: '4px 8px' }} onClick={() => openTicketDetail(t)}><Eye size={13} /></button>
               {t.status !== 'resolved' && <button className="btn-ghost" style={{ padding: '4px 8px' }} onClick={() => { setEditingTicket(t); setTicketForm({ asset_id: t.asset_id, title: t.title, description: t.description || '', ticket_type: t.ticket_type || 'breakdown', priority: t.priority || 'normal' }); setShowTicketForm(true) }}><Edit2 size={13} /></button>}
               {isAdmin && <button className="btn-ghost" style={{ padding: '4px 8px', color: 'var(--red)' }} onClick={() => handleDeleteTicket(t.id)}><Trash2 size={13} /></button>}
@@ -673,19 +676,19 @@ export default function MaintenancePage() {
         {filteredTickets.map(t => (
           <div key={t.id} className="asset-card-mobile" onClick={() => openTicketDetail(t)}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <span className="font-mono" style={{ fontSize: '0.7rem', color: 'var(--accent)', fontWeight: 600 }}>{t.ticket_no}</span>
+              <span className="font-mono" style={{ color: 'var(--accent)', }}>{t.ticket_no}</span>
               <StatusBadge status={t.status} />
             </div>
-            <div style={{ fontWeight: 600, fontSize: '0.92rem', color: 'var(--text-0)', marginBottom: 4 }}>{t.assets?.asset_name}</div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-2)', marginBottom: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title}</div>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center', fontSize: '0.72rem', color: 'var(--text-3)' }}>
+            <div style={{ color: 'var(--text-0)', marginBottom: 4 }}>{t.assets?.asset_name}</div>
+            <div style={{ color: 'var(--text-2)', marginBottom: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title}</div>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center', color: 'var(--text-3)' }}>
               <PriorityBadge level={t.priority} />
               <SLAIndicator sla_due_at={t.sla_due_at} status={t.status} resolved_at={t.resolved_at} />
               {t.assignee?.full_name && <span>→ {t.assignee.full_name}</span>}
             </div>
             <div style={{ display: 'flex', gap: 6, marginTop: 8 }} onClick={e => e.stopPropagation()}>
-              {t.status !== 'resolved' && <button className="btn-primary" style={{ padding: '5px 12px', fontSize: '0.72rem' }} onClick={() => { setLogForm({ work_done: '', cost: 0, vendor_id: '', parts_used: [] }); setShowLogForm({ type: 'ticket', data: t }) }}>Resolve</button>}
-              <button className="btn-ghost" style={{ padding: '5px 12px', fontSize: '0.72rem' }} onClick={() => openTicketDetail(t)}><Eye size={12} /> Details</button>
+              {t.status !== 'resolved' && <button className="btn-primary" style={{ padding: '5px 12px', }} onClick={() => { setLogForm({ work_done: '', cost: 0, vendor_id: '', parts_used: [] }); setShowLogForm({ type: 'ticket', data: t }) }}>Resolve</button>}
+              <button className="btn-ghost" style={{ padding: '5px 12px', }} onClick={() => openTicketDetail(t)}><Eye size={12} /> Details</button>
             </div>
           </div>
         ))}
@@ -722,7 +725,7 @@ export default function MaintenancePage() {
     const renderGroup = (title, items, color) => (
       items.length > 0 && (
         <div style={{ marginBottom: 24 }}>
-          <h3 style={{ fontFamily: 'Oswald', textTransform: 'uppercase', fontSize: '0.85rem', marginBottom: 12, color: 'var(--text-1)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <h3 style={{ textTransform: 'uppercase', marginBottom: 12, color: 'var(--text-1)', display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
             {title} ({items.length})
           </h3>
@@ -732,22 +735,22 @@ export default function MaintenancePage() {
               return (
                 <div key={s.id} className="card" style={{ padding: '16px', borderLeft: `3px solid ${color}` }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 8, background: isOverdue ? 'rgba(239,68,68,0.08)' : 'var(--bg-3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 8, background: isOverdue ? 'var(--status-danger-soft)' : 'var(--bg-3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <Calendar size={15} style={{ color: isOverdue ? 'var(--red)' : 'var(--accent)' }} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text-0)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.assets?.asset_name}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>{s.title}</div>
+                      <div style={{ color: 'var(--text-0)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.assets?.asset_name}</div>
+                      <div style={{ color: 'var(--text-3)' }}>{s.title}</div>
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
-                    <span style={{ fontSize: '0.65rem', padding: '2px 8px', borderRadius: 12, background: 'var(--bg-3)', color: 'var(--text-2)', fontWeight: 600 }}>{FREQ_MAP[s.frequency] || s.frequency}</span>
-                    <span style={{ fontSize: '0.65rem', padding: '2px 8px', borderRadius: 12, background: isOverdue ? 'rgba(239,68,68,0.1)' : 'var(--accent-glow)', color: isOverdue ? 'var(--red)' : 'var(--accent)', fontWeight: 700 }}>
+                    <span style={{ padding: '2px 8px', borderRadius: 12, background: 'var(--bg-3)', color: 'var(--text-2)', }}>{FREQ_MAP[s.frequency] || s.frequency}</span>
+                    <span style={{ padding: '2px 8px', borderRadius: 12, background: isOverdue ? 'var(--status-danger-soft)' : 'var(--accent-glow)', color: isOverdue ? 'var(--red)' : 'var(--accent)', }}>
                       Due: {s.next_due ? new Date(s.next_due).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'TBD'}
                     </span>
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <button className="btn-primary" style={{ padding: '6px', fontSize: '0.75rem', flex: 1, justifyContent: 'center', background: 'var(--green)', borderColor: 'var(--green)' }}
+                    <button className="btn-primary" style={{ padding: '6px', flex: 1, justifyContent: 'center', background: 'var(--green)', borderColor: 'var(--green)' }}
                       onClick={() => { setLogForm({ work_done: s.title, cost: 0, vendor_id: '', parts_used: [] }); setShowLogForm({ type: 'schedule', data: s }) }}>
                       <CheckCircle2 size={14} /> Done
                     </button>
@@ -767,9 +770,9 @@ export default function MaintenancePage() {
         <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
           {['all', 'active', 'overdue'].map(f => (
             <button key={f} onClick={() => setSchedFilterStatus(f)} className={schedFilterStatus === f ? 'btn-primary' : 'btn-ghost'}
-              style={{ padding: '6px 14px', fontSize: '0.78rem', textTransform: 'capitalize', ...(f === 'overdue' && schedFilterStatus === f ? { background: 'var(--red)', borderColor: 'var(--red)' } : {}) }}>{f}</button>
+              style={{ padding: '6px 14px', textTransform: 'capitalize', ...(f === 'overdue' && schedFilterStatus === f ? { background: 'var(--red)', borderColor: 'var(--red)' } : {}) }}>{f}</button>
           ))}
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-3)', marginLeft: 'auto' }}>{filteredSchedules.length} schedules</span>
+          <span style={{ color: 'var(--text-3)', marginLeft: 'auto' }}>{filteredSchedules.length} schedules</span>
         </div>
 
         {filteredSchedules.length === 0 ? (
@@ -777,7 +780,7 @@ export default function MaintenancePage() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {renderGroup('Overdue', groups.Overdue, 'var(--red)')}
-            {renderGroup('Next 30 Days', groups.Upcoming, '#f59e0b')}
+            {renderGroup('Next 30 Days', groups.Upcoming, 'var(--status-warning)')}
             {renderGroup('Later', groups.Later, 'var(--text-3)')}
           </div>
         )}
@@ -791,18 +794,18 @@ export default function MaintenancePage() {
     <div>
       {/* Desktop table */}
       <div className="card desktop-table" style={{ overflow: 'hidden' }}>
-        <div className="card-header" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', gap: 10, color: 'var(--text-3)', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        <div className="card-header" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', gap: 10, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
           <span>Asset / Task</span><span>Type</span><span>Performed By</span><span>Cost</span><span>Approval</span><span style={{ textAlign: 'right' }}>Date</span>
         </div>
         {logs.map((l, idx) => (
           <div key={l.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', gap: 10, alignItems: 'center', padding: '12px 20px', borderBottom: idx < logs.length - 1 ? '1px solid var(--border)' : 'none' }}>
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontWeight: 600, color: 'var(--text-1)', fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.assets?.asset_name}</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.work_done}</div>
+              <div style={{ color: 'var(--text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.assets?.asset_name}</div>
+              <div style={{ color: 'var(--text-3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.work_done}</div>
             </div>
-            <div><span style={{ fontSize: '0.7rem', padding: '2px 6px', background: 'var(--bg-3)', borderRadius: 4 }}>{l.schedule_id ? 'Preventive' : 'Corrective'}</span></div>
-            <div style={{ fontSize: '0.82rem' }}>{l.profiles?.full_name || 'System'}</div>
-            <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-2)' }}>{formatCurrency(l.cost || 0)}</div>
+            <div><span style={{ padding: '2px 6px', background: 'var(--bg-3)', borderRadius: 4 }}>{l.schedule_id ? 'Preventive' : 'Corrective'}</span></div>
+            <div >{l.profiles?.full_name || 'System'}</div>
+            <div style={{ color: 'var(--text-2)' }}>{formatCurrency(l.cost || 0)}</div>
             <div>
               {l.approval_status === 'pending' ? (
                 <div style={{ display: 'flex', gap: 6 }}>
@@ -812,22 +815,22 @@ export default function MaintenancePage() {
                       <button className="btn-ghost" style={{ padding: 4, color: 'var(--red)' }} onClick={() => handleApproveLog(l.id, 'rejected')} title="Reject"><XCircle size={14} /></button>
                     </>
                   ) : (
-                    <span style={{ fontSize: '0.7rem', color: '#f59e0b', fontWeight: 600 }}>Pending</span>
+                    <span style={{ color: 'var(--status-warning)', }}>Pending</span>
                   )}
                 </div>
               ) : l.approval_status === 'rejected' ? (
-                <span style={{ fontSize: '0.7rem', color: 'var(--red)', fontWeight: 600 }}>Rejected</span>
+                <span style={{ color: 'var(--red)', }}>Rejected</span>
               ) : (
-                <span style={{ fontSize: '0.7rem', color: 'var(--green)', fontWeight: 600 }}>Approved</span>
+                <span style={{ color: 'var(--green)', }}>Approved</span>
               )}
             </div>
-            <div style={{ textAlign: 'right', fontSize: '0.82rem', fontFamily: 'DM Mono', color: 'var(--text-3)' }}>{new Date(l.performed_at).toLocaleDateString()}</div>
+            <div style={{ textAlign: 'right', color: 'var(--text-3)' }}>{new Date(l.performed_at).toLocaleDateString()}</div>
           </div>
         ))}
         {logs.length === 0 && <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-3)' }}>No history found.</div>}
         {logsHasMore && (
           <div style={{ textAlign: 'center', padding: '16px', borderTop: '1px solid var(--border)' }}>
-            <button className="btn-ghost" onClick={() => fetchLogs(logsPage + 1)} disabled={loadingLogs} style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+            <button className="btn-ghost" onClick={() => fetchLogs(logsPage + 1)} disabled={loadingLogs} >
               {loadingLogs ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : 'Load More Logs'}
             </button>
           </div>
@@ -838,14 +841,14 @@ export default function MaintenancePage() {
         {logs.map(l => (
           <div key={l.id} className="asset-card-mobile">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-              <span style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-0)' }}>{l.assets?.asset_name}</span>
-              <span style={{ fontSize: '0.7rem', padding: '2px 6px', background: 'var(--bg-3)', borderRadius: 4 }}>{l.schedule_id ? 'Preventive' : 'Corrective'}</span>
+              <span style={{ color: 'var(--text-0)' }}>{l.assets?.asset_name}</span>
+              <span style={{ padding: '2px 6px', background: 'var(--bg-3)', borderRadius: 4 }}>{l.schedule_id ? 'Preventive' : 'Corrective'}</span>
             </div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-2)', marginBottom: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.work_done}</div>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center', fontSize: '0.72rem', color: 'var(--text-3)' }}>
+            <div style={{ color: 'var(--text-2)', marginBottom: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.work_done}</div>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center', color: 'var(--text-3)' }}>
               <span>{l.profiles?.full_name || 'System'}</span>
-              <span style={{ fontWeight: 600, color: 'var(--text-2)' }}>{formatCurrency(l.cost || 0)}</span>
-              <span style={{ marginLeft: 'auto', fontFamily: 'DM Mono' }}>{new Date(l.performed_at).toLocaleDateString()}</span>
+              <span style={{ color: 'var(--text-2)' }}>{formatCurrency(l.cost || 0)}</span>
+              <span style={{ marginLeft: 'auto', }}>{new Date(l.performed_at).toLocaleDateString()}</span>
             </div>
           </div>
         ))}
@@ -860,34 +863,34 @@ export default function MaintenancePage() {
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
       {/* Monthly Spend */}
       <div className="card" style={{ padding: 20 }}>
-        <h3 style={{ fontFamily: 'Oswald', textTransform: 'uppercase', fontSize: '0.85rem', marginBottom: 16 }}>Monthly Spend</h3>
+        <h3 style={{ textTransform: 'uppercase', marginBottom: 16 }}>Monthly Spend</h3>
         {monthlySpend.length > 0 ? (
           <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={monthlySpend}><XAxis dataKey="name" tick={{ fontSize: 10 }} /><YAxis tick={{ fontSize: 10 }} /><Tooltip formatter={v => formatCurrency(v)} /><Bar dataKey="value" fill="var(--accent)" radius={[4, 4, 0, 0]} /></BarChart>
+            <BarChart data={monthlySpend}><XAxis dataKey="name" tick={{ }} /><YAxis tick={{ }} /><Tooltip formatter={v => formatCurrency(v)} /><Bar dataKey="value" fill="var(--accent)" radius={[4, 4, 0, 0]} /></BarChart>
           </ResponsiveContainer>
-        ) : <p style={{ color: 'var(--text-3)', fontSize: '0.8rem', textAlign: 'center', padding: 40 }}>No data yet</p>}
+        ) : <p style={{ color: 'var(--text-3)', textAlign: 'center', padding: 40 }}>No data yet</p>}
       </div>
 
       {/* By Vendor */}
       <div className="card" style={{ padding: 20 }}>
-        <h3 style={{ fontFamily: 'Oswald', textTransform: 'uppercase', fontSize: '0.85rem', marginBottom: 16 }}>Spend by Vendor</h3>
+        <h3 style={{ textTransform: 'uppercase', marginBottom: 16 }}>Spend by Vendor</h3>
         {spendByVendor.length > 0 ? (
           <ResponsiveContainer width="100%" height={220}>
-            <PieChart><Pie data={spendByVendor} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} style={{ fontSize: '0.65rem' }}>
+            <PieChart><Pie data={spendByVendor} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} >
               {spendByVendor.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
             </Pie><Tooltip formatter={v => formatCurrency(v)} /></PieChart>
           </ResponsiveContainer>
-        ) : <p style={{ color: 'var(--text-3)', fontSize: '0.8rem', textAlign: 'center', padding: 40 }}>No data yet</p>}
+        ) : <p style={{ color: 'var(--text-3)', textAlign: 'center', padding: 40 }}>No data yet</p>}
       </div>
 
       {/* Top Assets by Cost */}
       <div className="card" style={{ padding: 20, gridColumn: '1 / -1' }}>
-        <h3 style={{ fontFamily: 'Oswald', textTransform: 'uppercase', fontSize: '0.85rem', marginBottom: 16 }}>Top 10 Assets by Maintenance Cost</h3>
+        <h3 style={{ textTransform: 'uppercase', marginBottom: 16 }}>Top 10 Assets by Maintenance Cost</h3>
         {spendByAsset.length > 0 ? (
           <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={spendByAsset} layout="vertical"><XAxis type="number" tick={{ fontSize: 10 }} /><YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 10 }} /><Tooltip formatter={v => formatCurrency(v)} /><Bar dataKey="value" fill="#34d399" radius={[0, 4, 4, 0]} /></BarChart>
+            <BarChart data={spendByAsset} layout="vertical"><XAxis type="number" tick={{ }} /><YAxis type="category" dataKey="name" width={140} tick={{ }} /><Tooltip formatter={v => formatCurrency(v)} /><Bar dataKey="value" fill="#34d399" radius={[0, 4, 4, 0]} /></BarChart>
           </ResponsiveContainer>
-        ) : <p style={{ color: 'var(--text-3)', fontSize: '0.8rem', textAlign: 'center', padding: 40 }}>No data yet</p>}
+        ) : <p style={{ color: 'var(--text-3)', textAlign: 'center', padding: 40 }}>No data yet</p>}
       </div>
     </div>
   )
@@ -909,22 +912,22 @@ export default function MaintenancePage() {
         {/* Vendor Scorecards */}
         {vendorStats.length > 0 && (
           <div>
-            <h3 style={{ fontFamily: 'Oswald', textTransform: 'uppercase', fontSize: '0.85rem', marginBottom: 12, color: 'var(--text-2)' }}>Vendor Scorecards</h3>
+            <h3 style={{ textTransform: 'uppercase', marginBottom: 12, color: 'var(--text-2)' }}>Vendor Scorecards</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
               {vendorStats.filter(v => v.ticketCount > 0).sort((a,b) => b.totalSpend - a.totalSpend).slice(0, 4).map(v => (
                 <div key={`stat-${v.id}`} className="card" style={{ padding: '16px', background: 'linear-gradient(145deg, var(--bg-1), var(--bg-2))', borderLeft: '4px solid var(--accent)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                    <div style={{ fontWeight: 700, color: 'var(--text-0)', fontSize: '0.9rem' }}>{v.name}</div>
-                    <div style={{ background: 'var(--bg-3)', padding: '2px 8px', borderRadius: 12, fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-2)' }}>{v.ticketCount} Jobs</div>
+                    <div style={{ color: 'var(--text-0)', }}>{v.name}</div>
+                    <div style={{ background: 'var(--bg-3)', padding: '2px 8px', borderRadius: 12, color: 'var(--text-2)' }}>{v.ticketCount} Jobs</div>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                     <div>
-                      <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 2 }}>Total Spend</div>
-                      <div style={{ fontSize: '1.2rem', fontFamily: 'Oswald', fontWeight: 700, color: 'var(--accent)' }}>{formatCurrency(v.totalSpend)}</div>
+                      <div style={{ textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 2 }}>Total Spend</div>
+                      <div style={{ color: 'var(--accent)' }}>{formatCurrency(v.totalSpend)}</div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 2 }}>Avg / Job</div>
-                      <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-1)' }}>{formatCurrency(v.avgCost)}</div>
+                      <div style={{ textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 2 }}>Avg / Job</div>
+                      <div style={{ color: 'var(--text-1)' }}>{formatCurrency(v.avgCost)}</div>
                     </div>
                   </div>
                 </div>
@@ -934,7 +937,7 @@ export default function MaintenancePage() {
         )}
 
         {/* Vendor Directory */}
-        <h3 style={{ fontFamily: 'Oswald', textTransform: 'uppercase', fontSize: '0.85rem', marginBottom: 0, color: 'var(--text-2)' }}>Vendor Directory</h3>
+        <h3 style={{ textTransform: 'uppercase', marginBottom: 0, color: 'var(--text-2)' }}>Vendor Directory</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {vendors.map(v => (
             <div key={v.id} className="card" style={{ padding: '16px 20px', opacity: v.is_active ? 1 : 0.5 }}>
@@ -944,32 +947,32 @@ export default function MaintenancePage() {
                   <Building2 size={15} style={{ color: 'var(--accent)' }} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text-0)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.name}</div>
-                  {v.rating > 0 && <div style={{ fontSize: '0.75rem', color: '#f59e0b', letterSpacing: 2 }}>{'★'.repeat(v.rating)}{'☆'.repeat(5 - v.rating)}</div>}
+                  <div style={{ color: 'var(--text-0)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.name}</div>
+                  {v.rating > 0 && <div style={{ color: 'var(--status-warning)', letterSpacing: 2 }}>{'★'.repeat(v.rating)}{'☆'.repeat(5 - v.rating)}</div>}
                 </div>
-                {!v.is_active && <span style={{ fontSize: '0.6rem', fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: 'var(--bg-3)', color: 'var(--text-3)' }}>INACTIVE</span>}
+                {!v.is_active && <span style={{ padding: '2px 6px', borderRadius: 4, background: 'var(--bg-3)', color: 'var(--text-3)' }}>INACTIVE</span>}
                 <button className="btn-ghost" style={{ padding: 6, minHeight: 'auto', flexShrink: 0 }} onClick={() => { setEditingVendor(v); setVendorForm({ name: v.name, contact_person: v.contact_person || '', email: v.email || '', phone: v.phone || '', address: v.address || '', category: v.category || '', notes: v.notes || '' }); setShowVendorForm(true) }}><Edit2 size={13} /></button>
                 {isAdmin && <button className="btn-ghost" style={{ padding: 6, color: 'var(--red)', minHeight: 'auto', flexShrink: 0 }} onClick={() => handleDeleteVendor(v.id)}><Trash2 size={13} /></button>}
               </div>
               {/* Row 2: Meta pills */}
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {v.contact_person && (
-                  <span style={{ fontSize: '0.7rem', padding: '3px 8px', borderRadius: 6, background: 'var(--bg-3)', color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ padding: '3px 8px', borderRadius: 6, background: 'var(--bg-3)', color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 4 }}>
                     <User size={10} />{v.contact_person}
                   </span>
                 )}
                 {v.email && (
-                  <span style={{ fontSize: '0.7rem', padding: '3px 8px', borderRadius: 6, background: 'var(--bg-3)', color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ padding: '3px 8px', borderRadius: 6, background: 'var(--bg-3)', color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 4 }}>
                     <Mail size={10} />{v.email}
                   </span>
                 )}
                 {v.phone && (
-                  <span style={{ fontSize: '0.7rem', padding: '3px 8px', borderRadius: 6, background: 'var(--bg-3)', color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ padding: '3px 8px', borderRadius: 6, background: 'var(--bg-3)', color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 4 }}>
                     <Phone size={10} />{v.phone}
                   </span>
                 )}
                 {v.category && (
-                  <span style={{ fontSize: '0.7rem', padding: '3px 8px', borderRadius: 6, background: 'var(--accent-glow)', color: 'var(--accent)', fontWeight: 600 }}>
+                  <span style={{ padding: '3px 8px', borderRadius: 6, background: 'var(--accent-glow)', color: 'var(--accent)', }}>
                     {v.category}
                   </span>
                 )}
@@ -1001,15 +1004,15 @@ export default function MaintenancePage() {
               <Wrench size={18} style={{ color: 'var(--accent)' }} />
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <h2 className="font-display" style={{ fontSize: '1rem', margin: 0, letterSpacing: '0.04em' }}>{t.ticket_no}</h2>
+                  <h2 className="font-display" style={{ margin: 0, letterSpacing: '0.04em' }}>{t.ticket_no}</h2>
                   <StatusBadge status={t.status} />
                   <PriorityBadge level={t.priority} />
                 </div>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>{t.assets?.asset_name} · {t.assets?.asset_code}</span>
+                <span style={{ color: 'var(--text-3)' }}>{t.assets?.asset_name} · {t.assets?.asset_code}</span>
               </div>
             </div>
             <div style={{ display: 'flex', gap: 6 }}>
-              <button className="btn-ghost" style={{ padding: '6px 10px', fontSize: '0.72rem' }} onClick={() => generateWorkOrder(t)}><Download size={12} /> Work Order</button>
+              <button className="btn-ghost" style={{ padding: '6px 10px', }} onClick={() => generateWorkOrder(t)}><Download size={12} /> Work Order</button>
               <button className="btn-ghost" style={{ padding: 6 }} onClick={() => setSelectedTicket(null)}><X size={16} /></button>
             </div>
           </div>
@@ -1018,52 +1021,52 @@ export default function MaintenancePage() {
             {/* Info Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
               <div style={{ padding: '10px 14px', background: 'var(--bg-3)', borderRadius: 8 }}>
-                <div style={{ fontSize: '0.62rem', textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', marginBottom: 2 }}>Type</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600, textTransform: 'capitalize' }}>{t.ticket_type || '—'}</div>
+                <div style={{ textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', marginBottom: 2 }}>Type</div>
+                <div style={{ textTransform: 'capitalize' }}>{t.ticket_type || '-'}</div>
               </div>
               <div style={{ padding: '10px 14px', background: 'var(--bg-3)', borderRadius: 8 }}>
-                <div style={{ fontSize: '0.62rem', textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', marginBottom: 2 }}>SLA</div>
+                <div style={{ textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', marginBottom: 2 }}>SLA</div>
                 <SLAIndicator sla_due_at={t.sla_due_at} status={t.status} resolved_at={t.resolved_at} />
               </div>
               <div style={{ padding: '10px 14px', background: 'var(--bg-3)', borderRadius: 8 }}>
-                <div style={{ fontSize: '0.62rem', textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', marginBottom: 2 }}>Downtime</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600, fontFamily: 'DM Mono' }}>{formatDowntime(t.downtime_start, t.downtime_end)}</div>
+                <div style={{ textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', marginBottom: 2 }}>Downtime</div>
+                <div >{formatDowntime(t.downtime_start, t.downtime_end)}</div>
               </div>
               <div style={{ padding: '10px 14px', background: 'var(--bg-3)', borderRadius: 8 }}>
-                <div style={{ fontSize: '0.62rem', textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', marginBottom: 2 }}>Warranty</div>
+                <div style={{ textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', marginBottom: 2 }}>Warranty</div>
                 <WarrantyBadge warrantyExpiry={t.assets?.warranty_expiry} />
               </div>
               <div style={{ padding: '10px 14px', background: 'var(--bg-3)', borderRadius: 8 }}>
-                <div style={{ fontSize: '0.62rem', textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', marginBottom: 2 }}>Reported By</div>
-                <div style={{ fontSize: '0.82rem', fontWeight: 600 }}>{t.profiles?.full_name || '—'}</div>
+                <div style={{ textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', marginBottom: 2 }}>Reported By</div>
+                <div >{t.profiles?.full_name || '-'}</div>
               </div>
               <div style={{ padding: '10px 14px', background: 'var(--bg-3)', borderRadius: 8 }}>
-                <div style={{ fontSize: '0.62rem', textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', marginBottom: 2 }}>Created</div>
-                <div style={{ fontSize: '0.82rem', fontFamily: 'DM Mono' }}>{new Date(t.created_at).toLocaleDateString()}</div>
+                <div style={{ textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', marginBottom: 2 }}>Created</div>
+                <div >{new Date(t.created_at).toLocaleDateString()}</div>
               </div>
             </div>
 
             {/* Title + Description */}
             <div>
-              <h3 style={{ fontFamily: 'DM Sans', fontSize: '1rem', fontWeight: 700, color: 'var(--text-0)', margin: '0 0 6px' }}>{t.title}</h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-2)', lineHeight: 1.5, margin: 0 }}>{t.description || 'No description provided.'}</p>
+              <h3 style={{ color: 'var(--text-0)', margin: '0 0 6px' }}>{t.title}</h3>
+              <p style={{ color: 'var(--text-2)', margin: 0 }}>{t.description || 'No description provided.'}</p>
             </div>
 
             {/* Assign + Status Change */}
             {t.status !== 'resolved' && (
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', padding: '12px 16px', background: 'var(--bg-3)', borderRadius: 10 }}>
                 <div style={{ flex: 1, minWidth: 180 }}>
-                  <label style={{ fontSize: '0.62rem', textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', display: 'block', marginBottom: 4 }}>Assign To</label>
-                  <select className="sel" value={t.assigned_to || ''} onChange={e => handleAssignTicket(t.id, e.target.value || null)} style={{ height: 34, fontSize: '0.78rem', width: '100%' }}>
+                  <label style={{ textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', display: 'block', marginBottom: 4 }}>Assign To</label>
+                  <select className="sel" value={t.assigned_to || ''} onChange={e => handleAssignTicket(t.id, e.target.value || null)} style={{ height: 34, width: '100%' }}>
                     <option value="">Unassigned</option>
                     {profiles.map(p => <option key={p.id} value={p.id}>{p.full_name} ({p.role})</option>)}
                   </select>
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.62rem', textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', display: 'block', marginBottom: 4 }}>Change Status</label>
+                  <label style={{ textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', display: 'block', marginBottom: 4 }}>Change Status</label>
                   <div style={{ display: 'flex', gap: 6 }}>
                     {['open', 'assigned', 'working', 'resolved'].filter(s => s !== t.status).map(s => (
-                      <button key={s} className="btn-ghost" style={{ padding: '5px 10px', fontSize: '0.7rem', textTransform: 'capitalize' }} onClick={() => handleChangeStatus(t.id, s)}>{s}</button>
+                      <button key={s} className="btn-ghost" style={{ padding: '5px 10px', textTransform: 'capitalize' }} onClick={() => handleChangeStatus(t.id, s)}>{s}</button>
                     ))}
                   </div>
                 </div>
@@ -1072,7 +1075,7 @@ export default function MaintenancePage() {
 
             {/* Photo Evidence */}
             <div>
-              <h4 style={{ fontFamily: 'Oswald', fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-0)', margin: '0 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h4 style={{ textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-0)', margin: '0 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Camera size={14} style={{ color: 'var(--accent)' }} /> Photo Evidence ({photos.length})
               </h4>
               {detailLoading ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite', color: 'var(--accent)' }} /> : (
@@ -1080,7 +1083,7 @@ export default function MaintenancePage() {
                   {photos.map(p => (
                     <div key={p.id} style={{ position: 'relative', width: 80, height: 80 }}>
                       <img src={p.photo_url} alt="evidence" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)' }} />
-                      <span style={{ position: 'absolute', bottom: 2, left: 2, fontSize: '0.5rem', padding: '1px 4px', borderRadius: 3, background: 'rgba(0,0,0,0.6)', color: 'white' }}>{p.photo_type}</span>
+                      <span style={{ position: 'absolute', bottom: 2, left: 2, padding: '1px 4px', borderRadius: 3, background: 'rgba(0,0,0,0.6)', color: 'white' }}>{p.photo_type}</span>
                       <button onClick={() => handleRemovePhoto(p.id)} style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: 'var(--red)', color: 'white', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={10} /></button>
                     </div>
                   ))}
@@ -1089,7 +1092,7 @@ export default function MaintenancePage() {
                     <label key={type} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 80, height: 80, borderRadius: 8, border: '2px dashed var(--border)', background: 'var(--bg-2)', cursor: 'pointer', gap: 4 }}>
                       {photoUploading ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', color: 'var(--accent)' }} /> : <>
                         <Camera size={14} style={{ color: 'var(--text-3)' }} />
-                        <span style={{ fontSize: '0.5rem', color: 'var(--text-3)', textTransform: 'capitalize' }}>{type}</span>
+                        <span style={{ color: 'var(--text-3)', textTransform: 'capitalize' }}>{type}</span>
                       </>}
                       <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files[0]; if (f) handlePhotoUpload(f, type); e.target.value = '' }} />
                     </label>
@@ -1100,25 +1103,25 @@ export default function MaintenancePage() {
 
             {/* Comments / Timeline */}
             <div>
-              <h4 style={{ fontFamily: 'Oswald', fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-0)', margin: '0 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h4 style={{ textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-0)', margin: '0 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
                 <MessageSquare size={14} style={{ color: 'var(--accent)' }} /> Comments ({comments.length})
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 250, overflowY: 'auto', marginBottom: 12 }}>
                 {comments.map(c => (
                   <div key={c.id} style={{ display: 'flex', gap: 10 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg, var(--accent), var(--cyan))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '0.7rem', fontWeight: 700, color: 'white' }}>
+                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg, var(--accent), var(--cyan))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: 'white' }}>
                       {(c.profiles?.full_name || 'U')[0].toUpperCase()}
                     </div>
                     <div style={{ flex: 1, background: 'var(--bg-3)', padding: '8px 12px', borderRadius: '4px 12px 12px 12px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-0)' }}>{c.profiles?.full_name || 'User'}</span>
-                        <span style={{ fontSize: '0.62rem', color: 'var(--text-3)' }}>{new Date(c.created_at).toLocaleString()}</span>
+                        <span style={{ color: 'var(--text-0)' }}>{c.profiles?.full_name || 'User'}</span>
+                        <span style={{ color: 'var(--text-3)' }}>{new Date(c.created_at).toLocaleString()}</span>
                       </div>
-                      <p style={{ fontSize: '0.82rem', color: 'var(--text-1)', margin: 0, lineHeight: 1.4 }}>{c.comment}</p>
+                      <p style={{ color: 'var(--text-1)', margin: 0, }}>{c.comment}</p>
                     </div>
                   </div>
                 ))}
-                {comments.length === 0 && <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', textAlign: 'center', padding: 16 }}>No comments yet.</p>}
+                {comments.length === 0 && <p style={{ color: 'var(--text-3)', textAlign: 'center', padding: 16 }}>No comments yet.</p>}
               </div>
               {/* Add comment */}
               <div style={{ display: 'flex', gap: 8 }}>
@@ -1138,25 +1141,64 @@ export default function MaintenancePage() {
   // ── PAGE LAYOUT ───────────────────────────────────────────────────────
 
   return (
-    <div style={{ width: '100%' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h1 className="font-display" style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--text-0)', marginBottom: 4 }}>
-            MAINTENANCE <span style={{ color: 'var(--accent)' }}>MODULE</span>
-          </h1>
-          <p className="maint-subtitle" style={{ color: 'var(--text-2)', fontSize: '0.875rem', fontFamily: 'DM Sans' }}>Tickets, schedules, SLA tracking, vendor management & cost analytics.</p>
+    <>
+      {isMobile ? (
+        <MobileMaintenancePage
+          activeTab={activeTab} setActiveTab={setActiveTab}
+          loading={loading}
+          search={search} setSearch={setSearch}
+          filteredTickets={filteredTickets}
+          filteredSchedules={filteredSchedules}
+          logs={logs}
+          openTicketDetail={openTicketDetail}
+          setShowTicketForm={setShowTicketForm}
+          setShowScheduleForm={setShowScheduleForm}
+          setLogForm={setLogForm}
+          setShowLogForm={setShowLogForm}
+          setShowQRScanner={setShowQRScanner}
+          isAdmin={isAdmin}
+          isMod={isMod}
+          can={can}
+        />
+      ) : (
+        <div style={{ width: '100%' }}>
+          {/* Header */}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 12 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h1 className="text-page-title m-0 mb-1 tracking-wide uppercase">
+              MAINTENANCE <span className="text-accent">MODULE</span>
+            </h1>
+            <p className="maint-subtitle hidden md:block" style={{ color: 'var(--text-2)', }}>Tickets, schedules, SLA tracking, vendor management &amp; cost analytics.</p>
+          </div>
+          {/* Desktop action buttons */}
+          <div className="hidden md:flex" style={{ gap: 8, flexWrap: 'wrap' }}>
+            <button onClick={() => setShowQRScanner(true)} className="btn-ghost" style={{ padding: '8px 12px', }}><QrCode size={14} /> Scan Asset</button>
+            <button onClick={() => { setEditingVendor(null); setVendorForm({ name: '', contact_person: '', email: '', phone: '', address: '', category: '', notes: '' }); setShowVendorForm(true); setActiveTab('vendors') }} className="btn-ghost" style={{ padding: '8px 12px', }}><Building2 size={14} /> Add Vendor</button>
+            <button onClick={() => { setEditingSchedule(null); setSchedForm({ asset_id: '', title: '', description: '', frequency: 'monthly', next_due: '' }); setShowScheduleForm(true) }} className="btn-ghost" style={{ padding: '8px 12px', }}><Calendar size={14} /> New Schedule</button>
+            <button onClick={() => { setEditingTicket(null); setTicketForm({ asset_id: '', title: '', description: '', ticket_type: 'breakdown', priority: 'normal' }); setShowTicketForm(true) }} className="btn-primary" style={{ padding: '8px 16px', borderRadius: 8, }}><Plus size={16} /> Raise Ticket</button>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button onClick={() => setShowQRScanner(true)} className="btn-ghost" style={{ padding: '8px 12px', fontSize: '0.78rem', background: 'white' }}><QrCode size={14} /> <span className="maint-btn-label">Scan Asset</span></button>
-          <button onClick={() => { setEditingVendor(null); setVendorForm({ name: '', contact_person: '', email: '', phone: '', address: '', category: '', notes: '' }); setShowVendorForm(true); setActiveTab('vendors') }} className="btn-ghost" style={{ padding: '8px 12px', fontSize: '0.78rem', background: 'white' }}><Building2 size={14} /> <span className="maint-btn-label">Add Vendor</span></button>
-          <button onClick={() => { setEditingSchedule(null); setSchedForm({ asset_id: '', title: '', description: '', frequency: 'monthly', next_due: '' }); setShowScheduleForm(true) }} className="btn-ghost" style={{ padding: '8px 12px', fontSize: '0.78rem', background: 'white' }}><Calendar size={14} /> <span className="maint-btn-label">New Schedule</span></button>
-          <button onClick={() => { setEditingTicket(null); setTicketForm({ asset_id: '', title: '', description: '', ticket_type: 'breakdown', priority: 'normal' }); setShowTicketForm(true) }} className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.78rem', borderRadius: 8, fontWeight: 600 }}><Plus size={16} /> Raise Ticket</button>
+
+        {/* Mobile: icon-only compact action row */}
+        <div className="md:hidden flex items-center gap-2 overflow-x-auto pb-1 hide-scrollbar">
+          <button onClick={() => setShowQRScanner(true)} className="btn-ghost flex flex-col items-center gap-1 px-3 py-2 rounded-xl bg-bg-1 border border-border min-w-[58px]" >
+            <QrCode size={18} /><span>Scan</span>
+          </button>
+          <button onClick={() => { setEditingVendor(null); setVendorForm({ name: '', contact_person: '', email: '', phone: '', address: '', category: '', notes: '' }); setShowVendorForm(true); setActiveTab('vendors') }} className="btn-ghost flex flex-col items-center gap-1 px-3 py-2 rounded-xl bg-bg-1 border border-border min-w-[58px]" >
+            <Building2 size={18} /><span>Vendor</span>
+          </button>
+          <button onClick={() => { setEditingSchedule(null); setSchedForm({ asset_id: '', title: '', description: '', frequency: 'monthly', next_due: '' }); setShowScheduleForm(true) }} className="btn-ghost flex flex-col items-center gap-1 px-3 py-2 rounded-xl bg-bg-1 border border-border min-w-[58px]" >
+            <Calendar size={18} /><span>Schedule</span>
+          </button>
+          <button onClick={() => { setEditingTicket(null); setTicketForm({ asset_id: '', title: '', description: '', ticket_type: 'breakdown', priority: 'normal' }); setShowTicketForm(true) }} className="btn-primary flex flex-col items-center gap-1 px-3 py-2 rounded-xl min-w-[70px]" style={{ border: 'none' }}>
+            <Plus size={18} /><span>Raise Ticket</span>
+          </button>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="tab-container">
+      {/* Tabs - scrollable on mobile */}
+      <div className="tab-container" style={{ overflowX: 'auto', flexWrap: 'nowrap', paddingBottom: 2 }}>
         <TabBtn active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} icon={Wrench} label="Overview" />
         <TabBtn active={activeTab === 'tickets'} onClick={() => setActiveTab('tickets')} icon={Ticket} label="Tickets" count={openTickets.length} badge={slaBreached.length} />
         <TabBtn active={activeTab === 'schedules'} onClick={() => setActiveTab('schedules')} icon={Calendar} label="Schedules" count={schedules.length} badge={overdueSchedules.length} />
@@ -1184,6 +1226,8 @@ export default function MaintenancePage() {
           {activeTab === 'vendors' && renderVendors()}
         </>
       )}
+        </div>
+      )}
 
       {/* ── MODALS ── */}
 
@@ -1192,7 +1236,7 @@ export default function MaintenancePage() {
         <div className="modal-bg" style={{ zIndex: 2000 }} onClick={() => setShowTicketForm(false)}>
           <div className="modal" style={{ maxWidth: 500, padding: 32 }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-              <h2 style={{ fontFamily: 'Oswald', textTransform: 'uppercase', fontSize: '1.1rem', margin: 0 }}>{editingTicket ? 'Edit Ticket' : 'Raise Repair Ticket'}</h2>
+              <h2 style={{ textTransform: 'uppercase', margin: 0 }}>{editingTicket ? 'Edit Ticket' : 'Raise Repair Ticket'}</h2>
               <button className="btn-ghost" onClick={() => setShowTicketForm(false)}><X size={18} /></button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -1227,7 +1271,7 @@ export default function MaintenancePage() {
         <div className="modal-bg" style={{ zIndex: 2000 }} onClick={() => setShowScheduleForm(false)}>
           <div className="modal" style={{ maxWidth: 500, padding: 32 }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-              <h2 style={{ fontFamily: 'Oswald', textTransform: 'uppercase', fontSize: '1.1rem', margin: 0 }}>{editingSchedule ? 'Edit Schedule' : 'New PM Schedule'}</h2>
+              <h2 style={{ textTransform: 'uppercase', margin: 0 }}>{editingSchedule ? 'Edit Schedule' : 'New PM Schedule'}</h2>
               <button className="btn-ghost" onClick={() => setShowScheduleForm(false)}><X size={18} /></button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -1254,8 +1298,8 @@ export default function MaintenancePage() {
           <div className="modal" style={{ maxWidth: 550, padding: 32 }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
               <div>
-                <h2 style={{ fontFamily: 'Oswald', textTransform: 'uppercase', fontSize: '1.1rem', margin: 0 }}>Resolve Task</h2>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}>Asset: {showLogForm.data.assets?.asset_name || 'Record'}</div>
+                <h2 style={{ textTransform: 'uppercase', margin: 0 }}>Resolve Task</h2>
+                <div style={{ color: 'var(--text-3)' }}>Asset: {showLogForm.data.assets?.asset_name || 'Record'}</div>
               </div>
               <button className="btn-ghost" onClick={() => setShowLogForm(null)}><X size={18} /></button>
             </div>
@@ -1273,7 +1317,7 @@ export default function MaintenancePage() {
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, padding: 8, background: 'var(--bg-3)', borderRadius: 8, minHeight: 40 }}>
                   {inventory.map(i => (
                     <button key={i.id} onClick={() => setLogForm(f => ({ ...f, parts_used: f.parts_used.includes(i.id) ? f.parts_used.filter(x => x !== i.id) : [...f.parts_used, i.id] }))}
-                      style={{ fontSize: '0.7rem', padding: '4px 10px', borderRadius: 20, border: 'none', cursor: 'pointer', background: logForm.parts_used.includes(i.id) ? 'var(--accent)' : 'var(--bg-2)', color: logForm.parts_used.includes(i.id) ? 'white' : 'var(--text-3)' }}>
+                      style={{ padding: '4px 10px', borderRadius: 20, border: 'none', cursor: 'pointer', background: logForm.parts_used.includes(i.id) ? 'var(--accent)' : 'var(--bg-2)', color: logForm.parts_used.includes(i.id) ? 'white' : 'var(--text-3)' }}>
                       {i.item_name} ({i.current_stock})
                     </button>
                   ))}
@@ -1290,7 +1334,7 @@ export default function MaintenancePage() {
         <div className="modal-bg" style={{ zIndex: 2000 }} onClick={() => setShowVendorForm(false)}>
           <div className="modal" style={{ maxWidth: 500, padding: 32 }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-              <h2 style={{ fontFamily: 'Oswald', textTransform: 'uppercase', fontSize: '1.1rem', margin: 0 }}>{editingVendor ? 'Edit Vendor' : 'Add Vendor'}</h2>
+              <h2 style={{ textTransform: 'uppercase', margin: 0 }}>{editingVendor ? 'Edit Vendor' : 'Add Vendor'}</h2>
               <button className="btn-ghost" onClick={() => setShowVendorForm(false)}><X size={18} /></button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -1319,7 +1363,7 @@ export default function MaintenancePage() {
         <div className="modal-bg" style={{ zIndex: 3000 }}>
           <div className="modal" style={{ maxWidth: 400, padding: 0 }}>
             <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0, fontSize: '1rem', fontFamily: 'Oswald', textTransform: 'uppercase' }}>Scan Asset QR</h3>
+              <h3 style={{ margin: 0, textTransform: 'uppercase' }}>Scan Asset QR</h3>
               <button className="btn-ghost" style={{ padding: 4 }} onClick={() => setShowQRScanner(false)}><X size={18} /></button>
             </div>
             <QRScanner onScan={handleQRScan} onClose={() => setShowQRScanner(false)} />
@@ -1330,11 +1374,11 @@ export default function MaintenancePage() {
       {/* Toast */}
       {toast && <Toast message={toast.message} type={toast.type} onDone={() => setToast(null)} />}
 
-      <style>{`
+      <style dangerouslySetInnerHTML={{__html: `
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes slideIn { from { transform: translateX(100px); opacity: 0 } to { transform: translateX(0); opacity: 1 } }
         @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: 0.5 } }
-      `}</style>
-    </div>
+      `}} />
+    </>
   )
 }

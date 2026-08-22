@@ -15,9 +15,9 @@ export default function AssetRiskRadar({ repairCount = 0, overdueCount = 0, anom
     if (!active || !payload?.length) return null
     const item = payload[0].payload
     return (
-      <div style={{ background: '#0f172a', color: '#fff', padding: '8px 12px', borderRadius: 8, fontSize: '0.8rem', fontFamily: 'DM Sans', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
-        <div style={{ fontWeight: 700, color: '#f87171' }}>{item.subject} Risk Factor</div>
-        <div>Score: <strong style={{ color: '#fbbf24', fontFamily: 'DM Mono' }}>{item.value}/100</strong></div>
+      <div style={{ background: '#0f172a', color: '#fff', padding: '8px 12px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+        <div style={{ color: '#f87171' }}>{item.subject} Risk Factor</div>
+        <div>Score: <strong style={{ color: '#fbbf24', }}>{item.value}/100</strong></div>
       </div>
     )
   }
@@ -26,12 +26,12 @@ export default function AssetRiskRadar({ repairCount = 0, overdueCount = 0, anom
     <div className="card" style={{ padding: 20, background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
         <div>
-          <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <h3 style={{ margin: 0, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Operational Risk Radar
           </h3>
-          <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>Multi-axis risk index assessing 5 operational factors</p>
+          <p style={{ margin: 0, color: '#64748b' }}>Multi-axis risk index assessing 5 operational factors</p>
         </div>
-        <ShieldAlert size={18} color="#ef4444" />
+        <ShieldAlert size={18} color='var(--status-danger)' />
       </div>
 
       <div style={{ height: 220, width: '100%' }}>
@@ -40,7 +40,7 @@ export default function AssetRiskRadar({ repairCount = 0, overdueCount = 0, anom
             <PolarGrid stroke="#e2e8f0" />
             <PolarAngleAxis dataKey="subject" stroke="#475569" fontSize={10} tickLine={false} />
             <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#cbd5e1" fontSize={8} />
-            <Radar name="Risk Level" dataKey="value" stroke="#ef4444" fill="#ef4444" fillOpacity={0.25} />
+            <Radar name="Risk Level" dataKey="value" stroke='var(--status-danger)' fill='var(--status-danger)' fillOpacity={0.25} />
             <Tooltip content={<CustomTooltip />} />
           </RadarChart>
         </ResponsiveContainer>

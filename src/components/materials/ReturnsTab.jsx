@@ -98,7 +98,7 @@ function CreateReturnModal({ onClose, materials, sites, onSubmit }) {
 
   return (
     <ModalShell onClose={onClose} accent="var(--accent)">
-      <h3 style={{ fontFamily: 'Oswald', fontSize: 18, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 20, color: 'var(--text-0)' }}>
+      <h3 style={{ textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 20, color: 'var(--text-0)' }}>
         <RotateCcw size={18} style={{ marginRight: 8, verticalAlign: 'middle', color: 'var(--accent)' }} />
         New Material Return
       </h3>
@@ -111,7 +111,7 @@ function CreateReturnModal({ onClose, materials, sites, onSubmit }) {
             <option value="">Select material...</option>
             {materials.map(m => (
               <option key={m.id} value={m.id}>
-                {m.material_code} — {m.material_name}
+                {m.material_code} - {m.material_name}
               </option>
             ))}
           </select>
@@ -307,7 +307,7 @@ export default function ReturnsTab({ materials, stock, sites, onRefresh }) {
       material_id: form.material_id,
       transaction_type: 'return',
       quantity: qty,
-      notes: `Return ${return_no} — ${RETURN_TYPE_LABELS[form.return_type]} — from ${form.returned_from.trim()}${form.reason ? ' — ' + form.reason.trim() : ''}`,
+      notes: `Return ${return_no} - ${RETURN_TYPE_LABELS[form.return_type]} - from ${form.returned_from.trim()}${form.reason ? ' - ' + form.reason.trim() : ''}`,
       performed_by: user?.id,
       unit_cost: unitCost,
     }
@@ -391,14 +391,14 @@ export default function ReturnsTab({ materials, stock, sites, onRefresh }) {
 
       {/* Bulk delete bar */}
       {selectedIds.size > 0 && (
-        <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 16px', background:'var(--red-dim)', borderBottom:'1px solid rgba(239,68,68,0.2)' }}>
-          <span style={{ fontSize:'0.82rem', color:'var(--red)', fontWeight:600 }}>{selectedIds.size} return{selectedIds.size > 1 ? 's' : ''} selected</span>
+        <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 16px', background:'var(--red-dim)', borderBottom:'1px solid var(--status-danger-soft)' }}>
+          <span style={{ color:'var(--red)', }}>{selectedIds.size} return{selectedIds.size > 1 ? 's' : ''} selected</span>
           <button onClick={() => handleBulkDelete([...selectedIds])}
-            style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:6, padding:'6px 14px', borderRadius:10, background:'var(--red)', border:'none', color:'white', cursor:'pointer', fontSize:'0.78rem', fontWeight:600 }}>
+            style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:6, padding:'6px 14px', borderRadius:10, background:'var(--red)', border:'none', color:'white', cursor:'pointer', }}>
             <Trash2 size={13}/> Delete Selected
           </button>
           <button onClick={clearSel}
-            style={{ display:'flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:10, background:'var(--bg-3)', border:'1.5px solid var(--border)', color:'var(--text-2)', cursor:'pointer', fontSize:'0.78rem' }}>
+            style={{ display:'flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:10, background:'var(--bg-3)', border:'1.5px solid var(--border)', color:'var(--text-2)', cursor:'pointer', }}>
             <X size={13}/> Cancel
           </button>
         </div>
@@ -413,10 +413,10 @@ export default function ReturnsTab({ materials, stock, sites, onRefresh }) {
       ) : filtered.length === 0 ? (
         <div className="card" style={{ textAlign: 'center', padding: '48px 20px', color: 'var(--text-3)' }}>
           <RotateCcw size={36} style={{ marginBottom: 12, opacity: 0.4 }} />
-          <div style={{ fontFamily: 'Oswald', fontSize: 16, textTransform: 'uppercase', marginBottom: 4 }}>
+          <div style={{ textTransform: 'uppercase', marginBottom: 4 }}>
             {search ? 'No matching returns' : 'No returns yet'}
           </div>
-          <div style={{ fontSize: 13 }}>
+          <div >
             {search ? 'Try adjusting your search' : 'Click "New Return" to record a material return'}
           </div>
         </div>
@@ -444,28 +444,28 @@ export default function ReturnsTab({ materials, stock, sites, onRefresh }) {
                 {filtered.map(r => {
                   const mat = r.materials || {}
                   return (
-                    <tr key={r.id} style={{ background: selectedIds.has(r.id) ? 'rgba(239,68,68,0.04)' : undefined }}>
+                    <tr key={r.id} style={{ background: selectedIds.has(r.id) ? 'var(--status-danger-soft)' : undefined }}>
                       <td><input type="checkbox" checked={selectedIds.has(r.id)} onChange={() => toggleOne(r.id)} style={{ cursor:'pointer' }}/></td>
-                      <td style={{ whiteSpace: 'nowrap', fontSize: 13 }}>{fmtDate(r.created_at)}</td>
-                      <td style={{ fontFamily: 'DM Mono', fontSize: 12, color: 'var(--accent)' }}>{r.return_no}</td>
+                      <td style={{ whiteSpace: 'nowrap', }}>{fmtDate(r.created_at)}</td>
+                      <td style={{ color: 'var(--accent)' }}>{r.return_no}</td>
                       <td>
-                        <div style={{ fontWeight: 600, fontSize: 13 }}>{mat.material_name || '-'}</div>
-                        <div style={{ fontSize: 11, color: 'var(--text-3)', fontFamily: 'DM Mono' }}>{mat.material_code || ''}</div>
+                        <div >{mat.material_name || '-'}</div>
+                        <div style={{ color: 'var(--text-3)', }}>{mat.material_code || ''}</div>
                       </td>
-                      <td style={{ fontSize: 13 }}>{r.site || '-'}</td>
-                      <td style={{ fontFamily: 'DM Mono', fontSize: 13, fontWeight: 600 }}>
-                        {r.quantity} <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 400 }}>{mat.unit || ''}</span>
+                      <td >{r.site || '-'}</td>
+                      <td >
+                        {r.quantity} <span style={{ color: 'var(--text-3)', }}>{mat.unit || ''}</span>
                       </td>
                       <td><ReturnTypeBadge type={r.return_type} /></td>
-                      <td style={{ fontSize: 13 }}>{r.returned_from || '-'}</td>
+                      <td >{r.returned_from || '-'}</td>
                       <td><ConditionBadge condition={r.condition} /></td>
-                      <td style={{ fontSize: 13, color: 'var(--text-2)', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <td style={{ color: 'var(--text-2)', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {r.reason || '-'}
                       </td>
                       <td style={{ textAlign: 'right' }}>
                         <button onClick={() => handleBulkDelete([r.id])} title="Delete"
                           style={{ padding: '5px 7px', borderRadius: 8, background: 'var(--red-dim)',
-                            border: '1.5px solid rgba(239,68,68,0.2)', cursor: 'pointer', color: 'var(--red)' }}>
+                            border: '1.5px solid var(--status-danger-soft)', cursor: 'pointer', color: 'var(--red)' }}>
                           <Trash2 size={13} />
                         </button>
                       </td>
@@ -484,38 +484,38 @@ export default function ReturnsTab({ materials, stock, sites, onRefresh }) {
                 <div key={r.id} className="card" style={{ padding: '14px 16px' }}>
                   {/* Header row */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                    <span style={{ fontFamily: 'DM Mono', fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>{r.return_no}</span>
-                    <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{fmtDate(r.created_at)}</span>
+                    <span style={{ color: 'var(--accent)', }}>{r.return_no}</span>
+                    <span style={{ color: 'var(--text-3)' }}>{fmtDate(r.created_at)}</span>
                   </div>
 
                   {/* Material */}
-                  <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{mat.material_name || '-'}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-3)', fontFamily: 'DM Mono', marginBottom: 10 }}>{mat.material_code || ''}</div>
+                  <div style={{ marginBottom: 4 }}>{mat.material_name || '-'}</div>
+                  <div style={{ color: 'var(--text-3)', marginBottom: 10 }}>{mat.material_code || ''}</div>
 
                   {/* Info grid */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 12px', fontSize: 13 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 12px', }}>
                     <div>
-                      <div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 2 }}>Site</div>
+                      <div style={{ color: 'var(--text-3)', marginBottom: 2 }}>Site</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                         <MapPin size={12} style={{ color: 'var(--text-3)' }} />
                         {r.site || '-'}
                       </div>
                     </div>
                     <div>
-                      <div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 2 }}>Quantity</div>
-                      <div style={{ fontFamily: 'DM Mono', fontWeight: 600 }}>
-                        {r.quantity} <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 400 }}>{mat.unit || ''}</span>
+                      <div style={{ color: 'var(--text-3)', marginBottom: 2 }}>Quantity</div>
+                      <div >
+                        {r.quantity} <span style={{ color: 'var(--text-3)', }}>{mat.unit || ''}</span>
                       </div>
                     </div>
                     <div>
-                      <div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 2 }}>Returned From</div>
+                      <div style={{ color: 'var(--text-3)', marginBottom: 2 }}>Returned From</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                         <User size={12} style={{ color: 'var(--text-3)' }} />
                         {r.returned_from || '-'}
                       </div>
                     </div>
                     <div>
-                      <div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 2 }}>Reason</div>
+                      <div style={{ color: 'var(--text-3)', marginBottom: 2 }}>Reason</div>
                       <div style={{ color: 'var(--text-2)' }}>{r.reason || '-'}</div>
                     </div>
                   </div>

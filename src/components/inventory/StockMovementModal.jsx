@@ -72,22 +72,22 @@ export default function StockMovementModal({ isOpen, onClose, items, user, onSav
       }}>
         <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-0)' }}>STOCK MOVEMENT</h2>
-            <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Manual Adjustment / Log</p>
+            <h2 style={{ margin: 0, color: 'var(--text-0)' }}>STOCK MOVEMENT</h2>
+            <p style={{ margin: 0, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Manual Adjustment / Log</p>
           </div>
           <button onClick={onClose} className="btn-ghost" style={{ padding: 4, borderRadius: '50%' }}><X size={20}/></button>
         </div>
 
         <form onSubmit={handleSubmit} style={{ padding: 24 }}>
           {error && (
-            <div style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--red)', padding: 12, borderRadius: 8, display: 'flex', gap: 10, alignItems: 'center', marginBottom: 20, fontSize: '0.85rem' }}>
+            <div style={{ background: 'var(--status-danger-soft)', color: 'var(--red)', padding: 12, borderRadius: 8, display: 'flex', gap: 10, alignItems: 'center', marginBottom: 20, }}>
               <AlertCircle size={16} />
               {error}
             </div>
           )}
 
           <div style={{ marginBottom: 20 }}>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Item to Move</label>
+            <label style={{ display: 'block', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Item to Move</label>
             <select 
               className="inp"
               value={formData.item_id}
@@ -96,14 +96,14 @@ export default function StockMovementModal({ isOpen, onClose, items, user, onSav
             >
               <option value="">Select an Item...</option>
               {items.map(i => (
-                <option key={i.id} value={i.id}>{i.item_name} ({i.item_code}) — Bal: {i.current_stock}</option>
+                <option key={i.id} value={i.id}>{i.item_name} ({i.item_code}) - Bal: {i.current_stock}</option>
               ))}
             </select>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Movement Type</label>
+              <label style={{ display: 'block', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Movement Type</label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                 <button 
                   type="button"
@@ -112,8 +112,7 @@ export default function StockMovementModal({ isOpen, onClose, items, user, onSav
                     padding: '10px', borderRadius: 8, border: '1px solid var(--border)', cursor: 'pointer',
                     background: formData.transaction_type === 'receipt' ? 'var(--bg-3)' : 'none',
                     color: formData.transaction_type === 'receipt' ? 'var(--green)' : 'var(--text-3)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontWeight: 700, fontSize: '0.8rem'
-                  }}
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, }}
                 >
                   <ArrowDownLeft size={14} /> IN
                 </button>
@@ -124,15 +123,14 @@ export default function StockMovementModal({ isOpen, onClose, items, user, onSav
                     padding: '10px', borderRadius: 8, border: '1px solid var(--border)', cursor: 'pointer',
                     background: formData.transaction_type === 'issue' ? 'var(--bg-3)' : 'none',
                     color: formData.transaction_type === 'issue' ? 'var(--red)' : 'var(--text-3)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontWeight: 700, fontSize: '0.8rem'
-                  }}
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, }}
                 >
                   <ArrowUpRight size={14} /> OUT
                 </button>
               </div>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Quantity ({selectedItem?.unit || 'pcs'})</label>
+              <label style={{ display: 'block', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Quantity ({selectedItem?.unit || 'pcs'})</label>
               <input 
                 type="number" step="any" className="inp" placeholder="0.00"
                 value={formData.quantity}
@@ -143,7 +141,7 @@ export default function StockMovementModal({ isOpen, onClose, items, user, onSav
           </div>
 
           <div style={{ marginBottom: 20 }}>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Reference (PO / Ticket #)</label>
+            <label style={{ display: 'block', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Reference (PO / Ticket #)</label>
             <input 
               type="text" className="inp" placeholder="e.g. PO-1020 or TKT-441"
               value={formData.reference}
@@ -152,7 +150,7 @@ export default function StockMovementModal({ isOpen, onClose, items, user, onSav
           </div>
 
           <div style={{ marginBottom: 24 }}>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Movement Notes</label>
+            <label style={{ display: 'block', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Movement Notes</label>
             <textarea 
               className="inp" style={{ minHeight: 80, resize: 'vertical' }}
               placeholder="Reason for movement or adjustment details..."

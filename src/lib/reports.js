@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase, getAssetSelectCols } from './supabase'
 
 // ─────────────────────────────────────────────────────────
 // SHARED CONSTANTS
@@ -723,8 +723,9 @@ export async function getProcurementPipelineReport({ siteId = 'all' } = {}) {
 
 // 7. Custom Report Executor
 export async function executeCustomReport(config) {
-  const { data_source = 'assets', fields = [], group_by, filters = {} } = config
-  let q = supabase.from(data_source).select('*')
+  const { data_source = 'assets', fields = [], group_by, filters = {}, canViewFinancials = false } = config
+  const selectCols = data_source === 'assets' ? getAssetSelectCols(canViewFinancials) : '*'
+  let q = supabase.from(data_source).select(selectCols)
 
   if (filters.site && filters.site !== 'all') q = q.eq('site', filters.site)
   if (filters.category && filters.category !== 'all') q = q.eq('category', filters.category)
@@ -804,8 +805,9 @@ export async function getGenericReportAdapter(reportId, { siteId = 'all', catego
 
 // ── PRIVATE ADAPTER HELPERS ──────────────────────────────────────────────────
 
-async function _fetchAssets(siteId = 'all', category = 'all') {
-  let q = supabase.from('assets').select('id, asset_code, asset_name, make, model_no, serial_no, category, site, status, condition, purchase_value, salvage_value, useful_life_years, depreciation_method, depreciation_rate_percent, purchase_date, added_on, warranty_expiry, disposal_date, disposal_reason, department, location, assigned_to, quantity, is_scrapped, scrap_date, scrap_value').or('notes.is.null,notes.not.ilike.%[Migrated to Bulk Module]%').order('added_on', { ascending: false })
+async function _fetchAssets(siteId = 'all', category = 'all', canViewFinancials = false) {
+  const selectCols = getAssetSelectCols(canViewFinancials)
+  let q = supabase.from('assets').select(selectCols).or('notes.is.null,notes.not.ilike.%[Migrated to Bulk Module]%').order('added_on', { ascending: false })
   if (siteId !== 'all') q = q.eq('site', siteId)
   if (category !== 'all') q = q.eq('category', category)
   const { data, error } = await q.limit(500)
@@ -813,9 +815,9 @@ async function _fetchAssets(siteId = 'all', category = 'all') {
   return data || []
 }
 
-async function _assetRegisterAdapter(reportId, { siteId, category, startDate, endDate }) {
+async function _assetRegisterAdapter(reportId, { siteId, category, startDate, endDate, canViewFinancials }) {
   const now = new Date(); const currentYear = now.getFullYear()
-  const assets = await _fetchAssets(siteId, category)
+  const assets = await _fetchAssets(siteId, category, canViewFinancials)
   let filteredAssets = assets
   if (reportId === 'asset-ytd-summary') filteredAssets = assets.filter(a => { if (!a.added_on) return false; return new Date(a.added_on).getFullYear() === currentYear })
   let totalAcqCost = 0, totalAccumDepr = 0, totalNBV = 0
@@ -844,8 +846,8 @@ async function _assetRegisterAdapter(reportId, { siteId, category, startDate, en
   }
 }
 
-async function _assetAgeAdapter({ siteId, category }) {
-  const assets = await _fetchAssets(siteId, category)
+async function _assetAgeAdapter({ siteId, category, canViewFinancials }) {
+  const assets = await _fetchAssets(siteId, category, canViewFinancials)
   const buckets = { '0–2 yrs': 0, '3–5 yrs': 0, '6–10 yrs': 0, '11–15 yrs': 0, '15+ yrs': 0 }
   const rows = assets.map(a => {
     const ageYrs = yearsBetween(a.purchase_date || a.added_on) || 0
@@ -876,22 +878,22 @@ async function _assetDisposalAdapter({ siteId }) {
   return { state: rows.length === 0 ? 'NO_DATA' : 'DATA_AVAILABLE', summary: { totalDisposed: rows.length, totalOriginalCost: rows.reduce((s, r) => s + (r.original_cost || 0), 0), totalProceeds: rows.filter(r => typeof r.proceeds === 'number').reduce((s, r) => s + r.proceeds, 0) }, chartData: [{ name: 'With Proceeds', value: rows.filter(r => typeof r.proceeds === 'number').length }, { name: 'No Proceeds', value: rows.filter(r => r.proceeds === 'N/A').length }].filter(d => d.value > 0), columns: [{ key: 'asset_code', label: 'Asset Code' }, { key: 'asset_name', label: 'Asset Name' }, { key: 'category', label: 'Category' }, { key: 'site', label: 'Site' }, { key: 'disposal_date', label: 'Disposal Date' }, { key: 'disposal_reason', label: 'Reason' }, { key: 'original_cost', label: 'Original Cost (₹)', format: 'currency' }, { key: 'book_value_at_disposal', label: 'Book Value (₹)', format: 'currency' }, { key: 'proceeds', label: 'Proceeds (₹)', format: 'currency' }, { key: 'gain_loss', label: 'Gain/Loss (₹)' }], rows }
 }
 
-async function _assetLifespanAdapter({ siteId, category }) {
-  const assets = await _fetchAssets(siteId, category)
+async function _assetLifespanAdapter({ siteId, category, canViewFinancials }) {
+  const assets = await _fetchAssets(siteId, category, canViewFinancials)
   const rows = assets.map(a => { const expectedLife = Number(a.useful_life_years) || null; const actualAge = yearsBetween(a.purchase_date || a.added_on); const depr = calcDepreciation(a); const remainingLife = expectedLife !== null && actualAge !== null ? Math.max(0, expectedLife - actualAge) : null; let life_status = expectedLife === null ? 'Unknown' : actualAge >= expectedLife ? 'BEYOND EXPECTED LIFE' : actualAge >= expectedLife * 0.8 ? 'NEAR END OF LIFE' : 'WITHIN EXPECTED LIFE'; return { id: a.id, asset_code: a.asset_code, asset_name: a.asset_name || 'N/A', category: a.category || 'N/A', site: a.site || 'N/A', status: a.status || 'N/A', expected_life_years: expectedLife !== null ? expectedLife : 'N/A', actual_age_years: actualAge !== null ? Math.round(actualAge * 10) / 10 : 'N/A', remaining_life_years: remainingLife !== null ? Math.round(remainingLife * 10) / 10 : 'N/A', net_book_value: depr.netBookValue, life_status } }).sort((a, b) => { const da = typeof a.remaining_life_years === 'number' ? a.remaining_life_years : 999; const db = typeof b.remaining_life_years === 'number' ? b.remaining_life_years : 999; return da - db })
   const beyondExpected = rows.filter(r => r.life_status === 'BEYOND EXPECTED LIFE').length; const nearEnd = rows.filter(r => r.life_status === 'NEAR END OF LIFE').length
   return { state: rows.length === 0 ? 'NO_DATA' : 'DATA_AVAILABLE', summary: { totalAssets: rows.length, beyondExpected, nearEnd }, chartData: [{ name: 'Within Expected Life', value: rows.filter(r => r.life_status === 'WITHIN EXPECTED LIFE').length }, { name: 'Near End of Life', value: nearEnd }, { name: 'Beyond Expected Life', value: beyondExpected }, { name: 'Unknown', value: rows.filter(r => r.life_status === 'Unknown').length }].filter(d => d.value > 0), columns: [{ key: 'asset_code', label: 'Asset Code' }, { key: 'asset_name', label: 'Asset Name' }, { key: 'category', label: 'Category' }, { key: 'site', label: 'Site' }, { key: 'expected_life_years', label: 'Expected Life (Yrs)' }, { key: 'actual_age_years', label: 'Actual Age (Yrs)' }, { key: 'remaining_life_years', label: 'Remaining (Yrs)' }, { key: 'net_book_value', label: 'Net Book Value (₹)', format: 'currency' }, { key: 'life_status', label: 'Life Status', format: 'badge_compliance' }], rows }
 }
 
-async function _deptDepreciationAdapter({ siteId }) {
-  const assets = await _fetchAssets(siteId)
+async function _deptDepreciationAdapter({ siteId, canViewFinancials }) {
+  const assets = await _fetchAssets(siteId, 'all', canViewFinancials)
   const deptMap = {}; assets.forEach(a => { const dept = a.department || 'Unassigned'; if (!deptMap[dept]) deptMap[dept] = { department: dept, total_assets: 0, opening_value: 0, annual_depreciation: 0, net_book_value: 0 }; const depr = calcDepreciation(a); const usefulLife = Number(a.useful_life_years) || 10; const pVal = depr.purchaseVal; const salvage = Number(a.salvage_value) || 0; const annualDepr = usefulLife > 0 ? Math.round((pVal - salvage) / usefulLife) : 0; deptMap[dept].total_assets += 1; deptMap[dept].opening_value += pVal; deptMap[dept].annual_depreciation += annualDepr; deptMap[dept].net_book_value += depr.netBookValue })
   const rows = Object.values(deptMap).sort((a, b) => b.opening_value - a.opening_value)
   return { state: rows.length === 0 ? 'NO_DATA' : 'DATA_AVAILABLE', summary: { totalDepts: rows.length, totalAssets: rows.reduce((s, r) => s + r.total_assets, 0), totalAnnualDepreciation: rows.reduce((s, r) => s + r.annual_depreciation, 0) }, chartData: rows.slice(0, 8).map(r => ({ name: r.department, value: r.annual_depreciation })), columns: [{ key: 'department', label: 'Department' }, { key: 'total_assets', label: 'Assets', format: 'number' }, { key: 'opening_value', label: 'Opening Value (₹)', format: 'currency' }, { key: 'annual_depreciation', label: 'Annual Depreciation (₹)', format: 'currency' }, { key: 'net_book_value', label: 'Net Book Value (₹)', format: 'currency' }], rows }
 }
 
-async function _productDepreciationAdapter({ siteId, category }) {
-  const assets = await _fetchAssets(siteId, category)
+async function _productDepreciationAdapter({ siteId, category, canViewFinancials }) {
+  const assets = await _fetchAssets(siteId, category, canViewFinancials)
   const catMap = {}; assets.forEach(a => { const cat = a.category || 'Uncategorized'; if (!catMap[cat]) catMap[cat] = { category: cat, units: 0, gross_cost: 0, accumulated_depreciation: 0, net_book_value: 0 }; const depr = calcDepreciation(a); catMap[cat].units += 1; catMap[cat].gross_cost += depr.purchaseVal; catMap[cat].accumulated_depreciation += depr.accumDepr; catMap[cat].net_book_value += depr.netBookValue })
   const rows = Object.values(catMap).map(r => ({ ...r, depreciation_pct: r.gross_cost > 0 ? `${Math.round((r.accumulated_depreciation / r.gross_cost) * 100)}%` : 'N/A' })).sort((a, b) => b.gross_cost - a.gross_cost)
   return { state: rows.length === 0 ? 'NO_DATA' : 'DATA_AVAILABLE', summary: { totalCategories: rows.length, totalGrossCost: rows.reduce((s, r) => s + r.gross_cost, 0), totalAccumDepr: rows.reduce((s, r) => s + r.accumulated_depreciation, 0), totalNBV: rows.reduce((s, r) => s + r.net_book_value, 0) }, chartData: rows.slice(0, 8).map(r => ({ name: r.category, value: r.net_book_value })), columns: [{ key: 'category', label: 'Category' }, { key: 'units', label: 'Units', format: 'number' }, { key: 'gross_cost', label: 'Gross Cost (₹)', format: 'currency' }, { key: 'accumulated_depreciation', label: 'Accum Depr (₹)', format: 'currency' }, { key: 'net_book_value', label: 'Net Book Value (₹)', format: 'currency' }, { key: 'depreciation_pct', label: 'Depr %' }], rows }

@@ -51,18 +51,18 @@ export default function MobileFieldView() {
       <button 
         onClick={() => navigate('/')} 
         className="btn-ghost" 
-        style={{ padding: '8px 12px', marginBottom: 20, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: 6 }}
+        style={{ padding: '8px 12px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 6 }}
       >
         <ArrowLeft size={16} /> Back to Dashboard
       </button>
 
       <div className="card animate-fade-up">
         <div className="card-header" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
-          <h1 style={{ margin: 0, fontSize: '1.2rem', fontFamily: 'Oswald', color: 'var(--text-0)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <h1 style={{ margin: 0, color: 'var(--text-0)', display: 'flex', alignItems: 'center', gap: 8 }}>
             <QrCode size={20} color="var(--accent)" />
             FIELD TECHNICIAN PORTAL
           </h1>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-2)' }}>Scan or enter asset code to begin work</span>
+          <span style={{ color: 'var(--text-2)' }}>Scan or enter asset code to begin work</span>
         </div>
         
         <div className="card-body">
@@ -82,10 +82,10 @@ export default function MobileFieldView() {
             <div style={{ width: 64, height: 64, background: 'var(--bg-2)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--clay-shadow-sm)' }}>
               <QrCode size={32} color="var(--accent)" />
             </div>
-            <span style={{ fontWeight: 600, color: 'var(--text-1)', fontSize: '0.9rem' }}>Tap to Scan QR Code</span>
+            <span style={{ color: 'var(--text-1)', }}>Tap to Scan QR Code</span>
           </div>
 
-          <div style={{ textAlign: 'center', color: 'var(--text-3)', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', marginBottom: 24, position: 'relative' }}>
+          <div style={{ textAlign: 'center', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 24, position: 'relative' }}>
             <span style={{ background: 'var(--bg-2)', padding: '0 10px', position: 'relative', zIndex: 2 }}>OR</span>
             <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 1, background: 'var(--border)', zIndex: 1 }} />
           </div>
@@ -106,7 +106,7 @@ export default function MobileFieldView() {
               </button>
             </div>
             {error && (
-              <div style={{ marginTop: 12, padding: 12, background: 'rgba(239,68,68,0.1)', color: 'var(--red)', borderRadius: 10, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ marginTop: 12, padding: 12, background: 'var(--status-danger-soft)', color: 'var(--red)', borderRadius: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <AlertCircle size={16} /> {error}
               </div>
             )}
@@ -116,7 +116,7 @@ export default function MobileFieldView() {
 
       <div className="card animate-fade-up" style={{ marginTop: 16, animationDelay: '100ms' }}>
         <div className="card-body" style={{ padding: 16 }}>
-          <h3 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: 'var(--text-1)', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <h3 style={{ margin: '0 0 12px 0', color: 'var(--text-1)', display: 'flex', alignItems: 'center', gap: 6 }}>
             <Wrench size={16} color="var(--amber)" /> Quick Actions
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 8 }}>

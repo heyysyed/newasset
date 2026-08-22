@@ -5,13 +5,13 @@ import { supabase, fetchActivityLogs } from '../../lib/supabase'
 import * as XLSX from 'xlsx'
 
 const ACTION_COLORS = {
-  created: '#2563eb',
+  created: 'var(--accent)',
   updated: '#0891b2',
-  deleted: '#ef4444',
-  scrapped: '#dc2626',
-  requested_scrap: '#d97706',
+  deleted: 'var(--status-danger)',
+  scrapped: 'var(--status-danger)',
+  requested_scrap: 'var(--status-warning)',
   stock_reconciliation: '#059669',
-  high_risk_audit_anomaly: '#ef4444',
+  high_risk_audit_anomaly: 'var(--status-danger)',
   transfer: '#7c3aed',
   signed_in: '#059669'
 }
@@ -121,16 +121,16 @@ export default function UserActivityAnalytics() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
         <div>
-          <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Shield size={18} color="#2563eb" /> Security & Activity Command Center
+          <h3 style={{ margin: 0, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Shield size={18} color='var(--accent)' /> Security & Activity Command Center
           </h3>
-          <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', fontFamily: 'DM Sans' }}>
+          <p style={{ margin: 0, color: '#64748b', }}>
             Real-time security audit log, user action telemetry, and high-risk anomaly tracking
           </p>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button onClick={exportLogsToExcel} className="btn-ghost" style={{ padding: '6px 14px', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <button onClick={exportLogsToExcel} className="btn-ghost" style={{ padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
             <Download size={14} color="#059669" /> Export Excel
           </button>
         </div>
@@ -143,24 +143,24 @@ export default function UserActivityAnalytics() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           
           {/* High-Risk Event Banner */}
-          <div style={{ padding: 14, background: highRiskEventsCount > 0 ? 'rgba(239,68,68,0.08)' : '#f8fafc', borderRadius: 10, border: highRiskEventsCount > 0 ? '1px solid rgba(239,68,68,0.3)' : '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ padding: 14, background: highRiskEventsCount > 0 ? 'var(--status-danger-soft)' : '#f8fafc', borderRadius: 10, border: highRiskEventsCount > 0 ? '1px solid var(--status-danger-soft)' : '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <ShieldAlert size={20} color={highRiskEventsCount > 0 ? '#ef4444' : '#64748b'} />
+              <ShieldAlert size={20} color={highRiskEventsCount > 0 ? 'var(--status-danger)' : '#64748b'} />
               <div>
-                <div style={{ fontWeight: 700, fontSize: '0.88rem', color: highRiskEventsCount > 0 ? '#dc2626' : '#0f172a' }}>
+                <div style={{ color: highRiskEventsCount > 0 ? 'var(--status-danger)' : '#0f172a' }}>
                   High-Risk Security Events
                 </div>
-                <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Includes stock anomalies {'>'}10% & scrap requests</div>
+                <div style={{ color: '#64748b' }}>Includes stock anomalies {'>'}10% & scrap requests</div>
               </div>
             </div>
-            <span style={{ fontSize: '1.4rem', fontWeight: 700, fontFamily: 'Oswald', color: highRiskEventsCount > 0 ? '#dc2626' : '#0f172a' }}>
+            <span style={{ color: highRiskEventsCount > 0 ? 'var(--status-danger)' : '#0f172a' }}>
               {highRiskEventsCount}
             </span>
           </div>
 
           {/* User Activity Bar Chart */}
           <div style={{ background: '#f8fafc', padding: 14, borderRadius: 10, border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginBottom: 10, textTransform: 'uppercase' }}>
+            <div style={{ color: '#0f172a', marginBottom: 10, textTransform: 'uppercase' }}>
               User Actions Telemetry
             </div>
             <div style={{ height: 160, width: '100%' }}>
@@ -169,7 +169,7 @@ export default function UserActivityAnalytics() {
                   <XAxis dataKey="name" stroke="#64748b" fontSize={10} tickLine={false} />
                   <YAxis stroke="#64748b" fontSize={10} tickLine={false} />
                   <Tooltip />
-                  <Bar dataKey="count" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="count" fill='var(--accent)' radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -177,7 +177,7 @@ export default function UserActivityAnalytics() {
 
           {/* Action Types Donut Chart */}
           <div style={{ background: '#f8fafc', padding: 14, borderRadius: 10, border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', marginBottom: 10, textTransform: 'uppercase' }}>
+            <div style={{ color: '#0f172a', marginBottom: 10, textTransform: 'uppercase' }}>
               Action Type Distribution
             </div>
             <div style={{ height: 150, width: '100%', position: 'relative' }}>
@@ -224,35 +224,35 @@ export default function UserActivityAnalytics() {
           {/* Realtime Stream List */}
           <div style={{ overflowY: 'auto', maxHeight: 420, display: 'flex', flexDirection: 'column', gap: 8 }}>
             {filteredLogs.length === 0 && (
-              <div style={{ padding: 30, textAlign: 'center', color: '#94a3b8', fontSize: '0.8rem' }}>No activity logs recorded.</div>
+              <div style={{ padding: 30, textAlign: 'center', color: '#94a3b8', }}>No activity logs recorded.</div>
             )}
             {filteredLogs.map(l => {
               const act = l.action || ''
               const isAnomaly = act === 'high_risk_anomaly' || act === 'scrapped' || act === 'high_risk_audit_anomaly'
-              const color = ACTION_COLORS[act] || '#2563eb'
+              const color = ACTION_COLORS[act] || 'var(--accent)'
 
               return (
-                <div key={l.id} style={{ padding: 12, background: isAnomaly ? 'rgba(239,68,68,0.06)' : '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <div key={l.id} style={{ padding: 12, background: isAnomaly ? 'var(--status-danger-soft)' : '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#ffffff', background: color, padding: '2px 6px', borderRadius: 4, textTransform: 'uppercase' }}>
+                      <span style={{ color: '#ffffff', background: color, padding: '2px 6px', borderRadius: 4, textTransform: 'uppercase' }}>
                         {act.replace(/_/g, ' ')}
                       </span>
-                      <span style={{ fontWeight: 700, fontSize: '0.82rem', color: '#0f172a' }}>
+                      <span style={{ color: '#0f172a' }}>
                         {l.profiles?.full_name || l.user_id || 'System'}
                       </span>
                     </div>
-                    <span style={{ fontSize: '0.7rem', color: '#64748b', fontFamily: 'DM Mono', display: 'flex', alignItems: 'center', gap: 3 }}>
+                    <span style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: 3 }}>
                       <Clock size={11} /> {formatRelativeTime(l.created_at)}
                     </span>
                   </div>
 
-                  <div style={{ fontSize: '0.78rem', color: '#334155', fontWeight: 600 }}>
+                  <div style={{ color: '#334155', }}>
                     {l.entity_type?.toUpperCase()}: {l.entity_name}
                   </div>
 
                   {l.details && Object.keys(l.details).length > 0 && (
-                    <div style={{ fontSize: '0.72rem', color: '#64748b', background: '#f8fafc', padding: '4px 8px', borderRadius: 6, fontFamily: 'DM Mono' }}>
+                    <div style={{ color: '#64748b', background: '#f8fafc', padding: '4px 8px', borderRadius: 6, }}>
                       {l.details.variance !== undefined && `Variance: ${l.details.variance > 0 ? '+' : ''}${l.details.variance} units `}
                       {l.details.reasoning && `• Reason: ${l.details.reasoning}`}
                       {l.details.scrapValue && `• Scrap Value: ₹${l.details.scrapValue}`}

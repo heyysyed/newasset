@@ -77,7 +77,7 @@ export default function InventoryItemForm({ isOpen, onClose, onSave, item = null
       }}>
         <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: 'var(--bg-1)', zIndex: 10 }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-0)' }}>
+            <h2 style={{ margin: 0, color: 'var(--text-0)' }}>
               {item ? 'EDIT ITEM' : 'NEW INVENTORY SKU'}
             </h2>
           </div>
@@ -86,14 +86,14 @@ export default function InventoryItemForm({ isOpen, onClose, onSave, item = null
 
         <form onSubmit={handleSubmit} style={{ padding: 24 }}>
           {error && (
-            <div style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--red)', padding: 12, borderRadius: 8, marginBottom: 20, fontSize: '0.85rem' }}>
+            <div style={{ background: 'var(--status-danger-soft)', color: 'var(--red)', padding: 12, borderRadius: 8, marginBottom: 20, }}>
               {error}
             </div>
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
             <div style={{ gridColumn: 'span 2' }}>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Item Name</label>
+              <label style={{ display: 'block', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Item Name</label>
               <div style={{ position: 'relative' }}>
                 <Archive size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
                 <input 
@@ -107,7 +107,7 @@ export default function InventoryItemForm({ isOpen, onClose, onSave, item = null
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Item/SKU Code</label>
+              <label style={{ display: 'block', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Item/SKU Code</label>
               <input 
                 className="inp"
                 placeholder="INV-XXXXX"
@@ -118,7 +118,7 @@ export default function InventoryItemForm({ isOpen, onClose, onSave, item = null
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Category</label>
+              <label style={{ display: 'block', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Category</label>
               <select 
                 className="inp"
                 value={formData.category}
@@ -131,7 +131,7 @@ export default function InventoryItemForm({ isOpen, onClose, onSave, item = null
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 20 }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Unit</label>
+              <label style={{ display: 'block', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Unit</label>
               <select 
                 className="inp"
                 value={formData.unit}
@@ -141,7 +141,7 @@ export default function InventoryItemForm({ isOpen, onClose, onSave, item = null
               </select>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Unit Cost</label>
+              <label style={{ display: 'block', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Unit Cost</label>
               <input 
                 type="number" step="any" className="inp" placeholder="0.00"
                 value={formData.unit_cost}
@@ -150,7 +150,7 @@ export default function InventoryItemForm({ isOpen, onClose, onSave, item = null
               />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Min Stock Level</label>
+              <label style={{ display: 'block', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Min Stock Level</label>
               <input 
                 type="number" step="any" className="inp" placeholder="0"
                 value={formData.reorder_level}
@@ -162,7 +162,7 @@ export default function InventoryItemForm({ isOpen, onClose, onSave, item = null
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Storage Location</label>
+              <label style={{ display: 'block', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Storage Location</label>
               <input 
                 className="inp" placeholder="e.g. Warehouse 1"
                 value={formData.location}
@@ -170,7 +170,7 @@ export default function InventoryItemForm({ isOpen, onClose, onSave, item = null
               />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Bin / Shelf ID</label>
+              <label style={{ display: 'block', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Bin / Shelf ID</label>
               <input 
                 className="inp" placeholder="e.g. S4-B12"
                 value={formData.location_bin}
@@ -180,7 +180,7 @@ export default function InventoryItemForm({ isOpen, onClose, onSave, item = null
           </div>
 
           <div style={{ marginBottom: 24 }}>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Notes & Specifications</label>
+            <label style={{ display: 'block', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 8 }}>Notes & Specifications</label>
             <textarea 
               className="inp" style={{ minHeight: 80, resize: 'vertical' }}
               placeholder="Added details, material specs, or vendor preferences..."

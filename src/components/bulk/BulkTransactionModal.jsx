@@ -215,7 +215,7 @@ export default function BulkTransactionModal({ isOpen, onClose, txType, items, s
       }
 
       onSaved()
-      // For transfers, don't auto-close — show the gate pass toast first
+      // For transfers, don't auto-close - show the gate pass toast first
       if (!isTransfer) {
         onClose()
       }
@@ -248,14 +248,14 @@ export default function BulkTransactionModal({ isOpen, onClose, txType, items, s
       >
         <div style={{ background: 'var(--bg-3)', borderBottom: '1px solid var(--border)', padding: '24px 24px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ padding: 7, background: 'rgba(79,126,255,0.12)', borderRadius: 9, color: 'var(--accent)', border: '1px solid rgba(79,126,255,0.3)' }}>
+            <div style={{ padding: 7, background: 'var(--accent-soft)', borderRadius: 9, color: 'var(--accent)', border: '1px solid var(--accent-soft)' }}>
               <Package size={16} />
             </div>
             <div>
-              <h3 style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.05em', color: 'var(--text-0)', margin: 0, textTransform: 'uppercase' }}>
+              <h3 style={{ letterSpacing: '0.05em', color: 'var(--text-0)', margin: 0, textTransform: 'uppercase' }}>
                 {titleMap[txType]}
               </h3>
-              <p style={{ fontFamily: 'DM Sans', fontSize: '0.72rem', color: 'var(--text-3)', margin: 0 }}>Execute stock movement</p>
+              <p style={{ color: 'var(--text-3)', margin: 0 }}>Execute stock movement</p>
             </div>
           </div>
           <button onClick={onClose} className="btn-ghost" style={{ padding: 6 }}><X size={16}/></button>
@@ -279,12 +279,12 @@ export default function BulkTransactionModal({ isOpen, onClose, txType, items, s
               <CheckCircle2 size={18} color="var(--green)" />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--green)', marginBottom: 2 }}>
+              <div style={{ color: 'var(--green)', marginBottom: 2 }}>
                 Transfer Complete ✓
               </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-2)' }}>
+              <div style={{ color: 'var(--text-2)' }}>
                 Gate Pass generated:{' '}
-                <span style={{ fontFamily: 'DM Mono', fontWeight: 700, color: 'var(--accent)' }}>
+                <span style={{ color: 'var(--accent)' }}>
                   {generatedPass.pass_no}
                 </span>
               </div>
@@ -293,7 +293,7 @@ export default function BulkTransactionModal({ isOpen, onClose, txType, items, s
               <button
                 onClick={() => { onViewGatePass(); onClose() }}
                 className="btn-ghost"
-                style={{ padding: '6px 12px', fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, border: '1px solid var(--green)', color: 'var(--green)' }}
+                style={{ padding: '6px 12px', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, border: '1px solid var(--green)', color: 'var(--green)' }}
               >
                 <FileText size={13} /> View Pass
               </button>
@@ -340,8 +340,8 @@ export default function BulkTransactionModal({ isOpen, onClose, txType, items, s
               <div style={{ padding: 4, borderRadius: '50%', background: 'rgba(16,185,129,0.2)', color: '#059669', display: 'flex' }}>
                 <Package size={14} />
               </div>
-              <span style={{ fontSize: '0.75rem', color: '#059669', fontFamily: 'DM Sans', fontWeight: 600 }}>
-                Recommended Source: <strong>{recommendedSourceSite.site}</strong> (Surplus: {recommendedSourceSite.usable_qty} {selectedItem?.unit || 'pcs'}) — Tap to select
+              <span style={{ color: '#059669', }}>
+                Recommended Source: <strong>{recommendedSourceSite.site}</strong> (Surplus: {recommendedSourceSite.usable_qty} {selectedItem?.unit || 'pcs'}) - Tap to select
               </span>
             </div>
           )}
@@ -383,8 +383,8 @@ export default function BulkTransactionModal({ isOpen, onClose, txType, items, s
 
           {form.quantity && selectedItem?.unit_weight_kg > 0 && (
             <div style={{ padding:'10px 14px', background:'var(--bg-2)', borderRadius:8, border:'1px solid var(--border)', display:'flex', justifyContent:'space-between' }}>
-              <span style={{ fontSize:'0.85rem', color:'var(--text-2)' }}>Total Weight:</span>
-              <span style={{ fontFamily:'DM Mono', fontWeight:600, color:'var(--text-0)' }}>
+              <span style={{ color:'var(--text-2)' }}>Total Weight:</span>
+              <span style={{ color:'var(--text-0)' }}>
                 {(Number(form.quantity) * Number(selectedItem.unit_weight_kg)).toLocaleString('en-IN', { maximumFractionDigits: 2 })} kg
               </span>
             </div>
@@ -393,7 +393,7 @@ export default function BulkTransactionModal({ isOpen, onClose, txType, items, s
           {/* Transfer info note & Signature */}
           {isTransfer && (
             <>
-              <div style={{ padding: '10px 14px', background: 'rgba(79,126,255,0.06)', borderRadius: 8, border: '1px solid rgba(79,126,255,0.2)', fontSize: '0.75rem', color: 'var(--text-2)', display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+              <div style={{ padding: '10px 14px', background: 'var(--accent-soft)', borderRadius: 8, border: '1px solid var(--accent-soft)', color: 'var(--text-2)', display: 'flex', alignItems: 'flex-start', gap: 8 }}>
                 <FileText size={14} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 1 }} />
                 <span>A <strong style={{ color: 'var(--accent)' }}>Gate Pass</strong> will be automatically generated and linked to this transfer with your digital signature.</span>
               </div>

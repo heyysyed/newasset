@@ -8,6 +8,10 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { calculateBookValue, formatCurrency } from '../lib/depreciation'
 import { isSiteMatch } from '../lib/siteMatcher'
+import { useIsMobile } from '../hooks/useBreakpoint'
+import MobileSitesPage from '../components/mobile/MobileSitesPage'
+import Site360Workspace from '../components/sites/Site360Workspace'
+import MobileSiteDetail from '../components/mobile/MobileSiteDetail'
 
 // Fix Leaflet icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -37,6 +41,7 @@ export default function SitesPage() {
   const { user, currentCompany, can, isAdmin, isMod } = useAuth()
   const cc = currentCompany?.code
   const navigate = useNavigate()
+  const isMobile = useIsMobile()
   
   const [sites, setSites] = useState([])
   const [assets, setAssets] = useState([])
@@ -177,39 +182,161 @@ export default function SitesPage() {
     ? [validSites[0].latitude, validSites[0].longitude] 
     : [20.5937, 78.9629] // Default to India roughly
 
+  if (isMobile) {
+    return (
+      <>
+        <MobileSitesPage
+          sites={sites}
+          loading={loading}
+          can={can}
+          isAdmin={isAdmin}
+          isMod={isMod}
+          openNew={openNew}
+          openEdit={openEdit}
+          handleDelete={handleDelete}
+          openDrawer={openDrawer}
+          getSiteAnalytics={getSiteAnalytics}
+        />
+        {/* Modals from Desktop to handle creation/editing etc */}
+        {showDrawer && selectedSite && (
+          <div className="drawer-backdrop" onClick={() => setShowDrawer(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)', zIndex: 100 }} />
+        )}
+        {showDrawer && selectedSite && (
+          <div className="drawer animate-slide-in-right sites-drawer" style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '100%', maxWidth: 450, background: 'var(--bg-1)', zIndex: 101, boxShadow: '-4px 0 24px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-2)' }}>
+              <div>
+                <h2 style={{ margin: 0, color: 'var(--text-0)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <MapPin size={20} color="var(--accent)" /> {selectedSite.name}
+                </h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: selectedSite.is_active ? 'var(--green)' : 'var(--red)' }} />
+                  <span style={{ color: 'var(--text-2)' }}>{selectedSite.is_active ? 'Active Site' : 'Inactive Site'}</span>
+                </div>
+              </div>
+              <button onClick={() => setShowDrawer(false)} className="btn-ghost" style={{ padding: 8, background: 'var(--bg-1)' }}><X size={18} /></button>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
+                <div style={{ background: 'var(--bg-2)', padding: '16px', borderRadius: 12, border: '1px solid var(--border)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: 'var(--text-3)' }}>
+                    <Package size={16} /> <span style={{ textTransform: 'uppercase', }}>Total Assets</span>
+                  </div>
+                  <div style={{ color: 'var(--text-0)' }}>{getSiteAnalytics(selectedSite.name).total}</div>
+                </div>
+                <div style={{ background: 'rgba(220,38,38,0.05)', padding: '16px', borderRadius: 12, border: '1px solid rgba(220,38,38,0.1)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: 'var(--red)' }}>
+                    <Activity size={16} /> <span style={{ textTransform: 'uppercase', }}>Open Tickets</span>
+                  </div>
+                  <div style={{ color: 'var(--red)' }}>{getSiteAnalytics(selectedSite.name).openTickets}</div>
+                </div>
+              </div>
+              <div style={{ background: 'var(--bg-2)', borderRadius: 12, border: '1px solid var(--border)', overflow: 'hidden' }}>
+                <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', background: 'var(--bg-1)', }}>Location Details</div>
+                <div style={{ padding: 16 }}>
+                  <p style={{ margin: '0 0 12px 0', color: 'var(--text-1)', }}>
+                    {selectedSite.address || <span style={{ color: 'var(--text-3)', fontStyle: 'italic' }}>No address provided</span>}
+                  </p>
+                  <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                    {selectedSite.latitude && selectedSite.longitude ? (
+                      <>
+                        <div style={{ background: 'var(--bg-1)', padding: '4px 10px', borderRadius: 6, border: '1px solid var(--border)', }}>
+                          Lat: <span >{Number(selectedSite.latitude).toFixed(4)}</span>
+                        </div>
+                        <div style={{ background: 'var(--bg-1)', padding: '4px 10px', borderRadius: 6, border: '1px solid var(--border)', }}>
+                          Lng: <span >{Number(selectedSite.longitude).toFixed(4)}</span>
+                        </div>
+                        <div style={{ background: 'var(--accent-glow)', color: 'var(--accent)', padding: '4px 10px', borderRadius: 6, }}>
+                          {selectedSite.radius_meters}m Radius
+                        </div>
+                      </>
+                    ) : (
+                      <span style={{ color: 'var(--amber)', background: 'var(--status-warning-soft)', padding: '4px 8px', borderRadius: 6, }}>No GPS coordinates</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showModal && (
+          <div className="modal-backdrop" style={{ zIndex: 200 }}>
+            <div className="modal-container sites-modal-container animate-scale-in" style={{ maxWidth: 600, margin: '20px auto', maxHeight: '90vh', overflowY: 'auto' }}>
+              <div className="modal-header">
+                <h2>{editingSite ? 'Edit Site' : 'Add New Site'}</h2>
+                <button className="btn-ghost btn-icon" onClick={() => setShowModal(false)}><X size={18} /></button>
+              </div>
+              <div className="modal-body">
+                <form id="site-form" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                  <div className="form-group">
+                    <label>Site Name <span style={{ color: 'var(--red)' }}>*</span></label>
+                    <input type="text" className={`input ${errors.name ? 'error' : ''}`} value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="e.g. Main Warehouse" autoFocus />
+                    {errors.name && <span className="error-text">{errors.name}</span>}
+                  </div>
+                  <div className="form-group">
+                    <label>Site Code</label>
+                    <input type="text" className="input font-mono uppercase" value={form.site_code} onChange={e => setForm({...form, site_code: e.target.value.toUpperCase()})} placeholder="e.g. WH-01" />
+                  </div>
+                  <div className="form-group">
+                    <label>Address</label>
+                    <textarea className="input" value={form.address} onChange={e => setForm({...form, address: e.target.value})} rows={3} placeholder="Full physical address" />
+                  </div>
+                  <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+                    <input type="checkbox" id="site_active" checked={form.is_active} onChange={e => setForm({...form, is_active: e.target.checked})} />
+                    <label htmlFor="site_active" style={{ margin: 0, cursor: 'pointer' }}>Site is Active</label>
+                  </div>
+                </form>
+              </div>
+              <div className="modal-footer" style={{ justifyContent: 'flex-end', gap: 12 }}>
+                <button type="button" className="btn-ghost" onClick={() => setShowModal(false)}>Cancel</button>
+                <button type="submit" form="site-form" className="btn-primary" disabled={saving}>
+                  {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                  {saving ? 'Saving...' : (editingSite ? 'Save Changes' : 'Create Site')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    )
+  }
+
   return (
     <div style={{ width: '100%' }}>
       {/* Header & Toggles */}
-      <div className="animate-fade-up sites-header-row" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <h1 style={{ fontSize: '1.8rem', fontWeight: 700, fontFamily: 'Oswald', margin: '0 0 4px', color: 'var(--text-0)' }}>
-            SITE <span style={{ color: 'var(--accent)' }}>MANAGEMENT</span>
-          </h1>
-          <p style={{ margin: 0, color: 'var(--text-2)', fontSize: '0.85rem', fontFamily: 'DM Sans' }}>
-            Manage geographical locations, geofencing coordinates, and view site analytics.
-          </p>
-        </div>
-
-        <div className="sites-header-actions" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div className="tab-container" style={{ margin: 0 }}>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`tab-btn ${viewMode === 'list' ? 'active' : ''}`}
-            >
-              <List size={15} /> List View
-            </button>
-            <button
-              onClick={() => setViewMode('map')}
-              className={`tab-btn ${viewMode === 'map' ? 'active' : ''}`}
-            >
-              <MapIcon size={15} /> Map View
-            </button>
+      <div className="animate-fade-up" style={{ marginBottom: 24 }}>
+        {/* Title Row */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
+          <div>
+            <h1 className="text-page-title m-0 mb-1 tracking-wide uppercase">
+              SITE <span className="text-accent">MANAGEMENT</span>
+            </h1>
+            <p style={{ margin: 0, color: 'var(--text-2)', }} className="hidden md:block">
+              Manage geographical locations, geofencing coordinates, and view site analytics.
+            </p>
           </div>
+
           {(isAdmin || isMod || can('add')) && (
-            <button onClick={openNew} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px' }}>
+            <button onClick={openNew} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px', minHeight: 44 }}>
               <PlusCircle size={16} /> Add Site
             </button>
           )}
+        </div>
+
+        {/* View Toggle Row */}
+        <div className="tab-container" style={{ margin: 0 }}>
+          <button
+            onClick={() => setViewMode('list')}
+            className={`tab-btn ${viewMode === 'list' ? 'active' : ''}`}
+          >
+            <List size={15} /> List View
+          </button>
+          <button
+            onClick={() => setViewMode('map')}
+            className={`tab-btn ${viewMode === 'map' ? 'active' : ''}`}
+          >
+            <MapIcon size={15} /> Map View
+          </button>
         </div>
       </div>
 
@@ -232,30 +359,30 @@ export default function SitesPage() {
               <React.Fragment key={site.id}>
                 <Marker position={[Number(site.latitude), Number(site.longitude)]}>
                   <Popup className="custom-popup">
-                    <div style={{ padding: '4px 0', fontFamily: 'DM Sans', minWidth: 200 }}>
+                    <div style={{ padding: '4px 0', minWidth: 200 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
                         <div style={{ width: 10, height: 10, borderRadius: '50%', background: site.is_active ? 'var(--green)' : 'var(--red)' }} />
                         {site.site_code && (
-                          <span style={{ fontFamily: 'DM Mono, monospace', fontWeight: 700, background: 'rgba(59,130,246,0.15)', color: '#2563eb', padding: '1px 6px', borderRadius: 4, fontSize: '0.72rem', border: '1px solid rgba(59,130,246,0.3)' }}>
+                          <span style={{ background: 'rgba(59,130,246,0.15)', color: 'var(--accent)', padding: '1px 6px', borderRadius: 4, border: '1px solid rgba(59,130,246,0.3)' }}>
                             [{site.site_code}]
                           </span>
                         )}
-                        <strong style={{ fontSize: '1.05rem', color: '#111', fontFamily: 'Oswald' }}>{site.name}</strong>
+                        <strong style={{ color: '#111', }}>{site.name}</strong>
                       </div>
-                      <p style={{ margin: '0 0 12px 0', fontSize: '0.8rem', color: '#666', lineHeight: 1.4 }}>{site.address || 'No address provided'}</p>
+                      <p style={{ margin: '0 0 12px 0', color: '#666', }}>{site.address || 'No address provided'}</p>
                       
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
                         <div style={{ background: '#f5f7fa', padding: '6px 8px', borderRadius: 6, textAlign: 'center' }}>
-                          <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase' }}>Assets</div>
-                          <div style={{ fontSize: '1rem', fontWeight: 700, color: '#333' }}>{getSiteAnalytics(site.name).total}</div>
+                          <div style={{ color: '#666', textTransform: 'uppercase' }}>Assets</div>
+                          <div style={{ color: '#333' }}>{getSiteAnalytics(site.name).total}</div>
                         </div>
                         <div style={{ background: '#fef2f2', padding: '6px 8px', borderRadius: 6, textAlign: 'center' }}>
-                          <div style={{ fontSize: '0.7rem', color: '#dc2626', textTransform: 'uppercase' }}>Alerts</div>
-                          <div style={{ fontSize: '1rem', fontWeight: 700, color: '#dc2626' }}>{getSiteAnalytics(site.name).openTickets}</div>
+                          <div style={{ color: 'var(--status-danger)', textTransform: 'uppercase' }}>Alerts</div>
+                          <div style={{ color: 'var(--status-danger)' }}>{getSiteAnalytics(site.name).openTickets}</div>
                         </div>
                       </div>
                       
-                      <button onClick={() => openDrawer(site)} style={{ width: '100%', background: 'var(--accent)', color: 'white', border: 'none', padding: '8px', borderRadius: 6, fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>
+                      <button onClick={() => openDrawer(site)} style={{ width: '100%', background: 'var(--accent)', color: 'white', border: 'none', padding: '8px', borderRadius: 6, cursor: 'pointer' }}>
                         View Site Details
                       </button>
                     </div>
@@ -275,8 +402,8 @@ export default function SitesPage() {
             <div style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(8px)', padding: '12px 16px', borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', border: '1px solid rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', gap: 12 }}>
               <div style={{ background: 'var(--accent-glow)', color: 'var(--accent)', padding: 8, borderRadius: 8 }}><MapPin size={20} /></div>
               <div>
-                <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Total Sites</div>
-                <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#111', fontFamily: 'Oswald' }}>{sites.length}</div>
+                <div style={{ color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', }}>Total Sites</div>
+                <div style={{ color: '#111', }}>{sites.length}</div>
               </div>
             </div>
           </div>
@@ -300,7 +427,7 @@ export default function SitesPage() {
                 <tbody>
                   {sites.length === 0 && (
                     <tr>
-                      <td colSpan={6} style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>
+                      <td colSpan={6} style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-3)', }}>
                         <MapPin size={32} style={{ opacity: 0.3, margin: '0 auto 12px', display: 'block' }} />
                         No sites configured. Add your first site to map your assets.
                       </td>
@@ -310,7 +437,7 @@ export default function SitesPage() {
                     const analytics = getSiteAnalytics(site.name)
                     return (
                     <tr key={site.id} onClick={() => openDrawer(site)} style={{ cursor: 'pointer', transition: 'background 0.2s' }} onMouseOver={e => e.currentTarget.style.background = 'var(--bg-2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                      <td style={{ fontWeight: 600, color: 'var(--text-0)' }}>
+                      <td style={{ color: 'var(--text-0)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                           <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--accent-glow)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                             <MapPin size={18} />
@@ -318,16 +445,16 @@ export default function SitesPage() {
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                               {site.site_code && (
-                                <span style={{ fontFamily: 'DM Mono, monospace', fontWeight: 700, background: 'rgba(59,130,246,0.12)', color: '#2563eb', padding: '2px 8px', borderRadius: 6, fontSize: '0.75rem', border: '1px solid rgba(59,130,246,0.25)' }}>
+                                <span style={{ background: 'rgba(59,130,246,0.12)', color: 'var(--accent)', padding: '2px 8px', borderRadius: 6, border: '1px solid rgba(59,130,246,0.25)' }}>
                                   [{site.site_code}]
                                 </span>
                               )}
-                              <span style={{ fontFamily: 'Oswald', fontSize: '1.05rem', letterSpacing: '0.02em' }}>{site.name}</span>
+                              <span style={{ letterSpacing: '0.02em' }}>{site.name}</span>
                             </div>
                             {Array.isArray(site.aliases) && site.aliases.length > 0 && (
                               <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                                 {site.aliases.slice(0, 3).map((a, idx) => (
-                                  <span key={idx} style={{ fontSize: '0.68rem', color: 'var(--text-2)', background: 'var(--bg-1)', padding: '1px 6px', borderRadius: 4, border: '1px solid var(--border)' }}>
+                                  <span key={idx} style={{ color: 'var(--text-2)', background: 'var(--bg-1)', padding: '1px 6px', borderRadius: 4, border: '1px solid var(--border)' }}>
                                     {a}
                                   </span>
                                 ))}
@@ -337,29 +464,29 @@ export default function SitesPage() {
                         </div>
                       </td>
                       <td>
-                        <div style={{ color: 'var(--text-2)', fontSize: '0.85rem', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }} title={site.address}>
-                          {site.address || <span style={{ color: 'var(--text-3)' }}>—</span>}
+                        <div style={{ color: 'var(--text-2)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }} title={site.address}>
+                          {site.address || <span style={{ color: 'var(--text-3)' }}>-</span>}
                         </div>
                       </td>
-                      <td className="font-mono" style={{ fontSize: '0.75rem', color: 'var(--text-2)' }}>
+                      <td className="font-mono" style={{ color: 'var(--text-2)' }}>
                         {(site.latitude && site.longitude) ? (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            <span style={{ border: '1px solid var(--border)', background: 'var(--bg-1)', padding: '2px 8px', borderRadius: 6, display: 'inline-block', width: 'fit-content' }}>Lat: <span style={{ color: 'var(--text-0)', fontWeight: 600 }}>{Number(site.latitude).toFixed(4)}</span></span>
-                            <span style={{ border: '1px solid var(--border)', background: 'var(--bg-1)', padding: '2px 8px', borderRadius: 6, display: 'inline-block', width: 'fit-content' }}>Lng: <span style={{ color: 'var(--text-0)', fontWeight: 600 }}>{Number(site.longitude).toFixed(4)}</span></span>
-                            <span style={{ color: 'var(--accent)', fontWeight: 600, marginTop: 4, fontSize: '0.75rem' }}>{site.radius_meters}m Radius</span>
+                            <span style={{ border: '1px solid var(--border)', background: 'var(--bg-1)', padding: '2px 8px', borderRadius: 6, display: 'inline-block', width: 'fit-content' }}>Lat: <span style={{ color: 'var(--text-0)', }}>{Number(site.latitude).toFixed(4)}</span></span>
+                            <span style={{ border: '1px solid var(--border)', background: 'var(--bg-1)', padding: '2px 8px', borderRadius: 6, display: 'inline-block', width: 'fit-content' }}>Lng: <span style={{ color: 'var(--text-0)', }}>{Number(site.longitude).toFixed(4)}</span></span>
+                            <span style={{ color: 'var(--accent)', marginTop: 4, }}>{site.radius_meters}m Radius</span>
                           </div>
-                        ) : <span style={{ color: 'var(--amber)', background: 'rgba(245,158,11,0.1)', padding: '4px 8px', borderRadius: 6, display: 'inline-block', fontWeight: 600 }}>No Coordinates</span>}
+                        ) : <span style={{ color: 'var(--amber)', background: 'var(--status-warning-soft)', padding: '4px 8px', borderRadius: 6, display: 'inline-block', }}>No Coordinates</span>}
                       </td>
                       <td style={{ textAlign: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                           <div style={{ width: 8, height: 8, borderRadius: '50%', background: site.is_active ? 'var(--green)' : 'var(--text-3)' }} />
-                          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: site.is_active ? 'var(--text-1)' : 'var(--text-3)' }}>{site.is_active ? 'Active' : 'Inactive'}</span>
+                          <span style={{ color: site.is_active ? 'var(--text-1)' : 'var(--text-3)' }}>{site.is_active ? 'Active' : 'Inactive'}</span>
                         </div>
                       </td>
                       <td style={{ textAlign: 'center' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0 }}>
-                          <span style={{ fontFamily: 'Oswald', fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-0)' }}>{analytics.total}</span>
-                          <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', fontWeight: 600 }}>Assets</span>
+                          <span style={{ color: 'var(--text-0)' }}>{analytics.total}</span>
+                          <span style={{ textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', }}>Assets</span>
                         </div>
                       </td>
                       <td style={{ textAlign: 'right' }} onClick={e => e.stopPropagation()}>
@@ -385,7 +512,7 @@ export default function SitesPage() {
 
           <div className="mobile-cards">
             {sites.length === 0 ? (
-              <div className="card" style={{ padding: 24, textAlign: 'center', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>
+              <div className="card" style={{ padding: 24, textAlign: 'center', color: 'var(--text-3)', }}>
                 <MapPin size={32} style={{ opacity: 0.3, margin: '0 auto 12px', display: 'block' }} />
                 No sites configured. Add your first site to map your assets.
               </div>
@@ -423,9 +550,6 @@ export default function SitesPage() {
                         </div>
                         <h3 style={{ 
                           margin: 0, 
-                          fontSize: '1.05rem', 
-                          fontWeight: 600, 
-                          fontFamily: 'Oswald', 
                           color: 'var(--text-0)',
                           letterSpacing: '0.02em'
                         }}>
@@ -435,7 +559,7 @@ export default function SitesPage() {
                       
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <div style={{ width: 8, height: 8, borderRadius: '50%', background: site.is_active ? 'var(--green)' : 'var(--text-3)' }} />
-                        <span style={{ fontSize: '0.75rem', color: site.is_active ? 'var(--text-1)' : 'var(--text-3)' }}>
+                        <span style={{ color: site.is_active ? 'var(--text-1)' : 'var(--text-3)' }}>
                           {site.is_active ? 'Active' : 'Inactive'}
                         </span>
                       </div>
@@ -443,9 +567,7 @@ export default function SitesPage() {
 
                     <p style={{ 
                       margin: 0, 
-                      fontSize: '0.85rem', 
                       color: 'var(--text-2)', 
-                      lineHeight: 1.4,
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: 'vertical',
@@ -461,8 +583,6 @@ export default function SitesPage() {
                           color: 'var(--accent)', 
                           padding: '4px 10px', 
                           borderRadius: 20, 
-                          fontSize: '0.72rem', 
-                          fontWeight: 600,
                           border: '1.5px solid var(--accent-glow)',
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -472,13 +592,11 @@ export default function SitesPage() {
                         </span>
                       ) : (
                         <span style={{ 
-                          background: 'rgba(245,158,11,0.08)', 
+                          background: 'var(--status-warning-soft)', 
                           color: 'var(--amber)', 
                           padding: '4px 10px', 
                           borderRadius: 20, 
-                          fontSize: '0.72rem', 
-                          fontWeight: 600,
-                          border: '1.5px solid rgba(245,158,11,0.2)'
+                          border: '1.5px solid var(--status-warning-soft)'
                         }}>
                           No Coordinates
                         </span>
@@ -489,8 +607,6 @@ export default function SitesPage() {
                         color: 'var(--text-1)', 
                         padding: '4px 10px', 
                         borderRadius: 20, 
-                        fontSize: '0.72rem', 
-                        fontWeight: 600,
                         border: '1.5px solid var(--border)',
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -501,13 +617,11 @@ export default function SitesPage() {
 
                       {analytics.openTickets > 0 && (
                         <span style={{ 
-                          background: 'rgba(239,68,68,0.08)', 
+                          background: 'var(--status-danger-soft)', 
                           color: 'var(--red)', 
                           padding: '4px 10px', 
                           borderRadius: 20, 
-                          fontSize: '0.72rem', 
-                          fontWeight: 600,
-                          border: '1.5px solid rgba(239,68,68,0.2)'
+                          border: '1.5px solid var(--status-danger-soft)'
                         }}>
                           Alerts: {analytics.openTickets}
                         </span>
@@ -534,7 +648,6 @@ export default function SitesPage() {
                             height: 36, 
                             minHeight: 36, 
                             borderRadius: 8, 
-                            fontSize: '0.75rem',
                             background: 'var(--bg-1)',
                             display: 'flex',
                             alignItems: 'center',
@@ -551,7 +664,6 @@ export default function SitesPage() {
                             height: 36, 
                             minHeight: 36, 
                             borderRadius: 8, 
-                            fontSize: '0.75rem',
                             color: 'var(--red)',
                             background: 'var(--bg-1)',
                             display: 'flex',
@@ -571,83 +683,50 @@ export default function SitesPage() {
         </>
       )}
 
-      {/* ── SITE ANALYTICS DRAWER ── */}
+      {/* ── SITE ANALYTICS DRAWER / MOBILE DETAIL ── */}
       {showDrawer && selectedSite && (
-        <>
-          <div className="drawer-backdrop" onClick={() => setShowDrawer(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)', zIndex: 100 }} />
-          <div className="drawer animate-slide-in-right sites-drawer" style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '100%', maxWidth: 450, background: 'var(--bg-1)', zIndex: 101, boxShadow: '-4px 0 24px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-2)' }}>
-              <div>
-                <h2 style={{ margin: 0, fontFamily: 'Oswald', fontSize: '1.2rem', color: 'var(--text-0)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <MapPin size={20} color="var(--accent)" /> {selectedSite.name}
-                </h2>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: selectedSite.is_active ? 'var(--green)' : 'var(--red)' }} />
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-2)' }}>{selectedSite.is_active ? 'Active Site' : 'Inactive Site'}</span>
-                </div>
-              </div>
-              <button onClick={() => setShowDrawer(false)} className="btn-ghost" style={{ padding: 8, background: 'var(--bg-1)' }}><X size={18} /></button>
-            </div>
-            
-            <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
-              
-              {/* Mini Map */}
-              {(selectedSite.latitude && selectedSite.longitude) ? (
-                <div style={{ height: 200, borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)', marginBottom: 24 }}>
-                  <MapContainer center={[Number(selectedSite.latitude), Number(selectedSite.longitude)]} zoom={14} style={{ height: '100%', width: '100%' }} zoomControl={false} dragging={false} scrollWheelZoom={false}>
-                    <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
-                    <Marker position={[Number(selectedSite.latitude), Number(selectedSite.longitude)]} />
-                    <Circle center={[Number(selectedSite.latitude), Number(selectedSite.longitude)]} radius={Number(selectedSite.radius_meters) || 200} pathOptions={{ color: 'var(--accent)', fillColor: 'var(--accent)', fillOpacity: 0.2, weight: 2 }} />
-                  </MapContainer>
-                </div>
-              ) : (
-                <div style={{ height: 100, borderRadius: 12, border: '1px dashed var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', fontSize: '0.85rem', marginBottom: 24, background: 'var(--bg-2)' }}>
-                  No GPS coordinates configured for this site.
-                </div>
-              )}
-
-              {/* Analytics Grid */}
-              <h3 style={{ fontFamily: 'Oswald', fontSize: '1rem', color: 'var(--text-1)', letterSpacing: '0.04em', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: 6 }}><Activity size={16} /> SITE ANALYTICS</h3>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
-                <div style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', padding: 16, borderRadius: 12 }}>
-                  <Package size={18} color="var(--accent)" style={{ marginBottom: 8 }} />
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Assets</div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-0)', fontFamily: 'Oswald' }}>{getSiteAnalytics(selectedSite.name).total}</div>
-                </div>
-                <div style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', padding: 16, borderRadius: 12 }}>
-                  <Activity size={18} color="var(--green)" style={{ marginBottom: 8 }} />
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Active Assets</div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-0)', fontFamily: 'Oswald' }}>{getSiteAnalytics(selectedSite.name).active}</div>
-                </div>
-                <div style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', padding: 16, borderRadius: 12, gridColumn: '1 / -1' }}>
-                  <DollarSign size={18} color="var(--cyan)" style={{ marginBottom: 8 }} />
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Book Value at Site</div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-0)', fontFamily: 'Oswald' }}>{formatCurrency(getSiteAnalytics(selectedSite.name).value)}</div>
-                </div>
-                {getSiteAnalytics(selectedSite.name).openTickets > 0 && (
-                  <div style={{ background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: 16, borderRadius: 12, gridColumn: '1 / -1' }}>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--red)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}><Info size={14} /> Open Support Tickets</div>
-                    <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--red)', fontFamily: 'Oswald', marginTop: 8 }}>{getSiteAnalytics(selectedSite.name).openTickets} <span style={{ fontSize: '0.9rem', fontWeight: 400, fontFamily: 'DM Sans' }}>active alerts</span></div>
+        isMobile ? (
+          <MobileSiteDetail 
+            site={selectedSite}
+            siteAssets={assets.filter(a => isSiteMatch(a.site, selectedSite.name))} 
+            siteTickets={tickets.filter(t => assets.filter(a => isSiteMatch(a.site, selectedSite.name)).map(a => a.id).includes(t.asset_id))}
+            can={can}
+            onClose={() => setShowDrawer(false)}
+            navigate={navigate}
+          />
+        ) : (
+          <>
+            <div className="drawer-backdrop" onClick={() => setShowDrawer(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)', zIndex: 100 }} />
+            <div className="drawer animate-slide-in-right sites-drawer" style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '100%', maxWidth: 450, background: 'var(--bg-1)', zIndex: 101, boxShadow: '-4px 0 24px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-2)' }}>
+                <div>
+                  <h2 style={{ margin: 0, color: 'var(--text-0)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <MapPin size={20} color="var(--accent)" /> {selectedSite.name}
+                  </h2>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: selectedSite.is_active ? 'var(--green)' : 'var(--red)' }} />
+                    <span style={{ color: 'var(--text-2)' }}>{selectedSite.is_active ? 'Active Site' : 'Inactive Site'}</span>
                   </div>
-                )}
+                </div>
+                <button onClick={() => setShowDrawer(false)} className="btn-ghost" style={{ padding: 8, background: 'var(--bg-1)' }}><X size={18} /></button>
               </div>
-
-              {/* Address */}
-              <div style={{ background: 'var(--bg-2)', padding: 16, borderRadius: 12, border: '1px solid var(--border)' }}>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8, fontWeight: 600 }}>Address</div>
-                <div style={{ fontSize: '0.9rem', color: 'var(--text-1)', lineHeight: 1.6 }}>{selectedSite.address || 'No address provided.'}</div>
+              
+              <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
+                <Site360Workspace 
+                  site={selectedSite} 
+                  siteAssets={assets.filter(a => isSiteMatch(a.site, selectedSite.name))} 
+                  siteTickets={tickets.filter(t => assets.filter(a => isSiteMatch(a.site, selectedSite.name)).map(a => a.id).includes(t.asset_id))} 
+                />
               </div>
-
+              
+              <div style={{ padding: 20, borderTop: '1px solid var(--border)', background: 'var(--bg-2)' }}>
+                <button onClick={() => navigate(`/assets?site=${encodeURIComponent(selectedSite.name)}`)} className="btn-primary" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  View Assets Inventory <ArrowRight size={16} />
+                </button>
+              </div>
             </div>
-            
-            <div style={{ padding: 20, borderTop: '1px solid var(--border)', background: 'var(--bg-2)' }}>
-              <button onClick={() => navigate(`/assets?site=${encodeURIComponent(selectedSite.name)}`)} className="btn-primary" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                View Assets Inventory <ArrowRight size={16} />
-              </button>
-            </div>
-          </div>
-        </>
+          </>
+        )
       )}
 
       {/* ── CREATE / EDIT MODAL ── */}
@@ -655,7 +734,7 @@ export default function SitesPage() {
         <div className="modal-bg" onClick={() => !saving && setShowModal(false)}>
           <div className="modal sites-modal-container" onClick={e => e.stopPropagation()} style={{ maxWidth: 800, width: '90%' }}>
             <div className="modal-header" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0, fontFamily: 'Oswald', letterSpacing: '0.04em', fontSize: '1.1rem' }}>
+              <h3 style={{ margin: 0, letterSpacing: '0.04em', }}>
                 {editingSite ? 'EDIT SITE' : 'ADD NEW SITE'}
               </h3>
               <button onClick={() => setShowModal(false)} className="btn-ghost" style={{ padding: 4 }}><X size={16} /></button>
@@ -668,7 +747,7 @@ export default function SitesPage() {
                   <div>
                     <label className="lbl">Site Name <span style={{ color: 'var(--red)' }}>*</span></label>
                     <input type="text" className="inp" value={form.name} onChange={e => { setForm({ ...form, name: e.target.value.toUpperCase() }); setErrors({ ...errors, name: null }) }} placeholder="e.g. CENTRAL STORE" />
-                    {errors.name && <p style={{ color: 'var(--red)', fontSize: '0.75rem', marginTop: 4 }}>{errors.name}</p>}
+                    {errors.name && <p style={{ color: 'var(--red)', marginTop: 4 }}>{errors.name}</p>}
                   </div>
                   <div>
                     <label className="lbl">Site Code / Prefix</label>
@@ -679,7 +758,7 @@ export default function SitesPage() {
                 <div>
                   <label className="lbl">Site Aliases (Comma-separated)</label>
                   <input type="text" className="inp" value={form.aliases} onChange={e => setForm({ ...form, aliases: e.target.value })} placeholder="e.g. WORLI, AAKASA, AKASHA" />
-                  <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', display: 'block', marginTop: 4 }}>Add alternate keywords to enable instant auto-linking in imports</span>
+                  <span style={{ color: 'var(--text-3)', display: 'block', marginTop: 4 }}>Add alternate keywords to enable instant auto-linking in imports</span>
                 </div>
                 
                 <div>
@@ -706,7 +785,7 @@ export default function SitesPage() {
                   
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 0' }}>
                     <input type="checkbox" id="is_active" checked={form.is_active} onChange={e => setForm({ ...form, is_active: e.target.checked })} style={{ width: 16, height: 16 }} />
-                    <label htmlFor="is_active" style={{ fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none' }}>Site is Active</label>
+                    <label htmlFor="is_active" style={{ cursor: 'pointer', userSelect: 'none' }}>Site is Active</label>
                   </div>
                 </div>
               </div>
@@ -715,7 +794,7 @@ export default function SitesPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <label className="lbl" style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span>Interactive Map Editor</span>
-                  <span style={{ fontSize: '0.7rem', color: 'var(--accent)', fontWeight: 600 }}>Click map to drop pin</span>
+                  <span style={{ color: 'var(--accent)', }}>Click map to drop pin</span>
                 </label>
                 <div style={{ flex: 1, minHeight: 300, borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)' }}>
                   <MapContainer center={[Number(form.latitude) || 20.5937, Number(form.longitude) || 78.9629]} zoom={form.latitude ? 15 : 4} style={{ height: '100%', width: '100%' }}>

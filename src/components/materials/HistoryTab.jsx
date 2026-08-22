@@ -20,7 +20,7 @@ function EmptyState({ msg }) {
       }}>
         <Boxes size={26} style={{ color: 'var(--text-3)' }} />
       </div>
-      <p style={{ fontFamily: 'DM Sans', color: 'var(--text-3)', fontSize: '0.88rem' }}>{msg}</p>
+      <p style={{ color: 'var(--text-3)', }}>{msg}</p>
     </div>
   )
 }
@@ -28,7 +28,7 @@ function EmptyState({ msg }) {
 const TxBadge = ({ type }) => {
   const map = {
     purchase:     { bg: 'var(--green-dim)', color: 'var(--green)', border: 'rgba(0,185,107,0.25)', icon: ShoppingCart },
-    transfer:     { bg: 'var(--accent-glow)', color: 'var(--accent)', border: 'rgba(79,126,255,0.25)', icon: ArrowRightLeft },
+    transfer:     { bg: 'var(--accent-glow)', color: 'var(--accent)', border: 'var(--accent-soft)', icon: ArrowRightLeft },
     requisition:  { bg: 'var(--purple-dim)', color: 'var(--purple)', border: 'rgba(139,92,246,0.25)', icon: ClipboardList },
   }
   const m = map[type] || { bg: 'var(--bg-3)', color: 'var(--text-2)', border: 'var(--border)', icon: History }
@@ -52,14 +52,14 @@ export default function HistoryTab({ txns, canWrite, onBulkDelete }) {
     <>
       {/* Bulk delete bar */}
       {canWrite && selectedIds.size > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', background: 'var(--red-dim)', borderBottom: '1px solid rgba(239,68,68,0.2)' }}>
-          <span style={{ fontSize: '0.82rem', color: 'var(--red)', fontWeight: 600 }}>{selectedIds.size} record{selectedIds.size > 1 ? 's' : ''} selected</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', background: 'var(--red-dim)', borderBottom: '1px solid var(--status-danger-soft)' }}>
+          <span style={{ color: 'var(--red)', }}>{selectedIds.size} record{selectedIds.size > 1 ? 's' : ''} selected</span>
           <button onClick={() => { onBulkDelete(txns.filter(t => selectedIds.has(t.id))); clearSel() }}
-            style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 10, background: 'var(--red)', border: 'none', color: 'white', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600 }}>
+            style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 10, background: 'var(--red)', border: 'none', color: 'white', cursor: 'pointer', }}>
             <Trash2 size={13} /> Delete Selected
           </button>
           <button onClick={clearSel}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 10, background: 'var(--bg-3)', border: '1.5px solid var(--border)', color: 'var(--text-2)', cursor: 'pointer', fontSize: '0.78rem' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 10, background: 'var(--bg-3)', border: '1.5px solid var(--border)', color: 'var(--text-2)', cursor: 'pointer', }}>
             <X size={13} /> Cancel
           </button>
         </div>
@@ -84,29 +84,29 @@ export default function HistoryTab({ txns, canWrite, onBulkDelete }) {
           </thead>
           <tbody>
             {txns.map(t => (
-              <tr key={t.id} style={{ background: selectedIds.has(t.id) ? 'rgba(239,68,68,0.04)' : undefined }}>
+              <tr key={t.id} style={{ background: selectedIds.has(t.id) ? 'var(--status-danger-soft)' : undefined }}>
                 {canWrite && <td><input type="checkbox" checked={selectedIds.has(t.id)} onChange={() => toggleOne(t.id)} style={{ cursor: 'pointer' }} /></td>}
-                <td style={{ whiteSpace: 'nowrap', fontSize: '0.8rem', color: 'var(--text-2)' }}>
+                <td style={{ whiteSpace: 'nowrap', color: 'var(--text-2)' }}>
                   {new Date(t.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                 </td>
-                <td style={{ fontWeight: 600, color: 'var(--text-0)' }}>{t.materials?.material_name}</td>
+                <td style={{ color: 'var(--text-0)' }}>{t.materials?.material_name}</td>
                 <td><TxBadge type={t.transaction_type} /></td>
                 <td>
                   {t.from_site
-                    ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: '0.82rem' }}>
+                    ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, }}>
                         <ArrowUpRight size={12} style={{ color: 'var(--red)' }} />{t.from_site}
                       </span>
-                    : <span style={{ color: 'var(--text-3)' }}>—</span>}
+                    : <span style={{ color: 'var(--text-3)' }}>-</span>}
                 </td>
                 <td>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: '0.82rem' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, }}>
                     <ArrowDownLeft size={12} style={{ color: 'var(--green)' }} />{t.to_site}
                   </span>
                 </td>
-                <td><span style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-0)' }}>{fmt(t.quantity)}</span></td>
-                <td className="col-hide-mobile" style={{ fontSize: '0.82rem' }}>{Number(t.unit_cost) > 0 ? fmtCur(t.unit_cost) : '—'}</td>
-                <td className="col-hide-mobile" style={{ fontSize: '0.82rem' }}>{t.performer?.full_name || '—'}</td>
-                <td className="col-hide-mobile" style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-3)', fontSize: '0.8rem' }}>{t.notes || '—'}</td>
+                <td><span style={{ color: 'var(--text-0)' }}>{fmt(t.quantity)}</span></td>
+                <td className="col-hide-mobile" >{Number(t.unit_cost) > 0 ? fmtCur(t.unit_cost) : '-'}</td>
+                <td className="col-hide-mobile" >{t.performer?.full_name || '-'}</td>
+                <td className="col-hide-mobile" style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-3)', }}>{t.notes || '-'}</td>
               </tr>
             ))}
           </tbody>
@@ -120,12 +120,12 @@ export default function HistoryTab({ txns, canWrite, onBulkDelete }) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
                 <div className="mat-mobile-title">{t.materials?.material_name}</div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-3)', marginTop: 2 }}>
+                <div style={{ color: 'var(--text-3)', marginTop: 2 }}>
                   {new Date(t.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                   {t.performer?.full_name && <span> · {t.performer.full_name}</span>}
                 </div>
               </div>
-              <span style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1rem', color: 'var(--text-0)' }}>{fmt(t.quantity)}</span>
+              <span style={{ color: 'var(--text-0)' }}>{fmt(t.quantity)}</span>
             </div>
             <div className="mat-mobile-meta">
               <TxBadge type={t.transaction_type} />
@@ -141,7 +141,7 @@ export default function HistoryTab({ txns, canWrite, onBulkDelete }) {
               )}
               {Number(t.unit_cost) > 0 && <span style={{ color: 'var(--text-2)' }}>{fmtCur(t.unit_cost)}</span>}
             </div>
-            {t.notes && <div style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>{t.notes}</div>}
+            {t.notes && <div style={{ color: 'var(--text-3)' }}>{t.notes}</div>}
           </div>
         ))}
       </div>

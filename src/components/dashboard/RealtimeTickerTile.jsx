@@ -27,9 +27,9 @@ export default function RealtimeTickerTile() {
 
   const fetchRecentStream = async () => {
     try {
-      const { data: txs } = await supabase.from('bulk_transactions').select('*').order('created_at', { ascending: false }).limit(5)
+      const { data: txs } = await supabase.from('bulk_transactions').select('*').order('transaction_at', { ascending: false }).limit(5)
       if (txs) {
-        setEvents(txs.map(t => ({ id: t.id, type: 'transfer', title: `Transfer: ${t.transaction_type} ${t.quantity} units`, site: t.to_site || t.from_site, time: t.created_at })))
+        setEvents(txs.map(t => ({ id: t.id, type: 'transfer', title: `Transfer: ${t.transaction_type} ${t.quantity} units`, site: t.to_site || t.from_site, time: t.transaction_at })))
       }
     } catch (e) { console.error(e) }
   }
@@ -45,26 +45,26 @@ export default function RealtimeTickerTile() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <Radio size={15} color="#059669" className="spin" style={{ animationDuration: '3s' }} />
-          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <span style={{ color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Real-Time Stream Ticker
           </span>
         </div>
-        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#059669', background: 'rgba(5,150,105,0.1)', padding: '2px 8px', borderRadius: 12 }}>
+        <span style={{ color: '#059669', background: 'rgba(5,150,105,0.1)', padding: '2px 8px', borderRadius: 12 }}>
           LIVE FEED
         </span>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {events.length === 0 && (
-          <div style={{ fontSize: '0.75rem', color: '#94a3b8', padding: '6px 0' }}>Listening for live transactions & audits...</div>
+          <div style={{ color: '#94a3b8', padding: '6px 0' }}>Listening for live transactions & audits...</div>
         )}
         {events.map(ev => (
-          <div key={ev.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: ev.isAnomaly ? 'rgba(239,68,68,0.08)' : '#f8fafc', borderRadius: 6, border: '1px solid #f1f5f9' }}>
+          <div key={ev.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: ev.isAnomaly ? 'var(--status-danger-soft)' : '#f8fafc', borderRadius: 6, border: '1px solid #f1f5f9' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              {ev.type === 'audit' ? <Shield size={12} color={ev.isAnomaly ? '#ef4444' : '#2563eb'} /> : <Boxes size={12} color="#059669" />}
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: ev.isAnomaly ? '#dc2626' : '#0f172a' }}>{ev.title}</span>
+              {ev.type === 'audit' ? <Shield size={12} color={ev.isAnomaly ? 'var(--status-danger)' : 'var(--accent)'} /> : <Boxes size={12} color="#059669" />}
+              <span style={{ color: ev.isAnomaly ? 'var(--status-danger)' : '#0f172a' }}>{ev.title}</span>
             </div>
-            <span style={{ fontSize: '0.68rem', color: '#64748b', fontFamily: 'DM Mono' }}>{ev.site}</span>
+            <span style={{ color: '#64748b', }}>{ev.site}</span>
           </div>
         ))}
       </div>

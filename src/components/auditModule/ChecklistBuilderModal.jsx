@@ -84,8 +84,8 @@ export default function ChecklistBuilderModal({ onClose, onSave, assetNames }) {
               <FileSpreadsheet size={18} />
             </div>
             <div>
-              <h2 className="font-display" style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Interactive Checklist Builder</h2>
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>Design a custom Pass/Fail template</span>
+              <h2 className="font-display" style={{ margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Interactive Checklist Builder</h2>
+              <span style={{ color: 'var(--text-3)', }}>Design a custom Pass/Fail template</span>
             </div>
           </div>
           <button onClick={onClose} className="btn-ghost" style={{ padding: 6 }} disabled={saving}><X size={16} /></button>
@@ -117,7 +117,7 @@ export default function ChecklistBuilderModal({ onClose, onSave, assetNames }) {
             </div>
           </div>
 
-          <h3 style={{ fontSize: '0.85rem', textTransform: 'uppercase', fontFamily: 'Oswald', color: 'var(--text-1)', marginBottom: 12, borderBottom: '1px solid var(--border)', paddingBottom: 8 }}>
+          <h3 style={{ textTransform: 'uppercase', color: 'var(--text-1)', marginBottom: 12, borderBottom: '1px solid var(--border)', paddingBottom: 8 }}>
             Inspection Items
           </h3>
 
@@ -132,12 +132,12 @@ export default function ChecklistBuilderModal({ onClose, onSave, assetNames }) {
                 
                 <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 3fr', gap: 12 }}>
                   <div>
-                    <label style={{ fontSize: '0.65rem', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Section Name</label>
-                    <input className="inp" placeholder="e.g., Electrical" value={item.section} onChange={e => handleUpdateItem(idx, 'section', e.target.value)} style={{ fontSize: '0.78rem' }} />
+                    <label style={{ color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Section Name</label>
+                    <input className="inp" placeholder="e.g., Electrical" value={item.section} onChange={e => handleUpdateItem(idx, 'section', e.target.value)}  />
                   </div>
                   <div>
-                    <label style={{ fontSize: '0.65rem', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Question / Inspection Task</label>
-                    <input className="inp" placeholder="e.g., Check main limit switches..." value={item.question} onChange={e => handleUpdateItem(idx, 'question', e.target.value)} style={{ fontSize: '0.78rem' }} />
+                    <label style={{ color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Question / Inspection Task</label>
+                    <input className="inp" placeholder="e.g., Check main limit switches..." value={item.question} onChange={e => handleUpdateItem(idx, 'question', e.target.value)}  />
                   </div>
                 </div>
 
@@ -148,7 +148,7 @@ export default function ChecklistBuilderModal({ onClose, onSave, assetNames }) {
             ))}
           </div>
 
-          <button className="btn-ghost" style={{ marginTop: 16, width: '100%', padding: '12px', border: '1px dashed var(--border)', borderRadius: 10, color: 'var(--accent)', fontWeight: 600, fontSize: '0.82rem' }} onClick={handleAddItem}>
+          <button className="btn-ghost" style={{ marginTop: 16, width: '100%', padding: '12px', border: '1px dashed var(--border)', borderRadius: 10, color: 'var(--accent)', }} onClick={handleAddItem}>
             <Plus size={16} /> Add Inspection Item
           </button>
         </div>
@@ -156,7 +156,7 @@ export default function ChecklistBuilderModal({ onClose, onSave, assetNames }) {
         {/* Footer */}
         <div style={{ padding: '16px 24px', background: 'var(--bg-3)', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
           <button onClick={onClose} className="btn-ghost" disabled={saving}>Cancel</button>
-          <button onClick={handleSubmit} className="btn-primary" disabled={saving} style={{ padding: '8px 20px', fontWeight: 600 }}>
+          <button onClick={handleSubmit} className="btn-primary" disabled={saving} style={{ padding: '8px 20px', }}>
             {saving ? 'Saving...' : <><Save size={16} /> Save Checklist</>}
           </button>
         </div>

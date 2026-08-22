@@ -1,179 +1,351 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import {
-  LayoutDashboard, Package, PlusCircle, Tag, FileSpreadsheet,
-  Settings, LogOut, Menu, X, ChevronRight, Shield, Users, ClipboardCheck,
-  Wrench, Boxes, Pencil, CheckCircle2, XCircle, Upload, ShieldCheck, MapPin, BarChart2, Search, ShoppingCart,
-  MoreHorizontal
+  LayoutDashboard, Package, Tag, FileSpreadsheet,
+  Settings, LogOut, Menu, X, ChevronRight, Shield, ClipboardCheck,
+  Wrench, Boxes, Search, HelpCircle, MapPin, BarChart2, ScanLine,
+  PanelLeftClose, PanelLeftOpen, MoreHorizontal
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useImport } from '../context/ImportContext'
-import { signOut, syncOfflineActionsQueue } from '../lib/supabase'
-import { Wifi, WifiOff, RefreshCw } from 'lucide-react'
+import { signOut } from '../lib/supabase'
+import { WifiOff } from 'lucide-react'
 import companyLogo from '../assets/logo.png'
 import UserProfileModal from './UserProfileModal'
 import NotificationBell from './NotificationBell'
-import CommandPalette from './CommandPalette'
 
-const ROLE_BADGE = {
-  super_admin: { label: 'Super Admin', cls: 'badge-admin' },
-  admin:       { label: 'Admin',       cls: 'badge-admin' },
-  moderator:   { label: 'Moderator',   cls: 'badge-mod' },
-  user:        { label: 'User',        cls: 'badge-user' },
+import MobileMoreMenu from './ui/MobileMoreMenu'
+
+// Page title map - derived from route
+const PAGE_TITLES = {
+  '/': 'Dashboard',
+  '/assets': 'Assets',
+  '/sites': 'Sites',
+  '/maintenance': 'Maintenance',
+  '/inventory': 'Inventory',
+  '/reports': 'Reports',
+  '/audit': 'Inspections',
+  '/admin': 'Administration',
+  '/stickers': 'QR & Tags',
+  '/import': 'Import Data',
+  '/scan': 'Scan QR',
+}
+
+function getMobileTitle(pathname) {
+  if (pathname.startsWith('/assets/') && pathname !== '/assets/new') return 'Asset Detail'
+  if (pathname === '/assets/new') return 'Add Asset'
+  for (const [path, title] of Object.entries(PAGE_TITLES)) {
+    if (path === '/') {
+      if (pathname === '/') return title
+    } else if (pathname.startsWith(path)) {
+      return title
+    }
+  }
+  return 'AssetPro'
 }
 
 export default function Layout() {
   const { profile, isAdmin, isMod, can, refreshProfile, patchProfile } = useAuth()
-  const { status: importStatus, progress: importProgress, result: importResult, total: importTotal, dismiss: dismissImport } = useImport()
   const navigate = useNavigate()
   const location = useLocation()
-  const [sidebarOpen,   setSidebarOpen]   = useState(false)
-  const [editingProfile, setEditingProfile] = useState(false)
-  const [showCommandPalette, setShowCommandPalette] = useState(false)
 
-  // Listen for Cmd+K or Ctrl+K to open the command palette
-  React.useEffect(() => {
-    const handleKeyDown = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault()
-        setShowCommandPalette(true)
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [editingProfile, setEditingProfile] = useState(false)
+
+  const [showMobileMore, setShowMobileMore] = useState(false)
+
+  const mobileTitle = useMemo(() => getMobileTitle(location.pathname), [location.pathname])
+
+
+
+  // No mobile sidebar route change effect needed anymore
 
   async function handleSignOut() {
     await signOut()
     navigate('/login')
   }
 
-  const NAV = [
-    { to: '/',            icon: LayoutDashboard, label: 'Dashboard',   exact: true,  show: isAdmin || isMod },
-    { to: '/assets',      icon: Package,         label: 'Assets',      exact: false, show: isAdmin || isMod },
-    { to: '/sites',       icon: MapPin,          label: 'Sites',       exact: false, show: isAdmin || isMod },
-    { to: '/audit',       icon: ShieldCheck,     label: 'Audit & Maint.', exact: false, show: true },
-    { to: '/maintenance', icon: Wrench,          label: 'Maintenance', exact: false, show: isAdmin || can('maintenance') },
-    { to: '/inventory',   icon: Boxes,           label: 'Inventory',   exact: false, show: isAdmin || isMod || can('inventory') },
-    { to: '/stickers',    icon: Tag,             label: 'Stickers',    exact: false, show: can('print_stickers') },
-    { to: '/import',      icon: FileSpreadsheet, label: 'Import Excel',exact: false, show: can('import') },
-    { to: '/reports',     icon: BarChart2,       label: 'Reports',     exact: false, show: true },
-    { to: '/admin',       icon: Shield,          label: 'Admin Panel', exact: false, show: isAdmin, divider: true },
-  ].filter(n => n.show)
-
-  // Bottom nav: pick the 4 most important + "More" button
-  const BOTTOM_NAV_KEYS = ['/', '/assets', '/inventory', '/audit']
-  const bottomNav = NAV.filter(n => BOTTOM_NAV_KEYS.includes(n.to))
-
-  const rb = ROLE_BADGE[profile?.role] || ROLE_BADGE.user
+  const NAV_GROUPS = [
+    {
+      label: 'Overview',
+      items: [
+        { to: '/', icon: LayoutDashboard, label: 'Dashboard', exact: true, show: isAdmin || isMod },
+      ]
+    },
+    {
+      label: 'Operations',
+      items: [
+        { to: '/assets', icon: Package, label: 'Assets', exact: false, show: isAdmin || isMod },
+        { to: '/sites', icon: MapPin, label: 'Sites', exact: false, show: isAdmin || isMod },
+      ]
+    },
+    {
+      label: 'Maintenance & Inventory',
+      items: [
+        { to: '/maintenance', icon: Wrench, label: 'Maintenance', exact: false, show: isAdmin || can('maintenance') },
+        { to: '/inventory', icon: Boxes, label: 'Inventory', exact: false, show: isAdmin || isMod || can('inventory') },
+        { to: '/audit', icon: ClipboardCheck, label: 'Inspections', exact: false, show: true },
+      ]
+    },
+    {
+      label: 'Insights & Tools',
+      items: [
+        { to: '/reports', icon: BarChart2, label: 'Reports', exact: false, show: true },
+        { to: '/stickers', icon: Tag, label: 'QR & Tags', exact: false, show: can('print_stickers') },
+        { to: '/import', icon: FileSpreadsheet, label: 'Import Data', exact: false, show: can('import') },
+      ]
+    },
+    {
+      label: 'System',
+      items: [
+        { to: '/admin', icon: Shield, label: 'Administration', exact: false, show: isAdmin },
+      ]
+    }
+  ]
 
   const isPathActive = (to, exact) => {
     if (exact) return location.pathname === to
     return location.pathname.startsWith(to)
   }
 
+  // Mobile Bottom Nav (5 items)
+  const BOTTOM_NAV = [
+    { to: '/', icon: LayoutDashboard, label: 'Home', exact: true },
+    { to: '/assets', icon: Package, label: 'Assets', exact: false },
+    { to: '/scan', icon: ScanLine, label: 'Scan', exact: false, isAction: true },
+    { to: '/maintenance', icon: Wrench, label: 'Maint.', exact: false },
+    { to: '#more', icon: MoreHorizontal, label: 'More', exact: false, action: () => setShowMobileMore(true) },
+  ]
+
   return (
-    <div className="flex h-screen overflow-hidden bg-bg-0 font-sans" data-theme="light">
+    <div className="flex h-screen w-screen overflow-hidden bg-bg-1 font-sans text-text-0 selection:bg-accent/20" data-theme="light">
 
-      {/* Mobile sidebar overlay backdrop */}
-      {sidebarOpen && (
-        <div className="modal-bg" style={{ zIndex: 1000 }} onClick={() => setSidebarOpen(false)} />
-      )}
-
-      {/* Sidebar */}
-      <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-        {/* Logo */}
-        <div className="flex items-center justify-between shrink-0 border-b border-border px-5 py-4">
-          <img src={companyLogo} alt="Strongbuilt" className="h-[72px] max-w-[200px] object-contain" />
-          <div className="lg:hidden">
-            <button className="btn-ghost btn-icon btn-sm border-none" onClick={() => setSidebarOpen(false)}>
-              <X size={18} />
-            </button>
+      {/* ── Sidebar (Tablet & Desktop) ── */}
+      <aside
+        className={`hidden md:flex flex-col bg-bg-0 border-r border-border shadow-sm shrink-0 h-screen z-30 transition-all duration-200 ease-in-out ${
+          sidebarCollapsed ? 'w-[72px] min-w-[72px]' : 'w-[260px] min-w-[260px]'
+        }`}
+      >
+        {/* Sidebar Header */}
+        <div className="flex items-center justify-between h-14 px-4 border-b border-border shrink-0">
+          <div className="flex items-center gap-2 overflow-hidden">
+            <img
+              src={companyLogo}
+              alt="Strongbuilt"
+              className={`object-contain transition-all duration-300 ${sidebarCollapsed ? 'w-8 scale-150 ml-1' : 'h-8 lg:h-9 w-auto'}`}
+              style={{ filter: sidebarCollapsed ? 'drop-shadow(0 0 2px rgba(0,0,0,0.1))' : 'none' }}
+            />
           </div>
         </div>
 
-        {/* Add new */}
-        {can('add') && (
-          <div className="px-4 pt-4 pb-2">
-            <NavLink to="/assets/new" onClick={() => setSidebarOpen(false)}
-              className="btn-primary w-full shadow-[4px_4px_14px_rgba(79,126,255,0.35)] no-underline text-[0.85rem]"
-            >
-              <PlusCircle size={15} /> Add New Asset
-            </NavLink>
-          </div>
-        )}
-
-        {/* Nav */}
-        <nav className="flex-1 p-2 overflow-y-auto">
-          <p className="lbl px-3 py-2 mb-1">Menu</p>
-          {NAV.map(({ to, icon: Icon, label, exact, divider }) => (
-            <React.Fragment key={to}>
-              {divider && <div className="mx-3 my-2 border-t border-border" />}
-              <NavLink to={to} end={exact} onClick={() => setSidebarOpen(false)}
-                className={({ isActive }) => `flex items-center gap-2.5 px-3 py-2.5 rounded-lg border-l-4 border-transparent no-underline font-sans text-sm transition-all mb-[1px] ${isActive ? 'nav-active text-text-0' : 'text-text-2'}`}
-              >
-                {({ isActive }) => (
-                  <>
-                    <Icon size={17} className={isActive ? 'text-accent' : 'text-text-3'} />
-                    {label}
-                    <ChevronRight size={13} className="ml-auto opacity-30" />
-                  </>
+        {/* Sidebar Navigation */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 custom-scrollbar flex flex-col gap-6">
+          {NAV_GROUPS.map((group, idx) => {
+            const visibleItems = group.items.filter(i => i.show)
+            if (visibleItems.length === 0) return null
+            return (
+              <div key={idx} className="flex flex-col gap-1">
+                {!sidebarCollapsed && (
+                  <h4 className="px-3 text-[11px] tracking-wider text-text-3 uppercase mb-1">
+                    {group.label}
+                  </h4>
                 )}
-              </NavLink>
-            </React.Fragment>
-          ))}
-        </nav>
-
-        {/* User info + logout */}
-        <div className="p-4 border-t border-border shrink-0 bg-bg-0">
-          
-          <div className="flex flex-col p-3 rounded-xl bg-bg-1 border border-border shadow-[var(--clay-shadow-sm)] mb-3 relative overflow-hidden">
-            <div className="flex items-center gap-3 relative z-10">
-              {/* Avatar */}
-              <div className="relative shrink-0">
-                {profile?.photo_url
-                  ? <img src={profile.photo_url} alt={profile.full_name || 'profile'}
-                      className="w-[38px] h-[38px] rounded-full object-cover border-[1.5px] border-bg-1 shadow-sm" />
-                  : <div className="w-[38px] h-[38px] rounded-full bg-gradient-to-br from-accent to-[#6b96ff] flex items-center justify-center text-[0.95rem] font-bold text-white font-display shadow-sm border-[1.5px] border-bg-1">
-                      {(profile?.full_name || profile?.email || 'U')[0].toUpperCase()}
-                    </div>
-                }
-                <div className="absolute -bottom-0.5 -right-0.5 w-[11px] h-[11px] bg-green rounded-full border-[2px] border-bg-1" title="Online" />
+                {visibleItems.map(item => {
+                  const active = isPathActive(item.to, item.exact)
+                  return (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      end={item.exact}
+                      title={sidebarCollapsed ? item.label : undefined}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-small text-body-medium transition-colors
+                        ${active ? 'bg-accent/10 text-accent' : 'text-text-2 hover:bg-bg-1 hover:text-text-0'}
+                      `}
+                    >
+                      <item.icon size={18} className={`shrink-0 ${active ? 'text-accent' : 'text-text-3'}`} />
+                      {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
+                    </NavLink>
+                  )
+                })}
               </div>
+            )
+          })}
+        </div>
 
-              <div className="min-w-0 flex-1">
-                <div className="text-[0.9rem] font-bold text-text-0 font-sans truncate leading-tight">
-                  {profile?.full_name || 'User'}
-                </div>
-                <div className="text-[0.7rem] text-text-3 font-sans truncate mt-0.5">
-                  {profile?.email || 'Logged in'}
-                </div>
-              </div>
-
-              <div className="shrink-0 flex items-center">
-                <NotificationBell />
-              </div>
+        {/* Sidebar Footer */}
+        <div className="p-3 border-t border-border flex flex-col gap-1 shrink-0">
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className={`hidden lg:flex items-center gap-3 p-2 text-text-3 hover:text-text-0 hover:bg-bg-1 rounded-lg transition-colors w-full ${sidebarCollapsed ? 'justify-center' : 'justify-start'}`}
+            title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+          >
+            <div className="w-8 flex items-center justify-center shrink-0">
+              {sidebarCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
             </div>
+            {!sidebarCollapsed && <span className="text-small font-medium">Collapse</span>}
+          </button>
 
-            <div className="flex items-center justify-between pt-3 mt-3 border-t border-border/60 relative z-10">
-              <span className={`badge ${rb.cls} text-[0.65rem] px-2 py-[2px] tracking-wide`}>{rb.label}</span>
-              <button
-                onClick={() => setEditingProfile(true)}
-                className="flex items-center gap-1.5 text-[0.75rem] font-semibold text-text-3 hover:text-text-0 transition-colors bg-transparent border-none cursor-pointer p-0"
-                title="Edit Profile"
-              >
-                <Pencil size={12} /> Edit
-              </button>
+          <div className="relative group cursor-pointer" onClick={() => setEditingProfile(true)}>
+            <div className={`flex items-center gap-3 p-2 rounded-lg hover:bg-bg-1 transition-colors ${sidebarCollapsed ? 'justify-center' : 'justify-start'}`}>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-accent text-small shrink-0 font-medium" style={{ background: 'var(--accent-soft)' }}>
+                {(profile?.full_name || 'U')[0]}
+              </div>
+              {!sidebarCollapsed && (
+                <div className="flex-1 min-w-0">
+                  <div className="text-small text-text-0 truncate font-medium">{profile?.full_name || 'User'}</div>
+                  <div className="text-caption text-text-3 truncate capitalize">{profile?.role || 'User'}</div>
+                </div>
+              )}
             </div>
           </div>
-          
-          <button onClick={handleSignOut} className="btn-ghost w-full justify-center text-[0.85rem] h-[40px] min-h-[40px] shadow-none hover:shadow-sm transition-all">
-            <LogOut size={16} /> Sign Out
+
+          <button
+            onClick={handleSignOut}
+            className={`flex items-center gap-3 p-2 text-danger hover:bg-danger-subtle hover:text-danger rounded-lg transition-colors w-full ${sidebarCollapsed ? 'justify-center' : 'justify-start'}`}
+            style={{ '--tw-bg-opacity': 0.1 }}
+          >
+            <div className="w-8 flex items-center justify-center shrink-0">
+              <LogOut size={18} />
+            </div>
+            {!sidebarCollapsed && <span className="text-small font-medium">Sign Out</span>}
           </button>
         </div>
       </aside>
 
-      {/* My Profile modal */}
+      {/* ── Main Content Area ── */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-bg-0 relative">
+
+        {/* ── Global Header (Mobile & Desktop) ── */}
+        <header className="flex shrink-0 bg-bg-1 border-b border-border items-center justify-between px-4 lg:px-6 z-30 relative shadow-sm" style={{ height: 56 }}>
+
+          {/* Left: Mobile Branding / Desktop Search */}
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            {/* Mobile only: logo + page title */}
+            <div className="flex items-center gap-2.5 md:hidden min-w-0">
+              <img src={companyLogo} alt="Strongbuilt" className="h-7 object-contain shrink-0" />
+              <span className="text-[15px] text-text-0 truncate tracking-tight">{mobileTitle}</span>
+            </div>
+
+
+          </div>
+
+          {/* Right: actions */}
+          <div className="flex items-center gap-1.5 shrink-0 ml-2">
+            {!navigator.onLine && (
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] text-danger bg-danger-subtle border border-danger/20">
+                <WifiOff size={11} /> Offline
+              </span>
+            )}
+
+
+
+            {/* Notification Bell */}
+            <div className="relative flex items-center justify-center p-2 text-text-2 hover:text-text-0 hover:bg-bg-2 rounded-lg transition-colors cursor-pointer">
+              <NotificationBell />
+            </div>
+
+            {/* Help (desktop & tablet) */}
+            <button
+              className="hidden md:flex p-2 text-text-2 hover:text-text-0 hover:bg-bg-2 rounded-lg transition-colors"
+              title="Help"
+              aria-label="Help"
+            >
+              <HelpCircle size={18} />
+            </button>
+
+            <div className="w-px h-5 bg-border mx-1 hidden md:block" />
+
+            {/* Profile avatar */}
+            <button
+              onClick={() => setEditingProfile(true)}
+              className="flex items-center justify-center rounded-full hover:ring-2 hover:ring-accent/30 transition-all ml-1"
+              aria-label="Profile"
+              style={{ width: 34, height: 34 }}
+            >
+              <div className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center text-caption shadow-sm">
+                {(profile?.full_name || 'U')[0].toUpperCase()}
+              </div>
+            </button>
+          </div>
+        </header>
+
+        {/* ── Scrollable Main ── */}
+        <main
+          className="flex-1 overflow-y-auto overflow-x-hidden w-full relative"
+          id="main-scroll-container"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        >
+          <div className="w-full max-w-[1600px] mx-auto p-4 lg:p-6 pb-20 md:pb-6">
+            <Outlet />
+          </div>
+        </main>
+
+        {/* ── Mobile Bottom Navigation ── */}
+        <nav
+          className="md:hidden fixed bottom-0 left-0 right-0 bg-bg-1 border-t border-border z-50 flex items-stretch shadow-[0_-2px_10px_rgba(0,0,0,0.05)]"
+          style={{
+            height: 60,
+            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          }}
+          aria-label="Mobile navigation"
+        >
+          {BOTTOM_NAV.map(item => {
+            const active = item.to !== '#more' && isPathActive(item.to, item.exact)
+
+            if (item.isAction) {
+              return (
+                <div key="scan" className="flex-1 flex items-center justify-center px-1">
+                  <NavLink
+                    to="/scan"
+                    className="flex items-center justify-center w-full h-[46px] bg-accent text-white rounded-xl shadow-sm hover:bg-accent-hover active:bg-accent-active transition-all gap-1.5 text-caption"
+                    aria-label="Scan QR Code"
+                  >
+                    <ScanLine size={18} />
+                    <span>Scan</span>
+                  </NavLink>
+                </div>
+              )
+            }
+
+            if (item.action) {
+              return (
+                <button
+                  key={item.label}
+                  onClick={item.action}
+                  className="flex-1 flex flex-col items-center justify-center gap-1 transition-colors text-text-2 hover:text-text-0 active:text-accent"
+                  style={{ minHeight: 60 }}
+                  aria-label={item.label}
+                >
+                  <item.icon size={20} />
+                  <span className="text-[10.5px] tracking-tight">{item.label}</span>
+                </button>
+              )
+            }
+
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.exact}
+                className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors
+                  ${active ? 'text-accent ' : 'text-text-2 hover:text-text-0'}
+                `}
+                style={{ minHeight: 60 }}
+                aria-label={item.label}
+              >
+                <div className={`p-1 rounded-lg transition-colors ${active ? 'bg-accent/10' : ''}`}>
+                  <item.icon size={20} className={active ? 'text-accent' : ''} />
+                </div>
+                <span className="text-[10.5px] tracking-tight">
+                  {item.label}
+                </span>
+              </NavLink>
+            )
+          })}
+        </nav>
+      </div>
+
+      {/* ── Modals & Overlays ── */}
       {editingProfile && profile && (
         <UserProfileModal
           user={profile}
@@ -182,138 +354,9 @@ export default function Layout() {
         />
       )}
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        
-        {/* Mobile Header */}
-        <header className="mobile-header">
-          <button onClick={() => setSidebarOpen(true)} className="btn-ghost btn-icon border-none">
-            <Menu size={22} />
-          </button>
-          <img src={companyLogo} alt="Strongbuilt" className="h-12 max-w-[180px] object-contain" />
-          <div className="flex items-center gap-2">
-            <button onClick={() => setShowCommandPalette(true)} className="btn-ghost btn-icon border-none">
-              <Search size={20} />
-            </button>
-            <NotificationBell />
-          </div>
-        </header>
 
-        {/* Desktop Topbar for Command Palette Search & PWA Network Sync */}
-        <div className="desktop-only flex items-center justify-between px-5 py-4 border-b border-border bg-bg-0">
-          <div className="flex items-center gap-2">
-            {!navigator.onLine ? (
-              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-red-500 bg-red-500/10 border border-red-500/20">
-                <WifiOff size={13} /> Offline Mode (PWA Queue Active)
-              </span>
-            ) : (
-              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20">
-                <Wifi size={13} /> Network Online
-              </span>
-            )}
-          </div>
 
-          <button 
-            onClick={() => setShowCommandPalette(true)}
-            className="flex items-center gap-3 px-4 py-2 bg-bg-1 border border-border rounded-full text-text-3 cursor-pointer font-sans text-sm min-w-[240px] transition-all duration-200"
-          >
-            <Search size={16} />
-            <span className="flex-1 text-left">Search assets...</span>
-            <span className="flex items-center gap-1 opacity-70">
-              <kbd className="font-mono text-[0.7rem]">⌘</kbd>
-              <kbd className="font-mono text-[0.7rem]">K</kbd>
-            </span>
-          </button>
-        </div>
-
-        <main className="flex-1 overflow-auto p-5 main-content mobile-main-content">
-          <div className="w-full">
-            <Outlet />
-          </div>
-        </main>
-
-        {/* ── Mobile Bottom Navigation Bar ── */}
-        <nav className="mobile-bottom-nav">
-          {bottomNav.map(({ to, icon: Icon, label, exact }) => {
-            const active = isPathActive(to, exact)
-            return (
-              <NavLink
-                key={to}
-                to={to}
-                end={exact}
-                className="mobile-bottom-nav-item"
-                style={{ color: active ? 'var(--accent)' : 'var(--text-3)' }}
-              >
-                <div className={`mobile-bottom-nav-icon ${active ? 'active' : ''}`}>
-                  <Icon size={22} />
-                </div>
-                <span className="mobile-bottom-nav-label">{label}</span>
-              </NavLink>
-            )
-          })}
-          {/* "More" button opens the full sidebar */}
-          <button
-            className="mobile-bottom-nav-item"
-            style={{ color: 'var(--text-3)', background: 'none', border: 'none', cursor: 'pointer' }}
-            onClick={() => setSidebarOpen(true)}
-          >
-            <div className="mobile-bottom-nav-icon">
-              <MoreHorizontal size={22} />
-            </div>
-            <span className="mobile-bottom-nav-label">More</span>
-          </button>
-        </nav>
-      </div>
-
-      {/* ── Background import indicator ── */}
-      {importStatus !== 'idle' && (
-        <div className="fixed bottom-6 right-6 z-[9999] bg-bg-2 border border-border rounded-2xl p-4 w-[300px] shadow-[0_8px_32px_rgba(0,0,0,0.3)] import-toast">
-          {importStatus === 'running' && (
-            <>
-              <div className="flex items-center gap-2.5 mb-2.5">
-                <div className="w-3.5 h-3.5 border-2 border-accent border-t-transparent rounded-full animate-spin shrink-0"/>
-                <span className="font-sans font-bold text-[0.85rem] text-text-0 flex-1">
-                  Importing {importTotal.toLocaleString()} assets…
-                </span>
-                <span className="font-mono text-[0.78rem] text-accent font-bold">{importProgress}%</span>
-              </div>
-              <div className="bg-bg-4 rounded-md h-1.5 overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-accent to-[#6b96ff] rounded-md transition-all duration-300" style={{ width: `${importProgress}%` }}/>
-              </div>
-              <p className="font-sans text-[0.68rem] text-text-3 m-0 mt-2">
-                You can freely navigate — import continues in background
-              </p>
-            </>
-          )}
-          {importStatus === 'done' && (
-            <div className="flex items-center gap-3">
-              <CheckCircle2 size={20} className="text-[#34d399] shrink-0"/>
-              <div className="flex-1">
-              <p className="font-sans font-bold text-[0.85rem] text-text-0 m-0">Import complete</p>
-                <p className="font-sans text-[0.72rem] text-[#34d399] m-0 mt-0.5">
-                  {importResult?.count?.toLocaleString()} assets imported successfully
-                </p>
-              </div>
-              <button onClick={dismissImport} className="bg-transparent border-none cursor-pointer text-text-3 p-1 shrink-0"><X size={14}/></button>
-            </div>
-          )}
-          {importStatus === 'error' && (
-            <div className="flex items-start gap-3">
-              <XCircle size={20} className="text-red shrink-0 mt-[1px]"/>
-              <div className="flex-1">
-                <p className="font-sans font-bold text-[0.85rem] text-text-0 m-0">Import failed</p>
-                <p className="font-sans text-[0.72rem] text-red m-0 mt-0.5">{importResult?.error}</p>
-              </div>
-              <button onClick={dismissImport} className="bg-transparent border-none cursor-pointer text-text-3 p-1 shrink-0"><X size={14}/></button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Command Palette */}
-      <CommandPalette isOpen={showCommandPalette} onClose={() => setShowCommandPalette(false)} />
-
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      <MobileMoreMenu isOpen={showMobileMore} onClose={() => setShowMobileMore(false)} />
     </div>
   )
 }

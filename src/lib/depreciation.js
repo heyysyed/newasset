@@ -32,10 +32,13 @@ export function calculateBookValue(asset) {
 }
 
 export function formatCurrency(value) {
+  if (value === null || value === undefined) return '—'
+  const num = Number(value)
+  if (isNaN(num)) return '—'
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(value || 0)
+  }).format(num)
 }

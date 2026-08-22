@@ -7,7 +7,7 @@ import {
   ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import QRCode from 'qrcode'
-import { fetchAssets } from '../lib/supabase'
+import { fetchAssets, getAssetSelectCols } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import defaultLogo from '../assets/logo.png'
 
@@ -60,7 +60,7 @@ const COLOR_THEMES = [
 const PRESET_TEMPLATES = [
   {
     name: 'Corporate Navy',
-    desc: 'Clean professional — navy header, white body, Inter font',
+    desc: 'Clean professional - navy header, white body, Inter font',
     badge: '🏢',
     config: {
       sizePreset: 'A6', copies: 1, printGap: 4,
@@ -77,7 +77,7 @@ const PRESET_TEMPLATES = [
   },
   {
     name: 'Dark Industrial',
-    desc: 'Dark body, indigo accent — premium look for workshop floors',
+    desc: 'Dark body, indigo accent - premium look for workshop floors',
     badge: '🔧',
     config: {
       sizePreset: 'A6', copies: 1, printGap: 4,
@@ -94,7 +94,7 @@ const PRESET_TEMPLATES = [
   },
   {
     name: 'Safety Green',
-    desc: 'High-visibility green — ideal for safety & PPE equipment',
+    desc: 'High-visibility green - ideal for safety & PPE equipment',
     badge: '🦺',
     config: {
       sizePreset: 'A6', copies: 1, printGap: 4,
@@ -103,7 +103,7 @@ const PRESET_TEMPLATES = [
       codeFontSize: 16, fieldFontSize: 11, labelFontSize: 7, qrSize: 112, cornerRadius: 3,
       borderStyle: 'solid', borderWidth: 2, logoSize: 1.0, logoColor: 'white', fontFamily: 'Montserrat',
       watermarkOpacity: 0.03, watermarkSource: 'code', watermarkText: '', watermarkSize: 9, watermarkAngle: -30,
-      footerText: 'SAFETY EQUIPMENT — INSPECT BEFORE USE',
+      footerText: 'SAFETY EQUIPMENT - INSPECT BEFORE USE',
       footerBg: '#14532d', footerColor: '#ffffff',
       codeColor: '#ffffff', dnrColor: '#fbbf24',
       visibleFields: ['asset_name', 'category', 'serial_no', 'site', 'purchase_date'],
@@ -111,16 +111,16 @@ const PRESET_TEMPLATES = [
   },
   {
     name: 'Heavy Machinery',
-    desc: 'Bold orange — Plant & Machinery, high-contrast readability',
+    desc: 'Bold orange - Plant & Machinery, high-contrast readability',
     badge: '🏗️',
     config: {
       sizePreset: 'A6', copies: 1, printGap: 5,
       showLogo: true, showQr: true, showBorder: true, showHeaderBar: true, showFooter: true,
       headerBg: '#7c2d12', accentColor: '#ea580c', bodyBg: '#fff7ed', fieldColor: '#1c1917', labelColor: '#9a3412',
       codeFontSize: 17, fieldFontSize: 12, labelFontSize: 7, qrSize: 114, cornerRadius: 2,
-      borderStyle: 'solid', borderWidth: 2, logoSize: 1.0, logoColor: 'white', fontFamily: 'Oswald',
+      borderStyle: 'solid', borderWidth: 2, logoSize: 1.0, logoColor: 'white',
       watermarkOpacity: 0.04, watermarkSource: 'custom', watermarkText: 'STRONGBUILT', watermarkSize: 11, watermarkAngle: -25,
-      footerText: 'PLANT & MACHINERY — DO NOT REMOVE THIS TAG',
+      footerText: 'PLANT & MACHINERY - DO NOT REMOVE THIS TAG',
       footerBg: '#7c2d12', footerColor: '#ffffff',
       codeColor: '#ffffff', dnrColor: '#fbbf24',
       visibleFields: ['asset_name', 'make', 'model_no', 'serial_no', 'capacity', 'site'],
@@ -128,7 +128,7 @@ const PRESET_TEMPLATES = [
   },
   {
     name: 'Compact Portrait',
-    desc: 'A8 portrait — small QR tag for tools & handheld equipment',
+    desc: 'A8 portrait - small QR tag for tools & handheld equipment',
     badge: '🏷️',
     config: {
       sizePreset: 'A8', copies: 1, printGap: 3,
@@ -145,14 +145,14 @@ const PRESET_TEMPLATES = [
   },
   {
     name: 'Minimal Clean',
-    desc: 'No coloured header — ultra-clean white label, light borders',
+    desc: 'No coloured header - ultra-clean white label, light borders',
     badge: '⬜',
     config: {
       sizePreset: 'A6', copies: 1, printGap: 4,
       showLogo: true, showQr: true, showBorder: true, showHeaderBar: false, showFooter: true,
       headerBg: '#e2e8f0', accentColor: '#475569', bodyBg: '#ffffff', fieldColor: '#0f172a', labelColor: '#64748b',
       codeFontSize: 16, fieldFontSize: 11, labelFontSize: 7, qrSize: 112, cornerRadius: 5,
-      borderStyle: 'solid', borderWidth: 1, logoSize: 1.0, logoColor: 'original', fontFamily: 'DM Sans',
+      borderStyle: 'solid', borderWidth: 1, logoSize: 1.0, logoColor: 'original',
       watermarkOpacity: 0, watermarkSource: 'code', watermarkText: '', watermarkSize: 9, watermarkAngle: -28,
       footerText: 'PROPERTY OF STRONGBUILT',
       footerBg: '#e2e8f0', footerColor: '#0f172a',
@@ -162,14 +162,14 @@ const PRESET_TEMPLATES = [
   },
   {
     name: 'Stealth Black',
-    desc: 'All-black with cyan accent — striking, premium finish',
+    desc: 'All-black with cyan accent - striking, premium finish',
     badge: '⚫',
     config: {
       sizePreset: 'A6', copies: 1, printGap: 4,
       showLogo: true, showQr: true, showBorder: true, showHeaderBar: true, showFooter: true,
       headerBg: '#000000', accentColor: '#06b6d4', bodyBg: '#0a0a0a', fieldColor: '#f1f5f9', labelColor: '#64748b',
       codeFontSize: 16, fieldFontSize: 11, labelFontSize: 7, qrSize: 112, cornerRadius: 4,
-      borderStyle: 'solid', borderWidth: 1, logoSize: 1.0, logoColor: 'white', fontFamily: 'Roboto Condensed',
+      borderStyle: 'solid', borderWidth: 1, logoSize: 1.0, logoColor: 'white',
       watermarkOpacity: 0.06, watermarkSource: 'code', watermarkText: '', watermarkSize: 10, watermarkAngle: -28,
       footerText: 'STRONGBUILT',
       footerBg: '#000000', footerColor: '#f1f5f9',
@@ -179,7 +179,7 @@ const PRESET_TEMPLATES = [
   },
   {
     name: 'IT & Electronics',
-    desc: 'Purple accent, serial & model focus — for electronics/IT assets',
+    desc: 'Purple accent, serial & model focus - for electronics/IT assets',
     badge: '💻',
     config: {
       sizePreset: 'A6', copies: 1, printGap: 4,
@@ -188,7 +188,7 @@ const PRESET_TEMPLATES = [
       codeFontSize: 16, fieldFontSize: 11, labelFontSize: 7, qrSize: 112, cornerRadius: 4,
       borderStyle: 'solid', borderWidth: 1, logoSize: 1.0, logoColor: 'white', fontFamily: 'Inter',
       watermarkOpacity: 0.03, watermarkSource: 'code', watermarkText: '', watermarkSize: 9, watermarkAngle: -28,
-      footerText: 'IT ASSET — REPORT ISSUES TO HELPDESK',
+      footerText: 'IT ASSET - REPORT ISSUES TO HELPDESK',
       footerBg: '#4c1d95', footerColor: '#ffffff',
       codeColor: '#ffffff', dnrColor: '#dc2626',
       visibleFields: ['asset_name', 'make', 'model_no', 'serial_no', 'purchase_order_no', 'site'],
@@ -196,7 +196,7 @@ const PRESET_TEMPLATES = [
   },
   {
     name: 'Multi-Copy Sheet',
-    desc: 'A8 × 3 copies — print a sheet of the same tag at once',
+    desc: 'A8 × 3 copies - print a sheet of the same tag at once',
     badge: '📋',
     config: {
       sizePreset: 'A8', copies: 3, printGap: 3,
@@ -213,16 +213,16 @@ const PRESET_TEMPLATES = [
   },
   {
     name: 'Vehicle Tag',
-    desc: 'Custom 90×55mm — credit-card size, bold code, vehicle fields',
+    desc: 'Custom 90×55mm - credit-card size, bold code, vehicle fields',
     badge: '🚗',
     config: {
       sizePreset: 'Custom', customWidthMm: 90, customHeightMm: 55, copies: 1, printGap: 4,
       showLogo: true, showQr: true, showBorder: true, showHeaderBar: true, showFooter: true,
       headerBg: '#1a1a2e', accentColor: '#e94560', bodyBg: '#ffffff', fieldColor: '#1a1a2e', labelColor: '#555577',
       codeFontSize: 14, fieldFontSize: 10, labelFontSize: 6.5, qrSize: 90, cornerRadius: 5,
-      borderStyle: 'solid', borderWidth: 2, logoSize: 0.9, logoColor: 'white', fontFamily: 'Oswald',
+      borderStyle: 'solid', borderWidth: 2, logoSize: 0.9, logoColor: 'white',
       watermarkOpacity: 0.03, watermarkSource: 'custom', watermarkText: 'VEHICLE', watermarkSize: 14, watermarkAngle: -20,
-      footerText: 'VEHICLES — DO NOT REMOVE',
+      footerText: 'VEHICLES - DO NOT REMOVE',
       footerBg: '#1a1a2e', footerColor: '#ffffff',
       codeColor: '#ffffff', dnrColor: '#e94560',
       visibleFields: ['asset_name', 'make', 'model_no', 'serial_no', 'site'],
@@ -305,7 +305,7 @@ function Sticker({ asset, qrUrl, config }) {
         </div>
       )}
 
-      {/* Header — compact, no wasted vertical space */}
+      {/* Header - compact, no wasted vertical space */}
       <div style={{
         background: showHeaderBar ? headerBg : 'transparent',
         borderBottom: !showHeaderBar ? `2px solid ${accentColor}` : 'none',
@@ -328,7 +328,7 @@ function Sticker({ asset, qrUrl, config }) {
         <div style={{
           fontWeight: 800, fontSize: codeFontSize,
           color: codeColor,
-          fontFamily: "'DM Mono', monospace", letterSpacing: '0.04em',
+          fontFamily: "var(--font-mono)", letterSpacing: '0.04em',
           textAlign: land ? (logoAlign === 'left' ? 'right' : logoAlign === 'right' ? 'left' : 'right') : logoAlign,
           flexShrink: 0, marginLeft: land && logoAlign === 'left' ? 'auto' : undefined,
           paddingLeft: land ? 6 : 0,
@@ -340,7 +340,7 @@ function Sticker({ asset, qrUrl, config }) {
         </div>
       </div>
 
-      {/* Body — fills all remaining space */}
+      {/* Body - fills all remaining space */}
       <div style={{
         flex: 1, display: 'flex', overflow: 'hidden', zIndex: 1,
         padding: land ? '6px 8px 5px 10px' : '5px 8px 4px',
@@ -356,7 +356,7 @@ function Sticker({ asset, qrUrl, config }) {
                 ? <img src={qrUrl} alt="QR" width={qrSize} height={qrSize} style={{ display: 'block' }} />
                 : <div style={{ width: qrSize, height: qrSize, background: '#f3f4f6' }} />}
             </div>
-            <div style={{ fontSize: labelFontSize * 0.9, fontWeight: 700, color: fieldColor, fontFamily: "'DM Mono', monospace", letterSpacing: '0.03em', marginTop: 2, textAlign: 'center' }}>
+            <div style={{ fontSize: labelFontSize * 0.9, fontWeight: 700, color: fieldColor, fontFamily: "var(--font-mono)", letterSpacing: '0.03em', marginTop: 2, textAlign: 'center' }}>
               {asset.asset_code}
             </div>
           </div>
@@ -376,7 +376,7 @@ function Sticker({ asset, qrUrl, config }) {
           ))}
         </div>
 
-        {/* Landscape: QR right column — stretches full body height */}
+        {/* Landscape: QR right column - stretches full body height */}
         {land && showQr && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0, alignSelf: 'stretch' }}>
             <div style={{ padding: 3, background: '#fff', border: `1.5px solid ${accentColor}30`, borderRadius: 5, display: 'flex', alignItems: 'center' }}>
@@ -384,7 +384,7 @@ function Sticker({ asset, qrUrl, config }) {
                 ? <img src={qrUrl} alt="QR" width={qrSize} height={qrSize} style={{ display: 'block' }} />
                 : <div style={{ width: qrSize, height: qrSize, background: '#f3f4f6' }} />}
             </div>
-            <div style={{ fontSize: labelFontSize * 0.9, fontWeight: 700, color: fieldColor, fontFamily: "'DM Mono', monospace", letterSpacing: '0.03em', marginTop: 2, textAlign: 'center' }}>
+            <div style={{ fontSize: labelFontSize * 0.9, fontWeight: 700, color: fieldColor, fontFamily: "var(--font-mono)", letterSpacing: '0.03em', marginTop: 2, textAlign: 'center' }}>
               {asset.asset_code}
             </div>
           </div>
@@ -464,8 +464,7 @@ function Sec({ id, open, toggle, children }) {
           fontSize: '0.72rem', fontWeight: 700, transition: 'all 0.15s',
         }}>{s.icon}</span>
         <span style={{
-          flex: 1, textAlign: 'left',
-          fontFamily: 'DM Sans, sans-serif', fontWeight: 600, fontSize: '0.82rem',
+          flex: 1, textAlign: 'left', fontWeight: 600, fontSize: '0.82rem',
           color: isOpen ? 'var(--accent-light)' : 'var(--text-1)',
           letterSpacing: '0.01em',
         }}>{s.title}</span>
@@ -488,8 +487,8 @@ function Slider({ label, k, min, max, step = 1, unit = '', fmt, config, onChange
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-        <label style={{ fontSize: '0.75rem', color: 'var(--text-2)', fontFamily: 'DM Sans', fontWeight: 500 }}>{label}</label>
-        <span style={{ fontSize: '0.72rem', color: 'var(--accent-light)', fontFamily: 'DM Mono, monospace', background: 'var(--accent-glow)', padding: '1px 6px', borderRadius: 4 }}>
+        <label style={{ fontSize: '0.75rem', color: 'var(--text-2)', fontWeight: 500 }}>{label}</label>
+        <span style={{ fontSize: '0.72rem', color: 'var(--accent-light)', fontFamily: 'var(--font-mono)', background: 'var(--accent-glow)', padding: '1px 6px', borderRadius: 4 }}>
           {fmt ? fmt(value) : `${value}${unit}`}
         </span>
       </div>
@@ -504,9 +503,9 @@ function Color({ label, k, config, onChange }) {
   const value = config[k]
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0' }}>
-      <label style={{ fontSize: '0.75rem', color: 'var(--text-2)', fontFamily: 'DM Sans', fontWeight: 500 }}>{label}</label>
+      <label style={{ fontSize: '0.75rem', color: 'var(--text-2)', fontWeight: 500 }}>{label}</label>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <span style={{ fontSize: '0.65rem', fontFamily: 'DM Mono', color: 'var(--text-3)' }}>{value}</span>
+        <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--text-3)' }}>{value}</span>
         <div style={{ position: 'relative', width: 34, height: 26 }}>
           <div style={{ position: 'absolute', inset: 0, borderRadius: 6, background: value, border: '2px solid var(--border)', pointerEvents: 'none', transition: 'background 0.15s' }}/>
           <input type="color" value={value} onChange={e => onChange(k, e.target.value)}
@@ -521,7 +520,7 @@ function Toggle({ label, k, config, onChange }) {
   const value = config[k]
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 0' }}>
-      <label style={{ fontSize: '0.75rem', color: 'var(--text-2)', fontFamily: 'DM Sans', fontWeight: 500 }}>{label}</label>
+      <label style={{ fontSize: '0.75rem', color: 'var(--text-2)', fontWeight: 500 }}>{label}</label>
       <button onClick={() => onChange(k, !value)} style={{
         width: 38, height: 21, borderRadius: 11, border: 'none', cursor: 'pointer',
         transition: 'background 0.25s ease, box-shadow 0.25s ease', position: 'relative', flexShrink: 0,
@@ -567,7 +566,7 @@ function ControlPanel({ config, onChange, onBatch }) {
 
       <Sec id="size" open={open} toggle={toggle}>
         <div>
-          <label style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 6 }}>Label Size</label>
+          <label style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 6 }}>Label Size</label>
           <div style={{ display: 'flex', gap: 5 }}>
             {SIZE_PRESETS.map(p => (
               <button key={p.key} onClick={() => onChange('sizePreset', p.key)} style={{
@@ -576,8 +575,8 @@ function ControlPanel({ config, onChange, onBatch }) {
                 borderColor: config.sizePreset === p.key ? 'var(--accent)' : 'var(--border)',
                 background: config.sizePreset === p.key ? 'var(--accent-glow)' : 'var(--bg-3)',
               }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: 700, fontFamily: 'DM Sans', color: config.sizePreset === p.key ? 'var(--accent-light)' : 'var(--text-1)' }}>{p.label}</div>
-                <div style={{ fontSize: '0.58rem', opacity: 0.6, fontFamily: 'DM Mono', color: 'var(--text-3)' }}>{p.sub}</div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 700, color: config.sizePreset === p.key ? 'var(--accent-light)' : 'var(--text-1)' }}>{p.label}</div>
+                <div style={{ fontSize: '0.58rem', opacity: 0.6, fontFamily: 'var(--font-mono)', color: 'var(--text-3)' }}>{p.sub}</div>
               </button>
             ))}
           </div>
@@ -602,7 +601,7 @@ function ControlPanel({ config, onChange, onBatch }) {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 4 }}>
           <div>
-            <label style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 4 }}>Border Style</label>
+            <label style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 4 }}>Border Style</label>
             <select value={config.borderStyle || 'solid'} onChange={e => onChange('borderStyle', e.target.value)} className="sel" style={{ fontSize: '0.78rem' }}>
               {BORDER_STYLES.map(b => <option key={b} value={b}>{b.charAt(0).toUpperCase() + b.slice(1)}</option>)}
             </select>
@@ -614,7 +613,7 @@ function ControlPanel({ config, onChange, onBatch }) {
 
       <Sec id="colors" open={open} toggle={toggle}>
         <div>
-          <label style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 8 }}>Quick Themes</label>
+          <label style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 8 }}>Quick Themes</label>
           <div style={{ display: 'flex', gap: 7 }}>
             {COLOR_THEMES.map(t => (
               <div key={t.key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
@@ -625,7 +624,7 @@ function ControlPanel({ config, onChange, onBatch }) {
                   cursor: 'pointer', boxShadow: config.headerBg === t.c ? `0 0 0 2px var(--accent)` : '0 1px 4px rgba(0,0,0,0.3)',
                   transition: 'all 0.15s',
                 }}/>
-                <span style={{ fontSize: '0.56rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>{t.label}</span>
+                <span style={{ fontSize: '0.56rem', color: 'var(--text-3)' }}>{t.label}</span>
               </div>
             ))}
           </div>
@@ -657,7 +656,7 @@ function ControlPanel({ config, onChange, onBatch }) {
         <label style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '9px',
           background: 'var(--bg-3)', border: '1.5px dashed var(--border)', borderRadius: 8,
-          cursor: 'pointer', color: 'var(--text-2)', fontSize: '0.78rem', fontFamily: 'DM Sans',
+          cursor: 'pointer', color: 'var(--text-2)', fontSize: '0.78rem',
           transition: 'border-color 0.15s',
         }}>
           ↑ Upload Logo
@@ -668,12 +667,12 @@ function ControlPanel({ config, onChange, onBatch }) {
         </label>
         <Slider label="Logo Size" k="logoSize" min={0.4} max={2.5} step={0.05} unit="×" config={config} onChange={onChange}/>
         <div>
-          <label style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 6 }}>Logo Alignment</label>
+          <label style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 6 }}>Logo Alignment</label>
           <div style={{ display: 'flex', gap: 5 }}>
             {[['left','Left'],['center','Center'],['right','Right']].map(([v,l]) => (
               <button key={v} onClick={() => onChange('logoAlign', v)} style={{
                 flex: 1, padding: '5px 4px', borderRadius: 7, border: '1.5px solid',
-                cursor: 'pointer', fontSize: '0.72rem', fontFamily: 'DM Sans', fontWeight: 600,
+                cursor: 'pointer', fontSize: '0.72rem', fontWeight: 600,
                 borderColor: config.logoAlign === v ? 'var(--accent)' : 'var(--border)',
                 background: config.logoAlign === v ? 'var(--accent-glow)' : 'var(--bg-3)',
                 color: config.logoAlign === v ? 'var(--accent)' : 'var(--text-3)',
@@ -682,12 +681,12 @@ function ControlPanel({ config, onChange, onBatch }) {
           </div>
         </div>
         <div>
-          <label style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 6 }}>Logo Tint</label>
+          <label style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 6 }}>Logo Tint</label>
           <div style={{ display: 'flex', gap: 5 }}>
             {[['white','White'],['original','Original'],['black','Black']].map(([v,l]) => (
               <button key={v} onClick={() => onChange('logoColor', v)} style={{
                 flex: 1, padding: '5px 4px', borderRadius: 7, border: '1.5px solid',
-                cursor: 'pointer', fontSize: '0.72rem', fontFamily: 'DM Sans', fontWeight: 600,
+                cursor: 'pointer', fontSize: '0.72rem', fontWeight: 600,
                 borderColor: config.logoColor === v ? 'var(--accent)' : 'var(--border)',
                 background: config.logoColor === v ? 'var(--accent-glow)' : 'var(--bg-3)',
                 color: config.logoColor === v ? 'var(--accent-light)' : 'var(--text-2)',
@@ -699,7 +698,7 @@ function ControlPanel({ config, onChange, onBatch }) {
 
       <Sec id="typography" open={open} toggle={toggle}>
         <div>
-          <label style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 5 }}>Font Family</label>
+          <label style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 5 }}>Font Family</label>
           <select value={config.fontFamily} onChange={e => onChange('fontFamily', e.target.value)} className="sel" style={{ fontSize: '0.8rem' }}>
             {FONTS.map(f => <option key={f} value={f}>{f}</option>)}
           </select>
@@ -712,12 +711,12 @@ function ControlPanel({ config, onChange, onBatch }) {
 
       <Sec id="branding" open={open} toggle={toggle}>
         <div>
-          <label style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 6 }}>Watermark</label>
+          <label style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 6 }}>Watermark</label>
           <div style={{ display: 'flex', gap: 5, marginBottom: 8 }}>
             {[['code','Asset Code'],['custom','Custom Text']].map(([v,l]) => (
               <button key={v} onClick={() => onChange('watermarkSource', v)} style={{
                 flex: 1, padding: '5px 4px', borderRadius: 7, border: '1.5px solid',
-                cursor: 'pointer', fontSize: '0.72rem', fontFamily: 'DM Sans', fontWeight: 600,
+                cursor: 'pointer', fontSize: '0.72rem', fontWeight: 600,
                 borderColor: (config.watermarkSource || 'code') === v ? 'var(--accent)' : 'var(--border)',
                 background: (config.watermarkSource || 'code') === v ? 'var(--accent-glow)' : 'var(--bg-3)',
                 color: (config.watermarkSource || 'code') === v ? 'var(--accent-light)' : 'var(--text-2)',
@@ -733,7 +732,7 @@ function ControlPanel({ config, onChange, onBatch }) {
         <Slider label="Size"     k="watermarkSize"    min={6}   max={20}   unit="pt" config={config} onChange={onChange}/>
         <Slider label="Rotation" k="watermarkAngle"   min={-60} max={0}    unit="°" config={config} onChange={onChange}/>
         <div>
-          <label style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 5 }}>Footer Text</label>
+          <label style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 5 }}>Footer Text</label>
           <input value={localFooter} onChange={e => setLocalFooter(e.target.value)}
             className="inp" style={{ fontSize: '0.78rem' }} />
         </div>
@@ -749,7 +748,7 @@ function ControlPanel({ config, onChange, onBatch }) {
                 onChange('visibleFields', on ? vf.filter(k => k !== f.key) : [...vf, f.key])
               }} style={{
                 padding: '4px 10px', borderRadius: 20, border: '1.5px solid',
-                cursor: 'pointer', fontSize: '0.72rem', fontFamily: 'DM Sans', fontWeight: 600,
+                cursor: 'pointer', fontSize: '0.72rem', fontWeight: 600,
                 transition: 'all 0.15s',
                 borderColor: on ? 'var(--accent)' : 'var(--border)',
                 background: on ? 'var(--accent-glow)' : 'var(--bg-3)',
@@ -768,8 +767,8 @@ function ControlPanel({ config, onChange, onBatch }) {
 
 // ─── Main Page ───────────────────────────────────────────────
 export default function StickerPage() {
-  const { currentCompany } = useAuth()
-  const cc = currentCompany?.code
+  const { currentCompany, can } = useAuth()
+  const cc = currentCompany?.id
   const [searchParams] = useSearchParams()
   const preIds = searchParams.get('ids')?.split(',').filter(Boolean) || []
 
@@ -837,7 +836,7 @@ export default function StickerPage() {
     localStorage.setItem(TPLKEY, JSON.stringify(updated)); setTemplates(updated)
   }
 
-  useEffect(() => { fetchAssets({}, cc).then(d => { setAssets(d); setLoading(false) }) }, [cc])
+  useEffect(() => { fetchAssets({}, cc, getAssetSelectCols(can('view_financials'))).then(d => { setAssets(d); setLoading(false) }) }, [cc])
 
   useEffect(() => {
     const todo = assets.filter(a => selected.has(a.id) && !qrMap[a.asset_code])
@@ -846,7 +845,7 @@ export default function StickerPage() {
     setGenning(true)
     Promise.all(todo.map(a => getOrMakeQR(a.asset_code, a.id).then(url => [a.asset_code, url])))
       .then(pairs => {
-        if (genId !== qrGenId.current) return // stale — a newer generation is running
+        if (genId !== qrGenId.current) return // stale - a newer generation is running
         const valid = pairs.filter(Boolean)
         if (valid.length) setQrMap(prev => { const n = { ...prev }; valid.forEach(([k, v]) => { n[k] = v }); return n })
         setGenning(false)
@@ -935,8 +934,8 @@ export default function StickerPage() {
                 <SaveIcon size={16} style={{ color: 'var(--accent)' }}/>
               </div>
               <div>
-                <h3 style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1rem', letterSpacing: '0.06em', color: 'var(--text-0)', margin: 0 }}>SAVE TEMPLATE</h3>
-                <p style={{ color: 'var(--text-3)', fontSize: '0.75rem', fontFamily: 'DM Sans', margin: 0 }}>Reuse this design anytime</p>
+                <h3 style={{ fontWeight: 700, fontSize: '1rem', letterSpacing: '0.06em', color: 'var(--text-0)', margin: 0 }}>SAVE TEMPLATE</h3>
+                <p style={{ color: 'var(--text-3)', fontSize: '0.75rem', margin: 0 }}>Reuse this design anytime</p>
               </div>
             </div>
             <label className="lbl">Template Name</label>
@@ -967,28 +966,28 @@ export default function StickerPage() {
             <Tag size={17} style={{ color: 'var(--accent)' }}/>
           </div>
           <div style={{ minWidth: 0 }}>
-            <h1 className="sticker-header-title" style={{ fontFamily: 'Oswald, sans-serif', fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-0)', letterSpacing: '0.06em', margin: 0, lineHeight: 1.1 }}>
-              STICKER <span style={{ color: 'var(--accent)' }}>DESIGNER</span>
+            <h1 className="text-page-title m-0 tracking-wide uppercase" style={{ lineHeight: 1.1 }}>
+              STICKER <span className="text-accent">DESIGNER</span>
             </h1>
             <div className="sticker-status-pills" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: genning ? 'rgba(245,158,11,0.1)' : 'rgba(34,197,94,0.1)', border: `1px solid ${genning ? 'rgba(245,158,11,0.3)' : 'rgba(34,197,94,0.3)'}`, borderRadius: 20, padding: '2px 8px 2px 5px' }}>
                   <div style={{ width: 6, height: 6, borderRadius: '50%', background: genning ? 'var(--amber)' : 'var(--green)', animation: genning ? 'none' : 'pulse2 2s infinite' }}/>
-                  <span style={{ fontSize: '0.72rem', color: genning ? 'var(--amber)' : 'var(--green)', fontFamily: 'DM Sans', fontWeight: 600 }}>
+                  <span style={{ fontSize: '0.72rem', color: genning ? 'var(--amber)' : 'var(--green)', fontWeight: 600 }}>
                     {genning ? 'Generating QR…' : 'Live'}
                   </span>
                 </div>
                 {selectedAssets.length > 0 && (
                   <>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>·</span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-2)', fontFamily: 'DM Sans' }}>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>·</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-2)' }}>
                       <strong style={{ color: 'var(--accent-light)' }}>{selectedAssets.length}</strong> asset{selectedAssets.length !== 1 ? 's' : ''}
                     </span>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>·</span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-2)', fontFamily: 'DM Sans' }}>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>·</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-2)' }}>
                       <strong style={{ color: 'var(--text-0)' }}>{printAssets.length}</strong> label{printAssets.length !== 1 ? 's' : ''}
                     </span>
-                    <span style={{ fontSize: '0.72rem', fontFamily: 'DM Mono', color: 'var(--text-3)', background: 'var(--bg-4)', padding: '1px 6px', borderRadius: 4 }}>{sizeLabel}</span>
-                    {copies > 1 && <span style={{ fontSize: '0.72rem', fontFamily: 'DM Mono', color: 'var(--amber)', background: 'rgba(245,158,11,0.1)', padding: '1px 6px', borderRadius: 4 }}>{copies}× copies</span>}
+                    <span style={{ fontSize: '0.72rem', fontFamily: 'var(--font-mono)', color: 'var(--text-3)', background: 'var(--bg-4)', padding: '1px 6px', borderRadius: 4 }}>{sizeLabel}</span>
+                    {copies > 1 && <span style={{ fontSize: '0.72rem', fontFamily: 'var(--font-mono)', color: 'var(--amber)', background: 'rgba(245,158,11,0.1)', padding: '1px 6px', borderRadius: 4 }}>{copies}× copies</span>}
                   </>
                 )}
               </div>
@@ -1003,7 +1002,7 @@ export default function StickerPage() {
               style={{ fontSize: '0.82rem', padding: '8px 14px', background: showTplPanel ? 'var(--accent-glow)' : undefined, borderColor: showTplPanel ? 'var(--accent)' : undefined, color: showTplPanel ? 'var(--accent-light)' : undefined, gap: 6 }}>
               <BookmarkIcon size={14}/>
               <span className="sticker-btn-label">Templates</span>
-              <span style={{ background: showTplPanel ? 'var(--accent)' : 'var(--bg-4)', color: showTplPanel ? 'white' : 'var(--text-3)', borderRadius: 8, padding: '1px 6px', fontSize: '0.65rem', fontFamily: 'DM Mono' }}>
+              <span style={{ background: showTplPanel ? 'var(--accent)' : 'var(--bg-4)', color: showTplPanel ? 'white' : 'var(--text-3)', borderRadius: 8, padding: '1px 6px', fontSize: '0.65rem', fontFamily: 'var(--font-mono)' }}>
                 {PRESET_TEMPLATES.length + templates.length}
               </span>
             </button>
@@ -1016,12 +1015,11 @@ export default function StickerPage() {
                     <button key={t.id} onClick={() => setTplTab(t.id)} style={{
                       flex: 1, padding: '10px 0', border: 'none', cursor: 'pointer', background: 'none',
                       color: tplTab === t.id ? 'var(--accent-light)' : 'var(--text-3)',
-                      borderBottom: tplTab === t.id ? '2px solid var(--accent)' : '2px solid transparent',
-                      fontFamily: 'DM Sans, sans-serif', fontWeight: 600, fontSize: '0.8rem',
+                      borderBottom: tplTab === t.id ? '2px solid var(--accent)' : '2px solid transparent', fontWeight: 600, fontSize: '0.8rem',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                     }}>
                       {t.label}
-                      <span style={{ fontSize: '0.65rem', background: tplTab === t.id ? 'var(--accent)' : 'var(--bg-4)', color: tplTab === t.id ? 'white' : 'var(--text-3)', borderRadius: 8, padding: '1px 6px', fontFamily: 'DM Mono' }}>{t.count}</span>
+                      <span style={{ fontSize: '0.65rem', background: tplTab === t.id ? 'var(--accent)' : 'var(--bg-4)', color: tplTab === t.id ? 'white' : 'var(--text-3)', borderRadius: 8, padding: '1px 6px', fontFamily: 'var(--font-mono)' }}>{t.count}</span>
                     </button>
                   ))}
                 </div>
@@ -1042,13 +1040,13 @@ export default function StickerPage() {
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2 }}>
-                            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-0)', fontFamily: 'DM Sans' }}>{tpl.name}</span>
-                            <span style={{ fontSize: '0.58rem', fontFamily: 'DM Mono', color: 'var(--accent-light)', background: 'var(--accent-glow)', padding: '1px 5px', borderRadius: 4 }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-0)' }}>{tpl.name}</span>
+                            <span style={{ fontSize: '0.58rem', fontFamily: 'var(--font-mono)', color: 'var(--accent-light)', background: 'var(--accent-glow)', padding: '1px 5px', borderRadius: 4 }}>
                               {tpl.config.sizePreset === 'Custom' ? `${tpl.config.customWidthMm}×${tpl.config.customHeightMm}mm` : tpl.config.sizePreset}
                             </span>
-                            {tpl.config.copies > 1 && <span style={{ fontSize: '0.58rem', fontFamily: 'DM Mono', color: 'var(--amber)', background: 'rgba(245,158,11,0.1)', padding: '1px 5px', borderRadius: 4 }}>{tpl.config.copies}×</span>}
+                            {tpl.config.copies > 1 && <span style={{ fontSize: '0.58rem', fontFamily: 'var(--font-mono)', color: 'var(--amber)', background: 'rgba(245,158,11,0.1)', padding: '1px 5px', borderRadius: 4 }}>{tpl.config.copies}×</span>}
                           </div>
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'DM Sans', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tpl.desc}</div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tpl.desc}</div>
                         </div>
                       </div>
                     ))}
@@ -1060,15 +1058,15 @@ export default function StickerPage() {
                   <>
                     <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end' }}>
                       <button onClick={() => { setShowTplPanel(false); setShowSaveModal(true) }}
-                        style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-light)', background: 'var(--accent-glow)', border: '1px solid rgba(43,127,255,0.25)', borderRadius: 7, padding: '5px 12px', cursor: 'pointer', fontFamily: 'DM Sans', display: 'flex', alignItems: 'center', gap: 5 }}>
+                        style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-light)', background: 'var(--accent-glow)', border: '1px solid rgba(43,127,255,0.25)', borderRadius: 7, padding: '5px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
                         <SaveIcon size={11}/> Save Current Design
                       </button>
                     </div>
                     {templates.length === 0 ? (
                       <div style={{ padding: '32px 20px', textAlign: 'center' }}>
                         <div style={{ fontSize: '2rem', marginBottom: 8 }}>📋</div>
-                        <p style={{ color: 'var(--text-2)', fontSize: '0.85rem', fontFamily: 'DM Sans', fontWeight: 600 }}>No saved templates yet</p>
-                        <p style={{ color: 'var(--text-3)', fontSize: '0.75rem', fontFamily: 'DM Sans', marginTop: 4 }}>Customise a design then save it</p>
+                        <p style={{ color: 'var(--text-2)', fontSize: '0.85rem', fontWeight: 600 }}>No saved templates yet</p>
+                        <p style={{ color: 'var(--text-3)', fontSize: '0.75rem', marginTop: 4 }}>Customise a design then save it</p>
                       </div>
                     ) : (
                       <div style={{ maxHeight: 380, overflowY: 'auto' }}>
@@ -1078,8 +1076,8 @@ export default function StickerPage() {
                             onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-3)'}
                             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-0)', fontFamily: 'DM Sans' }}>{tpl.name}</div>
-                              <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'DM Mono' }}>
+                              <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-0)' }}>{tpl.name}</div>
+                              <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>
                                 {new Date(tpl.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                               </div>
                             </div>
@@ -1120,7 +1118,7 @@ export default function StickerPage() {
                 padding: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center',
                 boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
               }}>
-                {/* Sticker — scaled to fit container width */}
+                {/* Sticker - scaled to fit container width */}
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
                   <div style={{ width: stickerPxW, transformOrigin: 'top center', transform: `scale(var(--sticker-scale, 1))` }} ref={el => {
                     if (el) {
@@ -1133,14 +1131,14 @@ export default function StickerPage() {
                     <Sticker asset={mobilePreviewAsset} qrUrl={qrMap[mobilePreviewAsset.asset_code]} config={config}/>
                   </div>
                 </div>
-                {/* Navigation — only show when 2+ assets */}
+                {/* Navigation - only show when 2+ assets */}
                 {selectedAssets.length > 1 && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', justifyContent: 'center', padding: '4px 0 2px' }}>
                     <button onClick={() => setPreviewIdx(i => Math.max(0, i - 1))} disabled={previewIdx === 0}
                       style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: previewIdx === 0 ? 'var(--text-3)' : 'var(--accent)', opacity: previewIdx === 0 ? 0.3 : 1 }}>
                       <ChevronLeft size={16}/>
                     </button>
-                    <span style={{ fontSize: '0.65rem', color: 'var(--text-3)', fontFamily: 'DM Mono' }}>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>
                       {previewIdx + 1} / {selectedAssets.length}
                     </span>
                     <button onClick={() => setPreviewIdx(i => Math.min(selectedAssets.length - 1, i + 1))} disabled={previewIdx >= selectedAssets.length - 1}
@@ -1156,7 +1154,7 @@ export default function StickerPage() {
                 background: 'var(--bg-2)', border: '2px dashed var(--border)', borderRadius: 10,
               }}>
                 <Tag size={22} style={{ color: 'var(--accent)', opacity: 0.5, marginBottom: 6 }}/>
-                <p style={{ color: 'var(--text-3)', fontSize: '0.75rem', fontFamily: 'DM Sans', margin: 0 }}>
+                <p style={{ color: 'var(--text-3)', fontSize: '0.75rem', margin: 0 }}>
                   Select assets from <strong style={{ color: 'var(--accent-light)' }}>Assets</strong> tab below
                 </p>
               </div>
@@ -1175,8 +1173,7 @@ export default function StickerPage() {
               <button key={t.id} onClick={() => setTab(t.id)} style={{
                 flex: 1, padding: '8px 0', border: 'none', cursor: 'pointer', borderRadius: 9,
                 background: tab === t.id ? 'var(--accent)' : 'transparent',
-                color: tab === t.id ? 'white' : 'var(--text-2)',
-                fontFamily: 'DM Sans, sans-serif', fontWeight: 700, fontSize: '0.78rem',
+                color: tab === t.id ? 'white' : 'var(--text-2)', fontWeight: 700, fontSize: '0.78rem',
                 transition: 'all 0.2s',
                 boxShadow: tab === t.id ? '0 2px 8px var(--accent)40' : 'none',
               }}>
@@ -1206,14 +1203,14 @@ export default function StickerPage() {
                       {/* Row 1: Site + Category */}
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                         <div>
-                          <label style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-3)', fontFamily: 'DM Sans', textTransform: 'uppercase', letterSpacing: '0.07em', display: 'block', marginBottom: 3 }}>Site</label>
+                          <label style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.07em', display: 'block', marginBottom: 3 }}>Site</label>
                           <select value={filterSite} onChange={e => setFilterSite(e.target.value)} className="sel"
                             style={{ fontSize: '0.75rem', width: '100%', fontWeight: filterSite !== 'All' ? 600 : 400, color: filterSite !== 'All' ? 'var(--accent-light)' : undefined }}>
                             {siteOptions.map(o => <option key={o} value={o}>{o === 'All' ? 'All Sites' : o}</option>)}
                           </select>
                         </div>
                         <div>
-                          <label style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-3)', fontFamily: 'DM Sans', textTransform: 'uppercase', letterSpacing: '0.07em', display: 'block', marginBottom: 3 }}>Category</label>
+                          <label style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.07em', display: 'block', marginBottom: 3 }}>Category</label>
                           <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} className="sel"
                             style={{ fontSize: '0.75rem', width: '100%', fontWeight: filterCategory !== 'All' ? 600 : 400, color: filterCategory !== 'All' ? 'var(--accent-light)' : undefined }}>
                             {categoryOptions.map(o => <option key={o} value={o}>{o === 'All' ? 'All Categories' : o}</option>)}
@@ -1222,7 +1219,7 @@ export default function StickerPage() {
                       </div>
                       {/* Row 2: Status (full width) */}
                       <div>
-                        <label style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-3)', fontFamily: 'DM Sans', textTransform: 'uppercase', letterSpacing: '0.07em', display: 'block', marginBottom: 3 }}>Status</label>
+                        <label style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.07em', display: 'block', marginBottom: 3 }}>Status</label>
                         <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="sel"
                           style={{ fontSize: '0.75rem', width: '100%', fontWeight: filterStatus !== 'All' ? 600 : 400, color: filterStatus !== 'All' ? 'var(--accent-light)' : undefined }}>
                           {statusOptions.map(o => <option key={o} value={o}>{o === 'All' ? 'All Statuses' : o}</option>)}
@@ -1232,11 +1229,11 @@ export default function StickerPage() {
                     {/* Filter summary + reset */}
                     {(filterSite !== 'All' || filterCategory !== 'All' || filterStatus !== 'All') && (
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 7, padding: '5px 8px', background: 'var(--accent-glow)', borderRadius: 7, border: '1px solid rgba(79,126,255,0.15)' }}>
-                        <span style={{ fontSize: '0.7rem', color: 'var(--accent-light)', fontFamily: 'DM Sans', fontWeight: 600 }}>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--accent-light)', fontWeight: 600 }}>
                           {filtered.length} / {assets.length} assets
                         </span>
                         <button onClick={() => { setFilterSite('All'); setFilterCategory('All'); setFilterStatus('All') }}
-                          style={{ fontSize: '0.68rem', color: 'var(--accent-light)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans', fontWeight: 600, padding: 0 }}>
+                          style={{ fontSize: '0.68rem', color: 'var(--accent-light)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, padding: 0 }}>
                           ✕ Clear
                         </button>
                       </div>
@@ -1244,11 +1241,11 @@ export default function StickerPage() {
                     {/* Select all / clear */}
                     <div style={{ display: 'flex', gap: 6, minWidth: 0 }}>
                       <button onClick={() => setSelected(s => { const n = new Set(s); filtered.forEach(a => n.add(a.id)); return n })}
-                        style={{ flex: 1, fontSize: '0.7rem', fontWeight: 600, color: 'var(--accent-light)', background: 'var(--accent-glow)', border: '1px solid rgba(43,127,255,0.2)', borderRadius: 7, padding: '6px 8px', cursor: 'pointer', fontFamily: 'DM Sans', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        style={{ flex: 1, fontSize: '0.7rem', fontWeight: 600, color: 'var(--accent-light)', background: 'var(--accent-glow)', border: '1px solid rgba(43,127,255,0.2)', borderRadius: 7, padding: '6px 8px', cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         + Select All{filterSite !== 'All' || filterCategory !== 'All' || filterStatus !== 'All' ? ' Filtered' : ''}
                       </button>
                       <button onClick={() => setSelected(new Set())}
-                        style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-3)', background: 'var(--bg-3)', border: '1px solid var(--border)', borderRadius: 7, padding: '6px 10px', cursor: 'pointer', fontFamily: 'DM Sans', flexShrink: 0 }}>
+                        style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-3)', background: 'var(--bg-3)', border: '1px solid var(--border)', borderRadius: 7, padding: '6px 10px', cursor: 'pointer', flexShrink: 0 }}>
                         Clear
                       </button>
                     </div>
@@ -1257,7 +1254,7 @@ export default function StickerPage() {
                   {loading ? [...Array(6)].map((_, i) => (
                     <div key={i} className="skeleton" style={{ margin: '10px 12px', height: 38, borderRadius: 8 }}/>
                   )) : filtered.length === 0 ? (
-                    <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--text-3)', fontSize: '0.82rem', fontFamily: 'DM Sans' }}>No assets match</div>
+                    <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--text-3)', fontSize: '0.82rem' }}>No assets match</div>
                   ) : filtered.map(asset => (
                     <label key={asset.id} style={{
                       display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', cursor: 'pointer',
@@ -1268,7 +1265,7 @@ export default function StickerPage() {
                       <input type="checkbox" checked={selected.has(asset.id)} onChange={() => toggleSelect(asset.id)}
                         style={{ width: 15, height: 15, accentColor: 'var(--accent)', cursor: 'pointer', flexShrink: 0 }}/>
                       <div style={{ minWidth: 0, flex: 1 }}>
-                        <div style={{ fontSize: '0.68rem', color: 'var(--accent-light)', fontWeight: 700, fontFamily: 'DM Mono' }}>{asset.asset_code}</div>
+                        <div style={{ fontSize: '0.68rem', color: 'var(--accent-light)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{asset.asset_code}</div>
                         <div style={{ fontSize: '0.78rem', color: 'var(--text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500 }}>{asset.asset_name}</div>
                       </div>
                       {selected.has(asset.id) && (
@@ -1290,11 +1287,11 @@ export default function StickerPage() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <Eye size={14} style={{ color: 'var(--accent)' }}/>
-                <span style={{ fontFamily: 'Oswald, sans-serif', fontSize: '0.8rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-2)', fontWeight: 600 }}>Live Canvas</span>
-                <span style={{ fontSize: '0.68rem', fontFamily: 'DM Mono', color: 'var(--text-3)', background: 'var(--bg-3)', padding: '2px 7px', borderRadius: 5 }}>{sizeLabel}</span>
+                <span style={{ fontSize: '0.8rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-2)', fontWeight: 600 }}>Live Canvas</span>
+                <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: 'var(--text-3)', background: 'var(--bg-3)', padding: '2px 7px', borderRadius: 5 }}>{sizeLabel}</span>
               </div>
               {selectedAssets.length > 0 && (
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>
                   {printAssets.length} label{printAssets.length !== 1 ? 's' : ''} ready
                 </span>
               )}
@@ -1310,8 +1307,8 @@ export default function StickerPage() {
                 <div style={{ width: 80, height: 80, borderRadius: 20, background: 'var(--bg-2)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }}>
                   <Tag size={32} style={{ color: 'var(--accent)', opacity: 0.6 }}/>
                 </div>
-                <h3 style={{ color: 'var(--text-1)', fontSize: '1.1rem', fontWeight: 700, marginBottom: 8, fontFamily: 'Oswald', letterSpacing: '0.06em' }}>NO LABELS SELECTED</h3>
-                <p style={{ color: 'var(--text-3)', fontSize: '0.85rem', maxWidth: 280, textAlign: 'center', lineHeight: 1.7, fontFamily: 'DM Sans', marginBottom: 20 }}>
+                <h3 style={{ color: 'var(--text-1)', fontSize: '1.1rem', fontWeight: 700, marginBottom: 8, letterSpacing: '0.06em' }}>NO LABELS SELECTED</h3>
+                <p style={{ color: 'var(--text-3)', fontSize: '0.85rem', maxWidth: 280, textAlign: 'center', lineHeight: 1.7, marginBottom: 20 }}>
                   Switch to the <strong style={{ color: 'var(--accent-light)' }}>Assets</strong> tab in the left panel, then select the assets you want to print.
                 </p>
                 <div style={{ display: 'flex', gap: 8 }}>
@@ -1344,7 +1341,7 @@ export default function StickerPage() {
                 <div style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--accent-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Printer size={14} style={{ color: 'var(--accent)' }}/>
                 </div>
-                <p style={{ fontSize: '0.78rem', color: 'var(--text-2)', fontFamily: 'DM Sans', margin: 0, lineHeight: 1.5 }}>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-2)', margin: 0, lineHeight: 1.5 }}>
                   <strong style={{ color: 'var(--text-0)' }}>Printing tip:</strong> Set page margins to <strong>None</strong> and enable <strong>Background graphics</strong> in your browser print dialog for accurate colours.
                 </p>
               </div>

@@ -14,7 +14,7 @@ import {
   FileText, Download, Loader2, ChevronDown, ChevronRight, Eye, Copy, Layers,
   GitBranch, Link2, Unlink, Search, Plus, Package, Shield, AlertTriangle,
   CheckCircle2, XCircle, TrendingDown, Hash, Building2, User, Clipboard,
-  BarChart3, Activity, Zap, ArrowRight, ExternalLink, MoreVertical,
+  BarChart3, Activity, Zap, ArrowRight, ExternalLink, MoreVertical, HelpCircle,
 } from 'lucide-react'
 import QRCode from 'qrcode'
 import { useAuth } from '../context/AuthContext'
@@ -30,9 +30,9 @@ const STATUS_BADGE = {
 const CONDITIONS = ['Operational', 'Damaged', 'Needs Repair', 'Non-Functional', 'Missing']
 const COND_COLOR = { 
   Operational: '#00b96b', Good: '#00b96b', Excellent: '#00b96b', 
-  Damaged: '#f59e0b', Fair: '#f59e0b', 
+  Damaged: 'var(--status-warning)', Fair: 'var(--status-warning)', 
   'Needs Repair': '#06b6d4', 
-  'Non-Functional': '#ef4444', Poor: '#ef4444', Critical: '#ef4444', 
+  'Non-Functional': 'var(--status-danger)', Poor: 'var(--status-danger)', Critical: 'var(--status-danger)', 
   Missing: '#64748b' 
 }
 const COND_ICON = { 
@@ -72,9 +72,7 @@ const PillTab = ({ active, onClick, icon: Icon, label, count }) => (
     display: 'flex', alignItems: 'center', gap: 7, padding: '9px 18px',
     borderRadius: 12, cursor: 'pointer',
     background: active ? 'linear-gradient(135deg, var(--accent), #6b96ff)' : 'var(--bg-2)',
-    color: active ? '#fff' : 'var(--text-2)',
-    fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: '0.8rem',
-    boxShadow: active ? '0 4px 16px rgba(79,126,255,0.35)' : 'var(--clay-shadow-sm)',
+    color: active ? '#fff' : 'var(--text-2)', boxShadow: active ? '0 4px 16px var(--accent-soft)' : 'var(--clay-shadow-sm)',
     border: active ? '1.5px solid var(--accent)' : '1.5px solid var(--border)',
     whiteSpace: 'nowrap',
   }}>
@@ -82,7 +80,7 @@ const PillTab = ({ active, onClick, icon: Icon, label, count }) => (
     <span>{label}</span>
     {count !== undefined && count !== null && (
       <span style={{
-        fontSize: '0.65rem', fontWeight: 700, padding: '1px 7px', borderRadius: 10,
+        padding: '1px 7px', borderRadius: 10,
         background: active ? 'rgba(255,255,255,0.25)' : 'var(--bg-3)',
         color: active ? '#fff' : 'var(--text-3)',
         minWidth: 20, textAlign: 'center',
@@ -110,10 +108,8 @@ function SectionCard({ title, icon: Icon, children, defaultOpen = true, actions,
         }}>
           {Icon && <Icon size={15} />}
         </div>
-        <h3 style={{
-          fontFamily: "'Oswald', sans-serif", fontSize: '0.82rem', textTransform: 'uppercase',
-          margin: 0, color: 'var(--text-1)', flex: 1, letterSpacing: '0.04em', fontWeight: 600,
-        }}>{title}</h3>
+        <h3 style={{ textTransform: 'uppercase',
+          margin: 0, color: 'var(--text-1)', flex: 1, letterSpacing: '0.04em', }}>{title}</h3>
         {actions && <div onClick={e => e.stopPropagation()} style={{ display: 'flex', gap: 6 }}>{actions}</div>}
         <div style={{
           width: 24, height: 24, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -137,14 +133,12 @@ const InfoField = ({ label, value, mono, icon: FieldIcon, accent }) => {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
         {FieldIcon && <FieldIcon size={11} style={{ color: accent || 'var(--text-3)' }} />}
-        <p style={{
-          fontFamily: "'Oswald', sans-serif", fontWeight: 500, fontSize: '0.6rem',
-          letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', margin: 0,
+        <p style={{ letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', margin: 0,
         }}>{label}</p>
       </div>
       <p style={{
-        fontFamily: mono ? "'DM Mono', monospace" : "'DM Sans', sans-serif",
-        fontSize: '0.88rem', color: 'var(--text-0)', fontWeight: mono ? 500 : 600, margin: 0,
+        fontFamily: mono ? "var(--font-mono)" : "var(--font-sans)",
+        color: 'var(--text-primary)', fontWeight: mono ? 500 : 600, margin: 0,
         wordBreak: 'break-word',
       }}>{value}</p>
     </div>
@@ -167,9 +161,9 @@ const StatMini = ({ label, value, icon: Icon, color, sub }) => (
       <Icon size={20} />
     </div>
     <div style={{ flex: 1, minWidth: 0 }}>
-      <p style={{ fontSize: '0.62rem', fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 2px' }}>{label}</p>
-      <p style={{ fontSize: '1.15rem', fontWeight: 700, fontFamily: "'DM Mono', monospace", color: 'var(--text-0)', margin: 0 }}>{value}</p>
-      {sub && <p style={{ fontSize: '0.65rem', color: 'var(--text-3)', margin: '2px 0 0' }}>{sub}</p>}
+      <p style={{ color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 2px' }}>{label}</p>
+      <p style={{ color: 'var(--text-0)', margin: 0 }}>{value}</p>
+      {sub && <p style={{ color: 'var(--text-3)', margin: '2px 0 0' }}>{sub}</p>}
     </div>
   </div>
 )
@@ -185,8 +179,8 @@ const EmptyState = ({ icon: Icon, title, description, action }) => (
     }}>
       <Icon size={28} style={{ color: 'var(--text-3)', opacity: 0.5 }} />
     </div>
-    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.92rem', fontWeight: 600, color: 'var(--text-2)', margin: '0 0 4px' }}>{title}</p>
-    {description && <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', margin: '0 0 16px', maxWidth: 320, marginLeft: 'auto', marginRight: 'auto' }}>{description}</p>}
+    <p style={{ color: 'var(--text-2)', margin: '0 0 4px' }}>{title}</p>
+    {description && <p style={{ color: 'var(--text-3)', margin: '0 0 16px', maxWidth: 320, marginLeft: 'auto', marginRight: 'auto' }}>{description}</p>}
     {action}
   </div>
 )
@@ -473,7 +467,7 @@ export default function AssetDetail() {
       ? `Employee: ${Array.isArray(a.employees) ? a.employees[0]?.full_name : a.employees.full_name} (${Array.isArray(a.employees) ? a.employees[0]?.employee_code : a.employees.employee_code})`
       : 'Unassigned'
     const html = `<!DOCTYPE html><html><head><title>${a.asset_code} — Asset Detail</title>
-    <style>body{font-family:'Segoe UI',sans-serif;padding:40px;color:#1a1a2e;max-width:100%;margin:0 auto}
+    <style>body{padding:40px;color:#1a1a2e;max-width:100%;margin:0 auto}
     h1{font-size:1.5rem;margin-bottom:4px}h2{font-size:1rem;margin-top:24px;border-bottom:2px solid #4f7eff;padding-bottom:4px;color:#4f7eff}
     .meta{color:#666;font-size:0.82rem}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
     .field{padding:8px 12px;background:#f8fafc;border-radius:6px;border:1px solid #e5e7eb}
@@ -550,7 +544,7 @@ export default function AssetDetail() {
   if (loading) return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 100, gap: 16 }}>
       <Loader2 size={36} style={{ animation: 'spin 0.8s linear infinite', color: 'var(--accent)' }} />
-      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem', color: 'var(--text-3)' }}>Loading asset details...</p>
+      <p style={{ color: 'var(--text-3)' }}>Loading asset details...</p>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   )
@@ -622,9 +616,9 @@ export default function AssetDetail() {
               {customFields.map(([k, v]) => <InfoField key={k} label={k} value={String(v)} />)}
             </div>
             {asset.notes && (
-              <div style={{ marginTop: 14, padding: '14px 16px', background: 'linear-gradient(135deg, var(--accent-glow), rgba(79,126,255,0.05))', borderRadius: 12, border: '1px solid rgba(79,126,255,0.15)' }}>
-                <p style={{ fontFamily: "'Oswald', sans-serif", fontSize: '0.6rem', color: 'var(--accent)', textTransform: 'uppercase', marginBottom: 6, letterSpacing: '0.06em', fontWeight: 600 }}>Notes</p>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-1)', lineHeight: 1.6, margin: 0 }}>{asset.notes}</p>
+              <div style={{ marginTop: 14, padding: '14px 16px', background: 'linear-gradient(135deg, var(--accent-glow), var(--accent-soft))', borderRadius: 12, border: '1px solid var(--accent-soft)' }}>
+                <p style={{ color: 'var(--accent)', textTransform: 'uppercase', marginBottom: 6, letterSpacing: '0.06em', }}>Notes</p>
+                <p style={{ color: 'var(--text-1)', margin: 0 }}>{asset.notes}</p>
               </div>
             )}
           </SectionCard>
@@ -636,16 +630,16 @@ export default function AssetDetail() {
                 {/* Value Cards */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 16 }}>
                   <div style={{ padding: 16, borderRadius: 14, background: 'linear-gradient(135deg, rgba(0,185,107,0.08), rgba(0,185,107,0.02))', border: '1px solid rgba(0,185,107,0.15)', textAlign: 'center' }}>
-                    <p style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 4px' }}>Purchase Price</p>
-                    <div style={{ fontSize: '1.3rem', fontWeight: 700, fontFamily: "'DM Mono', monospace", color: 'var(--text-0)' }}>{formatCurrency(asset.purchase_value)}</div>
+                    <p style={{ color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 4px' }}>Purchase Price</p>
+                    <div style={{ color: 'var(--text-0)' }}>{formatCurrency(asset.purchase_value)}</div>
                   </div>
-                  <div style={{ padding: 16, borderRadius: 14, background: 'linear-gradient(135deg, rgba(79,126,255,0.08), rgba(79,126,255,0.02))', border: '1px solid rgba(79,126,255,0.15)', textAlign: 'center' }}>
-                    <p style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 4px' }}>Current Value</p>
-                    <div style={{ fontSize: '1.3rem', fontWeight: 700, fontFamily: "'DM Mono', monospace", color: 'var(--accent)' }}>{formatCurrency(calculateBookValue(asset))}</div>
+                  <div style={{ padding: 16, borderRadius: 14, background: 'linear-gradient(135deg, var(--accent-soft), var(--accent-soft))', border: '1px solid var(--accent-soft)', textAlign: 'center' }}>
+                    <p style={{ color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 4px' }}>Current Value</p>
+                    <div style={{ color: 'var(--accent)' }}>{formatCurrency(calculateBookValue(asset))}</div>
                   </div>
-                  <div style={{ padding: 16, borderRadius: 14, background: 'linear-gradient(135deg, rgba(239,68,68,0.08), rgba(239,68,68,0.02))', border: '1px solid rgba(239,68,68,0.15)', textAlign: 'center' }}>
-                    <p style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 4px' }}>Total Depreciation</p>
-                    <div style={{ fontSize: '1.3rem', fontWeight: 700, fontFamily: "'DM Mono', monospace", color: 'var(--red)' }}>{formatCurrency(Number(asset.purchase_value) - calculateBookValue(asset))}</div>
+                  <div style={{ padding: 16, borderRadius: 14, background: 'linear-gradient(135deg, var(--status-danger-soft), var(--status-danger-soft))', border: '1px solid var(--status-danger-soft)', textAlign: 'center' }}>
+                    <p style={{ color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 4px' }}>Total Depreciation</p>
+                    <div style={{ color: 'var(--red)' }}>{formatCurrency(Number(asset.purchase_value) - calculateBookValue(asset))}</div>
                   </div>
                 </div>
 
@@ -653,8 +647,8 @@ export default function AssetDetail() {
                 {asset.purchase_value && (
                   <div style={{ marginBottom: 16, padding: '14px 16px', background: 'var(--bg-1)', borderRadius: 12, border: '1px solid var(--border)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <span style={{ fontSize: '0.68rem', fontWeight: 600, color: 'var(--text-2)', textTransform: 'uppercase' }}>Depreciation Progress</span>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 700, fontFamily: "'DM Mono', monospace", color: depPct > 75 ? 'var(--red)' : depPct > 50 ? 'var(--amber)' : 'var(--green)' }}>{depPct}%</span>
+                      <span style={{ color: 'var(--text-2)', textTransform: 'uppercase' }}>Depreciation Progress</span>
+                      <span style={{ color: depPct > 75 ? 'var(--red)' : depPct > 50 ? 'var(--amber)' : 'var(--green)' }}>{depPct}%</span>
                     </div>
                     <div style={{ height: 8, background: 'var(--bg-4)', borderRadius: 6, overflow: 'hidden' }}>
                       <div style={{
@@ -682,7 +676,7 @@ export default function AssetDetail() {
                 title="No financial data recorded"
                 description="Add purchase value, depreciation settings and warranty info to track your asset's financial lifecycle."
                 action={
-                  <Link to={`/assets/${id}/edit`} className="btn-primary" style={{ textDecoration: 'none', fontSize: '0.82rem', padding: '10px 20px' }}>
+                  <Link to={`/assets/${id}/edit`} className="btn-primary" style={{ textDecoration: 'none', padding: '10px 20px' }}>
                     <Edit2 size={13} /> Add Financial Details
                   </Link>
                 }
@@ -694,19 +688,19 @@ export default function AssetDetail() {
           <SectionCard title="Depreciation Schedule" icon={TrendingDown} defaultOpen={false} accentColor="var(--amber)">
             {depreciationSchedule.length > 0 ? (
               <div style={{ overflowX: 'auto' }}>
-                <div style={{ display: 'flex', gap: 16, marginBottom: 14, flexWrap: 'wrap', fontSize: '0.75rem', color: 'var(--text-3)' }}>
+                <div style={{ display: 'flex', gap: 16, marginBottom: 14, flexWrap: 'wrap', color: 'var(--text-3)' }}>
                   <span>Method: <strong style={{ color: 'var(--text-1)' }}>{asset.depreciation_method || 'Straight Line'}</strong></span>
                   {['Reducing Balance', 'Declining Balance'].includes(asset.depreciation_method) && <span>Rate: <strong style={{ color: 'var(--text-1)' }}>{asset.depreciation_rate_percent || 10}%</strong></span>}
                   <span>Salvage: <strong style={{ color: 'var(--text-1)' }}>{formatCurrency(asset.salvage_value || 0)}</strong></span>
                 </div>
-                <table className="tbl" style={{ fontSize: '0.82rem' }}>
+                <table className="tbl" >
                   <thead><tr><th>Year</th><th>Annual Depreciation</th><th>Book Value</th></tr></thead>
                   <tbody>
                     {depreciationSchedule.map(r => (
                       <tr key={r.year} style={{ background: r.year === new Date().getFullYear() ? 'var(--accent-glow)' : undefined }}>
-                        <td style={{ fontFamily: "'DM Mono', monospace", fontWeight: r.year === new Date().getFullYear() ? 700 : 400 }}>{r.year} {r.year === new Date().getFullYear() ? '← current' : ''}</td>
-                        <td style={{ fontFamily: "'DM Mono', monospace", color: 'var(--red)' }}>-{formatCurrency(r.depreciation)}</td>
-                        <td style={{ fontFamily: "'DM Mono', monospace", fontWeight: 600 }}>{formatCurrency(r.bookValue)}</td>
+                        <td style={{ fontWeight: r.year === new Date().getFullYear() ? 700 : 400 }}>{r.year} {r.year === new Date().getFullYear() ? '← current' : ''}</td>
+                        <td style={{ color: 'var(--red)' }}>-{formatCurrency(r.depreciation)}</td>
+                        <td >{formatCurrency(r.bookValue)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -718,7 +712,7 @@ export default function AssetDetail() {
                 title="Cannot generate schedule"
                 description={`Missing: ${depreciationMissing.join(', ')}`}
                 action={
-                  <Link to={`/assets/${id}/edit`} className="btn-ghost" style={{ textDecoration: 'none', fontSize: '0.78rem' }}>
+                  <Link to={`/assets/${id}/edit`} className="btn-ghost" style={{ textDecoration: 'none', }}>
                     <Edit2 size={12} /> Edit Asset
                   </Link>
                 }
@@ -735,17 +729,17 @@ export default function AssetDetail() {
               <div style={{ textAlign: 'center', padding: '20px 12px' }}>
                 <div style={{
                   width: 72, height: 72, borderRadius: 20, margin: '0 auto 14px',
-                  background: 'linear-gradient(135deg, var(--amber-dim), rgba(245,158,11,0.05))',
+                  background: 'linear-gradient(135deg, var(--amber-dim), var(--status-warning-soft))',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 8px 24px rgba(245,158,11,0.15)',
+                  boxShadow: '0 8px 24px var(--status-warning-soft)',
                 }}>
                   <Package size={32} style={{ color: 'var(--amber)' }} />
                 </div>
-                <p style={{ fontFamily: "'Oswald', sans-serif", fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-0)', marginBottom: 4 }}>
+                <p style={{ color: 'var(--text-0)', marginBottom: 4 }}>
                   {asset.quantity} {(asset.uom || 'nos').toUpperCase()}
                 </p>
-                <p style={{ fontSize: '0.78rem', color: 'var(--text-2)', marginBottom: 4 }}>Bulk / Quantity-tracked asset</p>
-                <p style={{ fontSize: '0.72rem', color: 'var(--text-3)', margin: 0 }}>No individual QR code · Partial transfers supported</p>
+                <p style={{ color: 'var(--text-2)', marginBottom: 4 }}>Bulk / Quantity-tracked asset</p>
+                <p style={{ color: 'var(--text-3)', margin: 0 }}>No individual QR code · Partial transfers supported</p>
               </div>
             </SectionCard>
           ) : (
@@ -765,8 +759,8 @@ export default function AssetDetail() {
                   )}
                 </div>
                 <div style={{ marginTop: 14, display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-                  <button onClick={downloadQR} className="btn-ghost" style={{ fontSize: '0.72rem', padding: '8px 16px' }}><Download size={13} /> Download</button>
-                  {can('print_stickers') && <Link to={`/stickers?ids=${asset.id}`} className="btn-ghost" style={{ textDecoration: 'none', fontSize: '0.72rem', padding: '8px 16px' }}><Tag size={13} /> Print Tag</Link>}
+                  <button onClick={downloadQR} className="btn-ghost" style={{ padding: '8px 16px' }}><Download size={13} /> Download</button>
+                  {can('print_stickers') && <Link to={`/stickers?ids=${asset.id}`} className="btn-ghost" style={{ textDecoration: 'none', padding: '8px 16px' }}><Tag size={13} /> Print Tag</Link>}
                 </div>
               </div>
             </SectionCard>
@@ -782,20 +776,19 @@ export default function AssetDetail() {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <CondIcon size={18} style={{ color: condColor }} />
-                  <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>Condition</span>
+                  <span >Condition</span>
                 </div>
                 {editingCondition ? (
                   <select className="sel" value={asset.condition || ''} onChange={e => handleConditionChange(e.target.value)}
-                    onBlur={() => setEditingCondition(false)} autoFocus style={{ height: 34, fontSize: '0.78rem', width: 130, minHeight: 34 }}>
+                    onBlur={() => setEditingCondition(false)} autoFocus style={{ height: 34, width: 130, minHeight: 34 }}>
                     {CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 ) : (
                   <span onClick={() => can('edit') && setEditingCondition(true)}
                     style={{
-                      fontWeight: 700, color: condColor, cursor: can('edit') ? 'pointer' : 'default',
+                      color: condColor, cursor: can('edit') ? 'pointer' : 'default',
                       padding: '5px 14px', borderRadius: 8, background: `${condColor}15`,
-                      fontSize: '0.82rem',
-                    }}>
+                      }}>
                     {asset.condition || 'Not Set'}
                   </span>
                 )}
@@ -808,9 +801,9 @@ export default function AssetDetail() {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <MapPin size={16} style={{ color: 'var(--cyan)' }} />
-                  <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>Location</span>
+                  <span >Location</span>
                 </div>
-                <span style={{ fontSize: '0.82rem', fontWeight: 600, background: 'var(--bg-3)', padding: '5px 14px', borderRadius: 8, color: 'var(--text-1)' }}>{asset.site || 'Not Set'}</span>
+                <span style={{ background: 'var(--bg-3)', padding: '5px 14px', borderRadius: 8, color: 'var(--text-1)' }}>{asset.site || 'Not Set'}</span>
               </div>
 
               {/* Assignee */}
@@ -820,10 +813,10 @@ export default function AssetDetail() {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <User size={16} style={{ color: assigneeType ? 'var(--green)' : 'var(--text-3)' }} />
-                  <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>Assigned To</span>
+                  <span >Assigned To</span>
                 </div>
                 <span style={{
-                  fontSize: '0.82rem', fontWeight: 600, padding: '5px 14px', borderRadius: 8,
+                  padding: '5px 14px', borderRadius: 8,
                   background: assigneeType ? 'var(--green-dim)' : 'var(--bg-3)',
                   color: assigneeType ? 'var(--green)' : 'var(--text-3)',
                 }}>{assigneeLabel}</span>
@@ -837,10 +830,9 @@ export default function AssetDetail() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <Shield size={16} style={{ color: wDays > 0 ? 'var(--green)' : 'var(--red)' }} />
-                      <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>Warranty</span>
+                      <span >Warranty</span>
                     </div>
                     <span style={{
-                      fontSize: '0.75rem', fontWeight: 700,
                       color: wDays > 0 ? 'var(--green)' : 'var(--red)',
                     }}>
                       {wDays > 0 ? `${wDays} days remaining` : `Expired ${Math.abs(wDays)}d ago`}
@@ -870,7 +862,7 @@ export default function AssetDetail() {
                   {can('edit') && (
                     <button onClick={e => { e.stopPropagation(); handlePhotoDelete(p.id) }} style={{
                       position: 'absolute', top: 6, right: 6, width: 22, height: 22, borderRadius: '50%',
-                      background: 'rgba(239,68,68,0.9)', color: 'white', border: 'none', cursor: 'pointer',
+                      background: 'var(--status-danger-soft)', color: 'white', border: 'none', cursor: 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)',
                     }}><X size={11} /></button>
                   )}
@@ -884,7 +876,7 @@ export default function AssetDetail() {
                 }}>
                   {photoUploading
                     ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite', color: 'var(--accent)' }} />
-                    : <><Camera size={18} style={{ color: 'var(--text-3)' }} /><span style={{ fontSize: '0.6rem', color: 'var(--text-3)', fontWeight: 600 }}>ADD PHOTO</span></>}
+                    : <><Camera size={18} style={{ color: 'var(--text-3)' }} /><span style={{ color: 'var(--text-3)', }}>ADD PHOTO</span></>}
                   <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files[0]; if (f) handlePhotoUpload(f); e.target.value = '' }} />
                 </label>
               )}
@@ -905,10 +897,10 @@ export default function AssetDetail() {
                     background: 'var(--purple-dim)', color: 'var(--purple)', flexShrink: 0,
                   }}><FileText size={16} /></div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-0)' }}>{a.file_name}</div>
-                    <div style={{ fontSize: '0.62rem', color: 'var(--text-3)', fontFamily: "'DM Sans', sans-serif" }}>{a.file_type} · {(a.file_size / 1024).toFixed(0)} KB</div>
+                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-0)' }}>{a.file_name}</div>
+                    <div style={{ color: 'var(--text-3)' }}>{a.file_type} · {(a.file_size / 1024).toFixed(0)} KB</div>
                   </div>
-                  <a href={a.file_url} target="_blank" rel="noopener noreferrer" className="btn-ghost" style={{ padding: '6px 10px', fontSize: '0.72rem' }}><Download size={13} /></a>
+                  <a href={a.file_url} target="_blank" rel="noopener noreferrer" className="btn-ghost" style={{ padding: '6px 10px', }}><Download size={13} /></a>
                   {can('edit') && <button onClick={() => handleAttachDelete(a.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--red)', padding: 4, opacity: 0.6 }}><Trash2 size={14} /></button>}
                 </div>
               ))}
@@ -920,7 +912,7 @@ export default function AssetDetail() {
                 }}>
                   {attachUploading
                     ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', color: 'var(--accent)' }} />
-                    : <><Upload size={14} style={{ color: 'var(--text-3)' }} /><span style={{ fontSize: '0.78rem', color: 'var(--text-3)', fontWeight: 500 }}>Upload Document</span></>}
+                    : <><Upload size={14} style={{ color: 'var(--text-3)' }} /><span style={{ color: 'var(--text-3)', }}>Upload Document</span></>}
                   <input type="file" style={{ display: 'none' }} onChange={e => { const f = e.target.files[0]; if (f) handleAttachUpload(f); e.target.value = '' }} />
                 </label>
               )}
@@ -938,10 +930,10 @@ export default function AssetDetail() {
                     border: '1px solid var(--border)', 
                   }}>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-0)' }}>{r.asset_name}</div>
-                      <div style={{ fontSize: '0.65rem', color: 'var(--text-3)', fontFamily: "'DM Mono', monospace" }}>{r.asset_code}</div>
+                      <div style={{ color: 'var(--text-0)' }}>{r.asset_name}</div>
+                      <div style={{ color: 'var(--text-3)', }}>{r.asset_code}</div>
                     </div>
-                    <span className={`badge ${STATUS_BADGE[r.status] || 'badge-inactive'}`} style={{ fontSize: '0.6rem' }}>{r.status}</span>
+                    <span className={`badge ${STATUS_BADGE[r.status] || 'badge-inactive'}`} >{r.status}</span>
                     <ArrowRight size={14} style={{ color: 'var(--text-3)' }} />
                   </Link>
                 ))}
@@ -966,7 +958,7 @@ export default function AssetDetail() {
           padding: 24, boxShadow: 'var(--clay-shadow)', overflow: 'hidden', position: 'relative',
         }}>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, var(--cyan), var(--accent))' }} />
-          <h4 style={{ fontFamily: "'Oswald', sans-serif", fontSize: '0.8rem', textTransform: 'uppercase', margin: '0 0 20px', color: 'var(--text-2)', letterSpacing: '0.04em' }}>Movement Timeline</h4>
+          <h4 style={{ textTransform: 'uppercase', margin: '0 0 20px', color: 'var(--text-2)', letterSpacing: '0.04em' }}>Movement Timeline</h4>
           <div style={{ display: 'flex', alignItems: 'center', gap: 0, overflowX: 'auto', paddingBottom: 8 }}>
             {[...movements].reverse().map((m, idx, arr) => (
               <React.Fragment key={m.id}>
@@ -974,10 +966,10 @@ export default function AssetDetail() {
                   <div style={{
                     width: 16, height: 16, borderRadius: '50%', margin: '0 auto 8px',
                     background: idx === arr.length - 1 ? 'linear-gradient(135deg, var(--accent), #6b96ff)' : 'var(--green)',
-                    border: '3px solid var(--bg-2)', boxShadow: idx === arr.length - 1 ? '0 0 12px rgba(79,126,255,0.4)' : '0 2px 6px rgba(0,185,107,0.2)',
+                    border: '3px solid var(--bg-2)', boxShadow: idx === arr.length - 1 ? '0 0 12px var(--accent-soft)' : '0 2px 6px rgba(0,185,107,0.2)',
                   }} />
-                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-0)' }}>{m.to_location}</div>
-                  <div style={{ fontSize: '0.62rem', color: 'var(--text-3)', fontFamily: "'DM Mono', monospace" }}>{new Date(m.moved_at).toLocaleDateString()}</div>
+                  <div style={{ color: 'var(--text-0)' }}>{m.to_location}</div>
+                  <div style={{ color: 'var(--text-3)', }}>{new Date(m.moved_at).toLocaleDateString()}</div>
                 </div>
                 {idx < arr.length - 1 && <div style={{ flex: 1, height: 2, background: 'linear-gradient(90deg, var(--green), var(--border))', minWidth: 30 }} />}
               </React.Fragment>
@@ -997,7 +989,7 @@ export default function AssetDetail() {
       <SectionCard title={`Movement History (${movements.length})`} icon={History} noPad accentColor="var(--cyan)">
         {movements.length > 0 ? (
           <div style={{ overflowX: 'auto' }}>
-            <table className="tbl" style={{ fontSize: '0.82rem' }}>
+            <table className="tbl" >
               <thead>
                 <tr>
                   <th>From</th>
@@ -1011,10 +1003,10 @@ export default function AssetDetail() {
                 {movements.map(m => (
                   <tr key={m.id}>
                     <td style={{ color: 'var(--text-3)' }}>{m.from_location || 'Initial'}</td>
-                    <td style={{ fontWeight: 600, color: 'var(--text-0)' }}>{m.to_location}</td>
+                    <td style={{ color: 'var(--text-0)' }}>{m.to_location}</td>
                     <td>{m.profiles?.full_name}</td>
                     <td style={{ color: 'var(--text-3)', fontStyle: 'italic', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.notes || '—'}</td>
-                    <td style={{ textAlign: 'right', fontFamily: "'DM Mono', monospace", color: 'var(--text-3)' }}>{new Date(m.moved_at).toLocaleDateString()}</td>
+                    <td style={{ textAlign: 'right', color: 'var(--text-3)' }}>{new Date(m.moved_at).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1059,17 +1051,17 @@ export default function AssetDetail() {
                     <Wrench size={16} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-0)' }}>{l.work_done}</div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-3)', display: 'flex', gap: 8 }}>
-                      <span style={{ padding: '1px 6px', borderRadius: 4, background: l.schedule_id ? 'var(--green-dim)' : 'var(--amber-dim)', color: l.schedule_id ? 'var(--green)' : 'var(--amber)', fontWeight: 600, fontSize: '0.6rem' }}>
+                    <div style={{ color: 'var(--text-0)' }}>{l.work_done}</div>
+                    <div style={{ color: 'var(--text-3)', display: 'flex', gap: 8 }}>
+                      <span style={{ padding: '1px 6px', borderRadius: 4, background: l.schedule_id ? 'var(--green-dim)' : 'var(--amber-dim)', color: l.schedule_id ? 'var(--green)' : 'var(--amber)', }}>
                         {l.schedule_id ? 'PREVENTIVE' : 'CORRECTIVE'}
                       </span>
                       <span>{l.profiles?.full_name || 'System'}</span>
                     </div>
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <div style={{ fontSize: '0.95rem', fontWeight: 700, fontFamily: "'DM Mono', monospace", color: 'var(--text-0)' }}>{formatCurrency(l.cost || 0)}</div>
-                    <div style={{ fontSize: '0.68rem', fontFamily: "'DM Mono', monospace", color: 'var(--text-3)' }}>{new Date(l.performed_at).toLocaleDateString()}</div>
+                    <div style={{ color: 'var(--text-0)' }}>{formatCurrency(l.cost || 0)}</div>
+                    <div style={{ color: 'var(--text-3)' }}>{new Date(l.performed_at).toLocaleDateString()}</div>
                   </div>
                 </div>
               ))}
@@ -1088,16 +1080,16 @@ export default function AssetDetail() {
                   <div key={t.id} style={{
                     padding: '12px 14px', background: 'var(--bg-1)', borderRadius: 10, border: '1px solid var(--border)',
                   }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, fontSize: '0.85rem', marginBottom: 4 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                       <span>{t.title}</span>
                       <span style={{
-                        fontSize: '0.58rem', fontWeight: 700, padding: '2px 8px', borderRadius: 6,
+                        padding: '2px 8px', borderRadius: 6,
                         background: t.priority === 'high' || t.priority === 'critical' ? 'var(--red-dim)' : 'var(--amber-dim)',
                         color: t.priority === 'high' || t.priority === 'critical' ? 'var(--red)' : 'var(--amber)',
                         textTransform: 'uppercase',
                       }}>{t.priority}</span>
                     </div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>{new Date(t.created_at).toLocaleDateString()} · {t.profiles?.full_name}</div>
+                    <div style={{ color: 'var(--text-3)' }}>{new Date(t.created_at).toLocaleDateString()} · {t.profiles?.full_name}</div>
                   </div>
                 ))}
               </div>
@@ -1113,17 +1105,17 @@ export default function AssetDetail() {
                   const isOverdue = new Date(s.next_due) < new Date()
                   return (
                     <div key={s.id} style={{
-                      padding: '12px 14px', background: isOverdue ? 'rgba(239,68,68,0.04)' : 'var(--bg-1)',
-                      borderRadius: 10, border: `1px solid ${isOverdue ? 'rgba(239,68,68,0.2)' : 'var(--border)'}`,
+                      padding: '12px 14px', background: isOverdue ? 'var(--status-danger-soft)' : 'var(--bg-1)',
+                      borderRadius: 10, border: `1px solid ${isOverdue ? 'var(--status-danger-soft)' : 'var(--border)'}`,
                     }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, fontSize: '0.85rem', marginBottom: 4 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                         <span>{s.title}</span>
                         <span style={{
-                          fontSize: '0.58rem', fontWeight: 700, padding: '2px 8px', borderRadius: 6,
+                          padding: '2px 8px', borderRadius: 6,
                           background: 'var(--accent-glow)', color: 'var(--accent)', textTransform: 'uppercase',
                         }}>{s.frequency}</span>
                       </div>
-                      <div style={{ fontSize: '0.72rem', color: isOverdue ? 'var(--red)' : 'var(--text-3)', fontWeight: isOverdue ? 600 : 400 }}>
+                      <div style={{ color: isOverdue ? 'var(--red)' : 'var(--text-3)', fontWeight: isOverdue ? 600 : 400 }}>
                         {isOverdue ? '⚠ OVERDUE — ' : 'Next: '}{new Date(s.next_due).toLocaleDateString()}
                       </div>
                     </div>
@@ -1144,15 +1136,15 @@ export default function AssetDetail() {
      ═══════════════════════════════════════════════════════════ */
   const renderChecklists = () => {
     const FREQ = [
-      { key: 'daily', label: 'Daily', color: '#ef4444', bg: 'rgba(239,68,68,0.08)', gradient: 'linear-gradient(135deg, rgba(239,68,68,0.1), rgba(239,68,68,0.03))' },
-      { key: 'weekly', label: 'Weekly', color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', gradient: 'linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.03))' },
+      { key: 'daily', label: 'Daily', color: 'var(--status-danger)', bg: 'var(--status-danger-soft)', gradient: 'linear-gradient(135deg, var(--status-danger-soft), var(--status-danger-soft))' },
+      { key: 'weekly', label: 'Weekly', color: 'var(--status-warning)', bg: 'var(--status-warning-soft)', gradient: 'linear-gradient(135deg, var(--status-warning-soft), var(--status-warning-soft))' },
       { key: 'monthly', label: 'Monthly', color: '#3b82f6', bg: 'rgba(59,130,246,0.08)', gradient: 'linear-gradient(135deg, rgba(59,130,246,0.1), rgba(59,130,246,0.03))' },
     ]
     const APPROVAL = {
-      pending_checker: { label: 'Pending Checker', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
+      pending_checker: { label: 'Pending Checker', color: 'var(--status-warning)', bg: 'var(--status-warning-soft)' },
       pending_hod: { label: 'Pending HOD', color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' },
       approved: { label: 'Approved', color: '#22c55e', bg: 'rgba(34,197,94,0.1)' },
-      rejected: { label: 'Rejected', color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
+      rejected: { label: 'Rejected', color: 'var(--status-danger)', bg: 'var(--status-danger-soft)' },
     }
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -1174,16 +1166,16 @@ export default function AssetDetail() {
                   }}>
                     <ClipboardList size={16} style={{ color: f.color }} />
                   </div>
-                  <div style={{ fontSize: '0.65rem', fontFamily: "'Oswald', sans-serif", fontWeight: 700, color: f.color, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+                  <div style={{ color: f.color, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
                     {f.label}
                   </div>
                   {cl ? (
                     <>
-                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-0)', margin: '0 0 4px' }}>{cl.name}</p>
-                      <p style={{ fontSize: '0.65rem', color: 'var(--text-3)', fontFamily: "'DM Sans', sans-serif", margin: 0 }}>{(cl.items || []).length} items</p>
+                      <p style={{ color: 'var(--text-0)', margin: '0 0 4px' }}>{cl.name}</p>
+                      <p style={{ color: 'var(--text-3)', margin: 0 }}>{(cl.items || []).length} items</p>
                     </>
                   ) : (
-                    <p style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: "'DM Sans', sans-serif", fontStyle: 'italic', margin: 0 }}>Not linked</p>
+                    <p style={{ color: 'var(--text-3)', fontStyle: 'italic', margin: 0 }}>Not linked</p>
                   )}
                 </div>
               )
@@ -1196,7 +1188,7 @@ export default function AssetDetail() {
           title={`Performed Checklists`}
           icon={CheckCircle2}
           accentColor="var(--green)"
-          actions={<span style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: "'DM Sans', sans-serif" }}>{checklistHistory.length} records</span>}
+          actions={<span style={{ color: 'var(--text-3)' }}>{checklistHistory.length} records</span>}
         >
           {checklistHistory.length === 0 ? (
             <EmptyState icon={ClipboardList} title="No checklists performed yet" description="Completed inspection checklists for this asset will appear here." />
@@ -1234,20 +1226,20 @@ export default function AssetDetail() {
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}>
-                        <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-0)' }}>
+                        <span style={{ color: 'var(--text-0)' }}>
                           {sub.checklist?.name || 'Checklist'}
                         </span>
-                        <span style={{ fontSize: '0.55rem', padding: '2px 7px', borderRadius: 6, background: fc.bg, color: fc.color, fontWeight: 700, textTransform: 'uppercase' }}>
+                        <span style={{ padding: '2px 7px', borderRadius: 6, background: fc.bg, color: fc.color, textTransform: 'uppercase' }}>
                           {fc.label}
                         </span>
-                        <span style={{ fontSize: '0.55rem', padding: '2px 7px', borderRadius: 6, background: ap.bg, color: ap.color, fontWeight: 700 }}>
+                        <span style={{ padding: '2px 7px', borderRadius: 6, background: ap.bg, color: ap.color, }}>
                           {ap.label}
                         </span>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.68rem', color: 'var(--text-3)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--text-3)' }}>
                         <span>By: {sub.prepared_name || '—'}</span>
-                        <span style={{ color: 'var(--green)', fontWeight: 600 }}>{passCount} Pass</span>
-                        {failCount > 0 && <span style={{ color: 'var(--red)', fontWeight: 600 }}>{failCount} Fail</span>}
+                        <span style={{ color: 'var(--green)', }}>{passCount} Pass</span>
+                        {failCount > 0 && <span style={{ color: 'var(--red)', }}>{failCount} Fail</span>}
                         <span>{totalItems} items</span>
                       </div>
                       {/* Mini pass/fail bar */}
@@ -1256,10 +1248,10 @@ export default function AssetDetail() {
                       </div>
                     </div>
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-2)', fontFamily: "'DM Sans', sans-serif" }}>
+                      <div style={{ color: 'var(--text-2)' }}>
                         {new Date(sub.submitted_at).toLocaleDateString('en-GB')}
                       </div>
-                      <div style={{ fontSize: '0.62rem', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'flex-end', marginTop: 4 }}>
+                      <div style={{ color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'flex-end', marginTop: 4 }}>
                         <Download size={10} /> PDF
                       </div>
                     </div>
@@ -1303,19 +1295,19 @@ export default function AssetDetail() {
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem', color: 'var(--text-0)', fontWeight: 600 }}>{log.profiles?.full_name || 'System'}</span>
+                      <span style={{ color: 'var(--text-0)', }}>{log.profiles?.full_name || 'System'}</span>
                       <span style={{
-                        fontSize: '0.58rem', padding: '2px 8px', borderRadius: 6,
-                        background: cfg.bg, color: cfg.color, fontWeight: 700, textTransform: 'uppercase',
+                        padding: '2px 8px', borderRadius: 6,
+                        background: cfg.bg, color: cfg.color, textTransform: 'uppercase',
                       }}>{cfg.label}</span>
                     </div>
                     {log.changes && (
-                      <p style={{ fontSize: '0.75rem', color: 'var(--text-3)', margin: '4px 0 0', lineHeight: 1.4 }}>
+                      <p style={{ color: 'var(--text-3)', margin: '4px 0 0', }}>
                         {typeof log.changes === 'string' ? log.changes : JSON.stringify(log.changes)}
                       </p>
                     )}
                   </div>
-                  <span style={{ color: 'var(--text-3)', fontSize: '0.72rem', fontFamily: "'DM Mono', monospace", flexShrink: 0, whiteSpace: 'nowrap' }}>
+                  <span style={{ color: 'var(--text-3)', flexShrink: 0, whiteSpace: 'nowrap' }}>
                     {new Date(log.created_at).toLocaleString()}
                   </span>
                 </div>
@@ -1339,7 +1331,7 @@ export default function AssetDetail() {
         <SectionCard title="Link Child Assets" icon={Link2} accentColor="var(--accent)"
           actions={
             <button onClick={() => { setShowLinkChild(!showLinkChild); setChildSearch(''); setChildSearchResults([]) }}
-              className={showLinkChild ? "btn-danger" : "btn-ghost"} style={{ fontSize: '0.72rem', padding: '6px 14px' }}>
+              className={showLinkChild ? "btn-danger" : "btn-ghost"} style={{ padding: '6px 14px' }}>
               {showLinkChild ? <><X size={12} /> Cancel</> : <><Plus size={12} /> Add Child</>}
             </button>
           }
@@ -1351,10 +1343,10 @@ export default function AssetDetail() {
                 <input
                   type="text" value={childSearch} onChange={e => handleSearchChildren(e.target.value)}
                   placeholder="Search by asset name or code..." className="inp"
-                  style={{ paddingLeft: 38, fontSize: '0.85rem' }} autoFocus
+                  style={{ paddingLeft: 38, }} autoFocus
                 />
               </div>
-              {childSearching && <p style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: 10 }}>Searching...</p>}
+              {childSearching && <p style={{ color: 'var(--text-3)', marginTop: 10 }}>Searching...</p>}
               {childSearchResults.length > 0 && (
                 <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {childSearchResults.map(r => (
@@ -1363,11 +1355,11 @@ export default function AssetDetail() {
                       background: 'var(--bg-1)', border: '1px solid var(--border)', borderRadius: 12,
                     }}>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-0)' }}>{r.asset_name}</div>
-                        <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', fontFamily: "'DM Mono', monospace" }}>{r.asset_code} · {r.category} · {r.site || 'No site'}</div>
+                        <div style={{ color: 'var(--text-0)' }}>{r.asset_name}</div>
+                        <div style={{ color: 'var(--text-3)', }}>{r.asset_code} · {r.category} · {r.site || 'No site'}</div>
                       </div>
-                      <span className={`badge ${STATUS_BADGE[r.status] || 'badge-inactive'}`} style={{ fontSize: '0.6rem' }}>{r.status}</span>
-                      <button onClick={() => handleLinkChild(r.id)} className="btn-primary" style={{ padding: '6px 14px', fontSize: '0.72rem' }}>
+                      <span className={`badge ${STATUS_BADGE[r.status] || 'badge-inactive'}`} >{r.status}</span>
+                      <button onClick={() => handleLinkChild(r.id)} className="btn-primary" style={{ padding: '6px 14px', }}>
                         <Link2 size={12} /> Link
                       </button>
                     </div>
@@ -1375,12 +1367,12 @@ export default function AssetDetail() {
                 </div>
               )}
               {childSearch.length >= 2 && !childSearching && childSearchResults.length === 0 && (
-                <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', marginTop: 12, textAlign: 'center' }}>No available assets found matching "{childSearch}"</p>
+                <p style={{ color: 'var(--text-3)', marginTop: 12, textAlign: 'center' }}>No available assets found matching "{childSearch}"</p>
               )}
             </div>
           )}
           {!showLinkChild && (
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', margin: 0, textAlign: 'center' }}>Click "Add Child" to search and link sub-components.</p>
+            <p style={{ color: 'var(--text-3)', margin: 0, textAlign: 'center' }}>Click "Add Child" to search and link sub-components.</p>
           )}
         </SectionCard>
       )}
@@ -1397,20 +1389,19 @@ export default function AssetDetail() {
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, var(--cyan), var(--accent))' }} />
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                   <Link to={`/assets/${c.id}`} style={{ textDecoration: 'none', color: 'inherit', flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-0)', marginBottom: 2 }}>{c.asset_name}</div>
-                    <div style={{ fontSize: '0.68rem', color: 'var(--accent)', fontFamily: "'DM Mono', monospace" }}>{c.asset_code}</div>
+                    <div style={{ color: 'var(--text-0)', marginBottom: 2 }}>{c.asset_name}</div>
+                    <div style={{ color: 'var(--accent)', }}>{c.asset_code}</div>
                   </Link>
-                  <span className={`badge ${STATUS_BADGE[c.status] || 'badge-inactive'}`} style={{ fontSize: '0.6rem', flexShrink: 0, marginLeft: 8 }}>{c.status}</span>
+                  <span className={`badge ${STATUS_BADGE[c.status] || 'badge-inactive'}`} style={{ flexShrink: 0, marginLeft: 8 }}>{c.status}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>
+                  <div style={{ color: 'var(--text-3)' }}>
                     {c.category}{c.make ? ` · ${c.make}` : ''}{c.model_no ? ` ${c.model_no}` : ''}
                   </div>
                   {can('edit') && (
                     <button onClick={() => handleUnlinkChild(c.id)} title="Remove child" style={{
                       background: 'var(--red-dim)', border: 'none', cursor: 'pointer', color: 'var(--red)',
-                      padding: '4px 8px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.62rem', fontWeight: 600,
-                    }}>
+                      padding: '4px 8px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 4, }}>
                       <Unlink size={12} /> Unlink
                     </button>
                   )}
@@ -1439,7 +1430,7 @@ export default function AssetDetail() {
           {/* Upload Form */}
           {can('edit') && (
             <div style={{ marginBottom: 20, padding: 16, background: 'var(--bg-1)', borderRadius: 12, border: '1px solid var(--border)' }}>
-              <h4 style={{ margin: '0 0 12px 0', fontSize: '0.85rem' }}>Upload Document</h4>
+              <h4 style={{ margin: '0 0 12px 0', }}>Upload Document</h4>
               <form onSubmit={async (e) => {
                 e.preventDefault()
                 const form = e.target
@@ -1508,10 +1499,10 @@ export default function AssetDetail() {
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                        <a href={doc.file_url} target="_blank" rel="noreferrer" style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-0)', textDecoration: 'none' }}>{doc.document_type}</a>
-                        {doc.expiry_date && <span style={{ fontSize: '0.65rem', padding: '2px 8px', borderRadius: 8, background: `${badgeColor}15`, color: badgeColor, fontWeight: 700 }}>{badgeText}</span>}
+                        <a href={doc.file_url} target="_blank" rel="noreferrer" style={{ color: 'var(--text-0)', textDecoration: 'none' }}>{doc.document_type}</a>
+                        {doc.expiry_date && <span style={{ padding: '2px 8px', borderRadius: 8, background: `${badgeColor}15`, color: badgeColor, }}>{badgeText}</span>}
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', display: 'flex', gap: 12 }}>
+                      <div style={{ color: 'var(--text-3)', display: 'flex', gap: 12 }}>
                         {doc.document_number && <span>#{doc.document_number}</span>}
                         {doc.expiry_date && <span>Expires: {new Date(doc.expiry_date).toLocaleDateString()}</span>}
                         <span>By: {doc.profiles?.full_name}</span>
@@ -1572,7 +1563,7 @@ export default function AssetDetail() {
     <div style={{ maxWidth: '100%', margin: '0 auto', padding: '0 4px' }}>
       {/* ── HERO HEADER ── */}
       <div style={{
-        background: 'linear-gradient(135deg, rgba(79,126,255,0.06), rgba(107,150,255,0.03), rgba(6,182,212,0.04))',
+        background: 'linear-gradient(135deg, var(--accent-soft), rgba(107,150,255,0.03), rgba(6,182,212,0.04))',
         border: '1.5px solid var(--border)', borderRadius: 20, padding: '24px 28px',
         marginBottom: 24, position: 'relative', overflow: 'hidden',
         boxShadow: 'var(--clay-shadow)',
@@ -1589,9 +1580,9 @@ export default function AssetDetail() {
               boxShadow: 'var(--clay-shadow-sm)', transition: 'all 0.15s',
             }}><ArrowLeft size={18} /></Link>
             <div>
-              <p style={{ fontFamily: "'Oswald', sans-serif", fontSize: '0.6rem', letterSpacing: '0.12em', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 2 }}>Asset Management</p>
+              <p style={{ letterSpacing: '0.12em', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 2 }}>Asset Management</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <h1 className="font-mono" style={{ fontSize: '1.2rem', fontWeight: 500, color: 'var(--accent)', margin: 0 }}>{asset.asset_code}</h1>
+                <h1 className="font-mono" style={{ color: 'var(--accent)', margin: 0 }}>{asset.asset_code}</h1>
                 <button onClick={copyAssetCode} title="Copy code" style={{
                   background: copied ? 'var(--green-dim)' : 'var(--bg-2)', border: `1px solid ${copied ? 'var(--green)' : 'var(--border)'}`,
                   cursor: 'pointer', borderRadius: 6, padding: '3px 6px', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -1616,28 +1607,27 @@ export default function AssetDetail() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12 }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, flexWrap: 'wrap' }}>
-              <h2 style={{ fontFamily: "'Oswald', sans-serif", fontSize: '2rem', fontWeight: 700, margin: 0, color: 'var(--text-0)' }}>{asset.asset_name}</h2>
-              <span className={`badge ${STATUS_BADGE[asset.status] || 'badge-inactive'}`} style={{ height: 'fit-content', padding: '5px 12px', fontSize: '0.75rem' }}>{asset.status?.toUpperCase()}</span>
+              <h2 style={{ margin: 0, color: 'var(--text-0)' }}>{asset.asset_name}</h2>
+              <span className={`badge ${STATUS_BADGE[asset.status] || 'badge-inactive'}`} style={{ height: 'fit-content', padding: '5px 12px', }}>{asset.status?.toUpperCase()}</span>
               <span style={{
-                fontSize: '0.72rem', padding: '4px 10px', borderRadius: 6,
-                background: `${condColor}12`, color: condColor, fontWeight: 700,
-                display: 'flex', alignItems: 'center', gap: 4,
+                padding: '4px 10px', borderRadius: 6,
+                background: `${condColor}12`, color: condColor, display: 'flex', alignItems: 'center', gap: 4,
               }}>
                 <CondIcon size={12} /> {asset.condition || 'N/A'}
               </span>
             </div>
-            <p style={{ color: 'var(--text-3)', fontSize: '0.88rem', fontFamily: "'DM Sans', sans-serif", margin: 0 }}>
+            <p style={{ color: 'var(--text-3)', margin: 0 }}>
               {[asset.make, asset.model_no && `Model ${asset.model_no}`, asset.category].filter(Boolean).join(' · ')}
             </p>
             {parentAsset && (
               <Link to={`/assets/${parentAsset.id}`} style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 10,
                 padding: '5px 12px', background: 'var(--accent-glow)', borderRadius: 8,
-                border: '1px solid rgba(79,126,255,0.2)', textDecoration: 'none',
-                fontSize: '0.75rem', color: 'var(--accent)', fontFamily: "'DM Sans', sans-serif",
+                border: '1px solid var(--accent-soft)', textDecoration: 'none',
+                color: 'var(--accent)',
               }}>
                 <GitBranch size={12} /> Child of: <strong>{parentAsset.asset_name}</strong>
-                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.65rem', opacity: 0.7 }}>({parentAsset.asset_code})</span>
+                <span style={{ opacity: 0.7 }}>({parentAsset.asset_code})</span>
               </Link>
             )}
           </div>
@@ -1676,14 +1666,14 @@ export default function AssetDetail() {
             <div style={{
               padding: '20px 24px', borderBottom: '1px solid var(--border)',
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              background: 'linear-gradient(135deg, rgba(79,126,255,0.06), transparent)',
+              background: 'linear-gradient(135deg, var(--accent-soft), transparent)',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{
                   width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   background: 'var(--accent-glow)', color: 'var(--accent)',
                 }}><Send size={16} /></div>
-                <h3 style={{ margin: 0, fontFamily: "'Oswald', sans-serif", textTransform: 'uppercase', fontSize: '0.95rem', letterSpacing: '0.04em' }}>Transfer Asset</h3>
+                <h3 style={{ margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Transfer Asset</h3>
               </div>
               <button onClick={() => setShowTransfer(false)} className="btn-ghost" style={{ padding: '6px 8px' }}><X size={18} /></button>
             </div>
@@ -1691,9 +1681,7 @@ export default function AssetDetail() {
               <div style={{ marginBottom: 20 }}>
                 <label className="lbl">Move From</label>
                 <div style={{
-                  padding: '12px 14px', borderRadius: 12, background: 'var(--bg-1)', fontSize: '0.9rem',
-                  color: 'var(--text-1)', border: '1px solid var(--border)', fontWeight: 500,
-                }}>{asset.site || 'Unknown'}</div>
+                  padding: '12px 14px', borderRadius: 12, background: 'var(--bg-1)', color: 'var(--text-1)', border: '1px solid var(--border)', }}>{asset.site || 'Unknown'}</div>
               </div>
               <div style={{ marginBottom: 20 }}>
                 <label className="lbl">Target Site</label>

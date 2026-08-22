@@ -196,7 +196,7 @@ export default function BudgetTab({ sites, onRefresh }) {
           borderRadius: 12, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12
         }}>
           <AlertTriangle size={20} style={{ color: 'var(--red)', flexShrink: 0 }} />
-          <div style={{ fontFamily: 'DM Sans', fontSize: 14, color: 'var(--red)' }}>
+          <div style={{ color: 'var(--red)' }}>
             <strong>Over-budget alert:</strong>{' '}
             {overBudgetSites.map(b => b.site).join(', ')} {overBudgetSites.length === 1 ? 'has' : 'have'} exceeded the allocated budget.
           </div>
@@ -236,7 +236,7 @@ export default function BudgetTab({ sites, onRefresh }) {
 
       {/* Header + Add */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 16px 12px' }}>
-        <h3 style={{ fontFamily: 'Oswald', fontSize: '0.95rem', color: 'var(--text-0)', margin: 0, letterSpacing: '0.03em' }}>
+        <h3 style={{ color: 'var(--text-0)', margin: 0, letterSpacing: '0.03em' }}>
           Site Budgets
         </h3>
         <button className="btn-primary" onClick={openCreate}>
@@ -246,13 +246,13 @@ export default function BudgetTab({ sites, onRefresh }) {
 
       {/* Budget Cards */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-3)', fontFamily: 'DM Sans' }}>
+        <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-3)', }}>
           Loading budgets...
         </div>
       ) : budgets.length === 0 ? (
         <div className="card" style={{ padding: 40, textAlign: 'center' }}>
           <Building2 size={36} style={{ color: 'var(--text-3)', marginBottom: 12 }} />
-          <div style={{ fontFamily: 'DM Sans', fontSize: 14, color: 'var(--text-2)' }}>
+          <div style={{ color: 'var(--text-2)' }}>
             No site budgets configured yet. Click "Add Budget" to get started.
           </div>
         </div>
@@ -271,17 +271,17 @@ export default function BudgetTab({ sites, onRefresh }) {
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
                   <div>
-                    <div style={{ fontFamily: 'Oswald', fontSize: 17, color: 'var(--text-0)', marginBottom: 4 }}>
+                    <div style={{ color: 'var(--text-0)', marginBottom: 4 }}>
                       {b.site}
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-3)', fontSize: 12, fontFamily: 'DM Sans' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-3)', }}>
                       <Calendar size={12} />
                       {fmtDate(b.period_start)} - {fmtDate(b.period_end)}
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: 4 }}>
                     {utilPct > 100 && (
-                      <span className="badge" style={{ background: 'var(--red-dim)', color: 'var(--red)', fontSize: 11, marginRight: 4 }}>
+                      <span className="badge" style={{ background: 'var(--red-dim)', color: 'var(--red)', marginRight: 4 }}>
                         Over Budget
                       </span>
                     )}
@@ -297,12 +297,12 @@ export default function BudgetTab({ sites, onRefresh }) {
                 {/* Budget vs Spend */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
                   <div>
-                    <div className="lbl" style={{ fontSize: 11, marginBottom: 2 }}>Budget</div>
-                    <div style={{ fontFamily: 'Oswald', fontSize: 16, color: 'var(--text-0)' }}>{fmtCur(budget)}</div>
+                    <div className="lbl" style={{ marginBottom: 2 }}>Budget</div>
+                    <div style={{ color: 'var(--text-0)' }}>{fmtCur(budget)}</div>
                   </div>
                   <div>
-                    <div className="lbl" style={{ fontSize: 11, marginBottom: 2 }}>Spent</div>
-                    <div style={{ fontFamily: 'Oswald', fontSize: 16, color: barColor }}>{fmtCur(spend)}</div>
+                    <div className="lbl" style={{ marginBottom: 2 }}>Spent</div>
+                    <div style={{ color: barColor }}>{fmtCur(spend)}</div>
                   </div>
                 </div>
 
@@ -319,13 +319,11 @@ export default function BudgetTab({ sites, onRefresh }) {
 
                 {/* Bottom row */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ fontFamily: 'DM Sans', fontSize: 13, color: remaining >= 0 ? 'var(--green)' : 'var(--red)' }}>
+                  <div style={{ color: remaining >= 0 ? 'var(--green)' : 'var(--red)' }}>
                     {remaining >= 0 ? 'Remaining: ' : 'Overrun: '}{fmtCur(Math.abs(remaining))}
                   </div>
                   <div style={{
-                    fontFamily: 'Oswald', fontSize: 14,
-                    color: barColor, fontWeight: 500
-                  }}>
+                    color: barColor, }}>
                     {utilPct.toFixed(1)}%
                   </div>
                 </div>
@@ -335,8 +333,7 @@ export default function BudgetTab({ sites, onRefresh }) {
                   <div style={{
                     marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)',
                     display: 'flex', alignItems: 'flex-start', gap: 6,
-                    color: 'var(--text-3)', fontSize: 12, fontFamily: 'DM Sans'
-                  }}>
+                    color: 'var(--text-3)', }}>
                     <FileText size={12} style={{ marginTop: 2, flexShrink: 0 }} />
                     {b.notes}
                   </div>
@@ -350,7 +347,7 @@ export default function BudgetTab({ sites, onRefresh }) {
       {/* Create/Edit Modal */}
       {modalOpen && (
         <ModalShell onClose={() => setModalOpen(false)} accent="var(--accent)">
-          <h3 style={{ fontFamily: 'Oswald', fontSize: 20, color: 'var(--text-0)', margin: '0 0 20px' }}>
+          <h3 style={{ color: 'var(--text-0)', margin: '0 0 20px' }}>
             {editingBudget ? 'Edit Budget' : 'Create Site Budget'}
           </h3>
 
@@ -440,10 +437,10 @@ export default function BudgetTab({ sites, onRefresh }) {
       {/* Delete Confirmation Modal */}
       {deleteTarget && (
         <ModalShell onClose={() => setDeleteTarget(null)} accent="var(--red)">
-          <h3 style={{ fontFamily: 'Oswald', fontSize: 20, color: 'var(--text-0)', margin: '0 0 12px' }}>
+          <h3 style={{ color: 'var(--text-0)', margin: '0 0 12px' }}>
             Delete Budget
           </h3>
-          <p style={{ fontFamily: 'DM Sans', fontSize: 14, color: 'var(--text-2)', margin: '0 0 20px' }}>
+          <p style={{ color: 'var(--text-2)', margin: '0 0 20px' }}>
             Are you sure you want to delete the budget for <strong>{deleteTarget.site}</strong> ({fmtDate(deleteTarget.period_start)} - {fmtDate(deleteTarget.period_end)})?
             This action cannot be undone.
           </p>

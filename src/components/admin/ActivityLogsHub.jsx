@@ -90,21 +90,21 @@ export default function ActivityLogsHub({
         boxShadow: 'var(--clay-shadow-sm)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 42, height: 42, borderRadius: 12, background: 'rgba(129,140,248,0.12)', border: '1px solid rgba(129,140,248,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#818cf8' }}>
+          <div style={{ width: 42, height: 42, borderRadius: 12, background: 'var(--status-special-soft)', border: '1px solid var(--status-special-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--status-special)' }}>
             <History size={20} />
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <h2 style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-0)', margin: 0 }}>
+              <h2 style={{ color: 'var(--text-0)', margin: 0 }}>
                 AUDIT TRAIL & SYSTEM ACTIVITY HUB
               </h2>
               {integrityStatus === 'valid' && (
-                <span style={{ fontSize: '0.62rem', fontWeight: 700, padding: '2px 8px', borderRadius: 8, background: 'rgba(34,197,94,0.12)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.3)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span style={{ padding: '2px 8px', borderRadius: 8, background: 'rgba(34,197,94,0.12)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.3)', display: 'flex', alignItems: 'center', gap: 4 }}>
                   <ShieldCheck size={12}/> SHA-256 Chain Validated
                 </span>
               )}
             </div>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-3)', fontFamily: 'DM Sans', margin: '2px 0 0' }}>
+            <p style={{ color: 'var(--text-3)', margin: '2px 0 0' }}>
               Immutable event trail capturing all administrative changes, authentication events, and data mutations.
             </p>
           </div>
@@ -112,17 +112,17 @@ export default function ActivityLogsHub({
 
         {/* Verification & Export Toolbar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <button onClick={handleVerifyAuditChain} disabled={verifyingIntegrity || actLogs.length === 0} className="btn-ghost" style={{ fontSize: '0.75rem', padding: '6px 12px', gap: 5, border: '1px solid var(--border)' }}>
+          <button onClick={handleVerifyAuditChain} disabled={verifyingIntegrity || actLogs.length === 0} className="btn-ghost" style={{ padding: '6px 12px', gap: 5, border: '1px solid var(--border)' }}>
             {verifyingIntegrity ? <RefreshCw size={13} className="spin"/> : <ShieldCheck size={13} style={{ color: '#34d399' }}/>}
             {verifyingIntegrity ? 'Verifying Hashes...' : 'Verify Cryptographic Integrity'}
           </button>
 
-          <select value={selectedFormat} onChange={e => setSelectedFormat(e.target.value)} className="sel" style={{ padding: '6px 10px', fontSize: '0.75rem', height: 32 }}>
+          <select value={selectedFormat} onChange={e => setSelectedFormat(e.target.value)} className="sel" style={{ padding: '6px 10px', height: 32 }}>
             <option value="csv">CSV Export</option>
             <option value="json">JSON Log Export</option>
           </select>
 
-          <button onClick={handleExportLogs} disabled={exporting || actLogs.length === 0} className="btn-primary" style={{ fontSize: '0.75rem', padding: '6px 14px', gap: 5 }}>
+          <button onClick={handleExportLogs} disabled={exporting || actLogs.length === 0} className="btn-primary" style={{ padding: '6px 14px', gap: 5 }}>
             <Download size={13}/> Export Logs
           </button>
         </div>
@@ -132,19 +132,19 @@ export default function ActivityLogsHub({
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
         <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
           <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
-          <input className="inp" placeholder="Search logs by keyword, user, or entity code…" style={{ paddingLeft: 32, height: 38, fontSize: '0.82rem' }}
+          <input className="inp" placeholder="Search logs by keyword, user, or entity code…" style={{ paddingLeft: 32, height: 38, }}
             value={actFilter.search || ''} onChange={e => { setActFilter(f => ({ ...f, search: e.target.value })); setActPage(0) }} />
         </div>
 
         <select className="sel" value={actFilter.entity_type || ''} onChange={e => { setActFilter(f => ({ ...f, entity_type: e.target.value })); setActPage(0) }}
-          style={{ height: 38, fontSize: '0.78rem', minWidth: 150 }}>
+          style={{ height: 38, minWidth: 150 }}>
           <option value="">All Entity Types</option>
           {['asset', 'ticket', 'schedule', 'audit_session', 'audit_schedule', 'vendor', 'user', 'profile', 'settings', 'auth', 'maintenance'].map(t => (
             <option key={t} value={t}>{t.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</option>
           ))}
         </select>
 
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-3)', fontFamily: 'DM Mono', fontWeight: 600 }}>{actTotal} total events</span>
+        <span style={{ color: 'var(--text-3)', }}>{actTotal} total events</span>
       </div>
 
       {/* ── Log Entries Timeline ── */}
@@ -159,10 +159,10 @@ export default function ActivityLogsHub({
 
             {actLogs.map((log, idx) => {
               const actionColor = {
-                created: '#22c55e', deleted: '#ef4444', updated: '#4f7eff',
+                created: '#22c55e', deleted: 'var(--status-danger)', updated: '#4f7eff',
                 signed_in: '#06b6d4', signed_out: '#6b7db3', transferred: '#06b6d4',
-                imported: '#8b5cf6', resolved: '#22c55e', assigned: '#f59e0b',
-                completed: '#22c55e', bulk_deleted: '#ef4444', bulk_updated: '#4f7eff',
+                imported: 'var(--status-special)', resolved: '#22c55e', assigned: 'var(--status-warning)',
+                completed: '#22c55e', bulk_deleted: 'var(--status-danger)', bulk_updated: '#4f7eff',
               }[log.action] || '#6b7db3'
 
               const typeIcon = {
@@ -180,7 +180,7 @@ export default function ActivityLogsHub({
                   {showDateHeader && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: idx === 0 ? '4px 0 12px -16px' : '18px 0 12px -16px' }}>
                       <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 8px var(--accent)40', flexShrink: 0 }} />
-                      <span style={{ fontFamily: 'Oswald', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-1)', textTransform: 'uppercase' }}>{logDate}</span>
+                      <span style={{ letterSpacing: '0.08em', color: 'var(--text-1)', textTransform: 'uppercase' }}>{logDate}</span>
                       <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
                     </div>
                   )}
@@ -200,20 +200,20 @@ export default function ActivityLogsHub({
                     </div>
 
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-0)', lineHeight: 1.5, wordBreak: 'break-word' }}>
-                        <strong style={{ fontFamily: 'DM Sans' }}>{log.profiles?.full_name || 'System'}</strong>{' '}
-                        <span style={{ color: actionColor, fontWeight: 700 }}>{log.action.replace(/_/g, ' ')}</span>{' '}
+                      <div style={{ color: 'var(--text-0)', wordBreak: 'break-word' }}>
+                        <strong >{log.profiles?.full_name || 'System'}</strong>{' '}
+                        <span style={{ color: actionColor, }}>{log.action.replace(/_/g, ' ')}</span>{' '}
                         <span style={{ color: 'var(--text-2)' }}>{log.entity_type.replace(/_/g, ' ')}</span>
-                        {log.entity_name && <> — <strong style={{ color: 'var(--text-1)' }}>{log.entity_name}</strong></>}
+                        {log.entity_name && <> - <strong style={{ color: 'var(--text-1)' }}>{log.entity_name}</strong></>}
                       </div>
 
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
                         {log.details && Object.keys(log.details).length > 0 && (
-                          <button onClick={() => setDiffLog(log)} className="btn-ghost" style={{ fontSize: '0.68rem', padding: '2px 8px', gap: 4, color: 'var(--accent)', border: '1px solid var(--accent)30', background: 'var(--accent-glow)' }}>
+                          <button onClick={() => setDiffLog(log)} className="btn-ghost" style={{ padding: '2px 8px', gap: 4, color: 'var(--accent)', border: '1px solid var(--accent)30', background: 'var(--accent-glow)' }}>
                             <Eye size={10}/> View BEFORE / AFTER Diff
                           </button>
                         )}
-                        <span style={{ fontSize: '0.65rem', color: 'var(--text-3)', fontFamily: 'DM Mono', marginLeft: 'auto', flexShrink: 0 }}>
+                        <span style={{ color: 'var(--text-3)', marginLeft: 'auto', flexShrink: 0 }}>
                           {new Date(log.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
@@ -226,7 +226,7 @@ export default function ActivityLogsHub({
             {actLogs.length === 0 && (
               <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-3)' }}>
                 <History size={32} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
-                <p style={{ fontFamily: 'DM Sans', fontSize: '0.88rem' }}>No activity logs found for the selected filter.</p>
+                <p >No activity logs found for the selected filter.</p>
               </div>
             )}
           </div>
@@ -238,7 +238,7 @@ export default function ActivityLogsHub({
             <button onClick={() => setActPage(p => Math.max(0, p - 1))} disabled={actPage === 0} className="btn-ghost" style={{ padding: '6px 10px' }}>
               <ChevronLeft size={14} />
             </button>
-            <span style={{ fontFamily: 'DM Mono', fontSize: '0.82rem', color: 'var(--text-2)' }}>
+            <span style={{ color: 'var(--text-2)' }}>
               Page {actPage + 1} of {Math.ceil(actTotal / 50)}
             </span>
             <button onClick={() => setActPage(p => p + 1)} disabled={actPage >= Math.ceil(actTotal / 50) - 1} className="btn-ghost" style={{ padding: '6px 10px' }}>
@@ -250,42 +250,43 @@ export default function ActivityLogsHub({
 
       {/* ── Side-by-Side BEFORE vs AFTER JSON Diff Modal ── */}
       {diffLog && (
-        <div className="modal-bg" style={{ zIndex: 2200 }}>
+        <div className="modal-bg" style={{ zIndex: 2200 }} onClick={e => { if (e.target === e.currentTarget) setDiffLog(null) }}
+             onKeyDown={e => { if (e.key === 'Escape') setDiffLog(null) }} tabIndex={-1} ref={el => el && el.focus()}>
           <div className="modal" style={{ maxWidth: 640, padding: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Eye size={16} style={{ color: 'var(--accent)' }} />
-                <h3 style={{ fontFamily: 'Oswald', fontSize: '1rem', margin: 0, color: 'var(--text-0)' }}>
+                <h3 style={{ margin: 0, color: 'var(--text-0)' }}>
                   AUDIT DIFF INSPECTOR ({diffLog.entity_name || diffLog.entity_type})
                 </h3>
               </div>
-              <button onClick={() => setDiffLog(null)} className="btn-ghost" style={{ padding: 4 }}><X size={16}/></button>
+              <button onClick={() => setDiffLog(null)} className="btn-ghost" style={{ padding: 4 }} aria-label="Close diff inspector"><X size={16}/></button>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
               {/* BEFORE State */}
               <div style={{ padding: 12, borderRadius: 10, background: 'var(--bg-3)', border: '1px solid var(--border)' }}>
-                <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--red)', fontFamily: 'Oswald', marginBottom: 6 }}>
+                <div style={{ color: 'var(--red)', marginBottom: 6 }}>
                   BEFORE STATE (PREVIOUS)
                 </div>
-                <pre style={{ fontFamily: 'DM Mono', fontSize: '0.72rem', color: 'var(--text-2)', margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                <pre style={{ color: 'var(--text-2)', margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
                   {JSON.stringify(diffLog.details?.before || { status: 'Initial Record', updated_at: logDate }, null, 2)}
                 </pre>
               </div>
 
               {/* AFTER State */}
               <div style={{ padding: 12, borderRadius: 10, background: 'var(--bg-3)', border: '1px solid var(--border)' }}>
-                <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--green)', fontFamily: 'Oswald', marginBottom: 6 }}>
+                <div style={{ color: 'var(--green)', marginBottom: 6 }}>
                   AFTER STATE (PROPOSED / MUTATED)
                 </div>
-                <pre style={{ fontFamily: 'DM Mono', fontSize: '0.72rem', color: 'var(--text-0)', margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                <pre style={{ color: 'var(--text-0)', margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
                   {JSON.stringify(diffLog.details?.after || diffLog.details || {}, null, 2)}
                 </pre>
               </div>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button onClick={() => setDiffLog(null)} className="btn-ghost" style={{ fontSize: '0.78rem' }}>Close Inspector</button>
+              <button onClick={() => setDiffLog(null)} className="btn-ghost" >Close Inspector</button>
             </div>
           </div>
         </div>

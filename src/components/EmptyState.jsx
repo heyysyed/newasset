@@ -21,7 +21,7 @@ export default function EmptyState({ icon: Icon, title, message, actionLabel, on
           background: 'var(--bg-3)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           marginBottom: 16,
-          boxShadow: 'inset 2px 2px 6px rgba(255,255,255,0.7), inset -2px -2px 6px rgba(79,126,255,0.08)'
+          boxShadow: 'inset 2px 2px 6px rgba(255,255,255,0.7), inset -2px -2px 6px var(--accent-soft)'
         }}>
           <Icon size={32} color="var(--text-2)" />
         </div>
@@ -29,18 +29,13 @@ export default function EmptyState({ icon: Icon, title, message, actionLabel, on
       <h3 style={{
         margin: '0 0 8px 0',
         color: 'var(--text-1)',
-        fontFamily: 'DM Sans',
-        fontWeight: 700,
-        fontSize: '1.1rem'
-      }}>
+        }}>
         {title}
       </h3>
       <p style={{
         margin: '0 0 24px 0',
         maxWidth: 320,
-        lineHeight: 1.5,
-        fontSize: '0.9rem'
-      }}>
+        }}>
         {message}
       </p>
       {actionLabel && onAction && (

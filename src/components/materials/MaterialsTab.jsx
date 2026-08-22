@@ -20,7 +20,7 @@ function EmptyState({ msg }) {
       }}>
         <Boxes size={26} style={{ color: 'var(--text-3)' }} />
       </div>
-      <p style={{ fontFamily: 'DM Sans', color: 'var(--text-3)', fontSize: '0.88rem' }}>{msg}</p>
+      <p style={{ color: 'var(--text-3)', }}>{msg}</p>
     </div>
   )
 }
@@ -41,14 +41,14 @@ export default function MaterialsTab({ materials, stock, canWrite, onEdit, onDel
     <>
       {/* Bulk delete bar */}
       {canWrite && selectedIds.size > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', background: 'var(--red-dim)', borderBottom: '1px solid rgba(239,68,68,0.2)' }}>
-          <span style={{ fontSize: '0.82rem', color: 'var(--red)', fontWeight: 600 }}>{selectedIds.size} material{selectedIds.size > 1 ? 's' : ''} selected</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', background: 'var(--red-dim)', borderBottom: '1px solid var(--status-danger-soft)' }}>
+          <span style={{ color: 'var(--red)', }}>{selectedIds.size} material{selectedIds.size > 1 ? 's' : ''} selected</span>
           <button onClick={() => { onBulkDelete(materials.filter(m => selectedIds.has(m.id))); clearSel() }}
-            style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 10, background: 'var(--red)', border: 'none', color: 'white', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600 }}>
+            style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 10, background: 'var(--red)', border: 'none', color: 'white', cursor: 'pointer', }}>
             <Trash2 size={13} /> Delete Selected
           </button>
           <button onClick={clearSel}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 10, background: 'var(--bg-3)', border: '1.5px solid var(--border)', color: 'var(--text-2)', cursor: 'pointer', fontSize: '0.78rem' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 10, background: 'var(--bg-3)', border: '1.5px solid var(--border)', color: 'var(--text-2)', cursor: 'pointer', }}>
             <X size={13} /> Cancel
           </button>
         </div>
@@ -77,37 +77,37 @@ export default function MaterialsTab({ materials, stock, canWrite, onEdit, onDel
               const total = siteStocks.reduce((sum, s) => sum + Number(s.quantity), 0)
               const totalVal = total * Number(m.unit_cost || 0)
               return (
-                <tr key={m.id} style={{ background: selectedIds.has(m.id) ? 'rgba(239,68,68,0.04)' : undefined }}>
+                <tr key={m.id} style={{ background: selectedIds.has(m.id) ? 'var(--status-danger-soft)' : undefined }}>
                   {canWrite && <td><input type="checkbox" checked={selectedIds.has(m.id)} onChange={() => toggleOne(m.id)} style={{ cursor: 'pointer' }} /></td>}
-                  <td style={{ fontWeight: 600, color: 'var(--text-0)' }}>
+                  <td style={{ color: 'var(--text-0)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                       {m.material_name}
                       {m.is_reusable && (
-                        <span className="badge" style={{ background: 'rgba(6,182,212,0.08)', color: 'var(--cyan)', border: '1px solid rgba(6,182,212,0.2)', fontSize: '0.62rem', padding: '1px 6px' }}>
+                        <span className="badge" style={{ background: 'rgba(6,182,212,0.08)', color: 'var(--cyan)', border: '1px solid rgba(6,182,212,0.2)', padding: '1px 6px' }}>
                           <RotateCcw size={9} />Reusable
                         </span>
                       )}
                     </div>
-                    {m.description && <div style={{ fontSize: '0.72rem', color: 'var(--text-3)', marginTop: 2 }}>{m.description}</div>}
+                    {m.description && <div style={{ color: 'var(--text-3)', marginTop: 2 }}>{m.description}</div>}
                   </td>
-                  <td><code style={{ fontSize: '0.75rem', background: 'var(--bg-3)', padding: '3px 8px', borderRadius: 8, fontFamily: 'DM Mono', color: 'var(--text-2)', border: '1px solid var(--border)' }}>{m.material_code}</code></td>
-                  <td className="col-hide-mobile">{m.category || '—'}</td>
+                  <td><code style={{ background: 'var(--bg-3)', padding: '3px 8px', borderRadius: 8, color: 'var(--text-2)', border: '1px solid var(--border)' }}>{m.material_code}</code></td>
+                  <td className="col-hide-mobile">{m.category || '-'}</td>
                   <td className="col-hide-mobile">{m.unit}</td>
-                  <td className="col-hide-mobile" style={{ fontSize: '0.85rem' }}>{Number(m.unit_cost) > 0 ? fmtCur(m.unit_cost) : <span style={{ color: 'var(--text-3)' }}>—</span>}</td>
-                  <td><span style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '0.95rem', color: total > 0 ? 'var(--green)' : 'var(--red)' }}>{fmt(total)}</span></td>
-                  <td className="col-hide-mobile" style={{ fontWeight: 600, fontSize: '0.85rem' }}>{totalVal > 0 ? fmtCur(totalVal) : '—'}</td>
+                  <td className="col-hide-mobile" >{Number(m.unit_cost) > 0 ? fmtCur(m.unit_cost) : <span style={{ color: 'var(--text-3)' }}>-</span>}</td>
+                  <td><span style={{ color: total > 0 ? 'var(--green)' : 'var(--red)' }}>{fmt(total)}</span></td>
+                  <td className="col-hide-mobile" >{totalVal > 0 ? fmtCur(totalVal) : '-'}</td>
                   <td className="col-hide-mobile">
                     <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                       {siteStocks.filter(s => Number(s.quantity) > 0).map(s => (
-                        <span key={s.site} style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: 8, background: 'var(--bg-3)', color: 'var(--text-2)', border: '1px solid var(--border)', fontFamily: 'DM Sans', whiteSpace: 'nowrap' }}>{s.site}: {fmt(s.quantity)}</span>
+                        <span key={s.site} style={{ padding: '2px 7px', borderRadius: 8, background: 'var(--bg-3)', color: 'var(--text-2)', border: '1px solid var(--border)', whiteSpace: 'nowrap' }}>{s.site}: {fmt(s.quantity)}</span>
                       ))}
-                      {siteStocks.filter(s => Number(s.quantity) > 0).length === 0 && <span style={{ color: 'var(--text-3)', fontSize: '0.78rem' }}>No stock</span>}
+                      {siteStocks.filter(s => Number(s.quantity) > 0).length === 0 && <span style={{ color: 'var(--text-3)', }}>No stock</span>}
                     </div>
                   </td>
                   {canWrite && (
                     <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
-                      <button onClick={() => onEdit(m)} title="Edit" style={{ background: 'var(--accent-glow)', border: '1.5px solid rgba(79,126,255,0.2)', borderRadius: 10, padding: '6px 8px', cursor: 'pointer', color: 'var(--accent)', marginRight: 6 }}><Pencil size={14} /></button>
-                      <button onClick={() => onDelete(m.id)} title="Delete" style={{ background: 'var(--red-dim)', border: '1.5px solid rgba(239,68,68,0.2)', borderRadius: 10, padding: '6px 8px', cursor: 'pointer', color: 'var(--red)' }}><Trash2 size={14} /></button>
+                      <button onClick={() => onEdit(m)} title="Edit" style={{ background: 'var(--accent-glow)', border: '1.5px solid var(--accent-soft)', borderRadius: 10, padding: '6px 8px', cursor: 'pointer', color: 'var(--accent)', marginRight: 6 }}><Pencil size={14} /></button>
+                      <button onClick={() => onDelete(m.id)} title="Delete" style={{ background: 'var(--red-dim)', border: '1.5px solid var(--status-danger-soft)', borderRadius: 10, padding: '6px 8px', cursor: 'pointer', color: 'var(--red)' }}><Trash2 size={14} /></button>
                     </td>
                   )}
                 </tr>
@@ -130,33 +130,33 @@ export default function MaterialsTab({ materials, stock, canWrite, onEdit, onDel
                   <div className="mat-mobile-title">
                     {m.material_name}
                     {m.is_reusable && (
-                      <span className="badge" style={{ marginLeft: 6, background: 'rgba(6,182,212,0.08)', color: 'var(--cyan)', border: '1px solid rgba(6,182,212,0.2)', fontSize: '0.65rem', padding: '1px 5px', verticalAlign: 'middle' }}>
+                      <span className="badge" style={{ marginLeft: 6, background: 'rgba(6,182,212,0.08)', color: 'var(--cyan)', border: '1px solid rgba(6,182,212,0.2)', padding: '1px 5px', verticalAlign: 'middle' }}>
                         <RotateCcw size={8} />Reusable
                       </span>
                     )}
                   </div>
                   <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 3 }}>
                     <span className="mat-mobile-code">{m.material_code}</span>
-                    {m.category && <span style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>{m.category}</span>}
+                    {m.category && <span style={{ color: 'var(--text-3)' }}>{m.category}</span>}
                   </div>
                 </div>
-                <span style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1.05rem', color: total > 0 ? 'var(--green)' : 'var(--red)' }}>{fmt(total)}</span>
+                <span style={{ color: total > 0 ? 'var(--green)' : 'var(--red)' }}>{fmt(total)}</span>
               </div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                {Number(m.unit_cost) > 0 && <span style={{ fontSize: '0.75rem', color: 'var(--text-2)' }}>{fmtCur(m.unit_cost)}/{m.unit}</span>}
-                {totalVal > 0 && <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--green)' }}>Value: {fmtCur(totalVal)}</span>}
+                {Number(m.unit_cost) > 0 && <span style={{ color: 'var(--text-2)' }}>{fmtCur(m.unit_cost)}/{m.unit}</span>}
+                {totalVal > 0 && <span style={{ color: 'var(--green)' }}>Value: {fmtCur(totalVal)}</span>}
               </div>
               {siteStocks.filter(s => Number(s.quantity) > 0).length > 0 && (
                 <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                   {siteStocks.filter(s => Number(s.quantity) > 0).map(s => (
-                    <span key={s.site} style={{ fontSize: '0.68rem', padding: '2px 7px', borderRadius: 8, background: 'var(--bg-3)', color: 'var(--text-2)', border: '1px solid var(--border)', fontFamily: 'DM Sans' }}>{s.site}: {fmt(s.quantity)}</span>
+                    <span key={s.site} style={{ padding: '2px 7px', borderRadius: 8, background: 'var(--bg-3)', color: 'var(--text-2)', border: '1px solid var(--border)', }}>{s.site}: {fmt(s.quantity)}</span>
                   ))}
                 </div>
               )}
               {canWrite && (
                 <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                  <button onClick={() => onEdit(m)} className="btn-ghost" style={{ padding: '5px 12px', fontSize: '0.75rem' }}><Pencil size={12} />Edit</button>
-                  <button onClick={() => onDelete(m.id)} className="btn-danger" style={{ padding: '5px 12px', fontSize: '0.75rem' }}><Trash2 size={12} />Delete</button>
+                  <button onClick={() => onEdit(m)} className="btn-ghost" style={{ padding: '5px 12px', }}><Pencil size={12} />Edit</button>
+                  <button onClick={() => onDelete(m.id)} className="btn-danger" style={{ padding: '5px 12px', }}><Trash2 size={12} />Delete</button>
                 </div>
               )}
             </div>
@@ -167,8 +167,8 @@ export default function MaterialsTab({ materials, stock, canWrite, onEdit, onDel
       {/* Total valuation footer */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '14px 20px', borderTop: '2px solid var(--border)', background: 'var(--bg-3)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <span style={{ fontFamily: 'Oswald', fontSize: '0.78rem', color: 'var(--text-2)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Total Value:</span>
-          <span style={{ fontFamily: 'DM Sans', fontWeight: 700, fontSize: '1rem', color: 'var(--green)' }}>{fmtCur(totalInvVal)}</span>
+          <span style={{ color: 'var(--text-2)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Total Value:</span>
+          <span style={{ color: 'var(--green)' }}>{fmtCur(totalInvVal)}</span>
         </div>
       </div>
     </>

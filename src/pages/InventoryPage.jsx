@@ -14,6 +14,8 @@ import BulkItemForm from '../components/bulk/BulkItemForm'
 import BulkTransactionModal from '../components/bulk/BulkTransactionModal'
 import GatePassTab from '../components/inventory/GatePassTab'
 import IssueSlipTab from '../components/materials/IssueSlipTab'
+import { useIsMobile } from '../hooks/useBreakpoint'
+import MobileInventoryPage from '../components/mobile/MobileInventoryPage'
 
 const TabBtn = ({ active, icon: Icon, label, onClick }) => (
   <button onClick={onClick} className={`tab-btn ${active ? 'active' : ''}`}>
@@ -26,6 +28,7 @@ const fmt = (n) => Number(n || 0).toLocaleString('en-IN', { maximumFractionDigit
 function InventoryPageContent() {
   const { user, isAdmin, isMod, can } = useAuth()
   const canWrite = isAdmin || isMod || (can ? can('inventory') : true) || true
+  const isMobile = useIsMobile()
 
   const [tab, setTab] = useState('stock')
   const [loading, setLoading] = useState(true)
@@ -529,57 +532,57 @@ function InventoryPageContent() {
   // ── Render Stock Views ────────────────────────────────────────────────────────
   const renderStock = () => (
     <div className="animate-fade-up">
-      {/* KPI Summary Cards */}
-      <div className="grid-mobile-2 stat-grid-mobile" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 14, marginBottom: 20 }}>
+      {/* KPI Summary Cards - 2-col on mobile, 5-col on desktop */}
+      <div className="grid grid-cols-2 md:grid-cols-5" style={{ gap: 14, marginBottom: 20 }}>
         <div className="stat-card">
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Catalog Items</div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-0)', fontFamily: 'Oswald', marginTop: 4 }}>{summary.uniqueItems}</div>
+          <div style={{ color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em', }}>Catalog Items</div>
+          <div style={{ color: 'var(--text-0)', marginTop: 4 }}>{summary.uniqueItems}</div>
         </div>
         <div className="stat-card" style={{ borderLeft: '3px solid var(--accent)' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div style={{ color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: 4 }}>
             <DollarSign size={13} /> Stock Valuation
           </div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-0)', fontFamily: 'Oswald', marginTop: 4 }}>
+          <div style={{ color: 'var(--text-0)', marginTop: 4 }}>
             {formatCurrency(summary.totalValuation)}
           </div>
         </div>
         <div className="stat-card" style={{ borderLeft: '3px solid var(--green)' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Usable Stock</div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--green)', fontFamily: 'Oswald', marginTop: 4 }}>{fmt(summary.totalUsable)}</div>
+          <div style={{ color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em', }}>Usable Stock</div>
+          <div style={{ color: 'var(--green)', marginTop: 4 }}>{fmt(summary.totalUsable)}</div>
         </div>
         <div className="stat-card" style={{ borderLeft: '3px solid var(--amber)' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Deployed</div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--amber)', fontFamily: 'Oswald', marginTop: 4 }}>{fmt(summary.totalInUse)}</div>
+          <div style={{ color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em', }}>Deployed</div>
+          <div style={{ color: 'var(--amber)', marginTop: 4 }}>{fmt(summary.totalInUse)}</div>
         </div>
         <div className="stat-card" style={{ borderLeft: '3px solid var(--red)' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Scrapped</div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--red)', fontFamily: 'Oswald', marginTop: 4 }}>{fmt(summary.totalScrap)}</div>
+          <div style={{ color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em', }}>Scrapped</div>
+          <div style={{ color: 'var(--red)', marginTop: 4 }}>{fmt(summary.totalScrap)}</div>
         </div>
       </div>
 
       {/* Stock View Switcher Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Grouping:</span>
+          <span style={{ color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Grouping:</span>
           <div className="tab-container" style={{ margin: 0, padding: 3, height: 'auto' }}>
             <button 
               onClick={() => setStockViewMode('by_site')} 
               className={`tab-btn ${stockViewMode === 'by_site' ? 'active' : ''}`}
-              style={{ padding: '4px 12px', fontSize: '0.78rem' }}
+              style={{ padding: '4px 12px', }}
             >
               <Building2 size={13} /> Flat Site Stock
             </button>
             <button 
               onClick={() => setStockViewMode('by_item')} 
               className={`tab-btn ${stockViewMode === 'by_item' ? 'active' : ''}`}
-              style={{ padding: '4px 12px', fontSize: '0.78rem' }}
+              style={{ padding: '4px 12px', }}
             >
               <Layers size={13} /> Multi-Site Master Grouping
             </button>
           </div>
         </div>
 
-        <div style={{ fontSize: '0.8rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>
+        <div style={{ color: 'var(--text-3)', }}>
           Showing <strong>{stockViewMode === 'by_site' ? filteredStock.length : groupedStockByItem.length}</strong> records
         </div>
       </div>
@@ -619,7 +622,7 @@ function InventoryPageContent() {
                     const usableQty = Number(s.usable_qty || 0)
                     const siteValuation = usableQty * unitPrice
                     const isLowStock = usableQty < 25;
-                    const rowBg = selectedStock.has(s.id) ? 'var(--bg-2)' : (isLowStock ? 'rgba(239,68,68,0.04)' : 'transparent');
+                    const rowBg = selectedStock.has(s.id) ? 'var(--bg-2)' : (isLowStock ? 'var(--status-danger-soft)' : 'transparent');
 
                     return (
                       <tr key={s.id} style={{ background: rowBg, transition: 'background 0.2s' }}>
@@ -647,54 +650,54 @@ function InventoryPageContent() {
                               </div>
                             )}
                             <div>
-                              <div style={{ fontWeight:700, color:'var(--text-0)', fontSize:'0.9rem' }}>{s.bulk_items?.item_name}</div>
-                              <div style={{ fontSize:'0.75rem', color:'var(--text-3)', fontFamily:'DM Mono' }}>{s.bulk_items?.item_code}</div>
+                              <div style={{ color:'var(--text-0)', }}>{s.bulk_items?.item_name}</div>
+                              <div style={{ color:'var(--text-3)', }}>{s.bulk_items?.item_code}</div>
                             </div>
                           </div>
                         </td>
                         <td>
-                          <span style={{ fontSize:'0.72rem', padding:'3px 8px', borderRadius:6, background:'rgba(79,126,255,0.08)', color:'var(--accent)', border:'1px solid rgba(79,126,255,0.2)', fontWeight:600 }}>
+                          <span style={{ padding:'3px 8px', borderRadius:6, background:'var(--accent-soft)', color:'var(--accent)', border:'1px solid var(--accent-soft)', }}>
                             {s.bulk_items?.category || 'General'}
                           </span>
                         </td>
                         <td>
-                          <span style={{ fontSize:'0.78rem', fontWeight:600, padding:'3px 10px', borderRadius:6, background:'var(--bg-2)', border:'1px solid var(--border)', color: 'var(--text-0)' }}>
+                          <span style={{ padding:'3px 10px', borderRadius:6, background:'var(--bg-2)', border:'1px solid var(--border)', color: 'var(--text-0)' }}>
                             {s.site}
                           </span>
                         </td>
                         <td style={{ textAlign:'right' }}>
-                          <div style={{ fontFamily:'Oswald', fontWeight:700, fontSize:'1.05rem', color: isLowStock ? 'var(--red)' : 'var(--green)' }}>
-                            {fmt(usableQty)} <span style={{ fontSize:'0.75rem', fontWeight:500 }}>{s.bulk_items?.unit || 'nos'}</span>
+                          <div style={{ color: isLowStock ? 'var(--red)' : 'var(--green)' }}>
+                            {fmt(usableQty)} <span >{s.bulk_items?.unit || 'nos'}</span>
                           </div>
-                          {isLowStock && <div style={{ fontSize: '0.65rem', color: 'var(--red)', fontWeight: 600, textTransform: 'uppercase', marginTop: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}><AlertCircle size={10}/> Low Stock</div>}
+                          {isLowStock && <div style={{ color: 'var(--red)', textTransform: 'uppercase', marginTop: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}><AlertCircle size={10}/> Low Stock</div>}
                         </td>
-                        <td style={{ textAlign:'right', fontFamily:'DM Mono', fontSize:'0.88rem', color:'var(--text-1)' }}>
-                          {unitPrice > 0 ? `₹${fmt(unitPrice)}` : <span style={{ color: 'var(--text-3)' }}>—</span>}
+                        <td style={{ textAlign:'right', color:'var(--text-1)' }}>
+                          {unitPrice > 0 ? `₹${fmt(unitPrice)}` : <span style={{ color: 'var(--text-3)' }}>-</span>}
                         </td>
-                        <td style={{ textAlign:'right', fontFamily:'Oswald', fontWeight:700, fontSize:'1rem', color:'var(--text-0)' }}>
-                          {siteValuation > 0 ? formatCurrency(siteValuation) : <span style={{ color: 'var(--text-3)', fontFamily: 'DM Sans', fontSize: '0.8rem' }}>₹0</span>}
+                        <td style={{ textAlign:'right', color:'var(--text-0)' }}>
+                          {siteValuation > 0 ? formatCurrency(siteValuation) : <span style={{ color: 'var(--text-3)', }}>₹0</span>}
                         </td>
                         <td style={{ textAlign:'right' }}>
-                          <div style={{ fontFamily:'Oswald', fontWeight:600, fontSize:'0.95rem', color:'var(--amber)' }}>
-                            {fmt(s.in_use_qty)} <span style={{ fontSize:'0.65rem', color:'var(--text-3)' }}>{s.bulk_items?.unit || 'nos'}</span>
+                          <div style={{ color:'var(--amber)' }}>
+                            {fmt(s.in_use_qty)} <span style={{ color:'var(--text-3)' }}>{s.bulk_items?.unit || 'nos'}</span>
                           </div>
                         </td>
                         <td style={{ textAlign:'right' }}>
-                          <div style={{ fontFamily:'Oswald', fontWeight:600, fontSize:'0.95rem', color:'var(--red)' }}>
-                            {fmt(s.scrap_qty)} <span style={{ fontSize:'0.65rem', color:'var(--text-3)' }}>{s.bulk_items?.unit || 'nos'}</span>
+                          <div style={{ color:'var(--red)' }}>
+                            {fmt(s.scrap_qty)} <span style={{ color:'var(--text-3)' }}>{s.bulk_items?.unit || 'nos'}</span>
                           </div>
                         </td>
                         {canWrite && (
                           <td style={{ textAlign:'right', paddingRight: 16 }}>
                             <div style={{ display:'flex', gap:6, justifyContent:'flex-end' }}>
-                              <button onClick={() => { setEditStockRecord({ ...s, unit_price: unitPrice }); setShowEditStockModal(true); }} className="btn-ghost" style={{ padding:'4px 8px', fontSize:'0.72rem', minHeight:28, display: 'flex', alignItems: 'center', gap: 3 }} title="Edit Stock Details">
+                              <button onClick={() => { setEditStockRecord({ ...s, unit_price: unitPrice }); setShowEditStockModal(true); }} className="btn-ghost" style={{ padding:'4px 8px', minHeight:28, display: 'flex', alignItems: 'center', gap: 3 }} title="Edit Stock Details">
                                 <Pencil size={12}/> Edit
                               </button>
-                              <button onClick={() => openTx('transfer', s.item_id, s.site)} className="btn-primary" style={{ padding:'4px 10px', fontSize:'0.72rem', minHeight:28, display: 'flex', alignItems: 'center', gap: 4 }}>
+                              <button onClick={() => openTx('transfer', s.item_id, s.site)} className="btn-primary" style={{ padding:'4px 10px', minHeight:28, display: 'flex', alignItems: 'center', gap: 4 }}>
                                 <ArrowRightLeft size={12}/> Transfer
                               </button>
-                              <button onClick={() => openTx('deploy', s.item_id, s.site)} className="btn-ghost" style={{ padding:'4px 8px', fontSize:'0.72rem', minHeight:28 }}>Deploy</button>
-                              <button title="Scrap / Write-off" onClick={() => openTx('scrap', s.item_id, s.site)} className="btn-ghost" style={{ padding:'4px 8px', color:'var(--red)', minHeight:28, border:'1px solid rgba(239,68,68,0.2)' }}>
+                              <button onClick={() => openTx('deploy', s.item_id, s.site)} className="btn-ghost" style={{ padding:'4px 8px', minHeight:28 }}>Deploy</button>
+                              <button title="Scrap / Write-off" onClick={() => openTx('scrap', s.item_id, s.site)} className="btn-ghost" style={{ padding:'4px 8px', color:'var(--red)', minHeight:28, border:'1px solid var(--status-danger-soft)' }}>
                                 <Trash2 size={12}/> Scrap
                               </button>
                             </div>
@@ -729,32 +732,32 @@ function InventoryPageContent() {
                 <div key={s.id} className="card" style={{ padding: '16px', borderLeft: isLowStock ? '4px solid var(--red)' : '4px solid var(--accent)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10, gap: 8 }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, color: 'var(--text-0)', fontSize: '0.98rem', lineHeight: 1.3 }}>{s.bulk_items?.item_name}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', fontFamily: 'DM Mono', marginTop: 2 }}>{s.bulk_items?.item_code}</div>
+                      <div style={{ color: 'var(--text-0)', }}>{s.bulk_items?.item_name}</div>
+                      <div style={{ color: 'var(--text-3)', marginTop: 2 }}>{s.bulk_items?.item_code}</div>
                     </div>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '4px 10px', borderRadius: 20, background: 'var(--bg-2)', border: '1px solid var(--border)', whiteSpace: 'nowrap', color: 'var(--text-0)' }}>
+                    <span style={{ padding: '4px 10px', borderRadius: 20, background: 'var(--bg-2)', border: '1px solid var(--border)', whiteSpace: 'nowrap', color: 'var(--text-0)' }}>
                       {s.site}
                     </span>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 12 }}>
                     <div style={{ background: 'var(--bg-2)', borderRadius: 10, padding: '8px 10px', textAlign: 'center' }}>
-                      <div style={{ fontSize: '0.6rem', color: 'var(--text-3)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.05em' }}>Usable</div>
-                      <div style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1.15rem', color: isLowStock ? 'var(--red)' : 'var(--green)', marginTop: 2 }}>
+                      <div style={{ color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Usable</div>
+                      <div style={{ color: isLowStock ? 'var(--red)' : 'var(--green)', marginTop: 2 }}>
                         {fmt(usableQty)}
                       </div>
-                      <div style={{ fontSize: '0.65rem', color: 'var(--text-3)' }}>{s.bulk_items?.unit || 'nos'}</div>
+                      <div style={{ color: 'var(--text-3)' }}>{s.bulk_items?.unit || 'nos'}</div>
                     </div>
                     <div style={{ background: 'var(--bg-2)', borderRadius: 10, padding: '8px 10px', textAlign: 'center' }}>
-                      <div style={{ fontSize: '0.6rem', color: 'var(--text-3)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.05em' }}>Rate (₹)</div>
-                      <div style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-0)', marginTop: 2 }}>
+                      <div style={{ color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Rate (₹)</div>
+                      <div style={{ color: 'var(--text-0)', marginTop: 2 }}>
                         ₹{fmt(unitPrice)}
                       </div>
-                      <div style={{ fontSize: '0.62rem', color: 'var(--text-3)' }}>per {s.bulk_items?.unit || 'unit'}</div>
+                      <div style={{ color: 'var(--text-3)' }}>per {s.bulk_items?.unit || 'unit'}</div>
                     </div>
-                    <div style={{ background: 'rgba(79,126,255,0.08)', borderRadius: 10, padding: '8px 10px', textAlign: 'center', border: '1px solid rgba(79,126,255,0.2)' }}>
-                      <div style={{ fontSize: '0.6rem', color: 'var(--accent)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>Valuation</div>
-                      <div style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1.05rem', color: 'var(--accent)', marginTop: 2 }}>
+                    <div style={{ background: 'var(--accent-soft)', borderRadius: 10, padding: '8px 10px', textAlign: 'center', border: '1px solid var(--accent-soft)' }}>
+                      <div style={{ color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Valuation</div>
+                      <div style={{ color: 'var(--accent)', marginTop: 2 }}>
                         {formatCurrency(siteValuation)}
                       </div>
                     </div>
@@ -762,13 +765,13 @@ function InventoryPageContent() {
 
                   {canWrite && (
                     <div style={{ display: 'flex', gap: 8, borderTop: '1px solid var(--border)', paddingTop: 10 }}>
-                      <button onClick={() => openTx('transfer', s.item_id, s.site)} className="btn-primary" style={{ flex: 1, padding: '8px 10px', fontSize: '0.78rem', minHeight: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+                      <button onClick={() => openTx('transfer', s.item_id, s.site)} className="btn-primary" style={{ flex: 1, padding: '8px 10px', minHeight: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
                         <ArrowRightLeft size={13}/> Transfer
                       </button>
-                      <button onClick={() => openTx('deploy', s.item_id, s.site)} className="btn-ghost" style={{ flex: 1, padding: '8px 10px', fontSize: '0.78rem', minHeight: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+                      <button onClick={() => openTx('deploy', s.item_id, s.site)} className="btn-ghost" style={{ flex: 1, padding: '8px 10px', minHeight: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
                         <Hammer size={13}/> Deploy
                       </button>
-                      <button onClick={() => openTx('scrap', s.item_id, s.site)} className="btn-ghost" style={{ padding: '8px 10px', fontSize: '0.78rem', minHeight: 36, color: 'var(--red)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                      <button onClick={() => openTx('scrap', s.item_id, s.site)} className="btn-ghost" style={{ padding: '8px 10px', minHeight: 36, color: 'var(--red)', border: '1px solid var(--status-danger-soft)' }}>
                         <Trash2 size={14}/> Scrap
                       </button>
                     </div>
@@ -812,14 +815,14 @@ function InventoryPageContent() {
                     )}
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                        <span style={{ fontFamily: 'Oswald', fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-0)', letterSpacing: '0.02em' }}>
+                        <span style={{ color: 'var(--text-0)', letterSpacing: '0.02em' }}>
                           {item.item_name || 'Master Item'}
                         </span>
-                        <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: 6, background: 'rgba(79,126,255,0.1)', color: 'var(--accent)', border: '1px solid rgba(79,126,255,0.3)', fontWeight: 600 }}>
+                        <span style={{ padding: '2px 8px', borderRadius: 6, background: 'var(--accent-soft)', color: 'var(--accent)', border: '1px solid var(--accent-soft)', }}>
                           {item.category || 'General'}
                         </span>
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', fontFamily: 'DM Mono', marginTop: 2 }}>
+                      <div style={{ color: 'var(--text-3)', marginTop: 2 }}>
                         SKU: {item.item_code} | UOM: <strong>{item.unit || 'nos'}</strong> | Unit Rate: <strong>₹{fmt(unitPrice)}</strong>
                       </div>
                     </div>
@@ -828,20 +831,20 @@ function InventoryPageContent() {
                   {/* Summary Totals for this Item */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Sites Present</div>
-                      <div style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1.1rem', color: 'var(--text-0)' }}>
+                      <div style={{ color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', }}>Sites Present</div>
+                      <div style={{ color: 'var(--text-0)' }}>
                         {group.siteBreakdown.length} Sites
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Global Usable Stock</div>
-                      <div style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1.2rem', color: 'var(--green)' }}>
-                        {fmt(group.totalUsable)} <span style={{ fontSize: '0.75rem', fontWeight: 400 }}>{item.unit || 'nos'}</span>
+                      <div style={{ color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', }}>Global Usable Stock</div>
+                      <div style={{ color: 'var(--green)' }}>
+                        {fmt(group.totalUsable)} <span >{item.unit || 'nos'}</span>
                       </div>
                     </div>
-                    <div style={{ textAlign: 'right', background: 'rgba(79,126,255,0.08)', padding: '6px 14px', borderRadius: 10, border: '1px solid rgba(79,126,255,0.2)' }}>
-                      <div style={{ fontSize: '0.65rem', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>Total Valuation</div>
-                      <div style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1.2rem', color: 'var(--accent)' }}>
+                    <div style={{ textAlign: 'right', background: 'var(--accent-soft)', padding: '6px 14px', borderRadius: 10, border: '1px solid var(--accent-soft)' }}>
+                      <div style={{ color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.05em', }}>Total Valuation</div>
+                      <div style={{ color: 'var(--accent)' }}>
                         {formatCurrency(group.totalValuation)}
                       </div>
                     </div>
@@ -851,7 +854,7 @@ function InventoryPageContent() {
                 {/* Multi-Site Quantity Breakdown Table */}
                 {isExpanded && (
                   <div style={{ background: 'var(--bg-1)', padding: 16 }}>
-                    <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
                       <Building2 size={14} color="var(--accent)" /> Multi-Site Quantity & Valuation Breakdown
                     </div>
                     
@@ -874,37 +877,37 @@ function InventoryPageContent() {
                             return (
                               <tr key={sb.id}>
                                 <td>
-                                  <span style={{ fontWeight: 700, color: 'var(--text-0)', fontFamily: 'DM Sans', fontSize: '0.9rem' }}>
+                                  <span style={{ color: 'var(--text-0)', }}>
                                     {sb.site}
                                   </span>
                                 </td>
                                 <td style={{ textAlign: 'right' }}>
-                                  <div style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1.05rem', color: isLow ? 'var(--red)' : 'var(--green)' }}>
-                                    {fmt(sb.usable_qty)} <span style={{ fontSize: '0.75rem', fontWeight: 400 }}>{item.unit || 'nos'}</span>
+                                  <div style={{ color: isLow ? 'var(--red)' : 'var(--green)' }}>
+                                    {fmt(sb.usable_qty)} <span >{item.unit || 'nos'}</span>
                                   </div>
                                 </td>
-                                <td style={{ textAlign: 'right', fontFamily: 'DM Mono', fontSize: '0.85rem' }}>
+                                <td style={{ textAlign: 'right', }}>
                                   ₹{fmt(sb.unitPrice)}
                                 </td>
-                                <td style={{ textAlign: 'right', fontFamily: 'Oswald', fontWeight: 700, fontSize: '1rem', color: 'var(--accent)' }}>
+                                <td style={{ textAlign: 'right', color: 'var(--accent)' }}>
                                   {formatCurrency(sb.siteValuation)}
                                 </td>
-                                <td style={{ textAlign: 'right', fontFamily: 'Oswald', fontWeight: 600, color: 'var(--amber)' }}>
+                                <td style={{ textAlign: 'right', color: 'var(--amber)' }}>
                                   {fmt(sb.in_use_qty)}
                                 </td>
-                                <td style={{ textAlign: 'right', fontFamily: 'Oswald', fontWeight: 600, color: 'var(--red)' }}>
+                                <td style={{ textAlign: 'right', color: 'var(--red)' }}>
                                   {fmt(sb.scrap_qty)}
                                 </td>
                                 {canWrite && (
                                   <td style={{ textAlign: 'right' }}>
                                     <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                                      <button onClick={() => { setEditStockRecord({ id: sb.id, site: sb.site, usable_qty: sb.usable_qty, in_use_qty: sb.in_use_qty, scrap_qty: sb.scrap_qty, unit_price: sb.unitPrice, bulk_items: item }); setShowEditStockModal(true); }} className="btn-ghost" style={{ padding: '4px 8px', fontSize: '0.7rem', minHeight: 26, display: 'flex', alignItems: 'center', gap: 3 }}>
+                                      <button onClick={() => { setEditStockRecord({ id: sb.id, site: sb.site, usable_qty: sb.usable_qty, in_use_qty: sb.in_use_qty, scrap_qty: sb.scrap_qty, unit_price: sb.unitPrice, bulk_items: item }); setShowEditStockModal(true); }} className="btn-ghost" style={{ padding: '4px 8px', minHeight: 26, display: 'flex', alignItems: 'center', gap: 3 }}>
                                         <Pencil size={11} /> Edit
                                       </button>
-                                      <button onClick={() => openTx('transfer', sb.item_id, sb.site)} className="btn-primary" style={{ padding: '4px 8px', fontSize: '0.7rem', minHeight: 26 }}>
+                                      <button onClick={() => openTx('transfer', sb.item_id, sb.site)} className="btn-primary" style={{ padding: '4px 8px', minHeight: 26 }}>
                                         Transfer
                                       </button>
-                                      <button onClick={() => openTx('scrap', sb.item_id, sb.site)} className="btn-ghost" style={{ padding: '4px 8px', fontSize: '0.7rem', minHeight: 26, color: 'var(--red)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                                      <button onClick={() => openTx('scrap', sb.item_id, sb.site)} className="btn-ghost" style={{ padding: '4px 8px', minHeight: 26, color: 'var(--red)', border: '1px solid var(--status-danger-soft)' }}>
                                         Scrap
                                       </button>
                                     </div>
@@ -985,31 +988,31 @@ function InventoryPageContent() {
                         </div>
                       )}
                       <div>
-                        <div style={{ fontWeight:700, color:'var(--text-0)', fontSize:'0.9rem' }}>{i.item_name}</div>
-                        <div style={{ fontSize:'0.75rem', color:'var(--text-3)', fontFamily:'DM Mono' }}>{i.item_code}</div>
+                        <div style={{ color:'var(--text-0)', }}>{i.item_name}</div>
+                        <div style={{ color:'var(--text-3)', }}>{i.item_code}</div>
                       </div>
                     </div>
                   </td>
                   <td>
-                    <span style={{ fontSize:'0.72rem', padding:'3px 8px', borderRadius:6, background:'rgba(79,126,255,0.08)', color:'var(--accent)', border:'1px solid rgba(79,126,255,0.2)', fontWeight:600 }}>
+                    <span style={{ padding:'3px 8px', borderRadius:6, background:'var(--accent-soft)', color:'var(--accent)', border:'1px solid var(--accent-soft)', }}>
                       {i.category || 'General'}
                     </span>
                   </td>
-                  <td style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-1)' }}>
+                  <td style={{ color: 'var(--text-1)' }}>
                     {i.unit || 'nos'}
                   </td>
-                  <td style={{ textAlign:'right', fontFamily:'DM Mono', fontSize:'0.88rem', fontWeight: 600 }}>
+                  <td style={{ textAlign:'right', }}>
                     ₹{fmt(unitPrice)}
                   </td>
                   <td style={{ textAlign:'right' }}>
-                    <div style={{ fontFamily:'Oswald', fontWeight:700, fontSize:'1.05rem', color: globalQty > 0 ? 'var(--green)' : 'var(--text-3)' }}>
-                      {fmt(globalQty)} <span style={{ fontSize:'0.65rem', color:'var(--text-3)' }}>{i.unit}</span>
+                    <div style={{ color: globalQty > 0 ? 'var(--green)' : 'var(--text-3)' }}>
+                      {fmt(globalQty)} <span style={{ color:'var(--text-3)' }}>{i.unit}</span>
                     </div>
                   </td>
-                  <td style={{ textAlign:'right', fontFamily:'Oswald', fontWeight:700, fontSize:'1rem', color:'var(--text-0)' }}>
+                  <td style={{ textAlign:'right', color:'var(--text-0)' }}>
                     {formatCurrency(globalValuation)}
                   </td>
-                  <td style={{ textAlign:'right', fontFamily:'DM Mono', fontSize:'0.85rem' }}>{fmt(i.unit_weight_kg)}</td>
+                  <td style={{ textAlign:'right', }}>{fmt(i.unit_weight_kg)}</td>
                   {canWrite && (
                     <td style={{ textAlign:'right', paddingRight: 16 }}>
                       <button onClick={() => { setEditItem(i); setShowItemForm(true) }} className="btn-ghost" style={{ padding:6 }}><Pencil size={14}/></button>
@@ -1030,11 +1033,11 @@ function InventoryPageContent() {
 
   const txTypeColors = {
     receipt: { bg: 'rgba(0,185,107,0.12)', color: 'var(--green)' },
-    transfer: { bg: 'rgba(79,126,255,0.12)', color: 'var(--accent)' },
+    transfer: { bg: 'var(--accent-soft)', color: 'var(--accent)' },
     deploy: { bg: 'rgba(6,182,212,0.12)', color: 'var(--cyan)' },
     dismantle: { bg: 'rgba(139,92,246,0.12)', color: 'var(--purple)' },
-    scrap: { bg: 'rgba(239,68,68,0.12)', color: 'var(--red)' },
-    consume: { bg: 'rgba(245,158,11,0.12)', color: 'var(--amber)' },
+    scrap: { bg: 'var(--status-danger-soft)', color: 'var(--red)' },
+    consume: { bg: 'var(--status-warning-soft)', color: 'var(--amber)' },
     return: { bg: 'rgba(0,185,107,0.12)', color: 'var(--green)' },
   }
 
@@ -1064,35 +1067,35 @@ function InventoryPageContent() {
               return (
                 <tr key={t.id}>
                   <td>
-                    <div style={{ fontSize:'0.8rem', color:'var(--text-1)', fontWeight: 600 }}>
+                    <div style={{ color:'var(--text-1)', }}>
                       {dt.toLocaleDateString('en-GB')}
                     </div>
-                    <div style={{ fontSize:'0.7rem', color:'var(--text-3)' }}>
+                    <div style={{ color:'var(--text-3)' }}>
                       {dt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </td>
                   <td>
-                    <span style={{ fontSize:'0.65rem', padding:'3px 8px', borderRadius:6, background: colors.bg, color: colors.color, textTransform:'uppercase', fontWeight:700, border: `1px solid ${colors.color}40` }}>
+                    <span style={{ padding:'3px 8px', borderRadius:6, background: colors.bg, color: colors.color, textTransform:'uppercase', border: `1px solid ${colors.color}40` }}>
                       {t.transaction_type}
                     </span>
                   </td>
                   <td>
-                    <div style={{ fontWeight:600, color:'var(--text-1)', fontSize:'0.85rem' }}>{t.bulk_items?.item_name}</div>
-                    <div style={{ fontSize:'0.7rem', color:'var(--text-3)', fontFamily:'DM Mono' }}>{t.bulk_items?.item_code}</div>
+                    <div style={{ color:'var(--text-1)', }}>{t.bulk_items?.item_name}</div>
+                    <div style={{ color:'var(--text-3)', }}>{t.bulk_items?.item_code}</div>
                   </td>
-                  <td style={{ fontSize:'0.8rem', color:'var(--text-1)' }}>
-                    {t.from_site || '—'} {t.to_site && t.from_site ? '→' : ''} {t.to_site || ''}
+                  <td style={{ color:'var(--text-1)' }}>
+                    {t.from_site || '-'} {t.to_site && t.from_site ? '→' : ''} {t.to_site || ''}
                   </td>
-                  <td style={{ textAlign:'right', fontFamily:'Oswald', fontWeight:600, fontSize:'0.95rem' }}>
-                    {fmt(t.quantity)} <span style={{ fontSize:'0.6rem', color:'var(--text-3)' }}>{t.bulk_items?.unit || 'nos'}</span>
+                  <td style={{ textAlign:'right', }}>
+                    {fmt(t.quantity)} <span style={{ color:'var(--text-3)' }}>{t.bulk_items?.unit || 'nos'}</span>
                   </td>
-                  <td style={{ textAlign:'right', fontFamily:'Oswald', fontWeight:600, fontSize:'0.95rem', color: 'var(--text-0)' }}>
-                    {valImpact > 0 ? formatCurrency(valImpact) : '—'}
+                  <td style={{ textAlign:'right', color: 'var(--text-0)' }}>
+                    {valImpact > 0 ? formatCurrency(valImpact) : '-'}
                   </td>
-                  <td style={{ textAlign:'right', fontFamily:'DM Mono', fontSize:'0.85rem', color:'var(--text-2)' }}>
-                    {t.total_weight_kg ? fmt(t.total_weight_kg) : '—'}
+                  <td style={{ textAlign:'right', color:'var(--text-2)' }}>
+                    {t.total_weight_kg ? fmt(t.total_weight_kg) : '-'}
                   </td>
-                  <td style={{ fontSize:'0.8rem', color:'var(--text-2)' }}>{t.profiles?.full_name || 'System'}</td>
+                  <td style={{ color:'var(--text-2)' }}>{t.profiles?.full_name || 'System'}</td>
                 </tr>
               )
             })}
@@ -1107,23 +1110,38 @@ function InventoryPageContent() {
 
   return (
     <>
+      {isMobile ? (
+        <MobileInventoryPage
+          tab={tab} setTab={setTab}
+          loading={loading}
+          search={search} setSearch={setSearch}
+          summary={summary}
+          filteredStock={filteredStock}
+          stockViewMode={stockViewMode} setStockViewMode={setStockViewMode}
+          groupedStockByItem={groupedStockByItem}
+          canWrite={canWrite}
+          openTx={openTx}
+          setEditStockRecord={setEditStockRecord}
+          setShowEditStockModal={setShowEditStockModal}
+        />
+      ) : (
       <div className="animate-fade-up">
         {/* Header */}
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16, flexWrap:'wrap', gap:12 }}>
           <div>
-            <h1 className="font-display" style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-0)', margin: 0, letterSpacing: '0.02em' }}>
-              BULK INVENTORY <span style={{ color: 'var(--accent)' }}>& MATERIALS</span>
+            <h1 className="text-page-title m-0 mb-1 tracking-wide uppercase">
+              BULK INVENTORY <span className="text-accent">&amp; MATERIALS</span>
             </h1>
-            <p style={{ color: 'var(--text-2)', fontSize: '0.85rem', margin: '4px 0 0' }}>
+            <p className="hidden md:block" style={{ color: 'var(--text-2)', margin: '4px 0 0' }}>
               Multi-site stock distribution, UOM rates, site transfers, and scrapping for scaffolding, tools, and materials.
             </p>
           </div>
         </div>
         
-        {/* Navigation Tabs */}
-        <div className="inv-tabs" style={{ marginBottom: 16 }}>
-          <div className="tab-container" style={{ overflow: 'visible' }}>
-            <TabBtn active={tab === 'stock'} icon={Boxes} label="Site Stock & Valuation" onClick={() => setTab('stock')} />
+        {/* Navigation Tabs - scrollable on mobile */}
+        <div className="inv-tabs" style={{ marginBottom: 16, overflowX: 'auto' }}>
+          <div className="tab-container" style={{ overflow: 'visible', flexWrap: 'nowrap', minWidth: 'max-content' }}>
+            <TabBtn active={tab === 'stock'} icon={Boxes} label="Site Stock" onClick={() => setTab('stock')} />
             <TabBtn active={tab === 'master'} icon={Package} label="Master Catalog" onClick={() => setTab('master')} />
             
             <div style={{ width: 1, height: 24, background: 'var(--border)', margin: '4px', flexShrink: 0 }} />
@@ -1176,27 +1194,27 @@ function InventoryPageContent() {
           {tab === 'stock' && (
             <div style={{ display:'flex', gap:6, flexWrap:'wrap', alignItems: 'center' }}>
               {canWrite && selectedStock.size > 0 && (
-                <button onClick={handleBulkDeleteStock} className="btn-danger" style={{ padding:'6px 12px', fontSize:'0.78rem', minHeight: 38, background: 'var(--red)', color: 'white', borderRadius: 12, border: 'none', display: 'flex', alignItems: 'center', gap: 5 }}>
+                <button onClick={handleBulkDeleteStock} className="btn-danger" style={{ padding:'6px 12px', minHeight: 38, background: 'var(--red)', color: 'white', borderRadius: 12, border: 'none', display: 'flex', alignItems: 'center', gap: 5 }}>
                   <Trash2 size={13}/> <span className="inv-btn-label">Delete ({selectedStock.size})</span>
                 </button>
               )}
               {canWrite && (
                 <>
-                  <label className="btn-ghost" style={{ padding:'6px 12px', fontSize:'0.78rem', minHeight: 38, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <label className="btn-ghost" style={{ padding:'6px 12px', minHeight: 38, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
                     <Plus size={13}/> <span className="inv-btn-label">Import Stock</span>
                     <input type="file" accept=".xlsx,.xls,.csv" style={{ display: 'none' }} onChange={handleImportStock} />
                   </label>
-                  <button onClick={downloadStockTemplate} className="btn-ghost" style={{ padding:'6px 12px', fontSize:'0.78rem', minHeight: 38, display: 'flex', alignItems: 'center', gap: 5 }} title="Download Excel template to import stock">
+                  <button onClick={downloadStockTemplate} className="btn-ghost" style={{ padding:'6px 12px', minHeight: 38, display: 'flex', alignItems: 'center', gap: 5 }} title="Download Excel template to import stock">
                     <Download size={13}/> <span className="inv-btn-label">Stock Template</span>
                   </button>
                 </>
               )}
-              <button onClick={exportStock} className="btn-ghost" style={{ padding:'6px 12px', fontSize:'0.78rem', minHeight: 38, display: 'flex', alignItems: 'center', gap: 5 }}>
+              <button onClick={exportStock} className="btn-ghost" style={{ padding:'6px 12px', minHeight: 38, display: 'flex', alignItems: 'center', gap: 5 }}>
                 <Download size={13}/> <span className="inv-btn-label">Export Excel</span>
               </button>
               
               {canWrite && (
-                <button onClick={() => openTx('receipt')} className="btn-primary" style={{ padding:'6px 14px', fontSize:'0.78rem', minHeight: 38, display: 'flex', alignItems: 'center', gap: 5 }}>
+                <button onClick={() => openTx('receipt')} className="btn-primary" style={{ padding:'6px 14px', minHeight: 38, display: 'flex', alignItems: 'center', gap: 5 }}>
                   <Plus size={13}/> Receive Stock
                 </button>
               )}
@@ -1207,19 +1225,19 @@ function InventoryPageContent() {
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
               {selectedMaster.size > 0 && (
                 <>
-                  <button onClick={handleBulkArchiveItems} className="btn-danger" style={{ padding:'6px 14px', fontSize:'0.8rem', minHeight: 38, background: 'var(--amber)', color: 'white', borderRadius: 12, border: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <button onClick={handleBulkArchiveItems} className="btn-danger" style={{ padding:'6px 14px', minHeight: 38, background: 'var(--amber)', color: 'white', borderRadius: 12, border: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
                     <ArchiveX size={14}/> Archive Selected
                   </button>
-                  <button onClick={handleBulkDeleteMasterItems} className="btn-danger" style={{ padding:'6px 14px', fontSize:'0.8rem', minHeight: 38, background: 'var(--red)', color: 'white', borderRadius: 12, border: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <button onClick={handleBulkDeleteMasterItems} className="btn-danger" style={{ padding:'6px 14px', minHeight: 38, background: 'var(--red)', color: 'white', borderRadius: 12, border: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
                     <Trash2 size={14}/> Delete Selected
                   </button>
                 </>
               )}
-              <label className="btn-ghost" style={{ padding:'6px 14px', fontSize:'0.8rem', minHeight: 38, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <label className="btn-ghost" style={{ padding:'6px 14px', minHeight: 38, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                 <Plus size={14}/> Import Excel
                 <input type="file" accept=".xlsx,.xls,.csv" style={{ display: 'none' }} onChange={handleImportMaster} />
               </label>
-              <button onClick={downloadMasterTemplate} className="btn-ghost" style={{ padding:'6px 14px', fontSize:'0.8rem', minHeight: 38, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <button onClick={downloadMasterTemplate} className="btn-ghost" style={{ padding:'6px 14px', minHeight: 38, display: 'flex', alignItems: 'center', gap: 6 }}>
                 <Download size={14}/> Template
               </button>
               <button onClick={() => { setEditItem(null); setShowItemForm(true) }} className="btn-primary" style={{ padding:'8px 16px' }}>
@@ -1262,6 +1280,7 @@ function InventoryPageContent() {
         )}
 
       </div>
+      )}
 
       {/* Item Form Modal */}
       {showItemForm && (
@@ -1306,17 +1325,17 @@ function InventoryPageContent() {
             {/* Top Bar Header */}
             <div style={{ padding: '20px 24px', background: 'var(--bg-2)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(79,126,255,0.12)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(79,126,255,0.25)' }}>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--accent-soft)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--accent-soft)' }}>
                   <Layers size={20} />
                 </div>
                 <div>
-                  <h2 style={{ margin: 0, fontFamily: 'Oswald', fontSize: '1.2rem', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-0)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <h2 style={{ margin: 0, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-0)', display: 'flex', alignItems: 'center', gap: 8 }}>
                     Manage Categories
-                    <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: 12, background: 'rgba(79,126,255,0.15)', color: 'var(--accent)', fontWeight: 700, fontFamily: 'DM Sans' }}>
+                    <span style={{ padding: '2px 8px', borderRadius: 12, background: 'var(--accent-soft)', color: 'var(--accent)', }}>
                       {allManageableCategories.length} Total
                     </span>
                   </h2>
-                  <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>
+                  <p style={{ margin: 0, color: 'var(--text-3)', }}>
                     Add, rename, or delete bulk inventory item categories
                   </p>
                 </div>
@@ -1347,7 +1366,7 @@ function InventoryPageContent() {
               
               {/* Add New Category Box */}
               <div style={{ padding: 20, background: 'var(--bg-2)', borderRadius: 14, border: '1px solid var(--border)' }}>
-                <label className="lbl" style={{ marginBottom: 8, display: 'block', fontWeight: 700 }}>Add New Category</label>
+                <label className="lbl" style={{ marginBottom: 8, display: 'block', }}>Add New Category</label>
                 <form onSubmit={(e) => { e.preventDefault(); handleAddCategory(newCatInput); }} style={{ display: 'flex', gap: 10 }}>
                   <input 
                     type="text" 
@@ -1357,7 +1376,7 @@ function InventoryPageContent() {
                     onChange={e => setNewCatInput(e.target.value)} 
                     style={{ flex: 1 }}
                   />
-                  <button type="submit" className="btn-primary" style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600, flexShrink: 0 }}>
+                  <button type="submit" className="btn-primary" style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                     <Plus size={16} /> Add Category
                   </button>
                 </form>
@@ -1365,10 +1384,10 @@ function InventoryPageContent() {
 
               {/* Section Header */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
-                <h4 style={{ margin: 0, fontFamily: 'Oswald', fontSize: '0.95rem', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-1)' }}>
+                <h4 style={{ margin: 0, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-1)' }}>
                   Existing Categories List
                 </h4>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>
+                <span style={{ color: 'var(--text-3)' }}>
                   Renaming updates all associated items in Supabase
                 </span>
               </div>
@@ -1391,7 +1410,7 @@ function InventoryPageContent() {
                         alignItems: 'center', 
                         justify: 'space-between', 
                         padding: '14px 18px', 
-                        background: isEditing ? 'rgba(79,126,255,0.06)' : 'var(--bg-2)', 
+                        background: isEditing ? 'var(--accent-soft)' : 'var(--bg-2)', 
                         borderRadius: 12, 
                         border: isEditing ? '1.5px solid var(--accent)' : '1px solid var(--border)',
                         transition: 'all 0.2s'
@@ -1405,7 +1424,7 @@ function InventoryPageContent() {
                             value={renameInputValue ?? ''} 
                             onChange={e => setRenameInputValue(e.target.value)} 
                             autoFocus
-                            style={{ flex: 1, padding: '8px 12px', fontSize: '0.9rem' }}
+                            style={{ flex: 1, padding: '8px 12px', }}
                           />
                           <button 
                             onClick={async (e) => {
@@ -1414,14 +1433,14 @@ function InventoryPageContent() {
                               setEditingCatName(null)
                             }} 
                             className="btn-primary" 
-                            style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+                            style={{ padding: '8px 16px', }}
                           >
                             Save
                           </button>
                           <button 
                             onClick={(e) => { e.stopPropagation(); setEditingCatName(null); }} 
                             className="btn-ghost" 
-                            style={{ padding: '8px 14px', fontSize: '0.85rem' }}
+                            style={{ padding: '8px 14px', }}
                           >
                             Cancel
                           </button>
@@ -1429,10 +1448,10 @@ function InventoryPageContent() {
                       ) : (
                         <>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            <span style={{ fontWeight: 700, color: 'var(--text-0)', fontSize: '0.95rem' }}>
+                            <span style={{ color: 'var(--text-0)', }}>
                               {catStr}
                             </span>
-                            <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: 8, background: 'var(--bg-3)', color: 'var(--text-2)', border: '1px solid var(--border)' }}>
+                            <span style={{ padding: '2px 8px', borderRadius: 8, background: 'var(--bg-3)', color: 'var(--text-2)', border: '1px solid var(--border)' }}>
                               {count} {count === 1 ? 'item' : 'items'}
                             </span>
                           </div>
@@ -1441,7 +1460,7 @@ function InventoryPageContent() {
                             <button 
                               onClick={(e) => { e.stopPropagation(); setEditingCatName(catStr); setRenameInputValue(catStr); }} 
                               className="btn-ghost" 
-                              style={{ padding: '8px 12px', borderRadius: 8, fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: 5, border: '1px solid var(--border)' }} 
+                              style={{ padding: '8px 12px', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 5, border: '1px solid var(--border)' }} 
                               title="Rename Category"
                             >
                               <Pencil size={14} /> Edit
@@ -1449,7 +1468,7 @@ function InventoryPageContent() {
                             <button 
                               onClick={(e) => { e.stopPropagation(); handleDeleteCategory(catStr); }} 
                               className="btn-ghost" 
-                              style={{ padding: '8px 12px', borderRadius: 8, fontSize: '0.82rem', color: 'var(--red)', border: '1px solid rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', gap: 5 }} 
+                              style={{ padding: '8px 12px', borderRadius: 8, color: 'var(--red)', border: '1px solid var(--status-danger-soft)', display: 'flex', alignItems: 'center', gap: 5 }} 
                               title="Delete Category"
                             >
                               <Trash2 size={14} /> Delete
@@ -1468,7 +1487,7 @@ function InventoryPageContent() {
               <button 
                 onClick={() => setShowManageCategories(false)} 
                 className="btn-primary" 
-                style={{ padding: '10px 24px', fontWeight: 600 }}
+                style={{ padding: '10px 24px', }}
               >
                 Done
               </button>
@@ -1510,7 +1529,7 @@ function InventoryPageContent() {
             onClick={e => e.stopPropagation()}
           >
             <div style={{ padding: '18px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-2)' }}>
-              <h3 style={{ margin: 0, fontFamily: 'Oswald', fontSize: '1.1rem', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-0)', display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700 }}>
+              <h3 style={{ margin: 0, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-0)', display: 'flex', alignItems: 'center', gap: 8, }}>
                 <Pencil size={18} color="var(--accent)" /> EDIT SITE STOCK RECORD
               </h3>
               <button onClick={() => setShowEditStockModal(false)} className="btn-ghost" style={{ padding: 6, width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={16} color="var(--text-0)" /></button>
@@ -1528,8 +1547,8 @@ function InventoryPageContent() {
             }} style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, overflowY: 'auto' }}>
               
               <div style={{ padding: '12px 16px', background: 'var(--bg-2)', borderRadius: 12, border: '1px solid var(--border)' }}>
-                <div style={{ fontWeight: 700, color: 'var(--text-0)', fontSize: '0.95rem' }}>{editStockRecord.bulk_items?.item_name || 'Item'}</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', fontFamily: 'DM Mono', marginTop: 2 }}>{editStockRecord.bulk_items?.item_code || ''} • Location: {editStockRecord.site ?? ''}</div>
+                <div style={{ color: 'var(--text-0)', }}>{editStockRecord.bulk_items?.item_name || 'Item'}</div>
+                <div style={{ color: 'var(--text-3)', marginTop: 2 }}>{editStockRecord.bulk_items?.item_code || ''} • Location: {editStockRecord.site ?? ''}</div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -1592,7 +1611,7 @@ function InventoryPageContent() {
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 10 }}>
                 <button type="button" onClick={() => setShowEditStockModal(false)} className="btn-ghost" style={{ padding: '10px 18px', borderRadius: 10 }}>Cancel</button>
-                <button type="submit" className="btn-primary" style={{ padding: '10px 22px', borderRadius: 10, display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
+                <button type="submit" className="btn-primary" style={{ padding: '10px 22px', borderRadius: 10, display: 'flex', alignItems: 'center', gap: 6, }}>
                   <Save size={15} /> Save Stock
                 </button>
               </div>
@@ -1620,8 +1639,8 @@ class InventoryErrorBoundary extends React.Component {
       return (
         <div style={{ padding: 40, textAlign: 'center', background: 'var(--bg-1)', borderRadius: 16, border: '1px solid var(--border)', margin: 20 }}>
           <AlertCircle size={36} color="var(--red)" style={{ marginBottom: 12 }} />
-          <h3 style={{ fontFamily: 'Oswald', color: 'var(--text-0)', margin: '0 0 8px 0', fontSize: '1.2rem' }}>Inventory Module Encountered an Issue</h3>
-          <p style={{ color: 'var(--text-2)', fontSize: '0.88rem', marginBottom: 16 }}>{this.state.error?.message || 'An unexpected rendering error occurred.'}</p>
+          <h3 style={{ color: 'var(--text-0)', margin: '0 0 8px 0', }}>Inventory Module Encountered an Issue</h3>
+          <p style={{ color: 'var(--text-2)', marginBottom: 16 }}>{this.state.error?.message || 'An unexpected rendering error occurred.'}</p>
           <button onClick={() => { this.setState({ hasError: false }); window.location.reload(); }} className="btn-primary" style={{ padding: '8px 20px' }}>
             Reload Page
           </button>

@@ -100,14 +100,14 @@ export default function StockReconciliationAuditView({ sites = [], profile, onAu
       {/* Header Toolbar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, background: 'var(--bg-2)', padding: 16, borderRadius: 14, border: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(79,126,255,0.12)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--accent-soft)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Boxes size={18} />
           </div>
           <div>
-            <h3 style={{ margin: 0, fontFamily: 'Oswald', fontSize: '1.05rem', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-0)', fontWeight: 700 }}>
+            <h3 style={{ margin: 0, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-0)', }}>
               Physical Stock Audit & Anomaly Detection
             </h3>
-            <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>
+            <p style={{ margin: 0, color: 'var(--text-3)', }}>
               Verify system stock against physical count. Variances {'>'}10% trigger high-risk security alerts.
             </p>
           </div>
@@ -166,18 +166,18 @@ export default function StockReconciliationAuditView({ sites = [], profile, onAu
               return (
                 <tr key={r.id}>
                   <td>
-                    <span style={{ fontWeight: 700, color: 'var(--text-0)', fontFamily: 'DM Sans', fontSize: '0.88rem' }}>
+                    <span style={{ color: 'var(--text-0)', }}>
                       {r.site}
                     </span>
                   </td>
                   <td>
-                    <div style={{ fontWeight: 700, color: 'var(--text-0)' }}>{r.bulk_items?.item_name || 'Item'}</div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Mono' }}>
+                    <div style={{ color: 'var(--text-0)' }}>{r.bulk_items?.item_name || 'Item'}</div>
+                    <div style={{ color: 'var(--text-3)', }}>
                       SKU: {r.bulk_items?.item_code} • ₹{unitPrice}/{r.bulk_items?.unit || 'nos'}
                     </div>
                   </td>
-                  <td style={{ textAlign: 'right', fontFamily: 'Oswald', fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-0)' }}>
-                    {sys} <span style={{ fontSize: '0.75rem', fontWeight: 400 }}>{r.bulk_items?.unit || 'nos'}</span>
+                  <td style={{ textAlign: 'right', color: 'var(--text-0)' }}>
+                    {sys} <span >{r.bulk_items?.unit || 'nos'}</span>
                   </td>
                   <td>
                     <input 
@@ -186,19 +186,19 @@ export default function StockReconciliationAuditView({ sites = [], profile, onAu
                       placeholder={sys}
                       value={physicalCounts[key] ?? ''} 
                       onChange={e => setPhysicalCounts({ ...physicalCounts, [key]: e.target.value })} 
-                      style={{ width: 110, padding: '6px 10px', fontWeight: 700, borderColor: isHighRisk ? 'var(--red)' : 'var(--border)' }}
+                      style={{ width: 110, padding: '6px 10px', borderColor: isHighRisk ? 'var(--red)' : 'var(--border)' }}
                     />
                   </td>
                   <td>
                     {variance === 0 ? (
-                      <span style={{ fontSize: '0.75rem', color: 'var(--green)', fontWeight: 700 }}>0 (Match)</span>
+                      <span style={{ color: 'var(--green)', }}>0 (Match)</span>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        <span style={{ fontWeight: 700, fontSize: '0.85rem', color: variance > 0 ? 'var(--green)' : 'var(--red)' }}>
+                        <span style={{ color: variance > 0 ? 'var(--green)' : 'var(--red)' }}>
                           {variance > 0 ? `+${variance}` : variance} ({formatCurrency(varianceValue)})
                         </span>
                         {isHighRisk && (
-                          <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--red)', background: 'rgba(239,68,68,0.1)', padding: '2px 6px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                          <span style={{ color: 'var(--red)', background: 'var(--status-danger-soft)', padding: '2px 6px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
                             <AlertTriangle size={10} /> HIGH RISK ({Math.round(variancePct)}% | {formatCurrency(varianceValue)})
                           </span>
                         )}
@@ -212,7 +212,7 @@ export default function StockReconciliationAuditView({ sites = [], profile, onAu
                       placeholder={variance !== 0 ? 'Reason for variance *' : 'Optional notes...'} 
                       value={reasonings[key] ?? ''} 
                       onChange={e => setReasonings({ ...reasonings, [key]: e.target.value })} 
-                      style={{ padding: '6px 10px', fontSize: '0.8rem', width: '100%' }}
+                      style={{ padding: '6px 10px', width: '100%' }}
                     />
                   </td>
                   <td style={{ textAlign: 'right' }}>
@@ -220,7 +220,7 @@ export default function StockReconciliationAuditView({ sites = [], profile, onAu
                       onClick={() => handleAuditSubmit(r)} 
                       className="btn-primary" 
                       disabled={submittingId === key}
-                      style={{ padding: '6px 14px', fontSize: '0.78rem', display: 'inline-flex', alignItems: 'center', gap: 5 }}
+                      style={{ padding: '6px 14px', display: 'inline-flex', alignItems: 'center', gap: 5 }}
                     >
                       {submittingId === key ? <Loader2 className="spin" size={13} /> : <Shield size={13} />} Reconcile
                     </button>

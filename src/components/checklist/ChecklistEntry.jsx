@@ -113,10 +113,10 @@ export default function ChecklistEntry({ template, assets, allSites, initialAsse
               <ClipboardCheck size={18} />
             </div>
             <div>
-              <h2 className="font-display" style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.04em', margin: 0, color: 'var(--text-0)' }}>
+              <h2 className="font-display" style={{ letterSpacing: '0.04em', margin: 0, color: 'var(--text-0)' }}>
                 {template.name.toUpperCase()}
               </h2>
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>Operational Inspection</span>
+              <span style={{ color: 'var(--text-3)', }}>Operational Inspection</span>
             </div>
           </div>
           <button onClick={onClose} className="btn-ghost" style={{ padding: 6 }}><X size={16}/></button>
@@ -135,8 +135,8 @@ export default function ChecklistEntry({ template, assets, allSites, initialAsse
             </div>
             <div>
               <label className="lbl">Asset Code</label>
-              <div className="inp" style={{ background: 'var(--bg-3)', display: 'flex', alignItems: 'center', fontFamily: 'DM Mono', fontSize: '0.82rem', fontWeight: 600, color: assetId ? 'var(--accent)' : 'var(--text-3)' }}>
-                {assetId ? (assets.find(a => a.id === assetId)?.asset_code || '—') : 'Select asset first'}
+              <div className="inp" style={{ background: 'var(--bg-3)', display: 'flex', alignItems: 'center', color: assetId ? 'var(--accent)' : 'var(--text-3)' }}>
+                {assetId ? (assets.find(a => a.id === assetId)?.asset_code || '-') : 'Select asset first'}
               </div>
             </div>
             <div>
@@ -148,7 +148,7 @@ export default function ChecklistEntry({ template, assets, allSites, initialAsse
             </div>
             <div>
               <label className="lbl">Performed By</label>
-              <div className="inp" style={{ background: 'var(--bg-3)', display: 'flex', alignItems: 'center', color: 'var(--accent)', fontWeight: 600, fontFamily: 'DM Sans', fontSize: '0.82rem' }}>
+              <div className="inp" style={{ background: 'var(--bg-3)', display: 'flex', alignItems: 'center', color: 'var(--accent)', }}>
                 {profile?.full_name || 'System User'}
               </div>
             </div>
@@ -157,8 +157,8 @@ export default function ChecklistEntry({ template, assets, allSites, initialAsse
           {/* Checklist items */}
           <div style={{ border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
             {failCount > 0 && (
-              <div style={{ padding: '8px 14px', background: 'rgba(239,68,68,0.07)', borderBottom: '1px solid rgba(239,68,68,0.15)', fontSize: '0.75rem', color: 'var(--red)', fontFamily: 'DM Sans', fontWeight: 600 }}>
-                ⚠ {failCount} item{failCount > 1 ? 's' : ''} marked as FAIL — add remarks below
+              <div style={{ padding: '8px 14px', background: 'var(--status-danger-soft)', borderBottom: '1px solid var(--status-danger-soft)', color: 'var(--red)', }}>
+                ⚠ {failCount} item{failCount > 1 ? 's' : ''} marked as FAIL - add remarks below
               </div>
             )}
             <div style={{ overflowX: 'auto' }}>
@@ -172,34 +172,34 @@ export default function ChecklistEntry({ template, assets, allSites, initialAsse
                 </thead>
                 <tbody>
                   {results.map((res, idx) => (
-                    <tr key={idx} style={{ background: res.status === 'NOT OK' ? 'rgba(239,68,68,0.04)' : undefined }}>
+                    <tr key={idx} style={{ background: res.status === 'NOT OK' ? 'var(--status-danger-soft)' : undefined }}>
                       <td>
                         {res.section && (
-                          <div style={{ fontSize: '0.65rem', color: 'var(--accent)', fontWeight: 700, fontFamily: 'DM Mono', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>
+                          <div style={{ color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>
                             {res.section}
                           </div>
                         )}
-                        <div style={{ fontSize: '0.82rem', color: 'var(--text-1)', fontFamily: 'DM Sans' }}>{res.description}</div>
+                        <div style={{ color: 'var(--text-1)', }}>{res.description}</div>
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: 4 }}>
                           <button type="button"
                             onClick={() => updateResult(idx, 'status', 'OK')}
                             className={res.status === 'OK' ? 'btn-primary' : 'btn-ghost'}
-                            style={{ padding: '4px 10px', fontSize: '0.72rem', fontFamily: 'DM Sans', fontWeight: 700 }}>
+                            style={{ padding: '4px 10px', }}>
                             ✓ OK
                           </button>
                           <button type="button"
                             onClick={() => updateResult(idx, 'status', 'NOT OK')}
                             className={res.status === 'NOT OK' ? 'btn-danger' : 'btn-ghost'}
-                            style={{ padding: '4px 10px', fontSize: '0.72rem', fontFamily: 'DM Sans', fontWeight: 700 }}>
+                            style={{ padding: '4px 10px', }}>
                             ✗ FAIL
                           </button>
                         </div>
                       </td>
                       <td>
                         <input className="inp"
-                          style={{ background: 'transparent', border: 'none', padding: 0, fontSize: '0.78rem', fontFamily: 'DM Sans' }}
+                          style={{ background: 'transparent', border: 'none', padding: 0, }}
                           placeholder="…" value={res.remark}
                           onChange={e => updateResult(idx, 'remark', e.target.value)} />
                       </td>
@@ -214,7 +214,7 @@ export default function ChecklistEntry({ template, assets, allSites, initialAsse
           <div>
             <label className="lbl">General Notes / Observations</label>
             <textarea className="inp"
-              style={{ height: 72, resize: 'none', fontFamily: 'DM Sans', fontSize: '0.82rem' }}
+              style={{ height: 72, resize: 'none', }}
               placeholder="Any additional comments…" value={notes}
               onChange={e => setNotes(e.target.value)} />
           </div>
@@ -229,10 +229,10 @@ export default function ChecklistEntry({ template, assets, allSites, initialAsse
                   <User size={14} />
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, fontFamily: 'DM Sans', color: 'var(--text-0)' }}>
+                  <div style={{ color: 'var(--text-0)' }}>
                     Inspector Sign-Off <span style={{ color: 'var(--red)' }}>*</span>
                   </div>
-                  <div style={{ fontSize: '0.65rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>Required for submission</div>
+                  <div style={{ color: 'var(--text-3)', }}>Required for submission</div>
                 </div>
               </div>
               <VerificationBlock profileName={profile?.full_name} userId={profile?.id} onChange={setInspectorVerif} />
@@ -245,10 +245,10 @@ export default function ChecklistEntry({ template, assets, allSites, initialAsse
                   <ShieldCheck size={14} />
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, fontFamily: 'DM Sans', color: 'var(--text-0)' }}>
+                  <div style={{ color: 'var(--text-0)' }}>
                     Site Incharge Approval
                   </div>
-                  <div style={{ fontSize: '0.65rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>Optional but recommended</div>
+                  <div style={{ color: 'var(--text-3)', }}>Optional but recommended</div>
                 </div>
               </div>
               <VerificationBlock profileName={null} userId={null} onChange={setInchargeVerif} />
@@ -264,18 +264,18 @@ export default function ChecklistEntry({ template, assets, allSites, initialAsse
             {physicalPreview ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                 {physicalPreview === 'pdf'
-                  ? <div style={{ padding: '8px 14px', background: 'var(--bg-3)', borderRadius: 8, border: '1px solid var(--border)', fontSize: '0.78rem', color: 'var(--text-1)', fontFamily: 'DM Sans' }}>
+                  ? <div style={{ padding: '8px 14px', background: 'var(--bg-3)', borderRadius: 8, border: '1px solid var(--border)', color: 'var(--text-1)', }}>
                       📄 {physicalFile?.name}
                     </div>
                   : <img src={physicalPreview} alt="Preview" style={{ maxHeight: 110, maxWidth: 180, borderRadius: 8, border: '1px solid var(--border)', objectFit: 'cover' }} />
                 }
                 <button type="button" onClick={() => { setPhysicalFile(null); setPhysicalPreview(null) }}
-                  className="btn-ghost" style={{ padding: '5px 10px', fontSize: '0.72rem', color: 'var(--red)' }}>
+                  className="btn-ghost" style={{ padding: '5px 10px', color: 'var(--red)' }}>
                   <Trash2 size={12} /> Remove
                 </button>
               </div>
             ) : (
-              <label className="btn-ghost" style={{ cursor: 'pointer', fontSize: '0.78rem', padding: '8px 14px', display: 'inline-flex', alignItems: 'center', gap: 7, border: '1px dashed var(--border)', borderRadius: 8 }}>
+              <label className="btn-ghost" style={{ cursor: 'pointer', padding: '8px 14px', display: 'inline-flex', alignItems: 'center', gap: 7, border: '1px dashed var(--border)', borderRadius: 8 }}>
                 <Upload size={13} /> Choose image or PDF to attach
                 <input type="file" accept="image/*,.pdf" style={{ display: 'none' }} onChange={handlePhysicalFile} />
               </label>
@@ -284,9 +284,9 @@ export default function ChecklistEntry({ template, assets, allSites, initialAsse
 
           {/* Submit bar */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, paddingTop: 4 }}>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>
+            <div style={{ color: 'var(--text-3)', }}>
               {inspectorVerif
-                ? <span style={{ color: 'var(--green)', fontWeight: 600 }}>✓ Inspector verified · Ref will be generated on save</span>
+                ? <span style={{ color: 'var(--green)', }}>✓ Inspector verified · Ref will be generated on save</span>
                 : <span style={{ color: 'var(--amber)' }}>⚠ Complete inspector verification to submit</span>
               }
             </div>

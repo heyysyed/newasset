@@ -70,14 +70,14 @@ export default function BulkItemForm({ isOpen, onClose, item, onSaved, available
       <div className="modal" style={{ maxWidth: 580 }} onClick={e => e.stopPropagation()}>
         <div style={{ background: 'var(--bg-3)', borderBottom: '1px solid var(--border)', padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTopLeftRadius: 22, borderTopRightRadius: 22 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ padding: 7, background: 'rgba(79,126,255,0.12)', borderRadius: 9, color: 'var(--accent)', border: '1px solid rgba(79,126,255,0.3)' }}>
+            <div style={{ padding: 7, background: 'var(--accent-soft)', borderRadius: 9, color: 'var(--accent)', border: '1px solid var(--accent-soft)' }}>
               <Package size={16} />
             </div>
             <div>
-              <h3 style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.05em', color: 'var(--text-0)', margin: 0, textTransform: 'uppercase' }}>
+              <h3 style={{ letterSpacing: '0.05em', color: 'var(--text-0)', margin: 0, textTransform: 'uppercase' }}>
                 {item ? 'Edit Master Item' : 'Add Master Item'}
               </h3>
-              <p style={{ fontFamily: 'DM Sans', fontSize: '0.72rem', color: 'var(--text-3)', margin: 0 }}>Configure inventory item details, rates, and UOM</p>
+              <p style={{ color: 'var(--text-3)', margin: 0 }}>Configure inventory item details, rates, and UOM</p>
             </div>
           </div>
           <button onClick={onClose} className="btn-ghost" style={{ padding: 6 }}><X size={16}/></button>
@@ -91,7 +91,7 @@ export default function BulkItemForm({ isOpen, onClose, item, onSaved, available
             </div>
             <div>
               <label className="lbl">Item Code / SKU *</label>
-              <input type="text" className="inp" required value={form.item_code} onChange={e => setForm({...form, item_code: e.target.value})} style={{ fontFamily:'DM Mono' }} placeholder="e.g. SCAF-VERT-01" />
+              <input type="text" className="inp" required value={form.item_code} onChange={e => setForm({...form, item_code: e.target.value})}  placeholder="e.g. SCAF-VERT-01" />
             </div>
           </div>
           
@@ -177,7 +177,7 @@ export default function BulkItemForm({ isOpen, onClose, item, onSaved, available
                 {form.image_url ? (
                   <img src={form.image_url} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
-                  <span style={{ color:'var(--text-3)', fontSize:'0.75rem' }}>Upload</span>
+                  <span style={{ color:'var(--text-3)', }}>Upload</span>
                 )}
                 <input 
                   type="file" 
@@ -215,7 +215,7 @@ export default function BulkItemForm({ isOpen, onClose, item, onSaved, available
                 />
               </div>
               {form.image_url && (
-                <button type="button" onClick={() => setForm({...form, image_url: ''})} className="btn-ghost" style={{ padding: '2px 8px', fontSize: '0.7rem', color: 'var(--red)', width: '100%', marginTop: 4 }}>
+                <button type="button" onClick={() => setForm({...form, image_url: ''})} className="btn-ghost" style={{ padding: '2px 8px', color: 'var(--red)', width: '100%', marginTop: 4 }}>
                   Remove
                 </button>
               )}

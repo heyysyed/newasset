@@ -11,8 +11,8 @@ import companyLogo from '../assets/logo.png'
 const STATUS_CONFIG = {
   'Active':       { bg: 'rgba(0,185,107,0.1)',  color: '#00b96b', border: 'rgba(0,185,107,0.25)',  icon: CheckCircle2 },
   'Inactive':     { bg: 'rgba(107,125,153,0.1)', color: '#6b7a99', border: 'rgba(107,125,153,0.25)', icon: XCircle },
-  'Under Repair': { bg: 'rgba(245,158,11,0.1)',  color: '#f59e0b', border: 'rgba(245,158,11,0.25)', icon: Wrench },
-  'Disposed':     { bg: 'rgba(239,68,68,0.1)',   color: '#ef4444', border: 'rgba(239,68,68,0.25)',  icon: XCircle },
+  'Under Repair': { bg: 'var(--status-warning-soft)',  color: 'var(--status-warning)', border: 'var(--status-warning-soft)', icon: Wrench },
+  'Disposed':     { bg: 'var(--status-danger-soft)',   color: 'var(--status-danger)', border: 'var(--status-danger-soft)',  icon: XCircle },
   'On Hire':      { bg: 'rgba(6,182,212,0.1)',   color: '#06b6d4', border: 'rgba(6,182,212,0.25)',  icon: Truck },
 }
 
@@ -77,7 +77,7 @@ export default function PublicAssetView() {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-0)' }}>
       <div style={{ textAlign: 'center' }}>
         <div style={{ width: 36, height: 36, border: '3px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
-        <p style={{ color: 'var(--text-3)', fontFamily: 'DM Sans', fontSize: '0.85rem' }}>Loading asset…</p>
+        <p style={{ color: 'var(--text-3)', }}>Loading asset…</p>
       </div>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
@@ -86,11 +86,11 @@ export default function PublicAssetView() {
   if (error) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-0)', padding: 20 }}>
       <div style={{ textAlign: 'center', background: 'var(--bg-2)', borderRadius: 20, padding: '40px 32px', boxShadow: 'var(--clay-shadow)', border: '1px solid var(--border)', maxWidth: 340 }}>
-        <div style={{ width: 56, height: 56, borderRadius: 16, background: 'var(--red-dim)', border: '1px solid rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+        <div style={{ width: 56, height: 56, borderRadius: 16, background: 'var(--red-dim)', border: '1px solid var(--status-danger-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
           <AlertTriangle size={26} style={{ color: 'var(--red)' }} />
         </div>
-        <h2 style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1.3rem', color: 'var(--text-0)', marginBottom: 8, letterSpacing: '0.04em' }}>Asset Not Found</h2>
-        <p style={{ color: 'var(--text-2)', fontFamily: 'DM Sans', fontSize: '0.875rem', lineHeight: 1.6 }}>
+        <h2 style={{ color: 'var(--text-0)', marginBottom: 8, letterSpacing: '0.04em' }}>Asset Not Found</h2>
+        <p style={{ color: 'var(--text-2)', }}>
           This QR code may be invalid or the asset has been removed from the system.
         </p>
       </div>
@@ -126,14 +126,14 @@ export default function PublicAssetView() {
   const visibleFields = allFields.filter(f => shouldShow(f.key) && asset[f.key])
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-0)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 16px 40px', fontFamily: 'DM Sans, sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-0)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 16px 40px', }}>
 
       {/* ── Top bar ── */}
       <div style={{ width: '100%', maxWidth: 460, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <img src={companyLogo} alt="Company" style={{ height: 44, maxWidth: 160, objectFit: 'contain' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 20, boxShadow: 'var(--clay-shadow-sm)' }}>
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)', animation: 'pulse 2s ease-in-out infinite' }} />
-          <span style={{ fontFamily: 'DM Sans', fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-2)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Live</span>
+          <span style={{ color: 'var(--text-2)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Live</span>
         </div>
       </div>
 
@@ -146,32 +146,32 @@ export default function PublicAssetView() {
         {/* Header */}
         <div style={{ padding: '22px 22px 18px' }}>
           {/* Asset code */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 10px', background: 'var(--accent-glow)', border: '1px solid rgba(79,126,255,0.2)', borderRadius: 8, marginBottom: 12 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 10px', background: 'var(--accent-glow)', border: '1px solid var(--accent-soft)', borderRadius: 8, marginBottom: 12 }}>
             <Package size={11} style={{ color: 'var(--accent)' }} />
-            <span style={{ fontFamily: 'DM Mono', fontSize: '0.72rem', fontWeight: 600, color: 'var(--accent)', letterSpacing: '0.05em' }}>
+            <span style={{ color: 'var(--accent)', letterSpacing: '0.05em' }}>
               {asset.asset_code}
             </span>
           </div>
 
           {/* Asset name */}
           {shouldShow('asset_name') && (
-            <h1 style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1.75rem', color: 'var(--text-0)', letterSpacing: '0.03em', marginBottom: 14, lineHeight: 1.15 }}>
+            <h1 style={{ color: 'var(--text-0)', letterSpacing: '0.03em', marginBottom: 14, }}>
               {asset.asset_name}
             </h1>
           )}
 
           {/* Status + site pills */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 20, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}`, fontSize: '0.78rem', fontWeight: 700, fontFamily: 'DM Sans' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 20, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}`, }}>
               <StatusIcon size={12} /> {asset.status}
             </span>
             {shouldShow('category') && asset.category && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 20, background: 'var(--bg-3)', color: 'var(--text-2)', border: '1px solid var(--border)', fontSize: '0.75rem', fontFamily: 'DM Sans', fontWeight: 600 }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 20, background: 'var(--bg-3)', color: 'var(--text-2)', border: '1px solid var(--border)', }}>
                 <Layers size={11} /> {asset.category}
               </span>
             )}
             {shouldShow('site') && asset.site && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 20, background: 'var(--cyan-dim)', color: 'var(--cyan)', border: '1px solid rgba(6,182,212,0.25)', fontSize: '0.75rem', fontFamily: 'DM Sans', fontWeight: 600 }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 20, background: 'var(--cyan-dim)', color: 'var(--cyan)', border: '1px solid rgba(6,182,212,0.25)', }}>
                 <MapPin size={11} /> {asset.site}
               </span>
             )}
@@ -200,11 +200,11 @@ export default function PublicAssetView() {
                     <div style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--bg-3)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <FieldIcon size={13} style={{ color: 'var(--text-3)' }} />
                     </div>
-                    <span style={{ fontFamily: 'Oswald', fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', fontWeight: 600 }}>{f.label}</span>
+                    <span style={{ letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', }}>{f.label}</span>
                   </div>
                   <span style={{
                     fontFamily: isMono ? 'DM Mono' : 'DM Sans',
-                    fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-0)',
+                    color: 'var(--text-0)',
                     textAlign: 'right', wordBreak: 'break-word',
                   }}>
                     {value}
@@ -218,8 +218,8 @@ export default function PublicAssetView() {
         {/* Notes */}
         {shouldShow('notes') && asset.notes && (
           <div style={{ margin: '0 22px 18px', padding: '13px 15px', background: 'var(--bg-3)', borderRadius: 12, border: '1px solid var(--border)' }}>
-            <p style={{ fontFamily: 'Oswald', fontSize: '0.6rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 6, fontWeight: 600 }}>Notes</p>
-            <p style={{ fontFamily: 'DM Sans', fontSize: '0.85rem', color: 'var(--text-1)', lineHeight: 1.6, margin: 0 }}>{asset.notes}</p>
+            <p style={{ letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 6, }}>Notes</p>
+            <p style={{ color: 'var(--text-1)', margin: 0 }}>{asset.notes}</p>
           </div>
         )}
 
@@ -233,8 +233,7 @@ export default function PublicAssetView() {
               background: locationCaptured ? 'var(--green-dim)' : 'var(--accent)', 
               color: locationCaptured ? 'var(--green)' : '#fff', 
               border: locationCaptured ? '1px solid rgba(0,185,107,0.3)' : 'none',
-              borderRadius: 12, fontFamily: 'DM Sans', fontSize: '0.85rem', fontWeight: 600, 
-              cursor: (isUpdatingLocation || locationCaptured) ? 'not-allowed' : 'pointer',
+              borderRadius: 12, cursor: (isUpdatingLocation || locationCaptured) ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s'
             }}
           >
@@ -252,20 +251,20 @@ export default function PublicAssetView() {
         <div style={{ padding: '12px 22px', background: 'var(--bg-3)', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <Calendar size={12} style={{ color: 'var(--text-3)' }} />
-            <span style={{ fontFamily: 'DM Sans', fontSize: '0.72rem', color: 'var(--text-3)' }}>
+            <span style={{ color: 'var(--text-3)' }}>
               Added {asset.added_on
                 ? new Date(asset.added_on).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-                : '—'}
+                : '-'}
             </span>
           </div>
-          <span style={{ fontFamily: 'DM Mono', fontSize: '0.62rem', color: 'var(--text-3)', background: 'var(--bg-4)', padding: '2px 7px', borderRadius: 6, border: '1px solid var(--border)' }}>
+          <span style={{ color: 'var(--text-3)', background: 'var(--bg-4)', padding: '2px 7px', borderRadius: 6, border: '1px solid var(--border)' }}>
             QR Scan
           </span>
         </div>
       </div>
 
       {/* ── Scan label ── */}
-      <p style={{ marginTop: 20, fontFamily: 'DM Sans', fontSize: '0.72rem', color: 'var(--text-3)', textAlign: 'center' }}>
+      <p style={{ marginTop: 20, color: 'var(--text-3)', textAlign: 'center' }}>
         Scanned via QR code · Asset Management System
       </p>
 

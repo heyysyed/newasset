@@ -5,9 +5,9 @@ import { TrendingDown, IndianRupee } from 'lucide-react'
 
 export default function FinancialWaterfallChart({ purchaseValue = 0, depreciation = 0, maintCost = 0, netBookValue = 0 }) {
   const data = [
-    { name: 'Purchase Cost', value: purchaseValue, fill: '#2563eb', type: 'initial' },
-    { name: '(-) Depreciation', value: depreciation, fill: '#f59e0b', type: 'deduction' },
-    { name: '(-) Maintenance', value: maintCost, fill: '#ef4444', type: 'deduction' },
+    { name: 'Purchase Cost', value: purchaseValue, fill: 'var(--accent)', type: 'initial' },
+    { name: '(-) Depreciation', value: depreciation, fill: 'var(--status-warning)', type: 'deduction' },
+    { name: '(-) Maintenance', value: maintCost, fill: 'var(--status-danger)', type: 'deduction' },
     { name: 'Net Asset Value', value: netBookValue, fill: '#059669', type: 'final' }
   ]
 
@@ -15,9 +15,9 @@ export default function FinancialWaterfallChart({ purchaseValue = 0, depreciatio
     if (!active || !payload?.length) return null
     const item = payload[0].payload
     return (
-      <div style={{ background: '#0f172a', color: '#fff', padding: '8px 12px', borderRadius: 8, fontSize: '0.8rem', fontFamily: 'DM Sans', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
-        <div style={{ fontWeight: 700 }}>{item.name}</div>
-        <div style={{ fontFamily: 'DM Mono', color: item.fill }}>{formatCurrency(item.value)}</div>
+      <div style={{ background: '#0f172a', color: '#fff', padding: '8px 12px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+        <div >{item.name}</div>
+        <div style={{ color: item.fill }}>{formatCurrency(item.value)}</div>
       </div>
     )
   }
@@ -26,12 +26,12 @@ export default function FinancialWaterfallChart({ purchaseValue = 0, depreciatio
     <div className="card" style={{ padding: 20, background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <div>
-          <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <h3 style={{ margin: 0, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Financial Waterfall Ledger
           </h3>
-          <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>Capital expenditure vs depreciation & repair deductions</p>
+          <p style={{ margin: 0, color: '#64748b' }}>Capital expenditure vs depreciation & repair deductions</p>
         </div>
-        <IndianRupee size={18} color="#2563eb" />
+        <IndianRupee size={18} color='var(--accent)' />
       </div>
 
       <div style={{ height: 220, width: '100%' }}>

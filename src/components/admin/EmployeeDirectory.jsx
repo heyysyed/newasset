@@ -15,8 +15,8 @@ function SectionHead({ icon: Icon, title, sub, color = 'var(--accent)' }) {
         <Icon size={16} style={{ color }}/>
       </div>
       <div>
-        <h2 style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '0.95rem', letterSpacing: '0.06em', color: 'var(--text-0)', margin: 0 }}>{title}</h2>
-        {sub && <p style={{ fontFamily: 'DM Sans', fontSize: '0.73rem', color: 'var(--text-3)', margin: 0, marginTop: 1 }}>{sub}</p>}
+        <h2 style={{ letterSpacing: '0.06em', color: 'var(--text-0)', margin: 0 }}>{title}</h2>
+        {sub && <p style={{ color: 'var(--text-3)', margin: 0, marginTop: 1 }}>{sub}</p>}
       </div>
     </div>
   )
@@ -225,7 +225,7 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
           <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
             <Search size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }}/>
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search employees by name, code, department..."
-              className="inp" style={{ paddingLeft: 32, fontSize: '0.82rem' }}/>
+              className="inp" style={{ paddingLeft: 32, }}/>
           </div>
 
           {/* View toggle */}
@@ -235,7 +235,7 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
               background: view === 'list' ? 'var(--bg-2)' : 'transparent',
               color: view === 'list' ? 'var(--text-0)' : 'var(--text-3)',
               boxShadow: view === 'list' ? 'var(--clay-shadow-sm)' : 'none',
-              fontFamily: 'DM Sans', fontSize: '0.72rem', fontWeight: 600, transition: 'all 0.2s',
+              transition: 'all 0.2s',
             }}>
               <List size={13}/> List
             </button>
@@ -244,7 +244,7 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
               background: view === 'grid' ? 'var(--bg-2)' : 'transparent',
               color: view === 'grid' ? 'var(--text-0)' : 'var(--text-3)',
               boxShadow: view === 'grid' ? 'var(--clay-shadow-sm)' : 'none',
-              fontFamily: 'DM Sans', fontSize: '0.72rem', fontWeight: 600, transition: 'all 0.2s',
+              transition: 'all 0.2s',
             }}>
               <LayoutGrid size={13}/> Grid
             </button>
@@ -253,26 +253,26 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
               background: view === 'orgchart' ? 'var(--bg-2)' : 'transparent',
               color: view === 'orgchart' ? 'var(--text-0)' : 'var(--text-3)',
               boxShadow: view === 'orgchart' ? 'var(--clay-shadow-sm)' : 'none',
-              fontFamily: 'DM Sans', fontSize: '0.72rem', fontWeight: 600, transition: 'all 0.2s',
+              transition: 'all 0.2s',
             }}>
               <Award size={13}/> Org-Chart Tree
             </button>
           </div>
 
-          <button onClick={() => { resetForm(); setIsAdding(true) }} className="btn-primary" style={{ padding: '8px 14px', fontSize: '0.75rem', gap: 5, flexShrink: 0 }}>
+          <button onClick={() => { resetForm(); setIsAdding(true) }} className="btn-primary" style={{ padding: '8px 14px', gap: 5, flexShrink: 0 }}>
             <UserPlus size={13}/> Add Employee
           </button>
-          <button onClick={() => { setIsImporting(true); setError(''); setExcelFile(null); setParsedRows([]) }} className="btn-ghost" style={{ padding: '8px 14px', fontSize: '0.75rem', gap: 5, flexShrink: 0, border: '1px solid var(--border)' }}>
+          <button onClick={() => { setIsImporting(true); setError(''); setExcelFile(null); setParsedRows([]) }} className="btn-ghost" style={{ padding: '8px 14px', gap: 5, flexShrink: 0, border: '1px solid var(--border)' }}>
             <FileSpreadsheet size={13}/> Import Excel
           </button>
         </div>
 
         {/* Row 2: Filter pills */}
-        <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'center', fontSize: '0.72rem' }}>
+        <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'center', }}>
           {/* Department Filter */}
           <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-            <span style={{ color: 'var(--text-3)', fontWeight: 600 }}>Department:</span>
-            <select value={deptFilter} onChange={e => setDeptFilter(e.target.value)} className="sel" style={{ padding: '3px 8px', minHeight: 26, fontSize: '0.72rem' }}>
+            <span style={{ color: 'var(--text-3)', }}>Department:</span>
+            <select value={deptFilter} onChange={e => setDeptFilter(e.target.value)} className="sel" style={{ padding: '3px 8px', minHeight: 26, }}>
               <option value="all">All Departments</option>
               {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
             </select>
@@ -280,15 +280,15 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
 
           {/* Status Filter */}
           <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-            <span style={{ color: 'var(--text-3)', fontWeight: 600 }}>Status:</span>
-            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="sel" style={{ padding: '3px 8px', minHeight: 26, fontSize: '0.72rem' }}>
+            <span style={{ color: 'var(--text-3)', }}>Status:</span>
+            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="sel" style={{ padding: '3px 8px', minHeight: 26, }}>
               <option value="all">All Statuses</option>
               <option value="active">Active Only</option>
               <option value="inactive">Inactive Only</option>
             </select>
           </div>
 
-          <span style={{ marginLeft: 'auto', color: 'var(--text-3)', fontWeight: 500 }}>
+          <span style={{ marginLeft: 'auto', color: 'var(--text-3)', }}>
             Showing {filteredEmployees.length} of {employees.length} employees
           </span>
         </div>
@@ -298,7 +298,7 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
       {filteredEmployees.length === 0 ? (
         <div style={{ padding: '48px 20px', textAlign: 'center' }}>
           <Briefcase size={32} style={{ color: 'var(--text-3)', marginBottom: 12, opacity: 0.5 }}/>
-          <p style={{ color: 'var(--text-2)', fontFamily: 'DM Sans', fontWeight: 600 }}>No employees found matching criteria</p>
+          <p style={{ color: 'var(--text-2)', }}>No employees found matching criteria</p>
         </div>
       ) : view === 'orgchart' ? (
         /* ORG CHART TREE VIEW */
@@ -310,19 +310,19 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
               <div key={dept} style={{ padding: 16, borderRadius: 14, background: 'var(--bg-1)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingBottom: 8, borderBottom: '1px solid var(--border)' }}>
                   <Award size={16} style={{ color: 'var(--accent)' }} />
-                  <h3 style={{ fontFamily: 'Oswald', fontSize: '0.95rem', margin: 0, color: 'var(--text-0)' }}>
+                  <h3 style={{ margin: 0, color: 'var(--text-0)' }}>
                     DEPARTMENT: {dept.toUpperCase()} ({deptEmps.length} STAFF)
                   </h3>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
                   {deptEmps.map(emp => (
                     <div key={emp.id} style={{ padding: 12, borderRadius: 10, background: 'var(--bg-3)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--accent-glow)', border: '1px solid var(--accent)30', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
+                      <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--accent-glow)', border: '1px solid var(--accent)30', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', }}>
                         {emp.full_name[0]}
                       </div>
                       <div>
-                        <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-0)', fontFamily: 'DM Sans' }}>{emp.full_name}</div>
-                        <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>{emp.designation || 'Staff'} • {emp.employee_code}</div>
+                        <div style={{ color: 'var(--text-0)', }}>{emp.full_name}</div>
+                        <div style={{ color: 'var(--text-3)', }}>{emp.designation || 'Staff'} • {emp.employee_code}</div>
                       </div>
                     </div>
                   ))}
@@ -345,14 +345,14 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
             >
               {/* Header: Avatar / Name / Designation */}
               <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--bg-3)', border: '1.5px solid var(--border)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontFamily: 'Oswald', fontSize: '1.1rem' }}>
+                <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--bg-3)', border: '1.5px solid var(--border)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', }}>
                   {emp.full_name[0].toUpperCase()}
                 </div>
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontFamily: 'DM Sans', fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-0)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={emp.full_name}>
+                  <div style={{ color: 'var(--text-0)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={emp.full_name}>
                     {emp.full_name}
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                  <div style={{ color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 3 }}>
                     <Award size={10} style={{ flexShrink: 0 }}/>
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{emp.designation || 'No title'}</span>
                   </div>
@@ -360,14 +360,14 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
               </div>
 
               {/* Specs Panel */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, width: '100%', fontSize: '0.72rem', color: 'var(--text-2)', background: 'var(--bg-3)', padding: '6px 8px', borderRadius: 10, border: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, width: '100%', color: 'var(--text-2)', background: 'var(--bg-3)', padding: '6px 8px', borderRadius: 10, border: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--text-3)' }}>Code:</span>
-                  <span style={{ fontFamily: 'DM Mono', fontWeight: 600 }}>{emp.employee_code}</span>
+                  <span >{emp.employee_code}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--text-3)' }}>Dept:</span>
-                  <span style={{ fontWeight: 600 }}>{emp.department}</span>
+                  <span >{emp.department}</span>
                 </div>
                 {emp.email && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -385,7 +385,7 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
 
               {/* Status Pill */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
-                <span style={{ fontSize: '0.62rem', fontWeight: 600, padding: '2px 8px', borderRadius: 10, background: emp.is_active ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: emp.is_active ? 'var(--green)' : 'var(--red)' }}>
+                <span style={{ padding: '2px 8px', borderRadius: 10, background: emp.is_active ? 'rgba(34,197,94,0.1)' : 'var(--status-danger-soft)', color: emp.is_active ? 'var(--green)' : 'var(--red)' }}>
                   {emp.is_active ? '● Active' : '○ Inactive'}
                 </span>
 
@@ -408,12 +408,12 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
       ) : (
         /* LIST VIEW (Responsive Single-Row Layout with Table Header) */
         <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 680 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 'max-content', padding: '0 4px' }}>
             {/* Table Header */}
             <div style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
               padding: '8px 18px', background: 'var(--bg-3)', borderBottom: '1px solid var(--border)',
-              fontSize: '0.66rem', fontFamily: 'Oswald', fontWeight: 700, color: 'var(--text-3)',
+              color: 'var(--text-3)',
               letterSpacing: '0.08em', textTransform: 'uppercase'
             }}>
               <span style={{ minWidth: 180, flex: '1 1 180px' }}>EMPLOYEE PERSONNEL</span>
@@ -432,44 +432,44 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
               >
                 {/* Left Column: Avatar + Info */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: '1 1 180px', minWidth: 180 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--bg-3)', border: '1px solid var(--border)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontFamily: 'Oswald', fontSize: '0.95rem', flexShrink: 0 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--bg-3)', border: '1px solid var(--border)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     {emp.full_name[0].toUpperCase()}
                   </div>
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontFamily: 'DM Sans', fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-0)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div style={{ color: 'var(--text-0)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {emp.full_name}
                     </div>
-                    <div style={{ fontSize: '0.71rem', color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      Code: <strong style={{ fontFamily: 'DM Mono', color: 'var(--text-1)' }}>{emp.employee_code}</strong> · {emp.designation || 'Staff'}
+                    <div style={{ color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      Code: <strong style={{ color: 'var(--text-1)' }}>{emp.employee_code}</strong> · {emp.designation || 'Staff'}
                     </div>
                   </div>
                 </div>
 
                 {/* Middle Column: Specs Pills */}
                 <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center', flexShrink: 0 }}>
-                  <span style={{ fontSize: '0.62rem', fontWeight: 700, padding: '2px 7px', borderRadius: 8, background: 'var(--bg-3)', color: 'var(--text-2)', border: '1px solid var(--border)', whiteSpace: 'nowrap' }}>🏢 {emp.department}</span>
-                  {emp.phone && <span style={{ fontSize: '0.62rem', fontWeight: 500, padding: '2px 7px', borderRadius: 8, background: 'var(--bg-3)', color: 'var(--text-2)', border: '1px solid var(--border)', whiteSpace: 'nowrap' }}>📞 {emp.phone}</span>}
-                  {emp.email && <span style={{ fontSize: '0.62rem', fontWeight: 500, padding: '2px 7px', borderRadius: 8, background: 'var(--bg-3)', color: 'var(--text-2)', border: '1px solid var(--border)', whiteSpace: 'nowrap', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>✉️ {emp.email}</span>}
-                  <span style={{ fontSize: '0.62rem', fontWeight: 600, padding: '2px 7px', borderRadius: 8, background: emp.is_active ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: emp.is_active ? 'var(--green)' : 'var(--red)', whiteSpace: 'nowrap' }}>
+                  <span style={{ padding: '2px 7px', borderRadius: 8, background: 'var(--bg-3)', color: 'var(--text-2)', border: '1px solid var(--border)', whiteSpace: 'nowrap' }}>🏢 {emp.department}</span>
+                  {emp.phone && <span style={{ padding: '2px 7px', borderRadius: 8, background: 'var(--bg-3)', color: 'var(--text-2)', border: '1px solid var(--border)', whiteSpace: 'nowrap' }}>📞 {emp.phone}</span>}
+                  {emp.email && <span style={{ padding: '2px 7px', borderRadius: 8, background: 'var(--bg-3)', color: 'var(--text-2)', border: '1px solid var(--border)', whiteSpace: 'nowrap', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>✉️ {emp.email}</span>}
+                  <span style={{ padding: '2px 7px', borderRadius: 8, background: emp.is_active ? 'rgba(34,197,94,0.1)' : 'var(--status-danger-soft)', color: emp.is_active ? 'var(--green)' : 'var(--red)', whiteSpace: 'nowrap' }}>
                     {emp.is_active ? 'Active' : 'Inactive'}
                   </span>
                 </div>
 
                 {/* Right Column: Actions */}
                 <div style={{ display: 'flex', gap: 4, alignItems: 'center', flexShrink: 0 }}>
-                  <button onClick={() => { resetForm(emp); setEditingEmployee(emp) }} className="btn-ghost" style={{ padding: '4px 8px', fontSize: '0.71rem', gap: 3, height: 30, borderRadius: 8, background: 'var(--bg-3)', border: '1px solid var(--border)', whiteSpace: 'nowrap' }}>
+                  <button onClick={() => { resetForm(emp); setEditingEmployee(emp) }} className="btn-ghost" style={{ padding: '4px 8px', gap: 3, height: 30, borderRadius: 8, background: 'var(--bg-3)', border: '1px solid var(--border)', whiteSpace: 'nowrap' }}>
                     <Edit2 size={11}/> Edit
                   </button>
                   <button onClick={() => handleToggleActive(emp)} className="btn-ghost"
                     style={{
-                      padding: '4px 8px', fontSize: '0.71rem', gap: 3, height: 30, borderRadius: 8, border: '1px solid', whiteSpace: 'nowrap',
-                      background: emp.is_active ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.08)',
+                      padding: '4px 8px', gap: 3, height: 30, borderRadius: 8, border: '1px solid', whiteSpace: 'nowrap',
+                      background: emp.is_active ? 'var(--status-danger-soft)' : 'rgba(34,197,94,0.08)',
                       color: emp.is_active ? 'var(--red)' : 'var(--green)',
-                      borderColor: emp.is_active ? 'rgba(239,68,68,0.25)' : 'rgba(34,197,94,0.25)',
+                      borderColor: emp.is_active ? 'var(--status-danger-soft)' : 'rgba(34,197,94,0.25)',
                     }}>
                     {emp.is_active ? <><X size={11}/> Deactivate</> : <><Check size={11}/> Activate</>}
                   </button>
-                  <button onClick={() => handleDeleteEmployee(emp.id, emp.full_name)} className="btn-ghost" style={{ padding: '4px 7px', height: 30, borderRadius: 8, color: 'var(--red)', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }} title="Delete Employee">
+                  <button onClick={() => handleDeleteEmployee(emp.id, emp.full_name)} className="btn-ghost" style={{ padding: '4px 7px', height: 30, borderRadius: 8, color: 'var(--red)', background: 'var(--status-danger-soft)', border: '1px solid var(--status-danger-soft)' }} title="Delete Employee">
                     <Trash2 size={11}/>
                   </button>
                 </div>
@@ -479,9 +479,9 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
         </div>
       )}
 
-      {/* ── Add / Edit Modal ── */}
       {(isAdding || editingEmployee) && (
-        <div className="modal-bg" style={{ zIndex: 2200 }}>
+        <div className="modal-bg" style={{ zIndex: 2200 }} onClick={e => { if (e.target === e.currentTarget) { setIsAdding(false); setEditingEmployee(null); } }}
+             onKeyDown={e => { if (e.key === 'Escape') { setIsAdding(false); setEditingEmployee(null); } }} tabIndex={-1} ref={el => el && el.focus()}>
           <div className="modal" style={{ maxWidth: 460 }}>
             {/* Header */}
             <div className="card-header" style={{ background: 'var(--bg-3)' }}>
@@ -490,10 +490,10 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
                   <UserPlus size={16} />
                 </div>
                 <div>
-                  <h3 style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1rem', letterSpacing: '0.05em', color: 'var(--text-0)', margin: 0 }}>
+                  <h3 style={{ letterSpacing: '0.05em', color: 'var(--text-0)', margin: 0 }}>
                     {editingEmployee ? 'EDIT EMPLOYEE' : 'ADD NEW EMPLOYEE'}
                   </h3>
-                  <p style={{ fontFamily: 'DM Sans', fontSize: '0.72rem', color: 'var(--text-3)', margin: 0 }}>
+                  <p style={{ color: 'var(--text-3)', margin: 0 }}>
                     {editingEmployee ? 'Modify employee profile details' : 'Register a new employee without login account'}
                   </p>
                 </div>
@@ -506,7 +506,7 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
               {error && (
                 <div className="login-alert login-alert-error" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', background: 'var(--red-dim)', border: '1px solid rgba(255,77,77,0.2)', borderRadius: 8, color: 'var(--red)' }}>
                   <AlertCircle size={13} style={{ flexShrink: 0 }}/>
-                  <span style={{ fontSize: '0.78rem', fontFamily: 'DM Sans' }}>{error}</span>
+                  <span >{error}</span>
                 </div>
               )}
 
@@ -514,9 +514,9 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
               <div>
                 <label className="lbl">Employee Code *</label>
                 <div style={{ display: 'flex', gap: 6 }}>
-                  <input className="inp" value={form.employee_code} onChange={e => setForm({ ...form, employee_code: e.target.value })} placeholder="e.g. EMP-001" required style={{ fontFamily: 'DM Mono', fontSize: '0.82rem' }}/>
+                  <input className="inp" value={form.employee_code} onChange={e => setForm({ ...form, employee_code: e.target.value })} placeholder="e.g. EMP-001" required />
                   {!editingEmployee && (
-                    <button type="button" onClick={handleAutoGenerateCode} className="btn-ghost" style={{ fontSize: '0.72rem', padding: '0 10px', height: 38, flexShrink: 0 }}>
+                    <button type="button" onClick={handleAutoGenerateCode} className="btn-ghost" style={{ padding: '0 10px', height: 38, flexShrink: 0 }}>
                       Auto-Gen
                     </button>
                   )}
@@ -564,8 +564,8 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
 
               {/* Footer */}
               <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 10, borderTop: '1px solid var(--border)', paddingTop: 14 }}>
-                <button type="button" onClick={() => { setIsAdding(false); setEditingEmployee(null) }} className="btn-ghost" style={{ padding: '8px 16px', fontSize: '0.82rem' }}>Cancel</button>
-                <button type="submit" disabled={saving} className="btn-primary" style={{ padding: '8px 20px', fontSize: '0.82rem', gap: 6 }}>
+                <button type="button" onClick={() => { setIsAdding(false); setEditingEmployee(null) }} className="btn-ghost" style={{ padding: '8px 16px', }}>Cancel</button>
+                <button type="submit" disabled={saving} className="btn-primary" style={{ padding: '8px 20px', gap: 6 }}>
                   {saving ? <><RefreshCw size={13} className="spin"/> Saving...</> : editingEmployee ? 'Update' : 'Save Employee'}
                 </button>
               </div>
@@ -576,7 +576,8 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
 
       {/* ── Excel Import Modal ── */}
       {isImporting && (
-        <div className="modal-bg" style={{ zIndex: 2200 }}>
+        <div className="modal-bg" style={{ zIndex: 2200 }} onClick={e => { if (e.target === e.currentTarget) { setIsImporting(false); setExcelFile(null); setParsedRows([]); } }}
+             onKeyDown={e => { if (e.key === 'Escape') { setIsImporting(false); setExcelFile(null); setParsedRows([]); } }} tabIndex={-1} ref={el => el && el.focus()}>
           <div className="modal" style={{ maxWidth: 640, width: '90vw' }}>
             {/* Header */}
             <div className="card-header" style={{ background: 'var(--bg-3)' }}>
@@ -585,8 +586,8 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
                   <FileSpreadsheet size={16} />
                 </div>
                 <div>
-                  <h3 style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1rem', letterSpacing: '0.05em', color: 'var(--text-0)', margin: 0 }}>IMPORT EMPLOYEES</h3>
-                  <p style={{ fontFamily: 'DM Sans', fontSize: '0.72rem', color: 'var(--text-3)', margin: 0 }}>Upload employee spreadsheet (.xlsx, .xls) to bulk register</p>
+                  <h3 style={{ letterSpacing: '0.05em', color: 'var(--text-0)', margin: 0 }}>IMPORT EMPLOYEES</h3>
+                  <p style={{ color: 'var(--text-3)', margin: 0 }}>Upload employee spreadsheet (.xlsx, .xls) to bulk register</p>
                 </div>
               </div>
               <button onClick={() => { setIsImporting(false); setExcelFile(null); setParsedRows([]) }} className="btn-ghost" style={{ padding: 6 }}><X size={16}/></button>
@@ -595,32 +596,32 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
             {/* Body */}
             <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
               {error && (
-                <div className="login-alert login-alert-error" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', background: 'var(--red-dim)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, color: 'var(--red)' }}>
+                <div className="login-alert login-alert-error" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', background: 'var(--red-dim)', border: '1px solid var(--status-danger-soft)', borderRadius: 8, color: 'var(--red)' }}>
                   <AlertCircle size={13} style={{ flexShrink: 0 }}/>
-                  <span style={{ fontSize: '0.78rem', fontFamily: 'DM Sans' }}>{error}</span>
+                  <span >{error}</span>
                 </div>
               )}
               {importSuccessMsg && (
                 <div className="login-alert login-alert-success" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 8, color: 'var(--green)' }}>
                   <CheckCircle2 size={13} style={{ flexShrink: 0 }}/>
-                  <span style={{ fontSize: '0.78rem', fontFamily: 'DM Sans', fontWeight: 600 }}>{importSuccessMsg}</span>
+                  <span >{importSuccessMsg}</span>
                 </div>
               )}
 
               {/* Upload drop zone */}
               <div style={{ border: '2px dashed var(--border)', borderRadius: 12, padding: '24px 16px', background: 'var(--bg-1)', textAlign: 'center', cursor: 'pointer', position: 'relative' }}>
                 <Upload size={28} style={{ color: 'var(--text-3)', marginBottom: 8, margin: '0 auto' }}/>
-                <p style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-1)', margin: '4px 0' }}>
+                <p style={{ color: 'var(--text-1)', margin: '4px 0' }}>
                   {excelFile ? excelFile.name : 'Select or drag employee Excel file'}
                 </p>
-                <p style={{ fontSize: '0.68rem', color: 'var(--text-3)', margin: 0 }}>Supports .xlsx & .xls files. Column mapping is automatic.</p>
+                <p style={{ color: 'var(--text-3)', margin: 0 }}>Supports .xlsx & .xls files. Column mapping is automatic.</p>
                 <input type="file" accept=".xlsx, .xls" onChange={handleExcelUpload} style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }} />
               </div>
 
               {/* Template Download Link */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', marginTop: 4, padding: '0 4px' }}>
-                <span style={{ color: 'var(--text-3)', fontFamily: 'DM Sans' }}>Need a template spreadsheet?</span>
-                <button type="button" onClick={handleDownloadTemplate} className="btn-ghost" style={{ padding: '4px 8px', fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: 4, color: 'var(--accent)', border: 'none', background: 'none', cursor: 'pointer' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, padding: '0 4px' }}>
+                <span style={{ color: 'var(--text-3)', }}>Need a template spreadsheet?</span>
+                <button type="button" onClick={handleDownloadTemplate} className="btn-ghost" style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', gap: 4, color: 'var(--accent)', border: 'none', background: 'none', cursor: 'pointer' }}>
                   <FileSpreadsheet size={12} /> Download Template
                 </button>
               </div>
@@ -628,11 +629,11 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
               {/* Preview parsed rows */}
               {parsedRows.length > 0 && (
                 <div>
-                  <h4 style={{ fontFamily: 'Oswald', fontSize: '0.78rem', color: 'var(--text-2)', textTransform: 'uppercase', marginBottom: 8 }}>
+                  <h4 style={{ color: 'var(--text-2)', textTransform: 'uppercase', marginBottom: 8 }}>
                     Parsed Employee Preview ({parsedRows.length} records)
                   </h4>
                   <div style={{ maxHeight: 180, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 8 }}>
-                    <table className="tbl" style={{ fontSize: '0.75rem', minWidth: '100%' }}>
+                    <table className="tbl" style={{ minWidth: '100%' }}>
                       <thead style={{ background: 'var(--bg-3)', position: 'sticky', top: 0 }}>
                         <tr>
                           <th>Code</th>
@@ -645,11 +646,11 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
                       <tbody>
                         {parsedRows.map((row, idx) => (
                           <tr key={idx}>
-                            <td style={{ fontFamily: 'DM Mono' }}>{row.employee_code}</td>
-                            <td style={{ fontWeight: 600 }}>{row.full_name}</td>
+                            <td >{row.employee_code}</td>
+                            <td >{row.full_name}</td>
                             <td>{row.designation}</td>
                             <td>{row.department}</td>
-                            <td>{row.phone || row.email || '—'}</td>
+                            <td>{row.phone || row.email || '-'}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -659,7 +660,7 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
                   {/* Overwrite Toggle */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
                     <input type="checkbox" id="overwrite_dup_codes" checked={importOverwrite} onChange={e => setImportOverwrite(e.target.checked)} style={{ cursor: 'pointer', width: 14, height: 14 }} />
-                    <label htmlFor="overwrite_dup_codes" className="lbl" style={{ margin: 0, cursor: 'pointer', fontSize: '0.75rem', color: 'var(--text-2)' }}>
+                    <label htmlFor="overwrite_dup_codes" className="lbl" style={{ margin: 0, cursor: 'pointer', color: 'var(--text-2)' }}>
                       Overwrite existing employee codes (Update details instead of throwing error)
                     </label>
                   </div>
@@ -668,8 +669,8 @@ export default function EmployeeDirectory({ employees, onRefresh }) {
 
               {/* Footer */}
               <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 10, borderTop: '1px solid var(--border)', paddingTop: 14 }}>
-                <button type="button" onClick={() => { setIsImporting(false); setExcelFile(null); setParsedRows([]) }} className="btn-ghost" style={{ padding: '8px 16px', fontSize: '0.82rem' }}>Cancel</button>
-                <button type="button" onClick={handleConfirmImport} disabled={!parsedRows.length || importing} className="btn-primary" style={{ padding: '8px 20px', fontSize: '0.82rem', gap: 6, background: parsedRows.length ? undefined : 'var(--bg-4)', cursor: parsedRows.length ? 'pointer' : 'not-allowed' }}>
+                <button type="button" onClick={() => { setIsImporting(false); setExcelFile(null); setParsedRows([]) }} className="btn-ghost" style={{ padding: '8px 16px', }}>Cancel</button>
+                <button type="button" onClick={handleConfirmImport} disabled={!parsedRows.length || importing} className="btn-primary" style={{ padding: '8px 20px', gap: 6, background: parsedRows.length ? undefined : 'var(--bg-4)', cursor: parsedRows.length ? 'pointer' : 'not-allowed' }}>
                   {importing ? <><RefreshCw size={13} className="spin"/> Importing...</> : <><Check size={13}/> Confirm Import</>}
                 </button>
               </div>

@@ -43,7 +43,7 @@ export default function MiniMap({ site, items = [] }) {
   if (!site || !site.latitude || !site.longitude) {
     return (
       <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-2)', borderRadius: 12, border: '1px solid var(--border)' }}>
-        <span style={{ fontSize: '0.8rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>No site GPS data available</span>
+        <span style={{ color: 'var(--text-3)', }}>No site GPS data available</span>
       </div>
     );
   }
@@ -72,10 +72,10 @@ export default function MiniMap({ site, items = [] }) {
           return (
             <Marker key={item.id} position={pos} icon={icon}>
               <Popup>
-                <div style={{ fontFamily: 'DM Sans' }}>
-                  <strong style={{ display: 'block', fontSize: '0.85rem' }}>{item.asset?.asset_code}</strong>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-2)' }}>{item.asset?.asset_name}</span>
-                  <div style={{ marginTop: 4, fontSize: '0.7rem', color: item.geo_verified ? 'var(--green)' : 'var(--red)' }}>
+                <div >
+                  <strong style={{ display: 'block', }}>{item.asset?.asset_code}</strong>
+                  <span style={{ color: 'var(--text-2)' }}>{item.asset?.asset_name}</span>
+                  <div style={{ marginTop: 4, color: item.geo_verified ? 'var(--green)' : 'var(--red)' }}>
                     {item.geo_verified ? 'Verified On-Site' : 'Scanned Off-Site'}
                   </div>
                 </div>

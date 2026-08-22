@@ -14,10 +14,10 @@ const fmtCur = (n) => '\u20B9' + Number(n || 0).toLocaleString('en-IN', { minimu
 const COLORS = {
   purchase: '#00b96b',
   transfer: '#4f7eff',
-  requisition: '#8b5cf6',
-  issue: '#f59e0b',
+  requisition: 'var(--status-special)',
+  issue: 'var(--status-warning)',
 }
-const BAR_PALETTE = ['#4f7eff', '#8b5cf6', '#06b6d4', '#00b96b']
+const BAR_PALETTE = ['#4f7eff', 'var(--status-special)', '#06b6d4', '#00b96b']
 
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -26,8 +26,7 @@ const chartHeader = {
   padding: '14px 16px 10px',
   borderBottom: '1px solid var(--border)',
   display: 'flex', alignItems: 'center', gap: 8,
-  fontFamily: 'Oswald', fontSize: '0.85rem',
-  fontWeight: 600, color: 'var(--text-0)', letterSpacing: '0.02em',
+  color: 'var(--text-0)', letterSpacing: '0.02em',
   textTransform: 'uppercase',
 }
 const chartBody = { padding: '16px 8px 12px' }
@@ -162,10 +161,9 @@ export default function ReportsTab({ materials = [], stock = [], txns = [], requ
     return (
       <div style={{
         background: 'var(--bg-1)', border: '1px solid var(--border)',
-        borderRadius: 8, padding: '8px 12px', fontSize: '0.75rem',
-        fontFamily: 'DM Sans', boxShadow: '0 4px 12px rgba(0,0,0,.15)'
+        borderRadius: 8, padding: '8px 12px', boxShadow: '0 4px 12px rgba(0,0,0,.15)'
       }}>
-        <div style={{ fontWeight: 600, color: 'var(--text-0)', marginBottom: 4 }}>{label}</div>
+        <div style={{ color: 'var(--text-0)', marginBottom: 4 }}>{label}</div>
         {payload.map((p, i) => (
           <div key={i} style={{ color: p.color || 'var(--text-1)' }}>
             {p.name}: {fmtCur(p.value)}
@@ -180,10 +178,9 @@ export default function ReportsTab({ materials = [], stock = [], txns = [], requ
     return (
       <div style={{
         background: 'var(--bg-1)', border: '1px solid var(--border)',
-        borderRadius: 8, padding: '8px 12px', fontSize: '0.75rem',
-        fontFamily: 'DM Sans', boxShadow: '0 4px 12px rgba(0,0,0,.15)'
+        borderRadius: 8, padding: '8px 12px', boxShadow: '0 4px 12px rgba(0,0,0,.15)'
       }}>
-        <div style={{ fontWeight: 600, color: 'var(--text-0)', marginBottom: 4 }}>{label || payload[0]?.name}</div>
+        <div style={{ color: 'var(--text-0)', marginBottom: 4 }}>{label || payload[0]?.name}</div>
         {payload.map((p, i) => (
           <div key={i} style={{ color: p.color || p.payload?.fill || 'var(--text-1)' }}>
             {p.name}: {p.value}
@@ -193,7 +190,7 @@ export default function ReportsTab({ materials = [], stock = [], txns = [], requ
     )
   }
 
-  const axisStyle = { fontSize: '0.65rem', fontFamily: 'DM Sans', fill: 'var(--text-2)' }
+  const axisStyle = { fill: 'var(--text-2)' }
   const chartH = 220
 
   return (
@@ -283,11 +280,11 @@ export default function ReportsTab({ materials = [], stock = [], txns = [], requ
                 <Pie data={txnBreakdown} cx="50%" cy="45%" innerRadius={45} outerRadius={75}
                   paddingAngle={3} dataKey="value" nameKey="name"
                   label={({ name, percent }) => `${name} ${(percent*100).toFixed(0)}%`}
-                  style={{ fontSize:'0.6rem', fontFamily:'DM Sans' }}>
+                  >
                   {txnBreakdown.map((entry,i) => <Cell key={i} fill={COLORS[entry.name] || BAR_PALETTE[i % BAR_PALETTE.length]} />)}
                 </Pie>
                 <Tooltip content={<CountTooltip />} />
-                <Legend wrapperStyle={{ fontSize:'0.68rem', fontFamily:'DM Sans' }}
+                <Legend wrapperStyle={{ }}
                   formatter={val => <span style={{ color:'var(--text-1)' }}>{val}</span>}/>
               </PieChart>
             </ResponsiveContainer>
@@ -305,7 +302,7 @@ export default function ReportsTab({ materials = [], stock = [], txns = [], requ
               <XAxis dataKey="name" tick={axisStyle}/>
               <YAxis tick={axisStyle} tickFormatter={v => fmtCur(v)} width={70}/>
               <Tooltip content={<CurrencyTooltip />} />
-              <Legend wrapperStyle={{ fontSize:'0.68rem', fontFamily:'DM Sans' }}/>
+              <Legend wrapperStyle={{ }}/>
               {categories.map((cat,i) => <Bar key={cat} dataKey={cat} stackId="a" fill={BAR_PALETTE[i % BAR_PALETTE.length]} radius={i===categories.length-1 ? [4,4,0,0] : [0,0,0,0]} />)}
             </BarChart>
           </ResponsiveContainer>

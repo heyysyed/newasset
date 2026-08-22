@@ -9,6 +9,9 @@ import {
 import { supabase, getAllProfiles, updateProfile, getSettings, updateSettings, adminCreateUser, fetchActivityLogs, fetchDeletedAssets, restoreAsset, permanentlyDeleteAsset, fetchUserSiteAssignments, assignUserToSite, removeUserFromSite, fetchFilterOptions, getQrScanConfig, updateQrScanConfig, fetchAuditAssignments, fetchMaintenanceSubmissions, fetchEmployees } from '../lib/supabase'
 import { formatCurrency } from '../lib/depreciation'
 import { useAuth, DEFAULT_FIELDS } from '../context/AuthContext'
+import { useIsMobile } from '../hooks/useBreakpoint'
+import MobileAdminMenu from '../components/mobile/MobileAdminMenu'
+import MobilePageHeader from '../components/mobile/MobilePageHeader'
 import UserProfileModal from '../components/UserProfileModal'
 import UserDirectory from '../components/admin/UserDirectory'
 import EmployeeDirectory from '../components/admin/EmployeeDirectory'
@@ -21,17 +24,17 @@ import TaskSlaTracker from '../components/admin/TaskSlaTracker'
 import QrStickerDesigner from '../components/admin/QrStickerDesigner'
 
 const ROLE_META = {
-  super_admin: { label: 'Super Admin', cls: 'badge-admin', color: '#ef4444', bg: 'rgba(239,68,68,0.12)' },
-  admin:       { label: 'Admin',       cls: 'badge-admin', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
-  moderator:   { label: 'Moderator',   cls: 'badge-mod',   color: '#818cf8', bg: 'rgba(129,140,248,0.12)' },
-  user:        { label: 'User',        cls: 'badge-user',  color: '#60a5fa', bg: 'rgba(96,165,250,0.12)'  },
+  super_admin: { label: 'Super Admin', cls: 'badge-admin', color: 'var(--status-danger)', bg: 'var(--status-danger-soft)' },
+  admin:       { label: 'Admin',       cls: 'badge-admin', color: 'var(--status-warning)', bg: 'var(--status-warning-soft)' },
+  moderator:   { label: 'Moderator',   cls: 'badge-mod',   color: 'var(--status-special)', bg: 'var(--status-special-soft)' },
+  user:        { label: 'User',        cls: 'badge-user',  color: 'var(--status-info)', bg: 'var(--status-info-soft)'  },
 }
 
 const MOD_PERM_GROUPS = [
   {
     title: 'ASSET ACTIONS',
     sub: 'What moderators can do with assets',
-    color: '#60a5fa',
+    color: 'var(--status-info)',
     icon: Package,
     perms: [
       { key: 'can_add',           label: 'Add Assets',        desc: 'Create new assets in the system',          icon: Plus },
@@ -46,7 +49,7 @@ const MOD_PERM_GROUPS = [
   {
     title: 'MODULE ACCESS',
     sub: 'Which sections moderators can navigate to',
-    color: '#818cf8',
+    color: 'var(--status-special)',
     icon: UserCog,
     perms: [
       { key: 'can_access_audit',       label: 'Audit Module',       desc: 'Run & view physical audit sessions',  icon: ClipboardCheck },
@@ -64,21 +67,22 @@ const USER_PERMS = [
   { key: 'can_access_maintenance', label: 'Report Maintenance',   desc: 'Log faults and view maintenance tickets',  icon: Wrench },
 ]
 
-// ── Stat Card ─────────────────────────────────────────────────
+// ── Compact Context Stat Indicator ────────────────────────────
 function StatCard({ label, value, icon: Icon, color, sub }) {
   return (
-    <div style={{
-      background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 14,
-      padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14,
-      boxShadow: '0 2px 12px rgba(0,0,0,0.12)', flex: 1,
-    }}>
-      <div style={{ width: 44, height: 44, borderRadius: 12, background: `${color}18`, border: `1px solid ${color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        <Icon size={20} style={{ color }}/>
+    <div className="bg-bg-1 border border-border rounded-lg px-3.5 py-2.5 flex items-center gap-3 shadow-sm">
+      <div 
+        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+        style={{ background: `${color}15`, border: `1px solid ${color}30` }}
+      >
+        <Icon size={16} style={{ color }} />
       </div>
-      <div>
-        <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-0)', fontFamily: 'Oswald', lineHeight: 1 }}>{value}</div>
-        <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', fontFamily: 'DM Sans', marginTop: 2 }}>{label}</div>
-        {sub && <div style={{ fontSize: '0.68rem', color, fontFamily: 'DM Mono', marginTop: 1 }}>{sub}</div>}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline gap-2 min-w-0">
+          <span className="text-body font-mono text-text-0 leading-tight truncate shrink-0 max-w-[60%]">{value}</span>
+          <span className="text-[11px] text-body-medium text-text-3 truncate">{label}</span>
+        </div>
+        {sub && <div className="text-[10px] text-text-3 font-mono truncate">{sub}</div>}
       </div>
     </div>
   )
@@ -106,8 +110,8 @@ function SectionHead({ icon: Icon, title, sub, color = 'var(--accent)' }) {
         <Icon size={16} style={{ color }}/>
       </div>
       <div>
-        <h2 style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '0.95rem', letterSpacing: '0.06em', color: 'var(--text-0)', margin: 0 }}>{title}</h2>
-        {sub && <p style={{ fontFamily: 'DM Sans', fontSize: '0.73rem', color: 'var(--text-3)', margin: 0, marginTop: 1 }}>{sub}</p>}
+        <h2 style={{ letterSpacing: '0.06em', color: 'var(--text-0)', margin: 0 }}>{title}</h2>
+        {sub && <p style={{ color: 'var(--text-3)', margin: 0, marginTop: 1 }}>{sub}</p>}
       </div>
     </div>
   )
@@ -166,24 +170,25 @@ function SiteAssignModal({ user, assignedById, onClose }) {
   }
 
   return (
-    <div className="modal-bg" style={{ zIndex: 2300 }} onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+    <div className="modal-bg" style={{ zIndex: 2300 }} onClick={e => { if (e.target === e.currentTarget) onClose() }}
+         onKeyDown={e => { if (e.key === 'Escape') onClose() }} tabIndex={-1} ref={el => el && el.focus()}>
       <div className="modal" style={{ maxWidth: 460 }}>
         <div className="card-header" style={{ background: 'var(--bg-3)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ padding: 7, background: 'rgba(34,211,238,0.12)', borderRadius: 9, color: '#22d3ee', border: '1px solid rgba(34,211,238,0.3)' }}>
+            <div style={{ padding: 7, background: 'var(--status-info-soft)', borderRadius: 9, color: 'var(--status-info)', border: '1px solid var(--status-info-soft)' }}>
               <MapPin size={16} />
             </div>
             <div>
-              <h3 style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1rem', letterSpacing: '0.05em', color: 'var(--text-0)', margin: 0 }}>SITE ACCESS</h3>
-              <p style={{ fontFamily: 'DM Sans', fontSize: '0.75rem', color: 'var(--text-3)', margin: 0 }}>{user.full_name || user.email}</p>
+              <h3 style={{ letterSpacing: '0.05em', color: 'var(--text-0)', margin: 0 }}>SITE ACCESS</h3>
+              <p style={{ color: 'var(--text-3)', margin: 0 }}>{user.full_name || user.email}</p>
             </div>
           </div>
-          <button onClick={onClose} className="btn-ghost" style={{ padding: 6, border: 'none' }}><X size={16} /></button>
+          <button onClick={onClose} className="btn-ghost" style={{ padding: 6, border: 'none' }} aria-label="Close site assignment modal"><X size={16} /></button>
         </div>
 
         <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
           {error && (
-            <div style={{ padding: '8px 12px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 8, color: 'var(--red)', fontFamily: 'DM Sans', fontSize: '0.78rem' }}>
+            <div style={{ padding: '8px 12px', background: 'var(--status-danger-soft)', border: '1px solid var(--status-danger-soft)', borderRadius: 8, color: 'var(--red)', }}>
               {error}
             </div>
           )}
@@ -192,11 +197,11 @@ function SiteAssignModal({ user, assignedById, onClose }) {
           <div>
             <p className="lbl" style={{ marginBottom: 8 }}>Assigned Sites</p>
             {assignments.length === 0 ? (
-              <p style={{ color: 'var(--text-3)', fontFamily: 'DM Sans', fontSize: '0.8rem', padding: '10px 0' }}>No sites assigned yet.</p>
+              <p style={{ color: 'var(--text-3)', padding: '10px 0' }}>No sites assigned yet.</p>
             ) : (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {assignments.map(a => (
-                  <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: 'rgba(34,211,238,0.08)', border: '1px solid rgba(34,211,238,0.25)', borderRadius: 20, fontFamily: 'DM Sans', fontSize: '0.78rem', color: '#22d3ee', fontWeight: 600 }}>
+                  <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: 'var(--status-info-soft)', border: '1px solid var(--status-info-soft)', borderRadius: 20, color: 'var(--status-info)', }}>
                     <MapPin size={11} />
                     {a.site_name}
                     <button onClick={() => handleRemove(a.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', padding: 0, display: 'flex', alignItems: 'center', marginLeft: 2 }} title="Remove">
@@ -223,10 +228,10 @@ function SiteAssignModal({ user, assignedById, onClose }) {
               </button>
             </div>
             {availableSites.length === 0 && allSites.length > 0 && (
-              <p style={{ color: 'var(--text-3)', fontFamily: 'DM Sans', fontSize: '0.72rem', marginTop: 6 }}>All known sites are already assigned.</p>
+              <p style={{ color: 'var(--text-3)', marginTop: 6 }}>All known sites are already assigned.</p>
             )}
             {allSites.length === 0 && (
-              <p style={{ color: 'var(--text-3)', fontFamily: 'DM Sans', fontSize: '0.72rem', marginTop: 6 }}>No sites found. Sites are derived from assets and inventory items.</p>
+              <p style={{ color: 'var(--text-3)', marginTop: 6 }}>No sites found. Sites are derived from assets and inventory items.</p>
             )}
           </div>
 
@@ -241,13 +246,16 @@ function SiteAssignModal({ user, assignedById, onClose }) {
 
 export default function AdminPage() {
   const { refreshSettings, profile: authProfile, isSuperAdmin } = useAuth()
-  const [tab, setTab]           = useState('users')
+  const isMobile = useIsMobile()
+  const [tab, setTab]           = useState(isMobile ? 'menu' : 'overview')
   const [users, setUsers]       = useState([])
   const [employees, setEmployees] = useState([])
   const [settings, setSettings] = useState(null)
+  const [originalSettings, setOriginalSettings] = useState(null)
   const [loading, setLoading]   = useState(true)
   const [saving, setSaving]     = useState(false)
   const [saved, setSaved]       = useState(false)
+  const [saveError, setSaveError] = useState(null)
 
   // Activity logs
   const [actLogs, setActLogs]         = useState([])
@@ -269,6 +277,7 @@ export default function AdminPage() {
 
   // QR config (super_admin only)
   const [qrConfig, setQrConfig] = useState(null)
+  const [originalQrConfig, setOriginalQrConfig] = useState(null)
 
   // Task & Audit tracking
   const [auditAssignments, setAuditAssignments] = useState([])
@@ -277,6 +286,27 @@ export default function AdminPage() {
   // Available roles depends on who's logged in
   const ROLES = isSuperAdmin ? ['admin', 'moderator', 'user'] : ['admin', 'moderator', 'user']
 
+  // Utility for dirty checking
+  const deepEqual = (a, b) => JSON.stringify(a) === JSON.stringify(b)
+  const isSettingsDirty = !deepEqual(settings, originalSettings)
+  const isQrDirty = !deepEqual(qrConfig, originalQrConfig)
+  const isDirty = (['fields', 'custom', 'modperms', 'useraccess', 'reports'].includes(tab) && isSettingsDirty) || (tab === 'qrconfig' && isQrDirty)
+
+  function handleTabChange(newTab) {
+    if (isDirty) {
+      if (!window.confirm('You have unsaved changes. Leave without saving?')) {
+        return;
+      }
+      // Revert changes if they discard
+      if (tab === 'qrconfig') {
+        setQrConfig(JSON.parse(JSON.stringify(originalQrConfig)));
+      } else {
+        setSettings(JSON.parse(JSON.stringify(originalSettings)));
+      }
+    }
+    setTab(newTab)
+  }
+
   async function load() {
     setLoading(true)
     try {
@@ -284,10 +314,17 @@ export default function AdminPage() {
         getAllProfiles(authProfile?.role).catch(() => []),
         getSettings().catch(() => ({})),
       ])
-      setUsers(u || []); setSettings(s || {})
+      setUsers(u || []); 
+      setSettings(s || {}); 
+      setOriginalSettings(JSON.parse(JSON.stringify(s || {})));
+
       // Load QR config for super admin
       if (authProfile?.role === 'super_admin') {
-        try { const qr = await getQrScanConfig(); setQrConfig(qr) } catch {}
+        try { 
+          const qr = await getQrScanConfig(); 
+          setQrConfig(qr); 
+          setOriginalQrConfig(JSON.parse(JSON.stringify(qr))); 
+        } catch {}
       }
       // Load employees
       try {
@@ -304,6 +341,11 @@ export default function AdminPage() {
         ])
         setAuditAssignments(aa || [])
         setMaintSubmissions(ms || [])
+      } catch {}
+      // Load initial activity logs
+      try {
+        const { data, count } = await fetchActivityLogs(20, 0, {})
+        setActLogs(data || []); setActTotal(count || 0)
       } catch {}
     } catch (e) { console.error(e) }
     finally { setLoading(false) }
@@ -349,19 +391,31 @@ export default function AdminPage() {
 
   async function saveSettings() {
     setSaving(true)
+    setSaveError(null)
     try {
-      await updateSettings({
-        hidden_fields:         settings?.hidden_fields,
-        custom_fields:         settings?.custom_fields,
-        moderator_permissions: settings?.moderator_permissions,
-        user_permissions:      settings?.user_permissions,
-        company_code:          settings?.company_code,
-      })
+      if (tab === 'qrconfig') {
+        await updateQrScanConfig(qrConfig)
+        setOriginalQrConfig(JSON.parse(JSON.stringify(qrConfig)))
+      } else {
+        await updateSettings({
+          hidden_fields:         settings?.hidden_fields,
+          custom_fields:         settings?.custom_fields,
+          moderator_permissions: settings?.moderator_permissions,
+          user_permissions:      settings?.user_permissions,
+          company_code:          settings?.company_code,
+          scheduled_reports:     settings?.scheduled_reports,
+          offline_sync_interval_mins: settings?.offline_sync_interval_mins,
+        })
+        setOriginalSettings(JSON.parse(JSON.stringify(settings)))
+      }
       await refreshSettings()
       setSaved(true)
       setTimeout(() => setSaved(false), 2500)
-    } catch (e) { alert('Error: ' + e.message) }
-    finally { setSaving(false) }
+    } catch (e) { 
+      setSaveError(e.message || 'Unable to save changes. Please try again.')
+    } finally { 
+      setSaving(false) 
+    }
   }
 
 
@@ -373,17 +427,18 @@ export default function AdminPage() {
   const modCount     = (users || []).filter(u => u?.role === 'moderator').length
 
   const TABS = [
-    { id: 'users',      label: 'Users',           icon: Users,    count: (users || []).length },
-    { id: 'employees',  label: 'Employees',       icon: Briefcase, count: (employees || []).length },
-    { id: 'modperms',   label: 'Mod Permissions', icon: Shield,   count: null },
-    { id: 'useraccess', label: 'User Access',      icon: UserCog,  count: null },
-    { id: 'fields',     label: 'Field Visibility', icon: Eye,      count: null },
-    { id: 'custom',     label: 'Custom Fields',   icon: Database, count: (settings?.custom_fields || []).length || null },
-    { id: 'reports',    label: 'Scheduled Reports', icon: FileSpreadsheet, count: (settings?.scheduled_reports || []).length || null },
-    { id: 'tracking',   label: 'Task Tracking',   icon: ClipboardCheck, count: (auditAssignments || []).length || null },
-    ...(isSuperAdmin ? [{ id: 'qrconfig', label: 'QR Config', icon: Hash, count: null }] : []),
-    { id: 'logs',       label: 'Activity Logs',   icon: History,  count: null },
-    { id: 'trash',      label: 'Trash',           icon: Trash2,   count: (deletedAssets || []).length || null },
+    { id: 'overview',   label: 'Admin Overview',     icon: LayoutGrid,     count: null, group: 'Admin', desc: 'System operational summary and administrative health' },
+    { id: 'users',      label: 'User Directory',     icon: Users,          count: (users || []).length, group: 'People & Access', desc: 'Manage system accounts, assign roles, and configure site access' },
+    { id: 'employees',  label: 'Employees',         icon: Briefcase,      count: (employees || []).length, group: 'People & Access', desc: 'Employee personnel directory, designations, and site allocations' },
+    { id: 'modperms',   label: 'Mod Permissions',    icon: Shield,         count: null, group: 'People & Access', desc: 'Configure operational permission matrices and module capabilities' },
+    { id: 'useraccess', label: 'User Access Rules',  icon: UserCog,        count: null, group: 'People & Access', desc: 'Set user-level browsing boundaries and inspection access' },
+    { id: 'fields',     label: 'Field Visibility',   icon: Eye,            count: null, group: 'Asset Configuration', desc: 'Control visible asset fields across desktop and mobile forms' },
+    { id: 'custom',     label: 'Custom Fields',     icon: Database,       count: (settings?.custom_fields || []).length || null, group: 'Asset Configuration', desc: 'Define dynamic user-defined attributes for assets' },
+    ...(isSuperAdmin ? [{ id: 'qrconfig', label: 'QR Configuration', icon: Hash, count: null, group: 'Asset Configuration', desc: 'Customize QR label layout, prefix, and print presets' }] : []),
+    { id: 'tracking',   label: 'Task SLA Tracking',  icon: ClipboardCheck, count: (auditAssignments || []).length || null, group: 'Operations & Security', desc: 'Track maintenance and inspection SLA resolution deadlines' },
+    { id: 'reports',    label: 'Scheduled Reports', icon: FileSpreadsheet, count: (settings?.scheduled_reports || []).length || null, group: 'Operations & Security', desc: 'Configure automated scheduled report delivery' },
+    { id: 'logs',       label: 'Activity Audit Logs', icon: History,       count: null, group: 'Operations & Security', desc: 'Complete chronological audit log of all system changes' },
+    { id: 'trash',      label: 'Deleted Trash Bin', icon: Trash2,         count: (deletedAssets || []).length || null, group: 'Operations & Security', desc: 'Recovery center for deleted equipment with permanent purge' },
   ]
 
   async function loadLogs() {
@@ -424,271 +479,670 @@ export default function AdminPage() {
   if (loading) return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 400, gap: 16 }}>
       <div style={{ width: 40, height: 40, border: '3px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }}/>
-      <p style={{ color: 'var(--text-3)', fontFamily: 'DM Sans', fontSize: '0.85rem' }}>Loading admin panel…</p>
+      <p style={{ color: 'var(--text-3)', }}>Loading admin panel…</p>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
 
-  return (
-    <div style={{ width: '100%' }}>
-
-      {/* ── Page Header ── */}
-      <div className="animate-fade-up" style={{
-        background: 'linear-gradient(135deg, rgba(245,158,11,0.08), rgba(79,126,255,0.06))',
-        border: '1px solid var(--border)', borderRadius: 18,
-        padding: '20px 28px', marginBottom: 24,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        flexWrap: 'wrap', gap: 14, boxShadow: 'var(--clay-shadow)',
-        backdropFilter: 'blur(12px)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ width: 52, height: 52, borderRadius: 16, background: 'linear-gradient(135deg, rgba(245,158,11,0.18), rgba(245,158,11,0.08))', border: '1px solid rgba(245,158,11,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 16px rgba(245,158,11,0.15)' }}>
-            <Shield size={24} style={{ color: '#f59e0b' }}/>
-          </div>
-          <div>
-            <h1 style={{ fontFamily: 'Oswald, sans-serif', fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-0)', letterSpacing: '0.06em', margin: 0, lineHeight: 1.1 }}>
-              ADMIN <span style={{ color: '#f59e0b' }}>PANEL</span>
-            </h1>
-            <p style={{ color: 'var(--text-3)', fontSize: '0.78rem', fontFamily: 'DM Sans', margin: 0, marginTop: 4 }}>
-              Users, permissions, field settings & custom fields
-            </p>
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          {saved && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 8, animation: 'admin-fade-in 0.3s ease' }}>
-              <CheckCircle2 size={14} style={{ color: 'var(--green)' }}/>
-              <span style={{ color: 'var(--green)', fontSize: '0.78rem', fontFamily: 'DM Sans', fontWeight: 600 }}>Saved!</span>
-            </div>
+  if (isMobile) {
+    if (tab === 'menu') {
+      return <MobileAdminMenu tabs={TABS} currentTab={tab} setTab={handleTabChange} />
+    }
+    
+    const currentTabObj = TABS.find(t => t.id === tab)
+    return (
+      <div className="mobile-page-container">
+        <MobilePageHeader 
+          title={currentTabObj?.label || 'Admin'} 
+          showBack={true} 
+          onBack={() => handleTabChange('menu')} 
+        />
+        <div style={{ padding: '16px' }}>
+          {tab === 'users' && (
+            <UserDirectory
+              users={users}
+              isSuperAdmin={isSuperAdmin}
+              changeRole={changeRole}
+              toggleActive={toggleActive}
+              setProfileUser={setProfileUser}
+              setSiteUser={setSiteUser}
+              setAddingUser={setAddingUser}
+              ROLES={ROLES}
+            />
           )}
-          <button onClick={() => {
-            const csvContent = "data:text/csv;charset=utf-8,ID,Action,EntityType,EntityName,Timestamp\n" + actLogs.map(l => `"${l.id}","${l.action}","${l.entity_type}","${l.entity_name || ''}","${l.created_at}"`).join("\n");
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `system_activity_logs_${new Date().toISOString().split('T')[0]}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-          }} className="btn-ghost" style={{ padding: '8px 12px', gap: 6, border: '1px solid var(--border)', fontSize: '0.78rem' }}>
-            <Download size={14} style={{ color: 'var(--accent)' }}/> Download All Logs
-          </button>
-          <button onClick={load} className="btn-ghost" style={{ padding: '8px 12px', gap: 6 }}>
-            <RefreshCw size={14}/>
-          </button>
-          <button onClick={saveSettings} disabled={saving} className="btn-primary" style={{ padding: '9px 18px', gap: 7, fontWeight: 700 }}>
-            {saving
-              ? <><div style={{ width: 13, height: 13, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }}/> Saving…</>
-              : <><Save size={14}/> Save Settings</>}
-          </button>
+
+          {tab === 'employees' && (
+            <EmployeeDirectory
+              employees={employees}
+              onRefresh={refreshEmployees}
+            />
+          )}
+
+          {tab === 'modperms' && (
+            <PermissionsGrid
+              tab={tab}
+              settings={settings}
+              setSettings={setSettings}
+            />
+          )}
+
+          {tab === 'useraccess' && (
+            <PermissionsGrid
+              tab={tab}
+              settings={settings}
+              setSettings={setSettings}
+            />
+          )}
+
+          {tab === 'fields' && (
+            <SettingsManager
+              tab={tab}
+              settings={settings}
+              setSettings={setSettings}
+            />
+          )}
+
+          {tab === 'custom' && (
+            <SettingsManager
+              tab={tab}
+              settings={settings}
+              setSettings={setSettings}
+            />
+          )}
+
+          {tab === 'reports' && (
+            <ScheduledReports
+              settings={settings}
+              setSettings={setSettings}
+            />
+          )}
+
+          {tab === 'tracking' && (
+            <TaskSlaTracker
+              auditAssignments={auditAssignments}
+              maintSubmissions={maintSubmissions}
+            />
+          )}
+
+          {isSuperAdmin && tab === 'qrconfig' && (
+            <QrStickerDesigner
+              config={qrConfig}
+              setConfig={setQrConfig}
+            />
+          )}
+
+          {tab === 'logs' && (
+            <ActivityLogsHub
+              logs={actLogs}
+              total={actTotal}
+              page={actPage}
+              setPage={setActPage}
+              filter={actFilter}
+              setFilter={setActFilter}
+              loading={actLoading}
+            />
+          )}
+
+          {tab === 'trash' && (
+            <TrashBinManager
+              deletedAssets={deletedAssets}
+              loading={trashLoading}
+              restoring={restoring}
+              onRestore={handleRestore}
+              onPermanentDelete={handlePermanentDelete}
+            />
+          )}
         </div>
-      </div>
-
-      {/* ── Stats Row ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 24 }}>
-        <StatCard label="Total Users"   value={totalUsers}  icon={Users}   color="#60a5fa" sub={`${activeUsers} active`}/>
-        <StatCard label="Admins"        value={adminCount}  icon={Shield}  color="#f59e0b" />
-        <StatCard label="Moderators"    value={modCount}    icon={Lock}    color="#818cf8" />
-        <StatCard label="Custom Fields" value={(settings?.custom_fields||[]).length} icon={Database} color="#34d399" />
-      </div>
-
-      {/* ── Sidebar + Content Layout ── */}
-      <div className="admin-layout" style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
-
-        {/* ── Sidebar Navigation ── */}
-        <div className="admin-sidebar" style={{
-          width: 220, flexShrink: 0, position: 'sticky', top: 20,
-          background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 18,
-          boxShadow: 'var(--clay-shadow)', overflow: 'hidden',
-        }}>
-          <div style={{ padding: '16px 14px', borderBottom: '1px solid var(--border)', background: 'linear-gradient(135deg, var(--bg-3), var(--bg-2))' }}>
-            <p style={{ fontFamily: 'Oswald', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-3)', margin: 0, textTransform: 'uppercase' }}>Navigation</p>
-          </div>
-          <div style={{ padding: '8px 6px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {TABS.map(t => {
-              const active = tab === t.id
-              return (
-                <button key={t.id} onClick={() => setTab(t.id)} style={{
-                  display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
-                  border: 'none', cursor: 'pointer', borderRadius: 12, width: '100%',
-                  background: active ? 'var(--accent-glow)' : 'transparent',
-                  borderLeft: active ? '3px solid var(--accent)' : '3px solid transparent',
-                  color: active ? 'var(--accent)' : 'var(--text-2)',
-                  fontFamily: 'DM Sans', fontWeight: active ? 700 : 500, fontSize: '0.78rem',
-                  transition: 'all 0.2s', textAlign: 'left',
-                }}>
-                  <t.icon size={15} style={{ flexShrink: 0, opacity: active ? 1 : 0.6 }}/>
-                  <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.label}</span>
-                  {t.count !== null && (
-                    <span style={{
-                      fontSize: '0.6rem', fontFamily: 'DM Mono', fontWeight: 700,
-                      color: active ? 'white' : 'var(--text-3)',
-                      borderRadius: 8, padding: '1px 6px', flexShrink: 0,
-                    }}>{t.count}</span>
-                  )}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* ── Content Area ── */}
-        <div key={tab} style={{ flex: 1, minWidth: 0, animation: 'admin-fade-in 0.35s ease' }}>
-
-      {/* ── USERS TAB ── */}
-      {tab === 'users' && (
-        <UserDirectory
-          users={users}
-          isSuperAdmin={isSuperAdmin}
-          changeRole={changeRole}
-          toggleActive={toggleActive}
-          setProfileUser={setProfileUser}
-          setSiteUser={setSiteUser}
-          setAddingUser={setAddingUser}
-          ROLES={ROLES}
-        />
-      )}
-
-      {/* ── EMPLOYEES TAB ── */}
-      {tab === 'employees' && (
-        <EmployeeDirectory
-          employees={employees}
-          onRefresh={refreshEmployees}
-        />
-      )}
-
-      {/* ── MOD PERMS TAB ── */}
-      {tab === 'modperms' && (
-        <PermissionsGrid
-          tab={tab}
-          settings={settings}
-          setSettings={setSettings}
-        />
-      )}
-
-      {/* ── USER ACCESS TAB ── */}
-      {tab === 'useraccess' && (
-        <PermissionsGrid
-          tab={tab}
-          settings={settings}
-          setSettings={setSettings}
-        />
-      )}
-
-      {/* ── FIELD VISIBILITY TAB ── */}
-      {tab === 'fields' && (
-        <SettingsManager
-          tab={tab}
-          settings={settings}
-          setSettings={setSettings}
-          qrConfig={qrConfig}
-          setQrConfig={setQrConfig}
-          isSuperAdmin={isSuperAdmin}
-          saving={saving}
-          setSaving={setSaving}
-          setSaved={setSaved}
-        />
-      )}
-
-      {/* ── CUSTOM FIELDS TAB ── */}
-      {tab === 'custom' && (
-        <SettingsManager
-          tab={tab}
-          settings={settings}
-          setSettings={setSettings}
-          qrConfig={qrConfig}
-          setQrConfig={setQrConfig}
-          isSuperAdmin={isSuperAdmin}
-          saving={saving}
-          setSaving={setSaving}
-          setSaved={setSaved}
-        />
-      )}
-
-      {/* ── Activity Logs Tab ── */}
-      {tab === 'logs' && (
-        <ActivityLogsHub
-          actLogs={actLogs}
-          actLoading={actLoading}
-          actTotal={actTotal}
-          actPage={actPage}
-          setActPage={setActPage}
-          actFilter={actFilter}
-          setActFilter={setActFilter}
-          onRefresh={loadLogs}
-        />
-      )}
-
-      {/* ── Trash Tab ── */}
-      {tab === 'trash' && (
-        <TrashBinManager
-          deletedAssets={deletedAssets}
-          trashLoading={trashLoading}
-          restoring={restoring}
-          handleRestore={handleRestore}
-          handlePermanentDelete={handlePermanentDelete}
-        />
-      )}
-
-      {/* ── SCHEDULED REPORTS TAB ── */}
-      {tab === 'reports' && (
-        <ScheduledReports
-          settings={settings}
-          setSettings={setSettings}
-        />
-      )}
-
-      {/* ── TASK TRACKING TAB ── */}
-      {tab === 'tracking' && (
-        <TaskSlaTracker
-          auditAssignments={auditAssignments}
-          onRefresh={load}
-        />
-      )}
-
-      {/* ── QR CONFIG TAB (Super Admin Only) ── */}
-      {tab === 'qrconfig' && isSuperAdmin && (
-        <QrStickerDesigner
-          qrConfig={qrConfig}
-          setQrConfig={setQrConfig}
-          saving={saving}
-          setSaving={setSaving}
-          setSaved={setSaved}
-        />
-      )}
-
-      {/* Bottom save */}
-      <div style={{ marginTop: 20, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-        {saved && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 9 }}>
-            <CheckCircle2 size={14} style={{ color: 'var(--green)' }}/>
-            <span style={{ color: 'var(--green)', fontSize: '0.78rem', fontFamily: 'DM Sans', fontWeight: 600 }}>Settings saved!</span>
+        
+        {/* Modals are appended here if any of them are open */}
+        {profileUser && <UserProfileModal user={profileUser} onClose={() => setProfileUser(null)} />}
+        {siteUser && <SiteAssignModal user={siteUser} assignedById={authProfile?.id} onClose={() => setSiteUser(null)} />}
+        {addingUser && (
+          <div className="modal-bg" style={{ zIndex: 3000 }} onClick={e => { if (e.target === e.currentTarget) setAddingUser(false) }}
+               onKeyDown={e => { if (e.key === 'Escape') setAddingUser(false) }} tabIndex={-1} ref={el => el && el.focus()}>
+            <div className="modal" style={{ maxWidth: 400 }}>
+              <div className="card-header" style={{ background: 'var(--bg-2)', borderBottom: '1px solid var(--border)' }}>
+                <h3 style={{ margin: 0, color: 'var(--text-0)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <UserPlus size={16} style={{ color: 'var(--accent)' }}/> ADD SYSTEM USER
+                </h3>
+                <button onClick={() => setAddingUser(false)} className="btn-ghost" style={{ padding: 6 }} aria-label="Close add user modal"><X size={16}/></button>
+              </div>
+              <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div>
+                  <label className="lbl">Full Name</label>
+                  <input type="text" className="inp" placeholder="e.g. John Doe" value={newUser.full_name} onChange={e => setNewUser({ ...newUser, full_name: e.target.value })}/>
+                </div>
+                <div>
+                  <label className="lbl">Email Address</label>
+                  <input type="email" className="inp" placeholder="name@company.com" value={newUser.email} onChange={e => setNewUser({ ...newUser, email: e.target.value })}/>
+                </div>
+                <div>
+                  <label className="lbl">Temporary Password</label>
+                  <div style={{ position: 'relative' }}>
+                    <input type={showPassword ? 'text' : 'password'} className="inp" style={{ paddingRight: 40 }} value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })}/>
+                    <button onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: 8, top: 8, background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer' }}>
+                      {showPassword ? <EyeOff size={16}/> : <Eye size={16}/>}
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label className="lbl">System Role</label>
+                  <select className="sel" value={newUser.role} onChange={e => setNewUser({ ...newUser, role: e.target.value })}>
+                    {ROLES.map(r => <option key={r} value={r}>{ROLE_META[r]?.label || r}</option>)}
+                  </select>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+                  <button onClick={handleAddUser} disabled={addingUserLoading || !newUser.email || !newUser.password} className="btn-primary" style={{ padding: '10px 20px', gap: 8 }}>
+                    {addingUserLoading ? 'Creating…' : <><Check size={14}/> Create User</>}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
-        <button onClick={saveSettings} disabled={saving} className="btn-primary" style={{ padding: '9px 20px', gap: 7, fontWeight: 700 }}>
-          {saving ? 'Saving…' : <><Save size={15}/> Save All Settings</>}
-        </button>
       </div>
+    )
+  }
 
-        </div>{/* end Content Area */}
+  return (
+    <div className="w-full flex flex-col gap-4">
+
+      {/* ── Desktop & Tablet 2-Column Layout ── */}
+      <div className="admin-layout flex flex-col md:flex-row gap-5 items-start">
+
+        {/* ── Left Navigation Sidebar (240px) ── */}
+        <div className="admin-sidebar hidden md:flex flex-col w-[240px] shrink-0 sticky top-4 bg-bg-1 border border-border rounded-xl shadow-sm overflow-hidden divide-y divide-border">
+          
+          {/* Group 0: Admin Overview */}
+          <div className="p-2.5">
+            <h4 className="text-[10px] text-text-3 uppercase tracking-wider px-2.5 mb-1.5">Admin</h4>
+            <button
+              onClick={() => handleTabChange('overview')}
+              className={`flex items-center justify-between px-3 py-2 rounded-lg text-caption  transition-all text-left w-full ${
+                tab === 'overview' ? 'bg-accent text-white shadow-sm ' : 'text-text-2 hover:bg-bg-2 hover:text-text-0'
+              }`}
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <LayoutGrid size={15} className={`shrink-0 ${tab === 'overview' ? 'text-white' : 'text-text-3'}`} />
+                <span className="truncate">Admin Overview</span>
+              </div>
+            </button>
+          </div>
+
+          {/* Group 1: People & Access */}
+          <div className="p-2.5">
+            <h4 className="text-[10px] text-text-3 uppercase tracking-wider px-2.5 mb-1.5">People & Access</h4>
+            <div className="flex flex-col gap-0.5">
+              {[
+                { id: 'users', label: 'User Directory', icon: Users, count: (users || []).length },
+                { id: 'employees', label: 'Employees', icon: Briefcase, count: (employees || []).length },
+                { id: 'modperms', label: 'Roles & Permissions', icon: Shield, count: null },
+                { id: 'useraccess', label: 'Access Rules', icon: UserCog, count: null },
+              ].map(t => {
+                const active = tab === t.id
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => handleTabChange(t.id)}
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-caption  transition-all text-left w-full ${
+                      active ? 'bg-accent text-white shadow-sm ' : 'text-text-2 hover:bg-bg-2 hover:text-text-0'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <t.icon size={15} className={`shrink-0 ${active ? 'text-white' : 'text-text-3'}`} />
+                      <span className="truncate">{t.label}</span>
+                    </div>
+                    {t.count !== null && (
+                      <span className={`text-[10px] font-mono  px-1.5 py-0.5 rounded-md ${
+                        active ? 'bg-[var(--bg-surface)]/20 text-white' : 'bg-bg-0 text-text-2 border border-border'
+                      }`}>
+                        {t.count}
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Group 2: Asset & Customization */}
+          <div className="p-2.5">
+            <h4 className="text-[10px] text-text-3 uppercase tracking-wider px-2.5 mb-1.5">Asset Configuration</h4>
+            <div className="flex flex-col gap-0.5">
+              {[
+                { id: 'fields', label: 'Field Visibility', icon: Eye, count: null },
+                { id: 'custom', label: 'Custom Fields', icon: Database, count: (settings?.custom_fields || []).length || null },
+                ...(isSuperAdmin ? [{ id: 'qrconfig', label: 'QR Configuration', icon: Hash, count: null }] : []),
+              ].map(t => {
+                const active = tab === t.id
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => handleTabChange(t.id)}
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-caption  transition-all text-left w-full ${
+                      active ? 'bg-accent text-white shadow-sm ' : 'text-text-2 hover:bg-bg-2 hover:text-text-0'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <t.icon size={15} className={`shrink-0 ${active ? 'text-white' : 'text-text-3'}`} />
+                      <span className="truncate">{t.label}</span>
+                    </div>
+                    {t.count !== null && (
+                      <span className={`text-[10px] font-mono  px-1.5 py-0.5 rounded-md ${
+                        active ? 'bg-[var(--bg-surface)]/20 text-white' : 'bg-bg-0 text-text-2 border border-border'
+                      }`}>
+                        {t.count}
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Group 3: Operations & System */}
+          <div className="p-2.5">
+            <h4 className="text-[10px] text-text-3 uppercase tracking-wider px-2.5 mb-1.5">Operations & Security</h4>
+            <div className="flex flex-col gap-0.5">
+              {[
+                { id: 'tracking', label: 'Task SLA Tracking', icon: ClipboardCheck, count: (auditAssignments || []).length || null },
+                { id: 'reports', label: 'Scheduled Reports', icon: FileSpreadsheet, count: (settings?.scheduled_reports || []).length || null },
+                { id: 'logs', label: 'Activity Audit Logs', icon: History, count: null },
+                { id: 'trash', label: 'Trash / Recovery', icon: Trash2, count: (deletedAssets || []).length || null },
+              ].map(t => {
+                const active = tab === t.id
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => handleTabChange(t.id)}
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-caption  transition-all text-left w-full ${
+                      active ? 'bg-accent text-white shadow-sm ' : 'text-text-2 hover:bg-bg-2 hover:text-text-0'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <t.icon size={15} className={`shrink-0 ${active ? 'text-white' : 'text-text-3'}`} />
+                      <span className="truncate">{t.label}</span>
+                    </div>
+                    {t.count !== null && (
+                      <span className={`text-[10px] font-mono  px-1.5 py-0.5 rounded-md ${
+                        active ? 'bg-[var(--bg-surface)]/20 text-white' : 'bg-bg-0 text-text-2 border border-border'
+                      }`}>
+                        {t.count}
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+        </div>
+
+        {/* ── Mobile Tab Strip ── */}
+        <div className="md:hidden flex overflow-x-auto gap-1.5 pb-2 mb-2 w-full custom-scrollbar">
+          {TABS.map(t => {
+            const active = tab === t.id
+            return (
+              <button
+                key={t.id}
+                onClick={() => handleTabChange(t.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-caption  whitespace-nowrap border shrink-0 ${
+                  active ? 'bg-accent text-white border-accent' : 'bg-bg-1 text-text-2 border-border'
+                }`}
+              >
+                <t.icon size={13} />
+                <span>{t.label}</span>
+              </button>
+            )
+          })}
+        </div>
+
+        {/* ── Content Workspace ── */}
+        <div key={tab} className="flex-1 min-w-0 w-full flex flex-col gap-4">
+
+          {/* Contextual Workspace Header */}
+          {(() => {
+            const currentTabObj = TABS.find(t => t.id === tab)
+            return (
+              <div className="bg-bg-1 border border-border rounded-xl px-4 py-3 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-1.5 text-[11px] text-text-3 uppercase tracking-wider mb-1">
+                    <span>Admin</span>
+                    <span>/</span>
+                    <span>{currentTabObj?.group || 'Settings'}</span>
+                    <span>/</span>
+                    <span className="text-accent">{currentTabObj?.label}</span>
+                  </div>
+                  <h2 className="text-page-title m-0 mb-1 tracking-wide uppercase text-text-0">
+                    {currentTabObj?.label}
+                  </h2>
+                  <p className="text-body-medium text-text-2 m-0 truncate max-w-xl">
+                    {currentTabObj?.desc}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  {saved && (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-green/10 border border-green/30 rounded-lg text-caption text-green">
+                      <CheckCircle2 size={13} />
+                      <span>Saved</span>
+                    </div>
+                  )}
+
+                  {tab === 'users' && (
+                    <button 
+                      onClick={() => setAddingUser(true)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-accent text-white hover:bg-accent-hover rounded-lg text-caption shadow-sm transition-all"
+                    >
+                      <UserPlus size={13} />
+                      <span>Add User</span>
+                    </button>
+                  )}
+
+                  {saveError && (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red/10 border border-red/30 rounded-lg text-caption text-red">
+                      <AlertCircle size={13} />
+                      <span>{saveError}</span>
+                      <button onClick={() => setSaveError(null)} className="ml-2 hover:opacity-70"><X size={13}/></button>
+                    </div>
+                  )}
+                  {isDirty && !saveError && !saving && (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber/10 border border-amber/30 rounded-lg text-caption text-amber">
+                      <AlertCircle size={13} />
+                      <span>Unsaved changes</span>
+                    </div>
+                  )}
+
+                  {['fields', 'custom', 'modperms', 'useraccess', 'reports', 'qrconfig'].includes(tab) && (
+                    <button 
+                      onClick={saveSettings} 
+                      disabled={saving || !isDirty} 
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-accent text-white hover:bg-accent-hover rounded-lg text-caption shadow-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {saving ? (
+                        <>
+                          <div className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                          <span>Saving...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Save size={13} />
+                          <span>Save Changes</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  {tab === 'logs' && (
+                    <button 
+                      onClick={() => {
+                        const csvContent = "data:text/csv;charset=utf-8,ID,Action,EntityType,EntityName,Timestamp\n" + actLogs.map(l => `"${l.id}","${l.action}","${l.entity_type}","${l.entity_name || ''}","${l.created_at}"`).join("\n");
+                        const encodedUri = encodeURI(csvContent);
+                        const link = document.createElement("a");
+                        link.setAttribute("href", encodedUri);
+                        link.setAttribute("download", `system_activity_logs_${new Date().toISOString().split('T')[0]}.csv`);
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }} 
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-bg-0 hover:bg-bg-2 border border-border rounded-lg text-caption text-text-0 transition-colors shadow-sm"
+                    >
+                      <Download size={13} className="text-accent" />
+                      <span>Export CSV</span>
+                    </button>
+                  )}
+
+                  <button 
+                    onClick={load} 
+                    className="p-1.5 bg-bg-0 hover:bg-bg-2 border border-border rounded-lg text-text-2 hover:text-text-0 transition-colors shadow-sm"
+                    title="Reload data"
+                  >
+                    <RefreshCw size={14} className={loading ? 'animate-spin text-accent' : ''} />
+                  </button>
+                </div>
+              </div>
+            )
+          })()}
+
+          {/* ── ADMIN OVERVIEW TAB ── */}
+          {tab === 'overview' && (
+            <div className="flex flex-col gap-4">
+              {/* Top 4 Key Admin Indicators */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <StatCard label="Total Users" value={totalUsers} icon={Users} tone="primary" sub={`${activeUsers} active accounts`} />
+                <StatCard label="Admins" value={adminCount} icon={Shield} tone="warning" sub="Full system control" />
+                <StatCard label="Moderators" value={modCount} icon={Lock} tone="special" sub="Field permissions" />
+                <StatCard label="Employees" value={(employees || []).length} icon={Briefcase} tone="success" sub="Personnel records" />
+              </div>
+
+              {/* 2-Column Operational Health Panes */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Pane 1: Access & Configuration Posture */}
+                <div className="bg-bg-1 border border-border rounded-xl p-4 shadow-sm flex flex-col gap-3">
+                  <div className="flex items-center justify-between border-b border-border pb-2.5">
+                    <div className="flex items-center gap-2">
+                      <Shield size={16} className="text-accent" />
+                      <h3 className="text-caption text-text-0 uppercase tracking-wider m-0">Configuration & Access Posture</h3>
+                    </div>
+                    <span className="text-[11px] text-green bg-green/10 px-2 py-0.5 rounded-full border border-green/20">
+                      Active
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col divide-y divide-border text-caption">
+                    <div className="py-2 flex items-center justify-between">
+                      <span className="text-text-3">Custom Field Attributes</span>
+                      <span className="font-mono text-text-0">{(settings?.custom_fields || []).length} defined</span>
+                    </div>
+                    <div className="py-2 flex items-center justify-between">
+                      <span className="text-text-3">Scheduled Automated Reports</span>
+                      <span className="font-mono text-text-0">{(settings?.scheduled_reports || []).length} configured</span>
+                    </div>
+                    <div className="py-2 flex items-center justify-between">
+                      <span className="text-text-3">Deleted Equipment in Trash</span>
+                      <span className="font-mono text-danger">{(deletedAssets || []).length} items</span>
+                    </div>
+                    <div className="py-2 flex items-center justify-between">
+                      <span className="text-text-3">Super Admin Configuration</span>
+                      <span className="font-mono text-accent">{isSuperAdmin ? 'Enabled (Master)' : 'Standard Admin'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pane 2: Recent Activity Audit Stream */}
+                <div className="bg-bg-1 border border-border rounded-xl p-4 shadow-sm flex flex-col gap-3">
+                  <div className="flex items-center justify-between border-b border-border pb-2.5">
+                    <div className="flex items-center gap-2">
+                      <History size={16} className="text-accent" />
+                      <h3 className="text-caption text-text-0 uppercase tracking-wider m-0">Recent Administrative Events</h3>
+                    </div>
+                    <button onClick={() => setTab('logs')} className="text-caption text-accent flex items-center gap-1">
+                      <span>View All Logs</span>
+                      <ChevronRight size={13} />
+                    </button>
+                  </div>
+
+                  {actLogs.length === 0 ? (
+                    <p className="text-caption text-text-3 m-0 py-2">No administrative activity recorded yet.</p>
+                  ) : (
+                    <div className="flex flex-col divide-y divide-border text-caption">
+                      {actLogs.slice(0, 4).map(log => (
+                        <div key={log.id} className="py-2 flex items-center justify-between">
+                          <div className="min-w-0 pr-2">
+                            <span className="text-text-0 block truncate capitalize">{log.action || 'System Change'}</span>
+                            <span className="text-[11px] text-text-3 font-mono block mt-0.5 truncate">
+                              {log.entity_type || 'System'} • {log.profiles?.full_name || 'Administrator'}
+                            </span>
+                          </div>
+                          <span className="text-[10px] text-text-3 font-mono shrink-0">
+                            {log.created_at ? new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Quick Jump Shortcuts Grid */}
+              <div className="bg-bg-1 border border-border rounded-xl p-4 shadow-sm">
+                <h3 className="text-caption text-text-3 uppercase tracking-wider mb-3 flex items-center gap-2 m-0">
+                  <Settings2 size={15} className="text-accent" />
+                  <span>Administrative Control Shortcuts</span>
+                </h3>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  <button onClick={() => setTab('users')} className="p-3 bg-bg-0 hover:bg-bg-2 border border-border rounded-lg text-left active:scale-[0.99] transition-all">
+                    <Users size={16} className="text-accent mb-1" />
+                    <div className="text-caption text-text-0">User Directory</div>
+                    <div className="text-[10px] text-text-3">{totalUsers} accounts</div>
+                  </button>
+
+                  <button onClick={() => setTab('employees')} className="p-3 bg-bg-0 hover:bg-bg-2 border border-border rounded-lg text-left active:scale-[0.99] transition-all">
+                    <Briefcase size={16} className="text-green mb-1" />
+                    <div className="text-caption text-text-0">Employees</div>
+                    <div className="text-[10px] text-text-3">{(employees || []).length} records</div>
+                  </button>
+
+                  <button onClick={() => setTab('custom')} className="p-3 bg-bg-0 hover:bg-bg-2 border border-border rounded-lg text-left active:scale-[0.99] transition-all">
+                    <Database size={16} className="text-amber mb-1" />
+                    <div className="text-caption text-text-0">Custom Fields</div>
+                    <div className="text-[10px] text-text-3">{(settings?.custom_fields || []).length} attributes</div>
+                  </button>
+
+                  <button onClick={() => setTab('trash')} className="p-3 bg-bg-0 hover:bg-bg-2 border border-border rounded-lg text-left active:scale-[0.99] transition-all">
+                    <Trash2 size={16} className="text-danger mb-1" />
+                    <div className="text-caption text-text-0">Trash Recovery</div>
+                    <div className="text-[10px] text-text-3">{(deletedAssets || []).length} deleted</div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── USERS TAB ── */}
+          {tab === 'users' && (
+            <UserDirectory
+              users={users}
+              isSuperAdmin={isSuperAdmin}
+              changeRole={changeRole}
+              toggleActive={toggleActive}
+              setProfileUser={setProfileUser}
+              setSiteUser={setSiteUser}
+              setAddingUser={setAddingUser}
+              ROLES={ROLES}
+            />
+          )}
+
+          {/* ── EMPLOYEES TAB ── */}
+          {tab === 'employees' && (
+            <EmployeeDirectory
+              employees={employees}
+              onRefresh={refreshEmployees}
+            />
+          )}
+
+          {/* ── MOD PERMS TAB ── */}
+          {tab === 'modperms' && (
+            <PermissionsGrid
+              tab={tab}
+              settings={settings}
+              setSettings={setSettings}
+            />
+          )}
+
+          {/* ── USER ACCESS RULES TAB ── */}
+          {tab === 'useraccess' && (
+            <PermissionsGrid
+              tab={tab}
+              settings={settings}
+              setSettings={setSettings}
+            />
+          )}
+
+          {/* ── FIELD VISIBILITY TAB ── */}
+          {tab === 'fields' && (
+            <SettingsManager
+              tab={tab}
+              settings={settings}
+              setSettings={setSettings}
+            />
+          )}
+
+          {/* ── CUSTOM FIELDS TAB ── */}
+          {tab === 'custom' && (
+            <SettingsManager
+              tab={tab}
+              settings={settings}
+              setSettings={setSettings}
+            />
+          )}
+
+          {/* ── SCHEDULED REPORTS TAB ── */}
+          {tab === 'reports' && (
+            <ScheduledReports
+              settings={settings}
+              setSettings={setSettings}
+            />
+          )}
+
+          {/* ── TASK SLA TRACKING TAB ── */}
+          {tab === 'tracking' && (
+            <TaskSlaTracker
+              auditAssignments={auditAssignments}
+              maintSubmissions={maintSubmissions}
+            />
+          )}
+
+          {/* ── QR CONFIG TAB ── */}
+          {isSuperAdmin && tab === 'qrconfig' && (
+            <QrStickerDesigner
+              config={qrConfig}
+              setConfig={setQrConfig}
+            />
+          )}
+
+          {/* ── ACTIVITY LOGS TAB ── */}
+          {tab === 'logs' && (
+            <ActivityLogsHub
+              logs={actLogs}
+              total={actTotal}
+              page={actPage}
+              setPage={setActPage}
+              filter={actFilter}
+              setFilter={setActFilter}
+              loading={actLoading}
+            />
+          )}
+
+          {/* ── TRASH TAB ── */}
+          {tab === 'trash' && (
+            <TrashBinManager
+              deletedAssets={deletedAssets}
+              loading={trashLoading}
+              restoring={restoring}
+              onRestore={handleRestore}
+              onPermanentDelete={handlePermanentDelete}
+            />
+          )}
+
+        </div>{/* end Content Workspace */}
       </div>{/* end Sidebar + Content Layout */}
 
       <style>{`
         @keyframes spin{to{transform:rotate(360deg)}}
         @keyframes admin-fade-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-        @media(max-width:900px){
+        @media(max-width:767px){
           .admin-layout {
             flex-direction: column !important;
             align-items: stretch !important;
           }
           .admin-sidebar {
-            width: 100% !important;
-            position: static !important;
-            margin-bottom: 20px;
+            display: none !important;
           }
-          .admin-sidebar button {
-            padding: 8px 10px !important;
-          }
+        }
+        @media(min-width:768px){
+          .admin-layout > .md\\:hidden { display: none !important; }
         }
       `}</style>
 
@@ -716,10 +1170,10 @@ export default function AdminPage() {
             {/* Header */}
             <div className="card-header" style={{ background: 'var(--bg-3)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ padding: 7, background: 'rgba(79,126,255,0.12)', borderRadius: 9, color: 'var(--accent)', border: '1px solid var(--accent)30' }}>
+                <div style={{ padding: 7, background: 'var(--accent-soft)', borderRadius: 9, color: 'var(--accent)', border: '1px solid var(--accent)30' }}>
                   <UserPlus size={16}/>
                 </div>
-                <h2 className="font-display" style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.04em', margin: 0, color: 'var(--text-0)' }}>
+                <h2 className="font-display" style={{ letterSpacing: '0.04em', margin: 0, color: 'var(--text-0)' }}>
                   ADD NEW USER
                 </h2>
               </div>
@@ -787,8 +1241,7 @@ export default function AdminPage() {
                         onClick={() => setNewUser(u => ({ ...u, role: r }))}
                         style={{
                           flex: 1, padding: '10px 8px', borderRadius: 10, border: `1.5px solid`,
-                          cursor: 'pointer', transition: 'all 0.15s', fontFamily: 'DM Sans', fontWeight: 600, fontSize: '0.8rem',
-                          borderColor: active ? rm.color : 'var(--border)',
+                          cursor: 'pointer', transition: 'all 0.15s', borderColor: active ? rm.color : 'var(--border)',
                           background: active ? rm.bg : 'var(--bg-3)',
                           color: active ? rm.color : 'var(--text-3)',
                           boxShadow: active ? `0 0 10px ${rm.color}20` : 'none',
@@ -802,9 +1255,9 @@ export default function AdminPage() {
               </div>
 
               {/* Info note */}
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, padding: '8px 10px', background: 'var(--bg-3)', borderRadius: 8, fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, padding: '8px 10px', background: 'var(--bg-3)', borderRadius: 8, color: 'var(--text-3)', }}>
                 <AlertCircle size={12} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 1 }}/>
-                The account is created immediately and confirmed — the user can sign in right away.
+                The account is created immediately and confirmed - the user can sign in right away.
               </div>
 
               {/* Actions */}

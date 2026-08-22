@@ -34,30 +34,30 @@ import BatchAuditActions from '../components/auditModule/BatchAuditActions'
 // ── Helpers ─────────────────────────────────────────────────
 
 const STATUS_COLORS = {
-  pending:      { label: 'Pending',     color: 'var(--amber)',  bg: 'rgba(245,158,11,0.1)' },
+  pending:      { label: 'Pending',     color: 'var(--amber)',  bg: 'var(--status-warning-soft)' },
   in_progress:  { label: 'In Progress', color: 'var(--accent)', bg: 'rgba(14,165,233,0.1)' },
   completed:    { label: 'Completed',   color: 'var(--green)',  bg: 'rgba(34,197,94,0.1)' },
   cancelled:    { label: 'Cancelled',   color: 'var(--text-3)', bg: 'var(--bg-3)' },
 }
 
 const APPROVAL_COLORS = {
-  pending_checker: { label: 'Pending Checker', color: 'var(--amber)',  bg: 'rgba(245,158,11,0.1)' },
+  pending_checker: { label: 'Pending Checker', color: 'var(--amber)',  bg: 'var(--status-warning-soft)' },
   pending_hod:     { label: 'Pending HOD',     color: 'var(--accent)', bg: 'rgba(14,165,233,0.1)' },
   approved:        { label: 'Approved',         color: 'var(--green)',  bg: 'rgba(34,197,94,0.1)' },
-  rejected:        { label: 'Rejected',         color: 'var(--red)',    bg: 'rgba(239,68,68,0.1)' },
+  rejected:        { label: 'Rejected',         color: 'var(--red)',    bg: 'var(--status-danger-soft)' },
 }
 
 const CONDITION_COLORS = {
   operational:    { label: 'Operational',    color: 'var(--green)',  bg: 'rgba(34,197,94,0.1)' },
-  damaged:        { label: 'Damaged',        color: 'var(--amber)',  bg: 'rgba(245,158,11,0.1)' },
+  damaged:        { label: 'Damaged',        color: 'var(--amber)',  bg: 'var(--status-warning-soft)' },
   needs_repair:   { label: 'Needs Repair',   color: 'var(--accent)', bg: 'rgba(14,165,233,0.1)' },
-  non_functional: { label: 'Non-Functional', color: 'var(--red)',    bg: 'rgba(239,68,68,0.1)' },
+  non_functional: { label: 'Non-Functional', color: 'var(--red)',    bg: 'var(--status-danger-soft)' },
   missing:        { label: 'Missing',        color: 'var(--text-3)', bg: 'var(--bg-3)' },
 }
 
 const FREQ_COLORS = {
-  daily:   { label: 'Daily',   color: 'var(--red)',    bg: 'rgba(239,68,68,0.1)' },
-  weekly:  { label: 'Weekly',  color: 'var(--amber)',  bg: 'rgba(245,158,11,0.1)' },
+  daily:   { label: 'Daily',   color: 'var(--red)',    bg: 'var(--status-danger-soft)' },
+  weekly:  { label: 'Weekly',  color: 'var(--amber)',  bg: 'var(--status-warning-soft)' },
   monthly: { label: 'Monthly', color: 'var(--accent)', bg: 'rgba(14,165,233,0.1)' },
 }
 
@@ -585,11 +585,11 @@ export default function AuditModulePage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 16 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <h1 className="font-display" style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--text-0)', letterSpacing: '0.04em', marginBottom: 4 }}>
-              AUDIT <span style={{ color: 'var(--accent)' }}>& MAINTENANCE</span>
+            <h1 className="text-page-title m-0 mb-1 tracking-wide uppercase">
+              AUDIT <span className="text-accent">&amp; MAINTENANCE</span>
             </h1>
           </div>
-          <p style={{ color: 'var(--text-2)', fontSize: '0.875rem' }}>
+          <p style={{ color: 'var(--text-2)', }}>
             {stats.total} audit{stats.total !== 1 ? 's' : ''} · {stats.completed} completed · {myPendingApprovals.length} pending approvals
           </p>
         </div>
@@ -630,8 +630,8 @@ export default function AuditModulePage() {
           <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'var(--bg-2)', borderRadius: 10, border: '1px solid var(--border)' }}>
             <s.icon size={16} style={{ color: s.color, flexShrink: 0 }} />
             <div>
-              <div style={{ fontSize: '1.1rem', fontWeight: 700, fontFamily: 'Oswald', color: 'var(--text-0)' }}>{s.val}</div>
-              <div style={{ fontSize: '0.62rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
+              <div style={{ color: 'var(--text-0)' }}>{s.val}</div>
+              <div style={{ color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
             </div>
           </div>
         ))}
@@ -657,13 +657,13 @@ export default function AuditModulePage() {
                 style={{
                   width: '100%', padding: '8px 10px 8px 32px', borderRadius: 8,
                   border: '1px solid var(--border)', background: 'var(--bg-1)',
-                  fontFamily: 'DM Sans', fontSize: '0.82rem', color: 'var(--text-1)',
+                  color: 'var(--text-1)',
                 }}
               />
             </div>
             <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{
               padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)',
-              background: 'var(--bg-1)', fontFamily: 'DM Sans', fontSize: '0.82rem', color: 'var(--text-1)',
+              background: 'var(--bg-1)', color: 'var(--text-1)',
             }}>
               <option value="all">All Statuses</option>
               <option value="pending">Pending</option>
@@ -676,7 +676,7 @@ export default function AuditModulePage() {
           {myAssignments.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-3)' }}>
               <ClipboardCheck size={36} style={{ marginBottom: 10, opacity: 0.4 }} />
-              <p style={{ fontFamily: 'DM Sans', fontSize: '0.85rem' }}>No audit assignments found</p>
+              <p >No audit assignments found</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -700,26 +700,26 @@ export default function AuditModulePage() {
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-                        <span style={{ fontFamily: 'Oswald', fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-0)' }}>
+                        <span style={{ color: 'var(--text-0)' }}>
                           {a.title}
                         </span>
                         <span style={{
-                          fontSize: '0.6rem', padding: '2px 8px', borderRadius: 10,
-                          fontFamily: 'DM Sans', fontWeight: 600, textTransform: 'uppercase',
+                          padding: '2px 8px', borderRadius: 10,
+                          textTransform: 'uppercase',
                           background: sc.bg, color: sc.color,
                         }}>{sc.label}</span>
                         <span style={{
-                          fontSize: '0.6rem', padding: '2px 8px', borderRadius: 10,
-                          fontFamily: 'DM Sans', fontWeight: 600, textTransform: 'uppercase',
+                          padding: '2px 8px', borderRadius: 10,
+                          textTransform: 'uppercase',
                           background: 'var(--bg-3)', color: 'var(--text-3)',
                         }}>{a.audit_type === 'asset_count' ? 'Asset Count' : 'Maintenance'}</span>
                       </div>
-                      <div style={{ display: 'flex', gap: 14, fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>
+                      <div style={{ display: 'flex', gap: 14, color: 'var(--text-3)', }}>
                         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <Building2 size={11} /> {a.site?.name || '—'}
+                          <Building2 size={11} /> {a.site?.name || '-'}
                         </span>
                         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <Users size={11} /> {a.auditor?.full_name || '—'}
+                          <Users size={11} /> {a.auditor?.full_name || '-'}
                         </span>
                         {a.due_date && (
                           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -748,12 +748,12 @@ export default function AuditModulePage() {
               <button onClick={() => setSelectedAssignment(null)} className="btn-ghost" style={{ padding: '5px 8px' }}>
                 <ChevronRight size={14} style={{ transform: 'rotate(180deg)' }} /> Back
               </button>
-              <h2 className="font-display" style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>
+              <h2 className="font-display" style={{ margin: 0 }}>
                 {selectedAssignment.title}
               </h2>
               <span style={{
-                fontSize: '0.62rem', padding: '2px 10px', borderRadius: 10,
-                fontFamily: 'DM Sans', fontWeight: 600, textTransform: 'uppercase',
+                padding: '2px 10px', borderRadius: 10,
+                textTransform: 'uppercase',
                 background: (STATUS_COLORS[selectedAssignment.status] || STATUS_COLORS.pending).bg,
                 color: (STATUS_COLORS[selectedAssignment.status] || STATUS_COLORS.pending).color,
               }}>{(STATUS_COLORS[selectedAssignment.status] || STATUS_COLORS.pending).label}</span>
@@ -767,17 +767,17 @@ export default function AuditModulePage() {
                     const doc = await generateAssetCountPDF(selectedAssignment, assignmentItems, logo)
                     doc.save(`audit-report-${selectedAssignment.title.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`)
                   } catch (e) { alert('PDF generation failed: ' + e.message); console.error(e) }
-                }} className="btn-ghost" style={{ fontSize: '0.78rem', padding: '7px 14px' }}>
+                }} className="btn-ghost" style={{ padding: '7px 14px' }}>
                   <Download size={14} /> Download Report
                 </button>
               )}
               {selectedAssignment.status !== 'completed' && (
-                <button onClick={() => setShowScanner(true)} className="btn-primary" style={{ fontSize: '0.78rem', padding: '7px 14px' }}>
+                <button onClick={() => setShowScanner(true)} className="btn-primary" style={{ padding: '7px 14px' }}>
                   <QrCode size={14} /> Scan QR
                 </button>
               )}
               {isAdmin && (
-                <button onClick={() => handleDeleteAssignment(selectedAssignment.id)} className="btn-ghost" style={{ fontSize: '0.78rem', color: 'var(--red)' }}>
+                <button onClick={() => handleDeleteAssignment(selectedAssignment.id)} className="btn-ghost" style={{ color: 'var(--red)' }}>
                   <Trash2 size={13} />
                 </button>
               )}
@@ -790,30 +790,30 @@ export default function AuditModulePage() {
             padding: 14, borderRadius: 12, background: 'var(--bg-1)', border: '1px solid var(--border)',
           }}>
             <div>
-              <span className="lbl" style={{ fontSize: '0.62rem' }}>Type</span>
-              <p style={{ fontSize: '0.82rem', fontFamily: 'DM Sans', margin: '2px 0 0', fontWeight: 600 }}>
+              <span className="lbl" >Type</span>
+              <p style={{ margin: '2px 0 0', }}>
                 {selectedAssignment.audit_type === 'asset_count' ? 'Asset Count Audit' : 'Maintenance Checklist Audit'}
               </p>
             </div>
             <div>
-              <span className="lbl" style={{ fontSize: '0.62rem' }}>Site</span>
-              <p style={{ fontSize: '0.82rem', fontFamily: 'DM Sans', margin: '2px 0 0' }}>
-                {selectedAssignment.site?.name || '—'}
+              <span className="lbl" >Site</span>
+              <p style={{ margin: '2px 0 0' }}>
+                {selectedAssignment.site?.name || '-'}
                 {selectedAssignment.site?.latitude && (
-                  <span style={{ fontSize: '0.65rem', color: 'var(--text-3)', marginLeft: 6 }}>
+                  <span style={{ color: 'var(--text-3)', marginLeft: 6 }}>
                     ({Number(selectedAssignment.site.latitude).toFixed(4)}, {Number(selectedAssignment.site.longitude).toFixed(4)})
                   </span>
                 )}
               </p>
             </div>
             <div>
-              <span className="lbl" style={{ fontSize: '0.62rem' }}>Auditor</span>
-              <p style={{ fontSize: '0.82rem', fontFamily: 'DM Sans', margin: '2px 0 0' }}>{selectedAssignment.auditor?.full_name || '—'}</p>
+              <span className="lbl" >Auditor</span>
+              <p style={{ margin: '2px 0 0' }}>{selectedAssignment.auditor?.full_name || '-'}</p>
             </div>
             <div>
-              <span className="lbl" style={{ fontSize: '0.62rem' }}>Due Date</span>
-              <p style={{ fontSize: '0.82rem', fontFamily: 'DM Sans', margin: '2px 0 0' }}>
-                {selectedAssignment.due_date ? new Date(selectedAssignment.due_date).toLocaleDateString('en-GB') : '—'}
+              <span className="lbl" >Due Date</span>
+              <p style={{ margin: '2px 0 0' }}>
+                {selectedAssignment.due_date ? new Date(selectedAssignment.due_date).toLocaleDateString('en-GB') : '-'}
               </p>
             </div>
           </div>
@@ -835,20 +835,19 @@ export default function AuditModulePage() {
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 10 }}>
                     <div>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-0)', fontFamily: 'DM Sans' }}>
+                      <span style={{ color: 'var(--text-0)', }}>
                         Audit Verification Progress
                       </span>
-                      <div style={{ display: 'flex', gap: 12, marginTop: 4, fontSize: '0.72rem', fontFamily: 'DM Sans' }}>
-                        <span style={{ color: 'var(--green)', fontWeight: 600 }}>Verified: {assignmentItemStats.verified}</span>
-                        <span style={{ color: 'var(--amber)', fontWeight: 600 }}>Unverified: {assignmentItemStats.unverified}</span>
+                      <div style={{ display: 'flex', gap: 12, marginTop: 4, }}>
+                        <span style={{ color: 'var(--green)', }}>Verified: {assignmentItemStats.verified}</span>
+                        <span style={{ color: 'var(--amber)', }}>Unverified: {assignmentItemStats.unverified}</span>
                         <span style={{ color: 'var(--text-3)' }}>Total: {assignmentItemStats.total}</span>
                       </div>
                     </div>
 
                     {selectedAssignment.status === 'completed' ? (
                       <span style={{
-                        padding: '8px 14px', borderRadius: 8, fontSize: '0.78rem', fontWeight: 700,
-                        background: 'rgba(34,197,94,0.1)', color: '#059669', border: '1px solid rgba(34,197,94,0.3)',
+                        padding: '8px 14px', borderRadius: 8, background: 'rgba(34,197,94,0.1)', color: '#059669', border: '1px solid rgba(34,197,94,0.3)',
                         display: 'flex', alignItems: 'center', gap: 6
                       }}>
                         <CheckCircle2 size={16} /> Audit Finalized & Locked
@@ -858,7 +857,7 @@ export default function AuditModulePage() {
                         onClick={() => setShowSelfie(true)}
                         className="btn-primary"
                         style={{
-                          padding: '10px 18px', fontSize: '0.82rem', fontWeight: 700, borderRadius: 10,
+                          padding: '10px 18px', borderRadius: 10,
                           background: 'linear-gradient(135deg, #0ea5e9, #0284c7)',
                           display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 12px rgba(14,165,233,0.25)'
                         }}
@@ -895,10 +894,10 @@ export default function AuditModulePage() {
                 <div style={{ textAlign: 'center', padding: 30 }}><Loader2 size={22} className="spin" style={{ color: 'var(--accent)' }} /></div>
               ) : assignmentItems.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '30px 20px' }}>
-                  <p style={{ fontSize: '0.82rem', color: 'var(--text-3)', fontFamily: 'DM Sans', marginBottom: 12 }}>
+                  <p style={{ color: 'var(--text-3)', marginBottom: 12 }}>
                     No assets loaded yet. Populate from the assigned site.
                   </p>
-                  <button onClick={handlePopulateItems} className="btn-primary" style={{ fontSize: '0.82rem' }}>
+                  <button onClick={handlePopulateItems} className="btn-primary" >
                     <Plus size={14} /> Populate Assets from Site
                   </button>
                 </div>
@@ -913,9 +912,9 @@ export default function AuditModulePage() {
                     
                     const OPTION_STYLES = {
                       operational: { color: '#059669', bg: 'rgba(5,150,105,0.08)', border: 'rgba(5,150,105,0.3)' },
-                      damaged: { color: '#d97706', bg: 'rgba(217,119,6,0.08)', border: 'rgba(217,119,6,0.3)' },
+                      damaged: { color: 'var(--status-warning)', bg: 'rgba(217,119,6,0.08)', border: 'rgba(217,119,6,0.3)' },
                       needs_repair: { color: '#0891b2', bg: 'rgba(8,145,178,0.08)', border: 'rgba(8,145,178,0.3)' },
-                      non_functional: { color: '#dc2626', bg: 'rgba(220,38,38,0.08)', border: 'rgba(220,38,38,0.3)' },
+                      non_functional: { color: 'var(--status-danger)', bg: 'rgba(220,38,38,0.08)', border: 'rgba(220,38,38,0.3)' },
                       missing: { color: '#64748b', bg: 'rgba(100,116,139,0.08)', border: 'rgba(100,116,139,0.3)' },
                     }
                     const optStyle = OPTION_STYLES[item.condition] || { color: 'var(--text-1)', bg: 'var(--bg-2)', border: 'var(--border)' }
@@ -933,23 +932,22 @@ export default function AuditModulePage() {
                         <StatusIcon size={18} style={{ color: statusColor, flexShrink: 0 }} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                            <span style={{ fontFamily: 'Oswald', fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-0)' }}>
+                            <span style={{ color: 'var(--text-0)' }}>
                               {item.asset?.asset_code}
                             </span>
-                            <span style={{ fontSize: '0.78rem', fontFamily: 'DM Sans', color: 'var(--text-2)' }}>
+                            <span style={{ color: 'var(--text-2)' }}>
                               {item.asset?.asset_name}
                             </span>
                           </div>
                           <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap', alignItems: 'center' }}>
                             {cond && (
                               <span style={{
-                                fontSize: '0.6rem', padding: '1px 7px', borderRadius: 8,
-                                background: cond.bg, color: cond.color, fontFamily: 'DM Sans', fontWeight: 600,
-                              }}>{cond.label}</span>
+                                padding: '1px 7px', borderRadius: 8,
+                                background: cond.bg, color: cond.color, }}>{cond.label}</span>
                             )}
                             <GeoStatusBadge verified={item.geo_verified} latitude={item.scan_latitude} longitude={item.scan_longitude} />
                             {item.condition_notes && (
-                              <span style={{ fontSize: '0.68rem', color: 'var(--accent)', fontFamily: 'DM Sans', fontStyle: 'italic', fontWeight: 600 }}>
+                              <span style={{ color: 'var(--accent)', fontStyle: 'italic', }}>
                                 Note: "{item.condition_notes}"
                               </span>
                             )}
@@ -966,9 +964,6 @@ export default function AuditModulePage() {
                             style={{
                               padding: '6px 12px',
                               borderRadius: 8,
-                              fontSize: '0.78rem',
-                              fontWeight: 600,
-                              fontFamily: 'DM Sans',
                               border: `1px solid ${optStyle.border}`,
                               background: optStyle.bg,
                               color: optStyle.color,
@@ -991,8 +986,7 @@ export default function AuditModulePage() {
                               onClick={() => handleOpenNoteModal(item)}
                               className="btn-ghost"
                               style={{
-                                padding: '6px 10px', borderRadius: 8, fontSize: '0.72rem', fontWeight: 600,
-                                border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-2)',
+                                padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-2)',
                                 display: 'flex', alignItems: 'center', gap: 4
                               }}
                               title="Add Observation Note"
@@ -1017,11 +1011,11 @@ export default function AuditModulePage() {
                     width: 50, height: 50, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--green)',
                   }} />
                   <div>
-                    <p style={{ fontSize: '0.78rem', fontFamily: 'DM Sans', fontWeight: 600, color: 'var(--green)', margin: 0 }}>
+                    <p style={{ color: 'var(--green)', margin: 0 }}>
                       Audit Completed
                     </p>
-                    <p style={{ fontSize: '0.68rem', fontFamily: 'DM Sans', color: 'var(--text-3)', margin: '2px 0 0' }}>
-                      Completed: {selectedAssignment.completed_at ? new Date(selectedAssignment.completed_at).toLocaleString('en-GB') : '—'}
+                    <p style={{ color: 'var(--text-3)', margin: '2px 0 0' }}>
+                      Completed: {selectedAssignment.completed_at ? new Date(selectedAssignment.completed_at).toLocaleString('en-GB') : '-'}
                     </p>
                   </div>
                 </div>
@@ -1036,10 +1030,10 @@ export default function AuditModulePage() {
                 padding: 16, borderRadius: 12, background: 'var(--bg-1)', border: '1px solid var(--border)',
                 textAlign: 'center',
               }}>
-                <p style={{ fontSize: '0.85rem', fontFamily: 'DM Sans', color: 'var(--text-2)', marginBottom: 14 }}>
+                <p style={{ color: 'var(--text-2)', marginBottom: 14 }}>
                   Scan an asset's QR code to load its maintenance checklist.
                 </p>
-                <button onClick={() => setShowScanner(true)} className="btn-primary" style={{ fontSize: '0.85rem', padding: '10px 20px' }}>
+                <button onClick={() => setShowScanner(true)} className="btn-primary" style={{ padding: '10px 20px' }}>
                   <QrCode size={16} /> Scan Asset QR Code
                 </button>
               </div>
@@ -1058,17 +1052,16 @@ export default function AuditModulePage() {
                       }}>
                         <FileSpreadsheet size={16} style={{ color: 'var(--accent)', flexShrink: 0 }} />
                         <div style={{ flex: 1 }}>
-                          <span style={{ fontSize: '0.78rem', fontFamily: 'DM Sans', fontWeight: 600 }}>
-                            {sub.asset?.asset_code} — {sub.checklist?.name}
+                          <span >
+                            {sub.asset?.asset_code} - {sub.checklist?.name}
                           </span>
-                          <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>
+                          <div style={{ color: 'var(--text-3)', }}>
                             {new Date(sub.submitted_at).toLocaleString('en-GB')}
                           </div>
                         </div>
                         <span style={{
-                          fontSize: '0.6rem', padding: '2px 8px', borderRadius: 10,
-                          background: asc.bg, color: asc.color, fontFamily: 'DM Sans', fontWeight: 600,
-                        }}>{asc.label}</span>
+                          padding: '2px 8px', borderRadius: 10,
+                          background: asc.bg, color: asc.color, }}>{asc.label}</span>
                       </div>
                     )
                   })}
@@ -1091,10 +1084,10 @@ export default function AuditModulePage() {
               marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
             }}>
               <div style={{ flex: 1, minWidth: 200 }}>
-                <p style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '0.82rem', margin: '0 0 4px', color: 'var(--text-0)' }}>
+                <p style={{ margin: '0 0 4px', color: 'var(--text-0)' }}>
                   UPLOAD CHECKLIST FOR ASSET TYPE
                 </p>
-                <p style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'DM Sans', margin: 0 }}>
+                <p style={{ color: 'var(--text-3)', margin: 0 }}>
                   Select an asset type, then upload its Excel checklist. It will auto-link to all matching assets.
                 </p>
               </div>
@@ -1102,7 +1095,7 @@ export default function AuditModulePage() {
                 id="upload-asset-type"
                 style={{
                   padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)',
-                  background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.82rem', color: 'var(--text-1)', minWidth: 180,
+                  background: 'var(--bg-2)', color: 'var(--text-1)', minWidth: 180,
                 }}
               >
                 <option value="">Select asset type...</option>
@@ -1111,8 +1104,7 @@ export default function AuditModulePage() {
               <label style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px',
                 borderRadius: 8, background: 'var(--accent)', color: 'white', cursor: 'pointer',
-                fontFamily: 'DM Sans', fontSize: '0.78rem', fontWeight: 600,
-              }}>
+                }}>
                 <FileSpreadsheet size={14} /> Upload Excel
                 <input type="file" accept=".xlsx,.xls,.csv" style={{ display: 'none' }} onChange={async (e) => {
                   const file = e.target.files?.[0]
@@ -1181,8 +1173,8 @@ export default function AuditModulePage() {
           )}
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', fontFamily: 'DM Sans', margin: 0 }}>
-              Maintenance checklist templates — upload per asset type or import bulk
+            <p style={{ color: 'var(--text-3)', margin: 0 }}>
+              Maintenance checklist templates - upload per asset type or import bulk
             </p>
             {(isAdmin || isMod) && (
               <div style={{ display: 'flex', gap: 8 }}>
@@ -1202,10 +1194,10 @@ export default function AuditModulePage() {
                   const wb = XLSX.utils.book_new()
                   XLSX.utils.book_append_sheet(wb, ws, 'Checklists')
                   XLSX.writeFile(wb, 'checklist_template.xlsx')
-                }} className="btn-ghost" style={{ fontSize: '0.78rem', padding: '7px 14px' }}>
+                }} className="btn-ghost" style={{ padding: '7px 14px' }}>
                   <Download size={14} /> Download Template
                 </button>
-                <button onClick={() => setShowBuilderModal(true)} className="btn-primary" style={{ fontSize: '0.78rem', padding: '7px 14px' }}>
+                <button onClick={() => setShowBuilderModal(true)} className="btn-primary" style={{ padding: '7px 14px' }}>
                   <Plus size={14} /> Build Checklist
                 </button>
               </div>
@@ -1226,8 +1218,8 @@ export default function AuditModulePage() {
             return allChecklists.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-3)' }}>
               <FileSpreadsheet size={36} style={{ marginBottom: 10, opacity: 0.4 }} />
-              <p style={{ fontFamily: 'DM Sans', fontSize: '0.85rem' }}>No maintenance checklists yet</p>
-              <p style={{ fontFamily: 'DM Sans', fontSize: '0.75rem' }}>Import checklists from Excel to get started</p>
+              <p >No maintenance checklists yet</p>
+              <p >Import checklists from Excel to get started</p>
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 10 }}>
@@ -1240,18 +1232,18 @@ export default function AuditModulePage() {
                     border: '1px solid var(--border)',
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                      <span style={{ fontFamily: 'Oswald', fontWeight: 600, fontSize: '0.88rem' }}>{cl.name}</span>
+                      <span >{cl.name}</span>
                       <span style={{
-                        fontSize: '0.6rem', padding: '2px 8px', borderRadius: 10,
-                        background: fc.bg, color: fc.color, fontFamily: 'DM Sans', fontWeight: 600, textTransform: 'uppercase',
+                        padding: '2px 8px', borderRadius: 10,
+                        background: fc.bg, color: fc.color, textTransform: 'uppercase',
                       }}>{cl.frequency || 'monthly'}</span>
                     </div>
                     {cl.category && (
-                      <p style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans', margin: '0 0 4px' }}>
+                      <p style={{ color: 'var(--text-3)', margin: '0 0 4px' }}>
                         Category: {cl.category}
                       </p>
                     )}
-                    <p style={{ fontSize: '0.72rem', color: 'var(--text-2)', fontFamily: 'DM Sans', margin: '0 0 8px' }}>
+                    <p style={{ color: 'var(--text-2)', margin: '0 0 8px' }}>
                       {(cl.items || []).length} inspection items
                     </p>
 
@@ -1259,7 +1251,7 @@ export default function AuditModulePage() {
                     <div style={{ marginBottom: 8 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                         <Link2 size={11} style={{ color: 'var(--accent)' }} />
-                        <span style={{ fontSize: '0.68rem', fontFamily: 'Oswald', fontWeight: 600, color: 'var(--accent)', letterSpacing: '0.03em' }}>
+                        <span style={{ color: 'var(--accent)', letterSpacing: '0.03em' }}>
                           LINKED TO ({linked.length} asset type{linked.length !== 1 ? 's' : ''})
                         </span>
                       </div>
@@ -1269,8 +1261,7 @@ export default function AuditModulePage() {
                             <span key={i} style={{
                               display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 6,
                               background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)',
-                              color: 'var(--green)', fontSize: '0.65rem', fontFamily: 'DM Sans', fontWeight: 600,
-                            }}>
+                              color: 'var(--green)', }}>
                               {name}
                               {(isAdmin || isMod) && (
                                 <X size={10} style={{ cursor: 'pointer', opacity: 0.7 }} onClick={async () => {
@@ -1296,7 +1287,7 @@ export default function AuditModulePage() {
                           }}
                           style={{
                             width: '100%', padding: '5px 8px', borderRadius: 6, border: '1px dashed var(--border)',
-                            background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.72rem', color: 'var(--text-2)',
+                            background: 'var(--bg-2)', color: 'var(--text-2)',
                           }}
                         >
                           <option value="">+ Link to asset type...</option>
@@ -1309,7 +1300,7 @@ export default function AuditModulePage() {
 
                     {(isAdmin || isMod) && (
                       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6, marginTop: 4 }}>
-                        <button onClick={() => setEditingChecklist(cl)} className="btn-ghost" style={{ fontSize: '0.68rem', padding: '3px 8px' }}>
+                        <button onClick={() => setEditingChecklist(cl)} className="btn-ghost" style={{ padding: '3px 8px' }}>
                           <Settings size={11} /> Edit
                         </button>
                         <button onClick={async () => {
@@ -1317,7 +1308,7 @@ export default function AuditModulePage() {
                           const table = cl.source === 'old' ? 'checklist_templates' : 'maintenance_checklists'
                           await supabase.from(table).delete().eq('id', cl.id)
                           await loadAll()
-                        }} className="btn-ghost" style={{ fontSize: '0.68rem', color: 'var(--red)', padding: '3px 8px' }}>
+                        }} className="btn-ghost" style={{ color: 'var(--red)', padding: '3px 8px' }}>
                           <Trash2 size={11} /> Delete
                         </button>
                       </div>
@@ -1345,7 +1336,7 @@ export default function AuditModulePage() {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <AlertTriangle size={16} style={{ color: 'var(--amber)' }} />
-                <span style={{ fontSize: '0.8rem', fontFamily: 'DM Sans', color: 'var(--text-0)', fontWeight: 600 }}>
+                <span style={{ color: 'var(--text-0)', }}>
                   {myPendingApprovals.length} submission(s) awaiting your approval
                 </span>
               </div>
@@ -1355,7 +1346,7 @@ export default function AuditModulePage() {
                   onClick={handleBatchApprove}
                   className="btn-primary"
                   style={{
-                    padding: '6px 14px', fontSize: '0.78rem', fontWeight: 700, borderRadius: 8,
+                    padding: '6px 14px', borderRadius: 8,
                     background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none',
                     display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 2px 8px rgba(16,185,129,0.3)'
                   }}
@@ -1369,7 +1360,7 @@ export default function AuditModulePage() {
           {submissions.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-3)' }}>
               <Shield size={36} style={{ marginBottom: 10, opacity: 0.4 }} />
-              <p style={{ fontFamily: 'DM Sans', fontSize: '0.85rem' }}>No submissions yet</p>
+              <p >No submissions yet</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -1387,8 +1378,8 @@ export default function AuditModulePage() {
                 return (
                   <div key={sub.id} onClick={() => setShowApproval(sub)} style={{
                     padding: '12px 16px', borderRadius: 10,
-                    background: isMyApproval ? 'rgba(245,158,11,0.04)' : 'var(--bg-1)',
-                    border: `1px solid ${isMyApproval ? 'rgba(245,158,11,0.3)' : 'var(--border)'}`,
+                    background: isMyApproval ? 'var(--status-warning-soft)' : 'var(--bg-1)',
+                    border: `1px solid ${isMyApproval ? 'var(--status-warning-soft)' : 'var(--border)'}`,
                     cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 14,
                     transition: 'border-color 0.2s',
                   }}>
@@ -1412,33 +1403,31 @@ export default function AuditModulePage() {
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2, flexWrap: 'wrap' }}>
-                        <span style={{ fontFamily: 'Oswald', fontWeight: 600, fontSize: '0.82rem' }}>
-                          {sub.asset?.asset_code} — {sub.checklist?.name}
+                        <span >
+                          {sub.asset?.asset_code} - {sub.checklist?.name}
                         </span>
                         <span style={{
-                          fontSize: '0.6rem', padding: '2px 8px', borderRadius: 10,
-                          background: asc.bg, color: asc.color, fontFamily: 'DM Sans', fontWeight: 600,
-                        }}>{asc.label}</span>
+                          padding: '2px 8px', borderRadius: 10,
+                          background: asc.bg, color: asc.color, }}>{asc.label}</span>
 
                         {/* SLA Countdown Timer Badge */}
                         <span style={{
-                          fontSize: '0.6rem', padding: '2px 8px', borderRadius: 10,
-                          background: isSlaBreached ? 'rgba(239,68,68,0.1)' : hoursLeft < 4 ? 'rgba(245,158,11,0.1)' : 'rgba(34,197,94,0.1)',
-                          color: isSlaBreached ? '#dc2626' : hoursLeft < 4 ? '#d97706' : '#059669',
-                          fontFamily: 'DM Sans', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4
+                          padding: '2px 8px', borderRadius: 10,
+                          background: isSlaBreached ? 'var(--status-danger-soft)' : hoursLeft < 4 ? 'var(--status-warning-soft)' : 'rgba(34,197,94,0.1)',
+                          color: isSlaBreached ? 'var(--status-danger)' : hoursLeft < 4 ? 'var(--status-warning)' : '#059669',
+                          display: 'flex', alignItems: 'center', gap: 4
                         }}>
                           <Clock size={10} /> {isSlaBreached ? '🚨 SLA Breached' : `⏰ SLA: ${hoursLeft}h left`}
                         </span>
 
                         {isMyApproval && (
                           <span style={{
-                            fontSize: '0.6rem', padding: '2px 8px', borderRadius: 10,
-                            background: 'rgba(239,68,68,0.1)', color: 'var(--red)',
-                            fontFamily: 'DM Sans', fontWeight: 600,
-                          }}>ACTION REQUIRED</span>
+                            padding: '2px 8px', borderRadius: 10,
+                            background: 'var(--status-danger-soft)', color: 'var(--red)',
+                            }}>ACTION REQUIRED</span>
                         )}
                       </div>
-                      <div style={{ display: 'flex', gap: 14, fontSize: '0.68rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>
+                      <div style={{ display: 'flex', gap: 14, color: 'var(--text-3)', }}>
                         <span>By: {sub.prepared_name || sub.preparer?.full_name}</span>
                         <span>{new Date(sub.submitted_at).toLocaleDateString('en-GB')}</span>
                         {sub.checklist?.frequency && (
@@ -1468,7 +1457,7 @@ export default function AuditModulePage() {
                 <div style={{ padding: 8, background: 'var(--accent-glow)', borderRadius: 10, color: 'var(--accent)', border: '1px solid var(--accent)30' }}>
                   <Plus size={18} />
                 </div>
-                <h2 className="font-display" style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.04em', margin: 0 }}>
+                <h2 className="font-display" style={{ letterSpacing: '0.04em', margin: 0 }}>
                   CREATE AUDIT ASSIGNMENT
                 </h2>
               </div>
@@ -1478,13 +1467,13 @@ export default function AuditModulePage() {
               <div>
                 <label className="lbl">Audit Title</label>
                 <input type="text" value={assignForm.title} onChange={e => setAssignForm(f => ({ ...f, title: e.target.value }))}
-                  placeholder="e.g. Q2 Asset Count — Site A"
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.82rem', color: 'var(--text-1)' }} />
+                  placeholder="e.g. Q2 Asset Count - Site A"
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-1)' }} />
               </div>
               <div>
                 <label className="lbl">Audit Type</label>
                 <select value={assignForm.audit_type} onChange={e => setAssignForm(f => ({ ...f, audit_type: e.target.value }))}
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.82rem', color: 'var(--text-1)' }}>
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-1)' }}>
                   <option value="asset_count">Asset Count Audit</option>
                   <option value="maintenance_checklist">Maintenance Checklist Audit</option>
                 </select>
@@ -1495,7 +1484,7 @@ export default function AuditModulePage() {
                   const siteId = e.target.value
                   setAssignForm(f => ({ ...f, site_id: siteId }))
                 }}
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.82rem', color: 'var(--text-1)' }}>
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-1)' }}>
                   <option value="">Select site...</option>
                   {sites.length > 0
                     ? sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)
@@ -1506,7 +1495,7 @@ export default function AuditModulePage() {
               <div>
                 <label className="lbl">Assign to (Auditor)</label>
                 <select value={assignForm.assigned_to} onChange={e => setAssignForm(f => ({ ...f, assigned_to: e.target.value }))}
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.82rem', color: 'var(--text-1)' }}>
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-1)' }}>
                   <option value="">Select auditor...</option>
                   {profiles.filter(p => p.is_active !== false).map(p => <option key={p.id} value={p.id}>{p.full_name} ({p.role})</option>)}
                 </select>
@@ -1514,18 +1503,18 @@ export default function AuditModulePage() {
               <div>
                 <label className="lbl">Due Date</label>
                 <input type="date" value={assignForm.due_date} onChange={e => setAssignForm(f => ({ ...f, due_date: e.target.value }))}
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.82rem', color: 'var(--text-1)' }} />
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-1)' }} />
               </div>
               <div>
                 <label className="lbl">Notes</label>
                 <textarea value={assignForm.notes} onChange={e => setAssignForm(f => ({ ...f, notes: e.target.value }))}
                   placeholder="Instructions for the auditor..." rows={2}
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.82rem', resize: 'vertical', color: 'var(--text-1)' }} />
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', resize: 'vertical', color: 'var(--text-1)' }} />
               </div>
             </div>
             <div style={{ padding: '14px 20px', borderTop: '1px solid var(--border)', background: 'var(--bg-2)', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowCreateForm(false)} className="btn-ghost" style={{ fontSize: '0.82rem' }}>Cancel</button>
-              <button onClick={handleCreateAssignment} className="btn-primary" style={{ fontSize: '0.82rem' }}>
+              <button onClick={() => setShowCreateForm(false)} className="btn-ghost" >Cancel</button>
+              <button onClick={handleCreateAssignment} className="btn-primary" >
                 <Plus size={13} /> Create Assignment
               </button>
             </div>
@@ -1538,7 +1527,7 @@ export default function AuditModulePage() {
         <div className="modal-bg" style={{ zIndex: 2000 }}>
           <div className="modal" style={{ maxWidth: 480, width: '95%', padding: 0, overflow: 'hidden' }}>
             <div className="card-header" style={{ background: 'var(--bg-3)' }}>
-              <h2 className="font-display" style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.04em', margin: 0 }}>
+              <h2 className="font-display" style={{ letterSpacing: '0.04em', margin: 0 }}>
                 {editingSite ? 'EDIT SITE' : 'ADD SITE'}
               </h2>
               <button onClick={() => { setShowSiteForm(false); setEditingSite(null) }} className="btn-ghost" style={{ padding: 6 }}><X size={16} /></button>
@@ -1547,7 +1536,7 @@ export default function AuditModulePage() {
               <div>
                 <label className="lbl">Site Name</label>
                 <select value={siteForm.name} onChange={e => setSiteForm(f => ({ ...f, name: e.target.value }))}
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.82rem', color: 'var(--text-1)' }}>
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-1)' }}>
                   <option value="">Select site...</option>
                   {assetSiteNames.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
@@ -1556,30 +1545,30 @@ export default function AuditModulePage() {
                 <div>
                   <label className="lbl">Latitude</label>
                   <input type="number" step="any" value={siteForm.latitude} onChange={e => setSiteForm(f => ({ ...f, latitude: e.target.value }))}
-                    placeholder="25.2048" style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.82rem', color: 'var(--text-1)' }} />
+                    placeholder="25.2048" style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-1)' }} />
                 </div>
                 <div>
                   <label className="lbl">Longitude</label>
                   <input type="number" step="any" value={siteForm.longitude} onChange={e => setSiteForm(f => ({ ...f, longitude: e.target.value }))}
-                    placeholder="55.2708" style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.82rem', color: 'var(--text-1)' }} />
+                    placeholder="55.2708" style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-1)' }} />
                 </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 <div>
                   <label className="lbl">Geo-Fence Radius (meters)</label>
                   <input type="number" value={siteForm.radius_meters} onChange={e => setSiteForm(f => ({ ...f, radius_meters: parseInt(e.target.value) || 200 }))}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.82rem', color: 'var(--text-1)' }} />
+                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-1)' }} />
                 </div>
                 <div>
                   <label className="lbl">Address</label>
                   <input type="text" value={siteForm.address} onChange={e => setSiteForm(f => ({ ...f, address: e.target.value }))}
-                    placeholder="Optional" style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.82rem', color: 'var(--text-1)' }} />
+                    placeholder="Optional" style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-1)' }} />
                 </div>
               </div>
               <div>
                 <label className="lbl">Checker (Site Supervisor)</label>
                 <select value={siteForm.checker_id} onChange={e => setSiteForm(f => ({ ...f, checker_id: e.target.value }))}
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.82rem', color: 'var(--text-1)' }}>
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-1)' }}>
                   <option value="">Select checker...</option>
                   {profiles.filter(p => p.is_active !== false).map(p => <option key={p.id} value={p.id}>{p.full_name} ({p.role})</option>)}
                 </select>
@@ -1587,7 +1576,7 @@ export default function AuditModulePage() {
               <div>
                 <label className="lbl">HOD (Head of Department)</label>
                 <select value={siteForm.hod_id} onChange={e => setSiteForm(f => ({ ...f, hod_id: e.target.value }))}
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.82rem', color: 'var(--text-1)' }}>
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-1)' }}>
                   <option value="">Select HOD...</option>
                   {profiles.filter(p => p.is_active !== false).map(p => <option key={p.id} value={p.id}>{p.full_name} ({p.role})</option>)}
                 </select>
@@ -1598,7 +1587,7 @@ export default function AuditModulePage() {
                   pos => setSiteForm(f => ({ ...f, latitude: pos.coords.latitude.toFixed(7), longitude: pos.coords.longitude.toFixed(7) })),
                   () => alert('Could not get your location.')
                 )
-              }} className="btn-ghost" style={{ fontSize: '0.78rem', width: '100%', justifyContent: 'center', border: '1px dashed var(--border)' }}>
+              }} className="btn-ghost" style={{ width: '100%', justifyContent: 'center', border: '1px dashed var(--border)' }}>
                 <MapPin size={13} /> Use My Current Location
               </button>
             </div>
@@ -1610,13 +1599,13 @@ export default function AuditModulePage() {
                     setShowSiteForm(false); setEditingSite(null)
                     await loadAll()
                   }
-                }} className="btn-ghost" style={{ fontSize: '0.78rem', color: 'var(--red)' }}>
+                }} className="btn-ghost" style={{ color: 'var(--red)' }}>
                   <Trash2 size={12} /> Delete
                 </button>
               )}
               <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
-                <button onClick={() => { setShowSiteForm(false); setEditingSite(null) }} className="btn-ghost" style={{ fontSize: '0.82rem' }}>Cancel</button>
-                <button onClick={handleSaveSite} className="btn-primary" style={{ fontSize: '0.82rem' }}>
+                <button onClick={() => { setShowSiteForm(false); setEditingSite(null) }} className="btn-ghost" >Cancel</button>
+                <button onClick={handleSaveSite} className="btn-primary" >
                   <CheckCircle2 size={13} /> {editingSite ? 'Update' : 'Create'} Site
                 </button>
               </div>
@@ -1645,8 +1634,8 @@ export default function AuditModulePage() {
                   <Camera size={18} />
                 </div>
                 <div>
-                  <h2 className="font-display" style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.04em', margin: 0 }}>COMPLETION SELFIE</h2>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>
+                  <h2 className="font-display" style={{ letterSpacing: '0.04em', margin: 0 }}>COMPLETION SELFIE</h2>
+                  <span style={{ color: 'var(--text-3)', }}>
                     All assets scanned! Take a selfie to finalize.
                   </span>
                 </div>
@@ -1696,7 +1685,7 @@ export default function AuditModulePage() {
                   <div style={{ padding: 8, background: 'var(--accent-glow)', borderRadius: 10, color: 'var(--accent)', border: '1px solid var(--accent)30' }}>
                     <Settings size={18} />
                   </div>
-                  <h2 className="font-display" style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.04em', margin: 0 }}>EDIT CHECKLIST</h2>
+                  <h2 className="font-display" style={{ letterSpacing: '0.04em', margin: 0 }}>EDIT CHECKLIST</h2>
                 </div>
                 <button onClick={() => setEditingChecklist(null)} className="btn-ghost" style={{ padding: 6 }}><X size={16} /></button>
               </div>
@@ -1707,12 +1696,12 @@ export default function AuditModulePage() {
                   <div style={{ gridColumn: 'span 2' }}>
                     <label className="lbl">Checklist Name</label>
                     <input type="text" value={ec.name || ''} onChange={e => updateField('name', e.target.value)}
-                      style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.82rem', color: 'var(--text-1)' }} />
+                      style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-1)' }} />
                   </div>
                   <div>
                     <label className="lbl">Frequency</label>
                     <select value={ec.frequency || 'monthly'} onChange={e => updateField('frequency', e.target.value)}
-                      style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.82rem', color: 'var(--text-1)' }}>
+                      style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-1)' }}>
                       <option value="daily">Daily</option>
                       <option value="weekly">Weekly</option>
                       <option value="monthly">Monthly</option>
@@ -1723,13 +1712,13 @@ export default function AuditModulePage() {
                   <label className="lbl">Category</label>
                   <input type="text" value={ec.category || ''} onChange={e => updateField('category', e.target.value)}
                     placeholder="e.g. Tower Crane, Generator..."
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.82rem', color: 'var(--text-1)' }} />
+                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-1)' }} />
                 </div>
 
                 {/* Items */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                   <label className="lbl" style={{ margin: 0 }}>Inspection Items ({items.length})</label>
-                  <button onClick={addItem} className="btn-ghost" style={{ fontSize: '0.72rem', padding: '4px 10px' }}>
+                  <button onClick={addItem} className="btn-ghost" style={{ padding: '4px 10px' }}>
                     <Plus size={12} /> Add Item
                   </button>
                 </div>
@@ -1743,15 +1732,15 @@ export default function AuditModulePage() {
                       <span style={{
                         width: 20, height: 20, borderRadius: 5, background: 'var(--bg-3)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '0.62rem', fontFamily: 'Oswald', fontWeight: 600, color: 'var(--text-3)', flexShrink: 0, marginTop: 6,
+                        color: 'var(--text-3)', flexShrink: 0, marginTop: 6,
                       }}>{idx + 1}</span>
                       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
                         <input type="text" value={item.section || ''} onChange={e => updateItem(idx, 'section', e.target.value)}
                           placeholder="Section (e.g. Structural, Safety...)"
-                          style={{ padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-1)', fontFamily: 'Oswald', fontSize: '0.72rem', color: 'var(--accent)', fontWeight: 600 }} />
+                          style={{ padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-1)', color: 'var(--accent)', }} />
                         <input type="text" value={item.question || item.description || ''} onChange={e => updateItem(idx, 'question', e.target.value)}
                           placeholder="Inspection item description..."
-                          style={{ padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-1)', fontFamily: 'DM Sans', fontSize: '0.78rem', color: 'var(--text-1)' }} />
+                          style={{ padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-1)', color: 'var(--text-1)' }} />
                       </div>
                       <button onClick={() => removeItem(idx)} style={{
                         background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--red)', opacity: 0.6, marginTop: 4,
@@ -1761,19 +1750,19 @@ export default function AuditModulePage() {
                 </div>
 
                 {items.length === 0 && (
-                  <p style={{ textAlign: 'center', padding: 20, color: 'var(--text-3)', fontSize: '0.78rem', fontFamily: 'DM Sans' }}>
+                  <p style={{ textAlign: 'center', padding: 20, color: 'var(--text-3)', }}>
                     No items. Click "Add Item" to start building the checklist.
                   </p>
                 )}
               </div>
 
               <div style={{ padding: '14px 20px', borderTop: '1px solid var(--border)', background: 'var(--bg-2)', display: 'flex', gap: 8, justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '0.68rem', color: 'var(--text-3)', fontFamily: 'DM Sans', alignSelf: 'center' }}>
+                <span style={{ color: 'var(--text-3)', alignSelf: 'center' }}>
                   {items.length} items · {[...new Set(items.map(i => i.section).filter(Boolean))].length} sections
                 </span>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={() => setEditingChecklist(null)} className="btn-ghost" style={{ fontSize: '0.82rem' }}>Cancel</button>
-                  <button onClick={saveChecklist} className="btn-primary" style={{ fontSize: '0.82rem' }}>
+                  <button onClick={() => setEditingChecklist(null)} className="btn-ghost" >Cancel</button>
+                  <button onClick={saveChecklist} className="btn-primary" >
                     <CheckCircle2 size={13} /> Save Checklist
                   </button>
                 </div>
@@ -1839,11 +1828,11 @@ export default function AuditModulePage() {
                   <FileText size={18} />
                 </div>
                 <div>
-                  <h2 className="font-display" style={{ fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.04em', margin: 0 }}>
+                  <h2 className="font-display" style={{ letterSpacing: '0.04em', margin: 0 }}>
                     OBSERVATION NOTE
                   </h2>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>
-                    {noteModalItem.asset?.asset_code} — {noteModalItem.asset?.asset_name}
+                  <span style={{ color: 'var(--text-3)', }}>
+                    {noteModalItem.asset?.asset_code} - {noteModalItem.asset?.asset_name}
                   </span>
                 </div>
               </div>
@@ -1859,16 +1848,16 @@ export default function AuditModulePage() {
                 autoFocus
                 style={{
                   width: '100%', padding: 12, borderRadius: 10, border: '1px solid var(--border)',
-                  background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.85rem', color: 'var(--text-1)',
+                  background: 'var(--bg-2)', color: 'var(--text-1)',
                   resize: 'vertical', outline: 'none'
                 }}
               />
             </div>
             <div style={{ padding: '14px 20px', borderTop: '1px solid var(--border)', background: 'var(--bg-2)', display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <button onClick={() => setNoteModalItem(null)} className="btn-ghost" style={{ fontSize: '0.82rem' }}>
+              <button onClick={() => setNoteModalItem(null)} className="btn-ghost" >
                 Cancel
               </button>
-              <button onClick={handleSaveNoteModal} className="btn-primary" style={{ fontSize: '0.82rem', padding: '8px 18px' }}>
+              <button onClick={handleSaveNoteModal} className="btn-primary" style={{ padding: '8px 18px' }}>
                 <CheckCircle2 size={14} /> Save Note
               </button>
             </div>

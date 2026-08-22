@@ -35,7 +35,7 @@ export default function LivePulse({ color = '#0ea5e9', size = 12, label = null }
         />
       </span>
       {label && (
-        <span className="data-mono" style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-1)' }}>
+        <span className="data-mono" style={{ color: 'var(--text-1)' }}>
           {label}
         </span>
       )}

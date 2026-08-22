@@ -36,7 +36,6 @@ const USER_GROUPS = ['GRP001 - Administrators', 'GRP002 - Staff / Technicians', 
 const ESTABLISHMENT_TYPES = ['Permanent', 'Contractual', 'Temporary']
 const COMPANIES = ['Skyway Group', 'L&T Construction', 'Shapoorji Pallonji', 'Strong Built Eng.']
 
-// Premium Toggle Switch Component
 function Toggle({ on, onChange }) {
   return (
     <button type="button" onClick={() => onChange(!on)} style={{
@@ -47,6 +46,29 @@ function Toggle({ on, onChange }) {
     }}>
       <div style={{ width: 14, height: 14, borderRadius: '50%', background: 'white', position: 'absolute', top: 4, left: on ? 24 : 4, transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}/>
     </button>
+  )
+}
+
+// Header Title component
+function AccordionHeader({ id, title, sub, isCollapsed, onToggle }) {
+  return (
+    <div
+      onClick={() => onToggle(id)}
+      className="profile-section-header"
+      style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '14px 18px', background: 'var(--bg-3)', border: '1px solid var(--border)',
+        borderRadius: 12, cursor: 'pointer', transition: 'all 0.2s', userSelect: 'none'
+      }}
+    >
+      <div>
+        <h4 style={{ letterSpacing: '0.05em', color: '#3b82f6', margin: 0, textTransform: 'uppercase' }}>
+          {title}
+        </h4>
+        <span style={{ color: 'var(--text-3)', display: 'block', marginTop: 2 }}>{sub}</span>
+      </div>
+      {isCollapsed ? <ChevronDown size={16} style={{ color: 'var(--text-3)' }} /> : <ChevronUp size={16} style={{ color: 'var(--text-3)' }} />}
+    </div>
   )
 }
 
@@ -153,6 +175,13 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
   const [saved, setSaved] = useState(false)
   const [allSites, setAllSites] = useState([])
   const [selectedSiteToAdd, setSelectedSiteToAdd] = useState('')
+
+  const modalRef = React.useRef(null)
+  useEffect(() => {
+    if (modalRef.current) {
+      modalRef.current.focus()
+    }
+  }, [])
 
   // Collapsible Accordion sections state
   const [collapsed, setCollapsed] = useState({
@@ -425,32 +454,11 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
     }
   }
 
-  // Header Title component
-  function AccordionHeader({ id, title, sub }) {
-    const isCollapsed = collapsed[id]
-    return (
-      <div
-        onClick={() => toggleSection(id)}
-        className="profile-section-header"
-        style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '14px 18px', background: 'var(--bg-3)', border: '1px solid var(--border)',
-          borderRadius: 12, cursor: 'pointer', transition: 'all 0.2s', userSelect: 'none'
-        }}
-      >
-        <div>
-          <h4 style={{ fontFamily: 'Oswald', fontSize: '0.88rem', fontWeight: 700, letterSpacing: '0.05em', color: '#3b82f6', margin: 0, textTransform: 'uppercase' }}>
-            {title}
-          </h4>
-          <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontFamily: 'DM Sans', display: 'block', marginTop: 2 }}>{sub}</span>
-        </div>
-        {isCollapsed ? <ChevronDown size={16} style={{ color: 'var(--text-3)' }} /> : <ChevronUp size={16} style={{ color: 'var(--text-3)' }} />}
-      </div>
-    )
-  }
+
 
   return (
-    <div className="modal-bg" style={{ zIndex: 2200 }}>
+    <div className="modal-bg" style={{ zIndex: 2200 }} onClick={e => { if (e.target === e.currentTarget) onClose() }}
+         onKeyDown={e => { if (e.key === 'Escape') onClose() }} tabIndex={-1} ref={modalRef}>
       <div className="modal" style={{ maxWidth: 960, width: '92vw', maxHeight: '90vh', display: 'flex', flexDirection: 'column', padding: 0, borderRadius: 16, overflow: 'hidden' }}>
         
         {/* Header (Fixed) */}
@@ -460,8 +468,8 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
               <UserCircle2 size={16} />
             </div>
             <div>
-              <h3 style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.05em', color: 'var(--text-0)', margin: 0 }}>USER PROFILE SETTINGS</h3>
-              <p style={{ fontFamily: 'DM Sans', fontSize: '0.72rem', color: 'var(--text-3)', margin: 0 }}>Configure details, locations, credentials & notification parameters</p>
+              <h3 style={{ letterSpacing: '0.05em', color: 'var(--text-0)', margin: 0 }}>USER PROFILE SETTINGS</h3>
+              <p style={{ color: 'var(--text-3)', margin: 0 }}>Configure details, locations, credentials & notification parameters</p>
             </div>
           </div>
           <button onClick={onClose} className="btn-ghost" style={{ padding: 6 }}><X size={16}/></button>
@@ -472,7 +480,7 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
 
           {/* 1. PERSONAL INFORMATION */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <AccordionHeader id="personal" title="Personal Information" sub="Personal Details & Identity parameters" />
+            <AccordionHeader id="personal" title="Personal Information" sub="Personal Details & Identity parameters" isCollapsed={collapsed.personal} onToggle={toggleSection} />
             {!collapsed.personal && (
               <div style={{ padding: 18, background: 'var(--bg-1)', border: '1px solid var(--border)', borderRadius: 12, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 16 }}>
                 
@@ -522,7 +530,7 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
                   <label className="lbl">RFID</label>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     <input className="inp" placeholder="RFID tag string" value={rfid} onChange={e => setRfid(e.target.value)} />
-                    <button type="button" onClick={handleGenerateRfid} style={{ border: 'none', background: 'none', color: '#3b82f6', fontSize: '0.72rem', cursor: 'pointer', width: 'fit-content', fontWeight: 600, padding: 0 }}>
+                    <button type="button" onClick={handleGenerateRfid} style={{ border: 'none', background: 'none', color: '#3b82f6', cursor: 'pointer', width: 'fit-content', padding: 0 }}>
                       Auto-Generate RFID
                     </button>
                   </div>
@@ -540,13 +548,13 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
 
           {/* 2. LOGIN INFORMATION */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <AccordionHeader id="login" title="Login Information" sub="Login Credentials & Account login details" />
+            <AccordionHeader id="login" title="Login Information" sub="Login Credentials & Account login details" isCollapsed={collapsed.login} onToggle={toggleSection} />
             {!collapsed.login && (
               <div style={{ padding: 18, background: 'var(--bg-1)', border: '1px solid var(--border)', borderRadius: 12 }}>
                 <div style={{ maxWidth: 450 }}>
                   <label className="lbl">Email / Username *</label>
                   <input className="inp" type="email" value={email} readOnly style={{ background: 'var(--bg-3)', cursor: 'not-allowed', color: 'var(--text-3)' }} />
-                  <span style={{ fontSize: '0.65rem', color: 'var(--text-3)', display: 'block', marginTop: 4 }}>Login Email is set upon account invitation. Contact administrator to update email.</span>
+                  <span style={{ color: 'var(--text-3)', display: 'block', marginTop: 4 }}>Login Email is set upon account invitation. Contact administrator to update email.</span>
                 </div>
               </div>
             )}
@@ -554,7 +562,7 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
 
           {/* 3. CONTACT INFORMATION */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <AccordionHeader id="contact" title="Contact Information" sub="Contact Details & Address information" />
+            <AccordionHeader id="contact" title="Contact Information" sub="Contact Details & Address information" isCollapsed={collapsed.contact} onToggle={toggleSection} />
             {!collapsed.contact && (
               <div style={{ padding: 18, background: 'var(--bg-1)', border: '1px solid var(--border)', borderRadius: 12, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 16 }}>
                 
@@ -637,7 +645,7 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
 
           {/* 4. TIMEZONE INFORMATION */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <AccordionHeader id="timezone" title="Timezone Information" sub="Timezone Details" />
+            <AccordionHeader id="timezone" title="System Settings & Timezone" sub="Regional preferences & operational timezone" isCollapsed={collapsed.timezone} onToggle={toggleSection} />
             {!collapsed.timezone && (
               <div style={{ padding: 18, background: 'var(--bg-1)', border: '1px solid var(--border)', borderRadius: 12 }}>
                 <div style={{ maxWidth: 450 }}>
@@ -655,7 +663,7 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
 
           {/* 5. OTHER SETTINGS INFORMATION */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <AccordionHeader id="other" title="Other Settings Information" sub="Other Settings Details" />
+            <AccordionHeader id="other" title="Other Settings" sub="Rates, departments, groups & structural assignments" isCollapsed={collapsed.other} onToggle={toggleSection} />
             {!collapsed.other && (
               <div style={{ padding: 18, background: 'var(--bg-1)', border: '1px solid var(--border)', borderRadius: 12, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 16 }}>
                 
@@ -716,11 +724,11 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                       <label className="lbl" style={{ margin: 0 }}>Location</label>
                       <div style={{ display: 'flex', gap: 10 }}>
-                        <button type="button" onClick={() => setLocations(allSites.map(s => s.name))} style={{ border: 'none', background: 'none', color: '#3b82f6', fontSize: '0.72rem', cursor: 'pointer', padding: 0, fontWeight: 600 }}>
+                        <button type="button" onClick={() => setLocations(allSites.map(s => s.name))} style={{ border: 'none', background: 'none', color: '#3b82f6', cursor: 'pointer', padding: 0, }}>
                           Select All
                         </button>
-                        <span style={{ color: 'var(--border)', fontSize: '0.72rem' }}>|</span>
-                        <button type="button" onClick={() => setLocations([])} style={{ border: 'none', background: 'none', color: 'var(--red)', fontSize: '0.72rem', cursor: 'pointer', padding: 0, fontWeight: 600 }}>
+                        <span style={{ color: 'var(--border)', }}>|</span>
+                        <button type="button" onClick={() => setLocations([])} style={{ border: 'none', background: 'none', color: 'var(--red)', cursor: 'pointer', padding: 0, }}>
                           Clear All
                         </button>
                       </div>
@@ -729,14 +737,13 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
                     {/* Render assigned tags list */}
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8, padding: '8px 10px', background: 'var(--bg-3)', border: '1px solid var(--border)', borderRadius: 10, minHeight: 60 }}>
                       {locations.length === 0 ? (
-                        <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', alignSelf: 'center' }}>No location assigned</span>
+                        <span style={{ color: 'var(--text-3)', alignSelf: 'center' }}>No location assigned</span>
                       ) : (
                         locations.map(loc => (
                           <span key={loc} style={{
                             display: 'flex', alignItems: 'center', gap: 6, padding: '3px 8px',
                             background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 16,
-                            fontFamily: 'DM Sans', fontSize: '0.73rem', color: 'var(--text-0)', fontWeight: 600
-                          }}>
+                            color: 'var(--text-0)', }}>
                             <button type="button" onClick={() => handleRemoveLocation(loc)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--red)', display: 'flex', alignItems: 'center' }}>
                               <X size={10} />
                             </button>
@@ -797,11 +804,11 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
 
           {/* 6. FILES INFORMATION */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <AccordionHeader id="files" title="Files Information" sub="Files Details (Avatar, Signature, Documents)" />
+            <AccordionHeader id="files" title="Profile Images & Signature" sub="User photo, electronic signature, and additional documents" isCollapsed={collapsed.files} onToggle={toggleSection} />
             {!collapsed.files && (
               <div style={{ padding: 18, background: 'var(--bg-1)', border: '1px solid var(--border)', borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 16 }}>
                 
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-3)', display: 'flex', gap: 6, alignItems: 'flex-start', background: 'var(--bg-3)', padding: '8px 12px', borderRadius: 8 }}>
+                <div style={{ color: 'var(--text-3)', display: 'flex', gap: 6, alignItems: 'flex-start', background: 'var(--bg-3)', padding: '8px 12px', borderRadius: 8 }}>
                   <AlertCircle size={13} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 1 }} />
                   Images must be clear and readable. PDF, JPG, PNG & WEBP formats are supported.
                 </div>
@@ -825,8 +832,8 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
                         </div>
                       )}
                     </div>
-                    {photoError && <span style={{ fontSize: '0.65rem', color: 'var(--red)', display: 'block' }}>{photoError}</span>}
-                    <label className="btn-primary" style={{ padding: '6px 12px', fontSize: '0.72rem', cursor: 'pointer', gap: 4 }}>
+                    {photoError && <span style={{ color: 'var(--red)', display: 'block' }}>{photoError}</span>}
+                    <label className="btn-primary" style={{ padding: '6px 12px', cursor: 'pointer', gap: 4 }}>
                       <Camera size={12} /> Choose a file
                       <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoFile} disabled={photoChecking} />
                     </label>
@@ -839,7 +846,7 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
                       {sigPreview ? (
                         <img src={sigPreview} alt="Signature" style={{ maxHeight: 70, maxWidth: '90%', objectFit: 'contain' }} />
                       ) : (
-                        <span style={{ fontSize: '0.68rem', color: 'var(--text-3)' }}>No Signature</span>
+                        <span style={{ color: 'var(--text-3)' }}>No Signature</span>
                       )}
                       {sigChecking && (
                         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -847,8 +854,8 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
                         </div>
                       )}
                     </div>
-                    {sigError && <span style={{ fontSize: '0.65rem', color: 'var(--red)', display: 'block' }}>{sigError}</span>}
-                    <label className="btn-primary" style={{ padding: '6px 12px', fontSize: '0.72rem', cursor: 'pointer', gap: 4 }}>
+                    {sigError && <span style={{ color: 'var(--red)', display: 'block' }}>{sigError}</span>}
+                    <label className="btn-primary" style={{ padding: '6px 12px', cursor: 'pointer', gap: 4 }}>
                       <Upload size={12} /> Choose a file
                       <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleSigFile} disabled={sigChecking} />
                     </label>
@@ -860,14 +867,14 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
                     <div style={{ margin: '14px 0', minHeight: 68, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                       {otherFileName ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: 'var(--bg-3)', borderRadius: 8 }}>
-                          <span style={{ fontSize: '0.72rem', color: 'var(--text-1)', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{otherFileName}</span>
+                          <span style={{ color: 'var(--text-1)', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{otherFileName}</span>
                           <button type="button" onClick={() => { setOtherFile(null); setOtherFileName(null) }} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--red)' }}><X size={12}/></button>
                         </div>
                       ) : (
-                        <span style={{ fontSize: '0.68rem', color: 'var(--text-3)' }}>No additional files</span>
+                        <span style={{ color: 'var(--text-3)' }}>No additional files</span>
                       )}
                     </div>
-                    <label className="btn-primary" style={{ padding: '6px 12px', fontSize: '0.72rem', cursor: 'pointer', gap: 4 }}>
+                    <label className="btn-primary" style={{ padding: '6px 12px', cursor: 'pointer', gap: 4 }}>
                       <Upload size={12} /> Choose a file
                       <input type="file" accept=".pdf,.doc,.docx,.jpg,.png" style={{ display: 'none' }} onChange={handleOtherFile} />
                     </label>
@@ -881,15 +888,15 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
 
           {/* 7. NOTIFICATIONS INFORMATION */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <AccordionHeader id="notifications" title="Notifications Information" sub="Notifications Details (Notify switches)" />
+            <AccordionHeader id="notifications" title="System Notification Preferences" sub="Control alerts for tasks, online status & completions" isCollapsed={collapsed.notifications} onToggle={toggleSection} />
             {!collapsed.notifications && (
               <div style={{ padding: 18, background: 'var(--bg-1)', border: '1px solid var(--border)', borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
                 
                 {/* Notify on Assignment */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'var(--bg-2)', borderRadius: 10, border: '1px solid var(--border)' }}>
                   <div>
-                    <span style={{ fontFamily: 'DM Sans', fontWeight: 600, fontSize: '0.82rem', color: 'var(--text-0)' }}>Notify On Assignment:</span>
-                    <p style={{ fontSize: '0.65rem', color: 'var(--text-3)', margin: '2px 0 0' }}>Receive alerts when tickets or audit sessions are assigned to you</p>
+                    <span style={{ color: 'var(--text-0)' }}>Notify On Assignment:</span>
+                    <p style={{ color: 'var(--text-3)', margin: '2px 0 0' }}>Receive alerts when tickets or audit sessions are assigned to you</p>
                   </div>
                   <Toggle on={notifyAssignment} onChange={setNotifyAssignment} />
                 </div>
@@ -897,8 +904,8 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
                 {/* Notify on Status Change */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'var(--bg-2)', borderRadius: 10, border: '1px solid var(--border)' }}>
                   <div>
-                    <span style={{ fontFamily: 'DM Sans', fontWeight: 600, fontSize: '0.82rem', color: 'var(--text-0)' }}>Notify On Status Change:</span>
-                    <p style={{ fontSize: '0.65rem', color: 'var(--text-3)', margin: '2px 0 0' }}>Receive alerts when your reported assets or tickets change status</p>
+                    <span style={{ color: 'var(--text-0)' }}>Notify On Status Change:</span>
+                    <p style={{ color: 'var(--text-3)', margin: '2px 0 0' }}>Receive alerts when your reported assets or tickets change status</p>
                   </div>
                   <Toggle on={notifyStatusChange} onChange={setNotifyStatusChange} />
                 </div>
@@ -906,8 +913,8 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
                 {/* Notify on Work Order Completion */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'var(--bg-2)', borderRadius: 10, border: '1px solid var(--border)' }}>
                   <div>
-                    <span style={{ fontFamily: 'DM Sans', fontWeight: 600, fontSize: '0.82rem', color: 'var(--text-0)' }}>Notify On Work Order Completion:</span>
-                    <p style={{ fontSize: '0.65rem', color: 'var(--text-3)', margin: '2px 0 0' }}>Receive alerts when a maintenance work order is completed</p>
+                    <span style={{ color: 'var(--text-0)' }}>Notify On Work Order Completion:</span>
+                    <p style={{ color: 'var(--text-3)', margin: '2px 0 0' }}>Receive alerts when a maintenance work order is completed</p>
                   </div>
                   <Toggle on={notifyCompletion} onChange={setNotifyCompletion} />
                 </div>
@@ -915,8 +922,8 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
                 {/* Notify on Task Completed */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'var(--bg-2)', borderRadius: 10, border: '1px solid var(--border)' }}>
                   <div>
-                    <span style={{ fontFamily: 'DM Sans', fontWeight: 600, fontSize: '0.82rem', color: 'var(--text-0)' }}>Notify On Task Completed:</span>
-                    <p style={{ fontSize: '0.65rem', color: 'var(--text-3)', margin: '2px 0 0' }}>Receive alerts when individual checklist tasks are submitted</p>
+                    <span style={{ color: 'var(--text-0)' }}>Notify On Task Completed:</span>
+                    <p style={{ color: 'var(--text-3)', margin: '2px 0 0' }}>Receive alerts when individual checklist tasks are submitted</p>
                   </div>
                   <Toggle on={notifyTaskCompleted} onChange={setNotifyTaskCompleted} />
                 </div>
@@ -924,8 +931,8 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
                 {/* Notify on Online Offline */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'var(--bg-2)', borderRadius: 10, border: '1px solid var(--border)' }}>
                   <div>
-                    <span style={{ fontFamily: 'DM Sans', fontWeight: 600, fontSize: '0.82rem', color: 'var(--text-0)' }}>Notify On Online Offline:</span>
-                    <p style={{ fontSize: '0.65rem', color: 'var(--text-3)', margin: '2px 0 0' }}>Receive system reports about user synchronization and network state changes</p>
+                    <span style={{ color: 'var(--text-0)' }}>Notify On Online Offline:</span>
+                    <p style={{ color: 'var(--text-3)', margin: '2px 0 0' }}>Receive system reports about user synchronization and network state changes</p>
                   </div>
                   <Toggle on={notifyOnlineOffline} onChange={setNotifyOnlineOffline} />
                 </div>
@@ -938,12 +945,12 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
 
         {/* Footer (Fixed) */}
         <div style={{ padding: '14px 24px', background: 'var(--bg-3)', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: 10, flexShrink: 0 }}>
-          <button type="button" onClick={onClose} className="btn-ghost" style={{ padding: '8px 16px', fontSize: '0.82rem' }}>Cancel</button>
+          <button type="button" onClick={onClose} className="btn-ghost" style={{ padding: '8px 16px', }}>Cancel</button>
           
           {saved && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0 10px', color: 'var(--green)' }}>
               <CheckCircle2 size={14} />
-              <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>Saved!</span>
+              <span >Saved!</span>
             </div>
           )}
 
@@ -953,7 +960,7 @@ export default function UserProfileModal({ user, onClose, onSaved }) {
             disabled={saving || saved || photoChecking || sigChecking}
             className="btn-primary"
             style={{
-              padding: '9px 22px', fontSize: '0.82rem', fontWeight: 600, gap: 6,
+              padding: '9px 22px', gap: 6,
               background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%)',
               boxShadow: '0 4px 12px var(--accent-glow)'
             }}

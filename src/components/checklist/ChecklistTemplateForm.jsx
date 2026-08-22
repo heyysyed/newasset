@@ -85,10 +85,10 @@ export default function ChecklistTemplateForm({ onSave, onClose, initialData }) 
               <List size={18} />
             </div>
             <div>
-              <h2 className="font-display" style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.04em', margin: 0, color: 'var(--text-0)' }}>
+              <h2 className="font-display" style={{ letterSpacing: '0.04em', margin: 0, color: 'var(--text-0)' }}>
                 {initialData ? 'EDIT TEMPLATE' : 'CREATE TEMPLATE'}
               </h2>
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>Define operational inspection points</span>
+              <span style={{ color: 'var(--text-3)', }}>Define operational inspection points</span>
             </div>
           </div>
           <button onClick={onClose} className="btn-ghost" style={{ padding: 6 }}><X size={16}/></button>
@@ -127,15 +127,15 @@ export default function ChecklistTemplateForm({ onSave, onClose, initialData }) 
           </div>
 
           <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-            <h3 className="font-display" style={{ fontSize: '0.82rem', color: 'var(--text-2)', letterSpacing: '0.08em', margin: 0 }}>
+            <h3 className="font-display" style={{ color: 'var(--text-2)', letterSpacing: '0.08em', margin: 0 }}>
               CHECKLIST ITEMS ({items.length})
             </h3>
             <div style={{ display: 'flex', gap: 8 }}>
-              <label className="btn-ghost" style={{ cursor: 'pointer', fontSize: '0.78rem', padding: '7px 12px' }}>
+              <label className="btn-ghost" style={{ cursor: 'pointer', padding: '7px 12px' }}>
                 <FileSpreadsheet size={14} /> Import Excel
                 <input type="file" onChange={handleExcelImport} style={{ display: 'none' }} accept=".xlsx, .xls" />
               </label>
-              <button type="button" onClick={addItem} className="btn-ghost" style={{ fontSize: '0.78rem', padding: '7px 12px' }}>
+              <button type="button" onClick={addItem} className="btn-ghost" style={{ padding: '7px 12px' }}>
                 <Plus size={14} /> Add Item
               </button>
             </div>
@@ -156,7 +156,7 @@ export default function ChecklistTemplateForm({ onSave, onClose, initialData }) 
                     <td>
                       <input
                         className="inp"
-                        style={{ background: 'transparent', border: 'none', padding: 0, fontSize: '0.82rem' }}
+                        style={{ background: 'transparent', border: 'none', padding: 0, }}
                         placeholder="e.g., Lifting"
                         value={item.section}
                         onChange={e => updateItem(idx, 'section', e.target.value)}
@@ -165,7 +165,7 @@ export default function ChecklistTemplateForm({ onSave, onClose, initialData }) 
                     <td>
                       <input
                         className="inp"
-                        style={{ background: 'transparent', border: 'none', padding: 0, fontSize: '0.82rem' }}
+                        style={{ background: 'transparent', border: 'none', padding: 0, }}
                         placeholder="Description of check…"
                         value={item.description}
                         onChange={e => updateItem(idx, 'description', e.target.value)}
@@ -181,8 +181,8 @@ export default function ChecklistTemplateForm({ onSave, onClose, initialData }) 
                 ))}
                 {items.length === 0 && (
                   <tr>
-                    <td colSpan={3} style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-3)', fontFamily: 'DM Sans', fontSize: '0.82rem' }}>
-                      No items yet — add manually or import from Excel.
+                    <td colSpan={3} style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-3)', }}>
+                      No items yet - add manually or import from Excel.
                     </td>
                   </tr>
                 )}

@@ -32,8 +32,8 @@ export default function QRScanner({ onScan, onClose }) {
               <Camera size={18} />
             </div>
             <div>
-              <h2 className="font-display" style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.04em', margin: 0, color: 'var(--text-0)' }}>SCAN ASSET QR</h2>
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>Point at the sticker QR code</span>
+              <h2 className="font-display" style={{ letterSpacing: '0.04em', margin: 0, color: 'var(--text-0)' }}>SCAN ASSET QR</h2>
+              <span style={{ color: 'var(--text-3)', }}>Point at the sticker QR code</span>
             </div>
           </div>
           <button onClick={onClose} className="btn-ghost" style={{ padding: 6 }}><X size={16}/></button>
@@ -44,7 +44,7 @@ export default function QRScanner({ onScan, onClose }) {
         </div>
         
         <div style={{ padding: '14px 24px', background: 'var(--bg-2)', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
-          <p style={{ color: 'var(--text-3)', fontSize: '0.78rem', fontFamily: 'DM Sans', margin: 0 }}>
+          <p style={{ color: 'var(--text-3)', margin: 0 }}>
             Make sure the QR code is well-lit and within the box.
           </p>
         </div>
@@ -68,7 +68,7 @@ export default function QRScanner({ onScan, onClose }) {
           border: none !important;
           padding: 8px 16px !important;
           border-radius: 6px !important;
-          font-family: 'DM Sans', sans-serif !important;
+          font-family: var(--font-sans) !important;
           font-size: 0.85rem !important;
           font-weight: 600 !important;
           cursor: pointer !important;

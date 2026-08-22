@@ -104,9 +104,9 @@ export default function VoiceAuditInput({ items, onVoiceMatch }) {
             onClick={() => { setErrorMsg(''); setIsListening(!isListening); }}
             style={{
               padding: 10, borderRadius: '50%', border: 'none',
-              background: isListening ? '#ef4444' : 'var(--accent)',
+              background: isListening ? 'var(--status-danger)' : 'var(--accent)',
               color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: isListening ? '0 0 16px rgba(239,68,68,0.5)' : '0 2px 8px rgba(14,165,233,0.3)',
+              boxShadow: isListening ? '0 0 16px var(--status-danger-soft)' : '0 2px 8px rgba(14,165,233,0.3)',
               transition: 'all 0.2s ease'
             }}
             title={isListening ? 'Stop Listening' : 'Start Voice Audit Assistant'}
@@ -116,16 +116,16 @@ export default function VoiceAuditInput({ items, onVoiceMatch }) {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <Sparkles size={14} style={{ color: 'var(--accent)' }} />
-              <span style={{ fontSize: '0.82rem', fontWeight: 700, fontFamily: 'DM Sans', color: 'var(--text-0)' }}>
+              <span style={{ color: 'var(--text-0)' }}>
                 Voice Audit Assistant
               </span>
               {isListening && (
-                <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: 10, background: 'rgba(239,68,68,0.1)', color: '#ef4444', fontWeight: 700 }}>
+                <span style={{ padding: '2px 8px', borderRadius: 10, background: 'var(--status-danger-soft)', color: 'var(--status-danger)', }}>
                   ● Listening...
                 </span>
               )}
             </div>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>
+            <span style={{ color: 'var(--text-3)', }}>
               Say asset code & condition (e.g. "VMD 002 Operational" or "Laptop Damaged")
             </span>
           </div>
@@ -134,7 +134,7 @@ export default function VoiceAuditInput({ items, onVoiceMatch }) {
         {lastMatch && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 8, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)' }}>
             <CheckCircle2 size={14} color="#059669" />
-            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#059669', fontFamily: 'DM Sans' }}>
+            <span style={{ color: '#059669', }}>
               Matched: {lastMatch.code} → {lastMatch.condition}
             </span>
           </div>
@@ -142,14 +142,14 @@ export default function VoiceAuditInput({ items, onVoiceMatch }) {
       </div>
 
       {isListening && transcript && (
-        <div style={{ marginTop: 8, padding: '6px 10px', borderRadius: 6, background: 'var(--bg-2)', fontSize: '0.75rem', fontFamily: 'DM Mono', color: 'var(--text-1)' }}>
+        <div style={{ marginTop: 8, padding: '6px 10px', borderRadius: 6, background: 'var(--bg-2)', color: 'var(--text-1)' }}>
           <Volume2 size={12} style={{ display: 'inline', marginRight: 6, color: 'var(--accent)' }} />
           "{transcript}"
         </div>
       )}
 
       {errorMsg && (
-        <div style={{ marginTop: 6, fontSize: '0.72rem', color: 'var(--red)', fontFamily: 'DM Sans' }}>
+        <div style={{ marginTop: 6, color: 'var(--red)', }}>
           {errorMsg}
         </div>
       )}

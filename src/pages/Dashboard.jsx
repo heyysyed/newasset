@@ -6,9 +6,12 @@ import {
   Ticket, Calendar, ClipboardCheck, AlertTriangle, IndianRupee,
   Plus, Shield, Boxes, ChevronRight, User, Upload, Clock, CheckCircle2, Tag
 } from 'lucide-react'
-import { supabase, fetchStats, fetchExpiringDocuments } from '../lib/supabase'
+import { supabase, fetchStats, fetchExpiringDocuments, getAssetSelectCols } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { calculateBookValue, formatCurrency } from '../lib/depreciation'
+
+import { useIsMobile } from '../hooks/useBreakpoint'
+import MobileDashboard from '../components/mobile/MobileDashboard'
 
 // Power BI Command Center Sub-Components
 const FinancialWaterfallChart = React.lazy(() => import('../components/dashboard/FinancialWaterfallChart'))
@@ -24,15 +27,15 @@ const UserActivityAnalytics = React.lazy(() => import('../components/dashboard/U
 const STATUS_COLOR = {
   Active:         { color: 'var(--green)',  hex: '#00b96b' },
   Inactive:       { color: 'var(--text-2)', hex: '#6b7db3' },
-  'Under Repair': { color: 'var(--amber)',  hex: '#f59e0b' },
-  Disposed:       { color: 'var(--red)',    hex: '#ef4444' },
+  'Under Repair': { color: 'var(--amber)',  hex: 'var(--status-warning)' },
+  Disposed:       { color: 'var(--red)',    hex: 'var(--status-danger)' },
   'On Hire':      { color: 'var(--cyan)',   hex: '#06b6d4' },
 }
 const STATUS_BADGE_CLS = {
   Active: 'badge-active', Inactive: 'badge-inactive',
   'Under Repair': 'badge-repair', Disposed: 'badge-disposed', 'On Hire': 'badge-onhire'
 }
-const CAT_COLORS = ['#4f7eff', '#34d399', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#f97316']
+const CAT_COLORS = ['#4f7eff', '#34d399', 'var(--status-warning)', 'var(--status-danger)', 'var(--status-special)', '#06b6d4', '#ec4899', '#f97316']
 
 function StatCard({ icon: Icon, label, value, color, sub, delay = 0, progress }) {
   return (
@@ -55,12 +58,12 @@ function StatCard({ icon: Icon, label, value, color, sub, delay = 0, progress })
           <div style={{ width: 38, height: 38, borderRadius: 12, background: `${color}15`, color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Icon size={18} />
           </div>
-          <span style={{ fontSize: '0.82rem', color: 'var(--text-2)', fontFamily: 'DM Sans', fontWeight: 600 }}>{label}</span>
+          <span style={{ color: 'var(--text-2)', }}>{label}</span>
         </div>
-        {sub && <span style={{ fontSize: '0.65rem', color: color, fontWeight: 700, fontFamily: 'DM Sans', background: `${color}12`, padding: '4px 10px', borderRadius: 20 }}>{sub}</span>}
+        {sub && <span style={{ color: color, background: `${color}12`, padding: '4px 10px', borderRadius: 20 }}>{sub}</span>}
       </div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10 }}>
-        <div style={{ fontSize: '2rem', fontWeight: 700, fontFamily: 'Oswald', color: 'var(--text-0)', lineHeight: 1 }}>{value}</div>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, minWidth: 0 }}>
+        <div title={value} style={{ color: 'var(--text-0)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</div>
       </div>
       {progress != null && (
         <div style={{ marginTop: 16, height: 4, borderRadius: 4, background: 'var(--bg-3)', overflow: 'hidden' }}>
@@ -80,13 +83,11 @@ const CustomTooltip = ({ active, payload }) => {
       border: '1px solid rgba(255,255,255,0.1)', 
       borderRadius: 10, 
       padding: '8px 12px', 
-      fontFamily: 'DM Sans', 
-      fontSize: '0.82rem', 
       color: 'white',
       boxShadow: 'var(--clay-shadow-sm)'
     }}>
-      <p style={{ margin: 0, fontWeight: 500 }}>
-        {payload[0].name}: <strong style={{ color: 'var(--accent-light)', fontFamily: 'DM Mono' }}>{payload[0].value}</strong>
+      <p style={{ margin: 0, }}>
+        {payload[0].name}: <strong style={{ color: 'var(--accent-light)', }}>{payload[0].value}</strong>
       </p>
     </div>
   )
@@ -101,13 +102,11 @@ const CurrencyTooltip = ({ active, payload }) => {
       border: '1px solid rgba(255,255,255,0.1)', 
       borderRadius: 10, 
       padding: '8px 12px', 
-      fontFamily: 'DM Sans', 
-      fontSize: '0.82rem', 
       color: 'white',
       boxShadow: 'var(--clay-shadow-sm)'
     }}>
-      <p style={{ margin: 0, fontWeight: 500 }}>
-        {payload[0].payload?.name}: <strong style={{ color: 'var(--accent-light)', fontFamily: 'DM Mono' }}>{formatCurrency(payload[0].value)}</strong>
+      <p style={{ margin: 0, }}>
+        {payload[0].payload?.name}: <strong style={{ color: 'var(--accent-light)', }}>{formatCurrency(payload[0].value)}</strong>
       </p>
     </div>
   )
@@ -149,6 +148,7 @@ export default function Dashboard() {
   const { profile, can, isAdmin, isMod, currentCompany } = useAuth()
   const cc = currentCompany?.code
   const navigate = useNavigate()
+  const isMobile = useIsMobile()
   const [assets, setAssets] = useState([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -188,7 +188,7 @@ export default function Dashboard() {
         .order('created_at', { ascending: false }).limit(10)
 
       let invQ = supabase.from('inventory_items')
-        .select('id, item_name, current_stock, min_stock, unit, site')
+        .select('id, item_name, current_stock, reorder_level, unit, location')
         .eq('is_active', true).order('item_name')
 
       let mlQ = supabase.from('maintenance_logs')
@@ -196,7 +196,7 @@ export default function Dashboard() {
         .order('performed_at', { ascending: false }).limit(500)
 
       let assetsQ = supabase.from('assets')
-        .select('id, asset_code, asset_name, make, site, status, category, purchase_value, salvage_value, useful_life_years, depreciation_rate_percent, depreciation_method, purchase_date, added_on')
+        .select(getAssetSelectCols(can('view_financials')))
         .or('notes.is.null,notes.not.ilike.%[Migrated to Bulk Module]%')
         .order('added_on', { ascending: false })
       if (cc) assetsQ = assetsQ.eq('company_code', cc)
@@ -412,36 +412,74 @@ export default function Dashboard() {
     </div>
   )
 
-  return (
-    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 24, paddingBottom: 40 }}>
+  if (isMobile) {
+    return (
+      <MobileDashboard
+        stats={{ totalValue: forecastStats.currentBV }}
+        assets={assets}
+        tickets={tickets}
+        schedules={schedules}
+        lowStockItems={lowStockItems}
+        expiringDocs={expiringDocs}
+        recentActivity={recentActivity}
+        loading={loading}
+        refreshing={refreshing}
+        onRefresh={load}
+        user={profile}
+      />
+    )
+  }
 
-      {/* ── Unified Page Header ── */}
-      <div className="flex flex-col gap-5 animate-fade-up" style={{ animationDelay: '0ms' }}>
-        
+  return (
+    <div className="flex flex-col gap-6 pb-10 w-full">
+
+        {/* ── Page Header ── */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="font-display text-[1.6rem] font-bold text-text-0 m-0 mb-1 leading-tight">
-              {greeting}, {profile?.full_name?.split(' ')[0] || 'User'}
+            <h1 className="text-page-title m-0 mb-1 tracking-wide uppercase">
+              {greeting}, <span className="text-accent">{profile?.full_name?.split(' ')[0] || 'User'}</span> 👋
             </h1>
-            <p className="text-text-2 text-[0.85rem] font-sans m-0">
+            <p className="text-text-2 text-[0.82rem] font-sans m-0 hidden md:block">
               Here is what's happening across your assets and facilities today.
             </p>
           </div>
-          
-          <div className="flex flex-wrap items-center gap-2">
+
+          {/* Desktop quick-actions */}
+          <div className="hidden md:flex flex-wrap items-center gap-2">
             {[
               { label: 'Raise Ticket', icon: Ticket,        to: '/maintenance', color: 'var(--red)',    show: isAdmin || isMod || can('maintenance') },
               { label: 'New Audit',    icon: ClipboardCheck, to: '/audit',       color: 'var(--green)',  show: true },
               { label: 'Import Excel', icon: Upload,         to: '/import',      color: 'var(--cyan)',   show: can('import') },
               { label: 'Admin',        icon: Shield,         to: '/admin',       color: 'var(--purple)', show: isAdmin },
             ].filter(a => a.show).map(a => (
-              <Link key={a.label} to={a.to} className="btn-ghost" style={{ padding: '8px 12px', fontSize: '0.78rem', gap: 6, textDecoration: 'none' }}>
-                <a.icon size={14} style={{ color: a.color }} /> <span className="hidden sm:inline">{a.label}</span>
+              <Link key={a.label} to={a.to} className="btn-ghost" style={{ padding: '8px 12px', gap: 6, textDecoration: 'none' }}>
+                <a.icon size={14} style={{ color: a.color }} /> {a.label}
               </Link>
             ))}
             {can('add') && (
-              <Link to="/assets/new" className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.8rem', gap: 6, textDecoration: 'none', marginLeft: 4 }}>
-                <Plus size={14} /> <span className="hidden sm:inline">New Asset</span>
+              <Link to="/assets/new" className="btn-primary" style={{ padding: '8px 16px', gap: 6, textDecoration: 'none', marginLeft: 4 }}>
+                <Plus size={14} /> New Asset
+              </Link>
+            )}
+          </div>
+
+          {/* Mobile quick-actions: compact icon row */}
+          <div className="md:hidden flex items-center gap-2 overflow-x-auto pb-1 hide-scrollbar">
+            {[
+              { label: 'Ticket',  icon: Ticket,        to: '/maintenance', color: 'var(--red)',    show: isAdmin || isMod || can('maintenance') },
+              { label: 'Audit',   icon: ClipboardCheck, to: '/audit',       color: 'var(--green)',  show: true },
+              { label: 'Import',  icon: Upload,         to: '/import',      color: 'var(--cyan)',   show: can('import') },
+              { label: 'Admin',   icon: Shield,         to: '/admin',       color: 'var(--purple)', show: isAdmin },
+            ].filter(a => a.show).map(a => (
+              <Link key={a.label} to={a.to} className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl bg-bg-1 hover:bg-bg-2 active:bg-bg-3 transition-colors min-w-[60px] border border-border" style={{ textDecoration: 'none' }}>
+                <a.icon size={18} style={{ color: a.color }} />
+                <span className="text-[0.65rem] text-text-2 whitespace-nowrap">{a.label}</span>
+              </Link>
+            ))}
+            {can('add') && (
+              <Link to="/assets/new" className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl bg-accent/10 hover:bg-accent/20 transition-colors min-w-[60px] border border-accent/20" style={{ textDecoration: 'none' }}>
+                <Plus size={18} style={{ color: 'var(--accent)' }} />
+                <span className="text-[0.65rem] text-accent whitespace-nowrap">New Asset</span>
               </Link>
             )}
           </div>
@@ -457,7 +495,7 @@ export default function Dashboard() {
                 value={selectedSite} 
                 onChange={e => setSelectedSite(e.target.value)} 
                 className="sel w-full" 
-                style={{ height: 36, minHeight: 36, padding: '4px 32px 4px 32px', fontSize: '0.8rem', borderRadius: 8, color: selectedSite ? 'var(--text-0)' : 'var(--text-2)', fontWeight: selectedSite ? 600 : 400, border: '1px solid var(--border)', background: 'var(--bg-0)' }}
+                style={{ height: 36, minHeight: 36, padding: '4px 32px 4px 32px', borderRadius: 8, color: selectedSite ? 'var(--text-0)' : 'var(--text-2)', fontWeight: selectedSite ? 600 : 400, border: '1px solid var(--border)', background: 'var(--bg-0)' }}
               >
                 <option value="">All Sites</option>
                 {sitesList.map(s => <option key={s} value={s}>{s}</option>)}
@@ -471,7 +509,7 @@ export default function Dashboard() {
                 value={selectedCategory} 
                 onChange={e => setSelectedCategory(e.target.value)} 
                 className="sel w-full" 
-                style={{ height: 36, minHeight: 36, padding: '4px 32px 4px 32px', fontSize: '0.8rem', borderRadius: 8, color: selectedCategory ? 'var(--text-0)' : 'var(--text-2)', fontWeight: selectedCategory ? 600 : 400, border: '1px solid var(--border)', background: 'var(--bg-0)' }}
+                style={{ height: 36, minHeight: 36, padding: '4px 32px 4px 32px', borderRadius: 8, color: selectedCategory ? 'var(--text-0)' : 'var(--text-2)', fontWeight: selectedCategory ? 600 : 400, border: '1px solid var(--border)', background: 'var(--bg-0)' }}
               >
                 <option value="">All Categories</option>
                 {categoriesList.map(c => <option key={c} value={c}>{c}</option>)}
@@ -495,7 +533,7 @@ export default function Dashboard() {
                   onClick={() => setTimeframe(t.id)} 
                   className={`toggle-opt ${timeframe === t.id ? 'active shadow-sm' : ''}`}
                   style={{ 
-                    padding: '4px 12px', border: 'none', height: 28, fontSize: '0.72rem', borderRadius: 6, fontWeight: timeframe === t.id ? 700 : 500,
+                    padding: '4px 12px', border: 'none', height: 28, borderRadius: 6, fontWeight: timeframe === t.id ? 700 : 500,
                     ...(timeframe !== t.id ? { background: 'transparent', color: 'var(--text-3)' } : {})
                   }}
                 >
@@ -505,14 +543,13 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      </div>
 
       {/* ── Error Banner ── */}
       {error && (
-        <div className="rounded-xl py-3 px-4 flex items-center gap-3 font-sans text-[0.85rem] text-red shadow-sm" style={{ backgroundColor: 'var(--red-dim)', border: '1px solid rgba(239,68,68,0.2)' }}>
+        <div className="rounded-xl py-3 px-4 flex items-center gap-3 font-sans text-[0.85rem] text-red shadow-sm" style={{ backgroundColor: 'var(--red-dim)', border: '1px solid var(--status-danger-soft)' }}>
           <AlertTriangle size={18} className="shrink-0" />
-          <span className="flex-1 font-medium">{error}</span>
-          <button onClick={load} className="bg-white/50 hover:bg-white/80 border border-red/20 rounded-md px-3 py-1.5 text-red cursor-pointer font-sans text-[0.78rem] transition-colors font-semibold">Retry</button>
+          <span className="flex-1 text-body-medium">{error}</span>
+          <button onClick={load} className="bg-[var(--bg-surface)]/50 hover:bg-[var(--bg-surface)]/80 border border-red/20 rounded-md px-3 py-1.5 text-red cursor-pointer font-sans text-[0.78rem] transition-colors">Retry</button>
         </div>
       )}
 
@@ -587,7 +624,7 @@ export default function Dashboard() {
         {/* Status Pie (1/3 width) */}
         <div className="card animate-fade-up col-span-1" style={{ animationDelay: '360ms' }}>
           <div className="card-header border-none pb-0">
-            <h2 style={{ fontFamily: 'Oswald', fontWeight: 600, fontSize: '0.9rem', letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>STATUS BREAKDOWN</h2>
+            <h2 style={{ letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>STATUS BREAKDOWN</h2>
           </div>
           <div className="card-body">
             {pieData.length > 0 ? (
@@ -602,8 +639,8 @@ export default function Dashboard() {
                     </PieChart>
                   </ResponsiveContainer>
                   <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', pointerEvents: 'none' }}>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'Oswald', color: 'var(--text-0)', lineHeight: 1 }}>{filteredAssets.length}</div>
-                    <div style={{ fontSize: '0.55rem', textTransform: 'uppercase', color: 'var(--text-3)', fontWeight: 700, letterSpacing: '0.05em', marginTop: 2 }}>Assets</div>
+                    <div style={{ color: 'var(--text-0)', }}>{filteredAssets.length}</div>
+                    <div style={{ textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', marginTop: 2 }}>Assets</div>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-2">
@@ -613,24 +650,24 @@ export default function Dashboard() {
                       <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <div style={{ width: 8, height: 8, borderRadius: '50%', background: c.hex }} />
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-1)', fontFamily: 'DM Sans', fontWeight: 500 }}>{d.name}</span>
+                          <span style={{ color: 'var(--text-1)', }}>{d.name}</span>
                         </div>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-0)', fontFamily: 'DM Mono' }}>{d.value}</span>
+                        <span style={{ color: 'var(--text-0)', }}>{d.value}</span>
                       </div>
                     )
                   })}
                 </div>
               </div>
-            ) : <p style={{ color: 'var(--text-3)', fontSize: '0.85rem', fontFamily: 'DM Sans' }}>No data yet</p>}
+            ) : <p style={{ color: 'var(--text-3)', }}>No data yet</p>}
           </div>
         </div>
 
         {/* Category Bar (2/3 width) */}
         <div className="card animate-fade-up col-span-1 lg:col-span-2" style={{ animationDelay: '400ms' }}>
           <div className="card-header border-none pb-0 flex justify-between items-center">
-            <h2 style={{ fontFamily: 'Oswald', fontWeight: 600, fontSize: '0.9rem', letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>ASSETS BY CATEGORY</h2>
+            <h2 style={{ letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>ASSETS BY CATEGORY</h2>
             {(isAdmin || isMod) && (
-              <span style={{ fontSize: '0.75rem', color: 'var(--purple)', fontWeight: 600, background: 'var(--purple-dim)', padding: '4px 10px', borderRadius: 8 }}>
+              <span style={{ color: 'var(--purple)', background: 'var(--purple-dim)', padding: '4px 10px', borderRadius: 8 }}>
                 Total Maint. Cost: {formatCurrency(maintCost)}
               </span>
             )}
@@ -645,13 +682,13 @@ export default function Dashboard() {
                       <stop offset="100%" stopColor="var(--cyan)" stopOpacity={0.8} />
                     </linearGradient>
                   </defs>
-                  <XAxis dataKey="name" tick={{ fill: 'var(--text-2)', fontSize: 11, fontFamily: 'DM Sans', fontWeight: 500 }} axisLine={{ stroke: 'var(--border)' }} tickLine={false} dy={10} />
-                  <YAxis tick={{ fill: 'var(--text-2)', fontSize: 11, fontFamily: 'DM Mono' }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="name" tick={{ fill: 'var(--text-2)', }} axisLine={{ stroke: 'var(--border)' }} tickLine={false} dy={10} />
+                  <YAxis tick={{ fill: 'var(--text-2)', }} axisLine={false} tickLine={false} />
                   <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--bg-2)', radius: 8 }} />
                   <Bar dataKey="value" fill="url(#catBarGrad)" radius={[6, 6, 0, 0]} barSize={40} />
                 </BarChart>
               </ResponsiveContainer>
-            ) : <p style={{ color: 'var(--text-3)', fontSize: '0.85rem', fontFamily: 'DM Sans' }}>No data yet</p>}
+            ) : <p style={{ color: 'var(--text-3)', }}>No data yet</p>}
           </div>
         </div>
       </div>
@@ -660,8 +697,8 @@ export default function Dashboard() {
       {(isAdmin || isMod) && valueByCategory.length > 0 && (
         <div className="card animate-fade-up" style={{ marginBottom: 16, animationDelay: '320ms' }}>
           <div className="card-header">
-            <h2 style={{ fontFamily: 'Oswald', fontWeight: 600, fontSize: '0.9rem', letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>ASSET VALUE BY CATEGORY</h2>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>Total Depreciation: {formatCurrency(totalDepreciation)}</span>
+            <h2 style={{ letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>ASSET VALUE BY CATEGORY</h2>
+            <span style={{ color: 'var(--text-3)', }}>Total Depreciation: {formatCurrency(totalDepreciation)}</span>
           </div>
           <div className="card-body">
             <ResponsiveContainer width="100%" height={200}>
@@ -674,8 +711,8 @@ export default function Dashboard() {
                     </linearGradient>
                   ))}
                 </defs>
-                <XAxis dataKey="name" tick={{ fill: 'var(--text-2)', fontSize: 10, fontFamily: 'DM Sans' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: 'var(--text-2)', fontSize: 10, fontFamily: 'DM Mono' }} axisLine={false} tickLine={false} tickFormatter={v => v >= 10000000 ? `${(v / 10000000).toFixed(1)}Cr` : v >= 100000 ? `${(v / 100000).toFixed(1)}L` : v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
+                <XAxis dataKey="name" tick={{ fill: 'var(--text-2)', }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: 'var(--text-2)', }} axisLine={false} tickLine={false} tickFormatter={v => v >= 10000000 ? `${(v / 10000000).toFixed(1)}Cr` : v >= 100000 ? `${(v / 100000).toFixed(1)}L` : v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
                 <Tooltip content={<CurrencyTooltip />} cursor={{ fill: 'rgba(43,127,255,0.06)' }} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                   {valueByCategory.map((_, i) => <Cell key={i} fill={`url(#valCatGrad-${i})`} />)}
@@ -692,14 +729,14 @@ export default function Dashboard() {
         {(isAdmin || isMod) && (
           <div className="card animate-fade-up h-full flex flex-col" style={{ animationDelay: '440ms' }}>
             <div className="card-header border-none pb-0">
-              <h2 style={{ fontFamily: 'Oswald', fontWeight: 600, fontSize: '0.9rem', letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>DEPRECIATION FORECAST SIMULATOR</h2>
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>Interactive projection tool</span>
+              <h2 style={{ letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>DEPRECIATION FORECAST SIMULATOR</h2>
+              <span style={{ color: 'var(--text-3)', }}>Interactive projection tool</span>
             </div>
             <div className="card-body flex-1 flex flex-col gap-6 justify-center">
               {/* Projection Slider */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <div>
-                  <label className="lbl">Projection Period: <span style={{ color: 'var(--accent)', fontWeight: 700, fontSize: '0.9rem' }}>{forecastYears} {forecastYears === 1 ? 'Year' : 'Years'}</span></label>
+                  <label className="lbl">Projection Period: <span style={{ color: 'var(--accent)', }}>{forecastYears} {forecastYears === 1 ? 'Year' : 'Years'}</span></label>
                   <input 
                     type="range" 
                     min="0" 
@@ -711,7 +748,7 @@ export default function Dashboard() {
                     style={{ width: '100%', marginTop: 8 }}
                   />
                 </div>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-2)', lineHeight: 1.4, margin: 0 }}>
+                <p style={{ color: 'var(--text-2)', margin: 0 }}>
                   Simulates the declining book value of the current set of filtered assets over the next 5 years using their straight-line or declining balance rules.
                 </p>
               </div>
@@ -719,25 +756,25 @@ export default function Dashboard() {
               {/* Comparative Metrics */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, background: 'var(--bg-1)', padding: 16, borderRadius: 12, border: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-2)', fontWeight: 500 }}>Initial Cost:</span>
-                  <span className="font-mono" style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-0)' }}>{formatCurrency(forecastStats.totalPV)}</span>
+                  <span style={{ color: 'var(--text-2)', }}>Initial Cost:</span>
+                  <span className="font-mono" style={{ color: 'var(--text-0)' }}>{formatCurrency(forecastStats.totalPV)}</span>
                 </div>
                 
                 <div style={{ height: 1, background: 'var(--border)' }} />
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-2)', fontWeight: 500 }}>Current Book Value:</span>
-                  <span className="font-mono" style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-1)' }}>{formatCurrency(forecastStats.currentBV)}</span>
+                  <span style={{ color: 'var(--text-2)', }}>Current Book Value:</span>
+                  <span className="font-mono" style={{ color: 'var(--text-1)' }}>{formatCurrency(forecastStats.currentBV)}</span>
                 </div>
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-2)', fontWeight: 500 }}>Future Book Value:</span>
-                  <span className="font-mono" style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--accent)' }}>{formatCurrency(forecastStats.projectedBV)}</span>
+                  <span style={{ color: 'var(--text-2)', }}>Future Book Value:</span>
+                  <span className="font-mono" style={{ color: 'var(--accent)' }}>{formatCurrency(forecastStats.projectedBV)}</span>
                 </div>
                 
                 {/* Visual Bar chart / indicator */}
                 <div style={{ marginTop: 4 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 4 }}>
                     <span>Current BV ({Math.round((forecastStats.currentBV / (forecastStats.totalPV || 1)) * 100)}%)</span>
                     <span>Future BV ({Math.round((forecastStats.projectedBV / (forecastStats.totalPV || 1)) * 100)}%)</span>
                   </div>
@@ -764,7 +801,7 @@ export default function Dashboard() {
         {/* ── Unified Action Center Card ── */}
         <div className="card animate-fade-up h-full flex flex-col" style={{ animationDelay: '480ms' }}>
           <div className="card-header border-none pb-0 flex-col items-start gap-4">
-            <h2 style={{ fontFamily: 'Oswald', fontWeight: 600, fontSize: '0.9rem', letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>ACTION CENTER</h2>
+            <h2 style={{ letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>ACTION CENTER</h2>
             
             {/* Tab Selectors - Sleek Pills */}
             <div className="flex w-full gap-2 overflow-x-auto pb-1 hide-scrollbar">
@@ -777,7 +814,7 @@ export default function Dashboard() {
                 <button
                   key={tab.id}
                   onClick={() => setActionCenterTab(tab.id)}
-                  className="whitespace-nowrap px-4 py-2 rounded-full text-[0.75rem] font-sans font-bold flex items-center gap-2 transition-all"
+                  className="whitespace-nowrap px-4 py-2 rounded-full text-[0.75rem] font-sans flex items-center gap-2 transition-all"
                   style={{ 
                     border: 'none', 
                     cursor: 'pointer',
@@ -791,7 +828,6 @@ export default function Dashboard() {
                     <span className="flex items-center justify-center rounded-full" style={{ 
                       background: actionCenterTab === tab.id ? 'rgba(255,255,255,0.25)' : (tab.badged ? 'var(--red)' : 'var(--accent)'), 
                       color: actionCenterTab === tab.id ? '#ffffff' : '#ffffff', 
-                      fontSize: '0.62rem', 
                       padding: '2px 6px', 
                       minWidth: 20
                     }}>
@@ -807,31 +843,31 @@ export default function Dashboard() {
           {actionCenterTab === 'pending' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {slaBreached.length > 0 && (
-                <Link to="/maintenance" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'rgba(239,68,68,0.05)', borderRadius: 10, border: '1px solid rgba(239,68,68,0.15)', textDecoration: 'none', color: 'inherit' }}>
+                <Link to="/maintenance" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'var(--status-danger-soft)', borderRadius: 10, border: '1px solid var(--status-danger-soft)', textDecoration: 'none', color: 'inherit' }}>
                   <AlertTriangle size={16} style={{ color: 'var(--red)', flexShrink: 0 }} />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--red)' }}>{slaBreached.length} SLA Breach{slaBreached.length > 1 ? 'es' : ''}</div>
-                    <div style={{ fontSize: '0.68rem', color: 'var(--text-3)' }}>Tickets past their resolution deadline</div>
+                    <div style={{ color: 'var(--red)' }}>{slaBreached.length} SLA Breach{slaBreached.length > 1 ? 'es' : ''}</div>
+                    <div style={{ color: 'var(--text-3)' }}>Tickets past their resolution deadline</div>
                   </div>
                   <ChevronRight size={14} style={{ color: 'var(--text-3)' }} />
                 </Link>
               )}
               {unassignedTickets.length > 0 && (
-                <Link to="/maintenance" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'rgba(245,158,11,0.05)', borderRadius: 10, border: '1px solid rgba(245,158,11,0.15)', textDecoration: 'none', color: 'inherit' }}>
-                  <User size={16} style={{ color: '#f59e0b', flexShrink: 0 }} />
+                <Link to="/maintenance" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'var(--status-warning-soft)', borderRadius: 10, border: '1px solid var(--status-warning-soft)', textDecoration: 'none', color: 'inherit' }}>
+                  <User size={16} style={{ color: 'var(--status-warning)', flexShrink: 0 }} />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f59e0b' }}>{unassignedTickets.length} Unassigned Ticket{unassignedTickets.length > 1 ? 's' : ''}</div>
-                    <div style={{ fontSize: '0.68rem', color: 'var(--text-3)' }}>Need team member assignment</div>
+                    <div style={{ color: 'var(--status-warning)' }}>{unassignedTickets.length} Unassigned Ticket{unassignedTickets.length > 1 ? 's' : ''}</div>
+                    <div style={{ color: 'var(--text-3)' }}>Need team member assignment</div>
                   </div>
                   <ChevronRight size={14} style={{ color: 'var(--text-3)' }} />
                 </Link>
               )}
               {overdueSchedules.length > 0 && (
-                <Link to="/maintenance" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'rgba(239,68,68,0.05)', borderRadius: 10, border: '1px solid rgba(239,68,68,0.15)', textDecoration: 'none', color: 'inherit' }}>
+                <Link to="/maintenance" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'var(--status-danger-soft)', borderRadius: 10, border: '1px solid var(--status-danger-soft)', textDecoration: 'none', color: 'inherit' }}>
                   <Calendar size={16} style={{ color: 'var(--red)', flexShrink: 0 }} />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--red)' }}>{overdueSchedules.length} Overdue Schedule{overdueSchedules.length > 1 ? 's' : ''}</div>
-                    <div style={{ fontSize: '0.68rem', color: 'var(--text-3)' }}>Preventive maintenance past due</div>
+                    <div style={{ color: 'var(--red)' }}>{overdueSchedules.length} Overdue Schedule{overdueSchedules.length > 1 ? 's' : ''}</div>
+                    <div style={{ color: 'var(--text-3)' }}>Preventive maintenance past due</div>
                   </div>
                   <ChevronRight size={14} style={{ color: 'var(--text-3)' }} />
                 </Link>
@@ -840,8 +876,8 @@ export default function Dashboard() {
                 <Link to="/audit" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'rgba(14,165,233,0.05)', borderRadius: 10, border: '1px solid rgba(14,165,233,0.15)', textDecoration: 'none', color: 'inherit' }}>
                   <ClipboardCheck size={16} style={{ color: 'var(--accent)', flexShrink: 0 }} />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--accent)' }}>{inProgressAudits.length} Audit{inProgressAudits.length > 1 ? 's' : ''} In Progress</div>
-                    <div style={{ fontSize: '0.68rem', color: 'var(--text-3)' }}>Pending completion</div>
+                    <div style={{ color: 'var(--accent)' }}>{inProgressAudits.length} Audit{inProgressAudits.length > 1 ? 's' : ''} In Progress</div>
+                    <div style={{ color: 'var(--text-3)' }}>Pending completion</div>
                   </div>
                   <ChevronRight size={14} style={{ color: 'var(--text-3)' }} />
                 </Link>
@@ -849,7 +885,7 @@ export default function Dashboard() {
               {slaBreached.length === 0 && unassignedTickets.length === 0 && overdueSchedules.length === 0 && inProgressAudits.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--green)' }}>
                   <CheckCircle2 size={24} style={{ margin: '0 auto 10px', color: 'var(--green)' }} />
-                  <div style={{ fontSize: '0.88rem', fontWeight: 600 }}>All operational tasks are up to date!</div>
+                  <div >All operational tasks are up to date!</div>
                 </div>
               )}
             </div>
@@ -860,22 +896,22 @@ export default function Dashboard() {
               {filteredLowStockItems.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--green)' }}>
                   <Boxes size={24} style={{ margin: '0 auto 10px', color: 'var(--green)' }} />
-                  <div style={{ fontSize: '0.88rem', fontWeight: 600 }}>Stock levels are healthy across all materials</div>
+                  <div >Stock levels are healthy across all materials</div>
                 </div>
               ) : (
                 <>
                   {filteredLowStockItems.slice(0, 6).map(item => (
-                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: item.current_stock === 0 ? 'rgba(239,68,68,0.05)' : 'rgba(245,158,11,0.04)', borderRadius: 8, border: `1px solid ${item.current_stock === 0 ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.12)'}` }}>
-                      <Boxes size={14} style={{ color: item.current_stock === 0 ? 'var(--red)' : '#f59e0b', flexShrink: 0 }} />
+                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: item.current_stock === 0 ? 'var(--status-danger-soft)' : 'var(--status-warning-soft)', borderRadius: 8, border: `1px solid ${item.current_stock === 0 ? 'var(--status-danger-soft)' : 'var(--status-warning-soft)'}` }}>
+                      <Boxes size={14} style={{ color: item.current_stock === 0 ? 'var(--red)' : 'var(--status-warning)', flexShrink: 0 }} />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-0)' }}>{item.item_name}</div>
-                        <div style={{ fontSize: '0.68rem', color: 'var(--text-3)' }}>Min Limit: {item.min_stock} {item.unit}</div>
+                        <div style={{ color: 'var(--text-0)' }}>{item.item_name}</div>
+                        <div style={{ color: 'var(--text-3)' }}>Min Limit: {item.min_stock} {item.unit}</div>
                       </div>
-                      <span style={{ fontFamily: 'DM Mono', fontWeight: 700, fontSize: '0.88rem', color: item.current_stock === 0 ? 'var(--red)' : '#f59e0b' }}>{item.current_stock}</span>
+                      <span style={{ color: item.current_stock === 0 ? 'var(--red)' : 'var(--status-warning)' }}>{item.current_stock}</span>
                     </div>
                   ))}
                   {filteredLowStockItems.length > 6 && (
-                    <Link to="/inventory" style={{ fontSize: '0.78rem', color: 'var(--accent)', textAlign: 'center', textDecoration: 'none', fontFamily: 'DM Sans', fontWeight: 600, marginTop: 4 }}>
+                    <Link to="/inventory" style={{ color: 'var(--accent)', textAlign: 'center', textDecoration: 'none', marginTop: 4 }}>
                       +{filteredLowStockItems.length - 6} more items →
                     </Link>
                   )}
@@ -889,22 +925,22 @@ export default function Dashboard() {
               {filteredExpiringDocs.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--green)' }}>
                   <ClipboardCheck size={24} style={{ margin: '0 auto 10px', color: 'var(--green)' }} />
-                  <div style={{ fontSize: '0.88rem', fontWeight: 600 }}>All asset documents are up to date!</div>
+                  <div >All asset documents are up to date!</div>
                 </div>
               ) : (
                 filteredExpiringDocs.map(doc => {
                   const isExpired = new Date(doc.expiry_date) < new Date()
                   return (
                     <Link key={doc.id} to={`/assets/${doc.asset_id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: isExpired ? 'rgba(239,68,68,0.05)' : 'rgba(245,158,11,0.04)', borderRadius: 8, border: `1px solid ${isExpired ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.12)'}` }}>
-                        <AlertTriangle size={16} style={{ color: isExpired ? 'var(--red)' : '#f59e0b', flexShrink: 0 }} />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: isExpired ? 'var(--status-danger-soft)' : 'var(--status-warning-soft)', borderRadius: 8, border: `1px solid ${isExpired ? 'var(--status-danger-soft)' : 'var(--status-warning-soft)'}` }}>
+                        <AlertTriangle size={16} style={{ color: isExpired ? 'var(--red)' : 'var(--status-warning)', flexShrink: 0 }} />
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-0)' }}>{doc.assets?.asset_code} - {doc.document_type}</div>
-                          <div style={{ fontSize: '0.68rem', color: 'var(--text-3)' }}>{doc.assets?.asset_name}</div>
+                          <div style={{ color: 'var(--text-0)' }}>{doc.assets?.asset_code} - {doc.document_type}</div>
+                          <div style={{ color: 'var(--text-3)' }}>{doc.assets?.asset_name}</div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: isExpired ? 'var(--red)' : '#f59e0b' }}>{isExpired ? 'EXPIRED' : 'Expiring Soon'}</div>
-                          <div style={{ fontSize: '0.68rem', color: 'var(--text-3)' }}>{new Date(doc.expiry_date).toLocaleDateString()}</div>
+                          <div style={{ color: isExpired ? 'var(--red)' : 'var(--status-warning)' }}>{isExpired ? 'EXPIRED' : 'Expiring Soon'}</div>
+                          <div style={{ color: 'var(--text-3)' }}>{new Date(doc.expiry_date).toLocaleDateString()}</div>
                         </div>
                       </div>
                     </Link>
@@ -919,7 +955,7 @@ export default function Dashboard() {
               {filteredRecentActivity.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-3)' }}>
                   <Clock size={24} style={{ margin: '0 auto 10px', color: 'var(--text-3)' }} />
-                  <div style={{ fontSize: '0.88rem', fontWeight: 600 }}>No activity found in this timeframe</div>
+                  <div >No activity found in this timeframe</div>
                 </div>
               ) : (
                 filteredRecentActivity.map((a, i) => {
@@ -949,10 +985,10 @@ export default function Dashboard() {
                         boxShadow: `0 0 6px ${actionColor}40`
                       }} />
                       <div style={{ flex: 1, minWidth: 0, paddingBottom: 10 }}>
-                        <div style={{ fontSize: '0.82rem', color: 'var(--text-1)', lineHeight: 1.4 }}>
-                          <strong style={{ color: 'var(--text-0)' }}>{a.profiles?.full_name || 'System'}</strong> {a.action} <span style={{ fontWeight: 600, color: 'var(--accent)' }}>{a.assets?.asset_name || 'asset'}</span>
+                        <div style={{ color: 'var(--text-1)', }}>
+                          <strong style={{ color: 'var(--text-0)' }}>{a.profiles?.full_name || 'System'}</strong> {a.action} <span style={{ color: 'var(--accent)' }}>{a.assets?.asset_name || 'asset'}</span>
                         </div>
-                        <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', fontFamily: 'DM Mono', marginTop: 2 }}>
+                        <div style={{ color: 'var(--text-3)', marginTop: 2 }}>
                           {new Date(a.created_at).toLocaleString()}
                         </div>
                       </div>
@@ -967,19 +1003,21 @@ export default function Dashboard() {
       </div>
 
 
-      {/* ── Recently Added Assets Table ── */}
+      {/* ── Recently Added Assets ── */}
       <div className="card animate-fade-up" style={{ animationDelay: '480ms' }}>
         <div className="card-header">
-          <h2 style={{ fontFamily: 'Oswald', fontWeight: 600, fontSize: '0.9rem', letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>RECENTLY ADDED</h2>
-          <Link to="/assets" style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--accent-light)', textDecoration: 'none', fontSize: '0.82rem', fontFamily: 'DM Sans' }}>
+          <h2 style={{ letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>RECENTLY ADDED</h2>
+          <Link to="/assets" style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--accent-light)', textDecoration: 'none', }}>
             View all <ArrowRight size={13} />
           </Link>
         </div>
-        <div style={{ overflowX: 'auto' }}>
+
+        {/* Desktop table */}
+        <div className="hidden md:block" style={{ overflowX: 'auto' }}>
           <table className="tbl">
             <thead>
               <tr>
-                <th>Asset Code</th><th>Name</th><th className="col-hide-mobile">Make</th><th className="col-hide-mobile">Site</th><th>Status</th>
+                <th>Asset Code</th><th>Name</th><th>Make</th><th>Site</th><th>Status</th>
               </tr>
             </thead>
             <tbody>
@@ -992,20 +1030,52 @@ export default function Dashboard() {
                   onClick={() => navigate(`/assets/${a.id}`)}
                   onKeyDown={e => e.key === 'Enter' && navigate(`/assets/${a.id}`)}
                 >
-                  <td><span className="font-mono" style={{ fontSize: '0.78rem', color: 'var(--accent)', fontWeight: 500 }}>{a.asset_code}</span></td>
-                  <td style={{ color: 'var(--text-0)', fontWeight: 500 }}>{a.asset_name || '—'}</td>
-                  <td className="col-hide-mobile" style={{ color: 'var(--text-2)' }}>{a.make || '—'}</td>
-                  <td className="col-hide-mobile" style={{ color: 'var(--text-2)' }}>{a.site || '—'}</td>
+                  <td><span className="font-mono" style={{ color: 'var(--accent)', }}>{a.asset_code}</span></td>
+                  <td style={{ color: 'var(--text-0)', }}>{a.asset_name || '-'}</td>
+                  <td style={{ color: 'var(--text-2)' }}>{a.make || '-'}</td>
+                  <td style={{ color: 'var(--text-2)' }}>{a.site || '-'}</td>
                   <td><span className={`badge ${STATUS_BADGE_CLS[a.status] || 'badge-inactive'}`}>{a.status}</span></td>
                 </tr>
               ))}
               {filteredRecentlyAdded.length === 0 && (
-                <tr><td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>
-                  No assets found matching selected filters — <Link to="/assets/new" style={{ color: 'var(--accent-light)' }}>add your first</Link>
+                <tr><td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-3)', }}>
+                  No assets found - <Link to="/assets/new" style={{ color: 'var(--accent-light)' }}>add your first</Link>
                 </td></tr>
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile card list */}
+        <div className="md:hidden flex flex-col divide-y divide-border">
+          {filteredRecentlyAdded.length === 0 ? (
+            <div className="py-10 text-center text-text-3 text-small">
+              No assets found - <Link to="/assets/new" style={{ color: 'var(--accent-light)' }}>add your first</Link>
+            </div>
+          ) : (
+            filteredRecentlyAdded.map(a => (
+              <button
+                key={a.id}
+                className="flex items-center gap-3 p-4 w-full text-left hover:bg-bg-1 active:bg-bg-2 transition-colors"
+                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                onClick={() => navigate(`/assets/${a.id}`)}
+              >
+                <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                  <Package size={18} style={{ color: 'var(--accent)' }} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-text-0 text-small truncate">{a.asset_name || '-'}</div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="font-mono text-[0.7rem] text-accent">{a.asset_code}</span>
+                    {a.site && <span className="text-[0.7rem] text-text-3 truncate">• {a.site}</span>}
+                  </div>
+                </div>
+                <div className="shrink-0">
+                  <span className={`badge ${STATUS_BADGE_CLS[a.status] || 'badge-inactive'}`}>{a.status}</span>
+                </div>
+              </button>
+            ))
+          )}
         </div>
       </div>
 

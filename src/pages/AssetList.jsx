@@ -7,7 +7,7 @@ import {
   FileSpreadsheet, FileText, ChevronDown as ChevronDownIcon, Layers,
   Clock, Ticket, BarChart3, Columns, Save
 } from 'lucide-react'
-import { supabase, fetchAssetsPaginated, bulkDeleteAssets, bulkUpdateAssets, fetchFilterOptions, createAsset, generateAssetCode, transferAsset, bulkCreateMaintenanceTickets } from '../lib/supabase'
+import { supabase, fetchAssetsPaginated, bulkDeleteAssets, bulkUpdateAssets, fetchFilterOptions, createAsset, generateAssetCode, transferAsset, bulkCreateMaintenanceTickets, getAssetSelectCols } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
@@ -22,8 +22,13 @@ import AssetFilters from '../components/assets/AssetFilters'
 import AssetTable from '../components/assets/AssetTable'
 import AssetRegisterModals from '../components/assets/AssetRegisterModals'
 import companyLogo from '../assets/logo.png'
+import { useIsMobile } from '../hooks/useBreakpoint'
+import MobileAssetList from '../components/mobile/MobileAssetList'
+import { generateAssetDossierPDF } from '../lib/exportDossier'
+import { buildAsset360 } from '../lib/intelligence/assetIntelligence'
+import AgeIntelligenceView from '../components/assets/AgeIntelligenceView'
 
-const STATUS_BADGE = {
+export const STATUS_BADGE = {
   Active: 'badge-active', Inactive: 'badge-inactive',
   'Under Repair': 'badge-repair', Disposed: 'badge-disposed', 'On Hire': 'badge-onhire'
 }
@@ -35,6 +40,7 @@ export default function AssetList() {
   const cc = currentCompany?.code
   const [params, setParams] = useSearchParams()
   const navigate = useNavigate()
+  const isMobile = useIsMobile()
 
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(() => {
@@ -147,14 +153,22 @@ export default function AssetList() {
   const { data: filterOptions = { categories: [], sites: [] } } = useQuery({
     queryKey: ['filterOptions', cc],
     queryFn: () => fetchFilterOptions(cc),
-    enabled: !!cc
+    enabled: !!cc,
+    staleTime: 10 * 60 * 1000
   })
 
-  const { data: assetsData, isLoading: loadingAssets } = useQuery({
+  const { data: assetsData, isLoading: loadingAssets, isError: isAssetsError, error: assetsError } = useQuery({
     queryKey: ['assets', cc, searchQ, statusQ, categoryQ, siteQ, page, pageSize],
-    queryFn: () => fetchAssetsPaginated({ search: searchQ, status: statusQ, category: categoryQ, site: siteQ }, page, pageSize, cc),
+    queryFn: () => fetchAssetsPaginated(
+      { search: searchQ, status: statusQ, category: categoryQ, site: siteQ }, 
+      page, 
+      pageSize, 
+      cc,
+      getAssetSelectCols(can('view_financials'))
+    ),
     enabled: !!cc && filtersReady,
-    keepPreviousData: true
+    keepPreviousData: true,
+    staleTime: 5 * 60 * 1000
   })
 
   const assets = assetsData?.data || []
@@ -330,6 +344,11 @@ export default function AssetList() {
       queryClient.invalidateQueries({ queryKey: ['assets'] })
       setInlineEdit(null)
     } catch (e) { console.error(e) }
+  }
+
+  function handleExportDossier(asset) {
+    const intel = buildAsset360(asset, { tickets: [], schedules: [], logs: [] }, { hasFinancialAccess: can('view_financials') })
+    generateAssetDossierPDF(asset, intel)
   }
 
   async function handleAssignGroupSubmit() {
@@ -549,8 +568,8 @@ export default function AssetList() {
       let currentTitle = '', currentSubtitle = ''
       const tBase = {
         theme: 'grid',
-        styles: { font: 'helvetica', fontSize: 7, cellPadding: 1.8, textColor: BK, lineColor: LG, lineWidth: 0.15, overflow: 'linebreak' },
-        headStyles: { fillColor: BK, textColor: WH, fontStyle: 'bold', fontSize: 6.5, cellPadding: 2 },
+        styles: { font: 'helvetica', cellPadding: 1.8, textColor: BK, lineColor: LG, lineWidth: 0.15, overflow: 'linebreak' },
+        headStyles: { fillColor: BK, textColor: WH, fontStyle: 'bold', cellPadding: 2 },
         alternateRowStyles: { fillColor: BG },
         margin: { left: m, right: m, top: 10 },
         didDrawPage() {},
@@ -562,7 +581,7 @@ export default function AssetList() {
         autoTable(doc, { ...tBase, startY: 30,
           head: [['#', 'Asset Code', 'Asset Name', 'Make / Model', 'Site', 'PV', 'BV', 'Status']],
           body: allAssets.map((a, i) => { const bv2 = calculateBookValue(a), pv2 = Number(a.purchase_value) || 0; return [i + 1, a.asset_code || '-', a.asset_name || '-', [a.make, a.model_no].filter(Boolean).join(' / ') || '-', a.site || '-', fmtCur(pv2), fmtCur(bv2), a.status || '-'] }),
-          columnStyles: { 0:{halign:'center',cellWidth:10}, 1:{cellWidth:28,fontSize:6}, 2:{cellWidth:38}, 3:{cellWidth:32}, 4:{cellWidth:28}, 5:{halign:'right',cellWidth:20}, 6:{halign:'right',cellWidth:20,fontStyle:'bold'}, 7:{halign:'center',cellWidth:17,fontStyle:'bold'} },
+          columnStyles: { 0:{halign:'center',cellWidth:10}, 1:{cellWidth:28,}, 2:{cellWidth:38}, 3:{cellWidth:32}, 4:{cellWidth:28}, 5:{halign:'right',cellWidth:20}, 6:{halign:'right',cellWidth:20,fontStyle:'bold'}, 7:{halign:'center',cellWidth:17,fontStyle:'bold'} },
         })
 
       } else if (reportType === 'summary') {
@@ -590,7 +609,7 @@ export default function AssetList() {
         autoTable(doc, { ...tBase, startY: 30,
           head: [['#', 'Asset Code', 'Asset Name', 'Site', 'PV', 'Life', 'Method', 'BV', 'Depr.', '%']],
           body: allAssets.map((a, i) => { const bv2 = calculateBookValue(a), pv2 = Number(a.purchase_value) || 0; return [i + 1, a.asset_code || '-', a.asset_name || '-', a.site || '-', fmtCur(pv2), a.useful_life_years ? a.useful_life_years + 'y' : '-', a.depreciation_method || '-', fmtCur(bv2), fmtCur(pv2 - bv2), pct(pv2 - bv2, pv2)] }),
-          columnStyles: { 0:{halign:'center',cellWidth:10}, 1:{cellWidth:26,fontSize:6}, 2:{cellWidth:34}, 3:{cellWidth:24}, 4:{halign:'right',cellWidth:18}, 5:{halign:'center',cellWidth:12}, 6:{halign:'center',cellWidth:24}, 7:{halign:'right',cellWidth:18,fontStyle:'bold'}, 8:{halign:'right',cellWidth:16}, 9:{halign:'center',cellWidth:11} },
+          columnStyles: { 0:{halign:'center',cellWidth:10}, 1:{cellWidth:26,}, 2:{cellWidth:34}, 3:{cellWidth:24}, 4:{halign:'right',cellWidth:18}, 5:{halign:'center',cellWidth:12}, 6:{halign:'center',cellWidth:24}, 7:{halign:'right',cellWidth:18,fontStyle:'bold'}, 8:{halign:'right',cellWidth:16}, 9:{halign:'center',cellWidth:11} },
         })
 
       } else if (reportType === 'status') {
@@ -611,7 +630,7 @@ export default function AssetList() {
           autoTable(doc, { ...tBase, startY: 30,
             head: [['#', 'Asset Code', 'Asset Name', 'Make / Model', 'Site', 'PV', 'BV', 'Cond.']],
             body: rows.map((a, i) => [i + 1, a.asset_code || '-', a.asset_name || '-', [a.make, a.model_no].filter(Boolean).join(' / ') || '-', a.site || '-', fmtCur(Number(a.purchase_value) || 0), fmtCur(calculateBookValue(a)), a.condition || '-']),
-            columnStyles: { 0:{halign:'center',cellWidth:10}, 1:{cellWidth:28,fontSize:6}, 2:{cellWidth:38}, 3:{cellWidth:32}, 4:{cellWidth:28}, 5:{halign:'right',cellWidth:20}, 6:{halign:'right',cellWidth:20,fontStyle:'bold'}, 7:{halign:'center',cellWidth:17} },
+            columnStyles: { 0:{halign:'center',cellWidth:10}, 1:{cellWidth:28,}, 2:{cellWidth:38}, 3:{cellWidth:32}, 4:{cellWidth:28}, 5:{halign:'right',cellWidth:20}, 6:{halign:'right',cellWidth:20,fontStyle:'bold'}, 7:{halign:'center',cellWidth:17} },
           })
         }
       }
@@ -645,6 +664,10 @@ export default function AssetList() {
     { k: 'model_no', l: 'Model' },
     { k: 'category', l: 'Category' },
     { k: 'site', l: 'Site' },
+    { k: 'age', l: 'Age' },
+    { k: 'health', l: 'Health' },
+    { k: 'risk', l: 'Risk' },
+    { k: 'location_precision', l: 'Location' },
     { k: 'condition', l: 'Condition' },
     { k: 'purchase_value', l: 'Book Value' },
     { k: 'status', l: 'Status' },
@@ -687,15 +710,48 @@ export default function AssetList() {
     }
   }
 
+  if (isMobile) {
+    return (
+      <>
+        <MobileAssetList
+          assets={assets}
+          loading={loading}
+          searchQ={searchQ}
+          setLocalSearch={setLocalSearch}
+          statusQ={statusQ}
+          setParam={setParam}
+          categoryQ={categoryQ}
+          siteQ={siteQ}
+          STATUSES={STATUSES}
+          categories={filterOptions.categories}
+          sites={filterOptions.sites}
+          can={can}
+          isAdmin={isAdmin}
+          handleDelete={handleDelete}
+          setShowHistoryAsset={setShowHistoryAsset}
+        />
+        <AssetRegisterModals
+          showHistoryAsset={showHistoryAsset} setShowHistoryAsset={setShowHistoryAsset}
+          showBulkMaintenance={showBulkMaintenance} setShowBulkMaintenance={setShowBulkMaintenance} handleBulkMaintenance={handleBulkMaintenance} bulkMaintenanceForm={bulkMaintenanceForm} setBulkMaintenanceForm={setBulkMaintenanceForm} selectedSize={selected.size}
+          showPDFModal={showPDFModal} setShowPDFModal={setShowPDFModal} exportPDF={exportPDF} activeFilters={{ site: siteQ, category: categoryQ, status: statusQ }}
+          showBulkStatus={showBulkStatus} setShowBulkStatus={setShowBulkStatus} bulkStatusVal={bulkStatusVal} setBulkStatusVal={setBulkStatusVal} STATUSES={STATUSES} handleBulkStatus={handleBulkStatus} bulkLoading={bulkLoading}
+          showBulkTransfer={showBulkTransfer} setShowBulkTransfer={setShowBulkTransfer} bulkTransferSite={bulkTransferSite} setBulkTransferSite={setBulkTransferSite} sites={filterOptions.sites} handleBulkTransfer={handleBulkTransfer}
+          showAssignGroup={showAssignGroup} setShowAssignGroup={setShowAssignGroup} assignGroupAssets={assignGroupAssets} assignGroupTab={assignGroupTab} setAssignGroupTab={setAssignGroupTab} assignGroupSearch={assignGroupSearch} setAssignGroupSearch={setAssignGroupSearch} uniqueGroupNames={uniqueGroupNames} assignGroupSelected={assignGroupSelected} setAssignGroupSelected={setAssignGroupSelected} assignGroupNewName={assignGroupNewName} setAssignGroupNewName={setAssignGroupNewName} assignGroupLoading={assignGroupLoading} handleAssignGroupSubmit={handleAssignGroupSubmit}
+          cloneAsset={cloneAsset} setCloneAsset={setCloneAsset} handleClone={handleClone} cloneLoading={cloneLoading}
+        />
+      </>
+    )
+  }
+
   return (
     <div style={{ width: '100%' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <h1 className="font-display" style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--text-0)', letterSpacing: '0.04em', marginBottom: 4 }}>
-            ASSET <span style={{ color: 'var(--accent)' }}>REGISTER</span>
+          <h1 className="text-page-title m-0 mb-1 tracking-wide uppercase">
+            ASSET <span className="text-accent">REGISTER</span>
           </h1>
-          <p style={{ color: 'var(--text-2)', fontSize: '0.875rem' }}>
+          <p style={{ color: 'var(--text-2)', }}>
             {totalCount} assets
           </p>
         </div>
@@ -709,7 +765,7 @@ export default function AssetList() {
               {deleting ? 'Deleting…' : `Delete (${selected.size})`}
             </button>
           )}
-          {can('add') && <Link to="/assets/new" className="btn-primary" style={{ textDecoration: 'none', borderRadius: 8, padding: '8px 16px', fontWeight: 600 }}><PlusCircle size={16} /> Add Asset</Link>}
+          {can('add') && <Link to="/assets/new" className="btn-primary" style={{ textDecoration: 'none', borderRadius: 8, padding: '8px 16px', }}><PlusCircle size={16} /> Add Asset</Link>}
         </div>
       </div>
 
@@ -723,14 +779,26 @@ export default function AssetList() {
         ].map(tab => (
           <button key={tab.id} onClick={() => setViewMode(tab.id)}
             style={{ flex: 1, minWidth: 140, justifyContent: 'center', display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: 6,
-              border: 'none', cursor: 'pointer', fontFamily: 'DM Sans', fontWeight: 600, fontSize: '0.85rem',
-              transition: 'all 0.15s', whiteSpace: 'nowrap',
+              border: 'none', cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap',
               background: viewMode === tab.id ? '#4285f4' : 'transparent',
               color: viewMode === tab.id ? 'white' : 'var(--text-2)' }}>
             <tab.icon size={16} /> <span className="mobile-hide">{tab.label}</span>
           </button>
         ))}
       </div>
+
+      {isAssetsError && (
+          <div style={{ padding: '16px 20px', marginBottom: 20, background: 'var(--red-dim)', border: '1px solid var(--red)', borderRadius: 12, color: 'var(--red)', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <AlertTriangle size={20} />
+            <div>
+              <p style={{ margin: 0, }}>Failed to load assets</p>
+              <p style={{ margin: 0, opacity: 0.9 }}>{assetsError?.message || 'An unexpected error occurred. Please try again later.'}</p>
+            </div>
+            <button onClick={() => queryClient.invalidateQueries({ queryKey: ['assets'] })} className="btn-primary" style={{ marginLeft: 'auto', background: 'var(--red)', color: 'white', padding: '6px 14px', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
+              Retry
+            </button>
+          </div>
+        )}
 
       {/* Transfers View */}
       {viewMode === 'transfers' && (
@@ -760,12 +828,14 @@ export default function AssetList() {
           <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'var(--bg-2)', borderRadius: 10, border: '1px solid var(--border)' }}>
             <s.icon size={16} style={{ color: s.color, flexShrink: 0 }} />
             <div>
-              <div style={{ fontSize: '1.1rem', fontWeight: 700, fontFamily: 'Oswald', color: 'var(--text-0)' }}>{s.val}</div>
-              <div style={{ fontSize: '0.62rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
+              <div style={{ color: 'var(--text-0)' }}>{s.val}</div>
+              <div style={{ color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
             </div>
           </div>
         ))}
       </div>
+
+      <AgeIntelligenceView companyCode={cc} />
 
       {/* Search + Filters */}
       <AssetFilters
@@ -783,13 +853,13 @@ export default function AssetList() {
       {/* Bulk Actions */}
       {selected.size > 0 && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 20px', borderRadius: 10, background: 'var(--accent-glow)', border: '1px solid var(--accent)', marginBottom: 16, flexWrap: 'wrap' }}>
-          <span style={{ fontWeight: 600, color: 'var(--accent-light)' }}>{selected.size} selected</span>
-          {can('print_stickers') && <Link to={`/stickers?ids=${[...selected].join(',')}`} className="btn-ghost" style={{ fontSize: '0.78rem', padding: '6px 14px', textDecoration: 'none' }}><Tag size={13} /> Stickers</Link>}
-          {(isAdmin || isMod) && <button onClick={() => setShowBulkStatus(true)} className="btn-ghost" style={{ fontSize: '0.78rem', padding: '6px 14px' }}><Activity size={13} /> Change Status</button>}
-          {(isAdmin || isMod) && <button onClick={() => setShowBulkTransfer(true)} className="btn-ghost" style={{ fontSize: '0.78rem', padding: '6px 14px' }}><MapPin size={13} /> Transfer</button>}
-          {(isAdmin || isMod) && <button onClick={() => setShowBulkMaintenance(true)} className="btn-ghost" style={{ fontSize: '0.78rem', padding: '6px 14px', color: 'var(--amber)', borderColor: 'var(--amber-dim)' }}><Ticket size={13} /> Schedule Maintenance</button>}
+          <span style={{ color: 'var(--accent-light)' }}>{selected.size} selected</span>
+          {can('print_stickers') && <Link to={`/stickers?ids=${[...selected].join(',')}`} className="btn-ghost" style={{ padding: '6px 14px', textDecoration: 'none' }}><Tag size={13} /> Stickers</Link>}
+          {(isAdmin || isMod) && <button onClick={() => setShowBulkStatus(true)} className="btn-ghost" style={{ padding: '6px 14px' }}><Activity size={13} /> Change Status</button>}
+          {(isAdmin || isMod) && <button onClick={() => setShowBulkTransfer(true)} className="btn-ghost" style={{ padding: '6px 14px' }}><MapPin size={13} /> Transfer</button>}
+          {(isAdmin || isMod) && <button onClick={() => setShowBulkMaintenance(true)} className="btn-ghost" style={{ padding: '6px 14px', color: 'var(--amber)', borderColor: 'var(--amber-dim)' }}><Ticket size={13} /> Schedule Maintenance</button>}
           {can('delete') && (
-            <button onClick={() => handleDelete([...selected])} className="btn-danger" disabled={deleting} style={{ fontSize: '0.78rem', padding: '6px 14px' }}>
+            <button onClick={() => handleDelete([...selected])} className="btn-danger" disabled={deleting} style={{ padding: '6px 14px' }}>
               {deleting ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />} Delete
             </button>
           )}
@@ -807,6 +877,7 @@ export default function AssetList() {
         pageSize={pageSize} setPageSize={setPageSize}
         setAssignGroupAssets={setAssignGroupAssets} setAssignGroupTab={setAssignGroupTab} setAssignGroupSearch={setAssignGroupSearch}
         setAssignGroupSelected={setAssignGroupSelected} setAssignGroupNewName={setAssignGroupNewName} setShowAssignGroup={setShowAssignGroup}
+        handleExportDossier={handleExportDossier}
       />
 
       {/* ── MODALS & DRAWERS ── */}

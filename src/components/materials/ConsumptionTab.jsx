@@ -108,7 +108,7 @@ function LogConsumptionModal({ materials, stock, sites, userId, onClose, onSaved
           from_site: site,
           to_site: null,
           quantity: qty,
-          notes: `Consumption ${consumptionNo} — ${purpose || 'N/A'}`.slice(0, 500),
+          notes: `Consumption ${consumptionNo} - ${purpose || 'N/A'}`.slice(0, 500),
           performed_by: userId,
           unit_cost: unitCost,
         })
@@ -125,22 +125,22 @@ function LogConsumptionModal({ materials, stock, sites, userId, onClose, onSaved
 
   return (
     <ModalShell onClose={onClose} accent="var(--red)">
-      <h3 style={{ fontFamily: 'Oswald', fontSize: '1.15rem', marginBottom: 18, paddingRight: 32 }}>
+      <h3 style={{ marginBottom: 18, paddingRight: 32 }}>
         Log Material Consumption
       </h3>
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         {/* Material */}
         <div>
-          <label className="lbl" style={{ fontFamily: 'Oswald', fontSize: '0.72rem', marginBottom: 4, display: 'block' }}>
+          <label className="lbl" style={{ marginBottom: 4, display: 'block' }}>
             Material *
           </label>
           <select className="sel" value={materialId} onChange={e => setMaterialId(e.target.value)} required
-            style={{ height: 38, fontSize: '0.82rem' }}>
+            style={{ height: 38, }}>
             <option value="">Select material...</option>
             {materials.filter(m => !m.is_reusable).map(m => (
               <option key={m.id} value={m.id}>
-                {m.material_code} — {m.material_name} ({m.unit})
+                {m.material_code} - {m.material_name} ({m.unit})
               </option>
             ))}
           </select>
@@ -148,18 +148,18 @@ function LogConsumptionModal({ materials, stock, sites, userId, onClose, onSaved
 
         {/* Site */}
         <div>
-          <label className="lbl" style={{ fontFamily: 'Oswald', fontSize: '0.72rem', marginBottom: 4, display: 'block' }}>
+          <label className="lbl" style={{ marginBottom: 4, display: 'block' }}>
             Site *
           </label>
           <select className="sel" value={site} onChange={e => setSite(e.target.value)} required
-            disabled={!materialId} style={{ height: 38, fontSize: '0.82rem' }}>
+            disabled={!materialId} style={{ height: 38, }}>
             <option value="">{materialId ? 'Select site...' : 'Select a material first'}</option>
             {availableSites.map(s => (
               <option key={s} value={s}>{s}</option>
             ))}
           </select>
           {materialId && availableSites.length === 0 && (
-            <div style={{ marginTop: 4, fontSize: '0.72rem', color: 'var(--red)', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <div style={{ marginTop: 4, color: 'var(--red)', display: 'flex', alignItems: 'center', gap: 4 }}>
               <AlertTriangle size={12} /> No sites have stock for this material
             </div>
           )}
@@ -172,9 +172,8 @@ function LogConsumptionModal({ materials, stock, sites, userId, onClose, onSaved
             padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 8,
           }}>
             <Package size={14} style={{ color: 'var(--accent)' }} />
-            <span style={{ fontSize: '0.78rem', color: 'var(--text-2)' }}>Available stock:</span>
+            <span style={{ color: 'var(--text-2)' }}>Available stock:</span>
             <span style={{
-              fontFamily: 'DM Mono', fontWeight: 700, fontSize: '0.88rem',
               color: availableQty > 0 ? 'var(--green)' : 'var(--red)',
             }}>
               {availableQty} {selectedMaterial?.unit || ''}
@@ -184,55 +183,55 @@ function LogConsumptionModal({ materials, stock, sites, userId, onClose, onSaved
 
         {/* Quantity */}
         <div>
-          <label className="lbl" style={{ fontFamily: 'Oswald', fontSize: '0.72rem', marginBottom: 4, display: 'block' }}>
+          <label className="lbl" style={{ marginBottom: 4, display: 'block' }}>
             Quantity *
           </label>
           <input className="inp" type="number" min="0.01" step="any" max={availableQty || undefined}
             value={quantity} onChange={e => setQuantity(e.target.value)} required
-            placeholder={`Max: ${availableQty}`} style={{ height: 38, fontSize: '0.82rem' }} />
+            placeholder={`Max: ${availableQty}`} style={{ height: 38, }} />
         </div>
 
         {/* Purpose + Work Area */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <div>
-            <label className="lbl" style={{ fontFamily: 'Oswald', fontSize: '0.72rem', marginBottom: 4, display: 'block' }}>
+            <label className="lbl" style={{ marginBottom: 4, display: 'block' }}>
               Purpose
             </label>
             <input className="inp" value={purpose} onChange={e => setPurpose(e.target.value)}
-              placeholder="e.g. Concrete pouring" style={{ height: 38, fontSize: '0.82rem' }} />
+              placeholder="e.g. Concrete pouring" style={{ height: 38, }} />
           </div>
           <div>
-            <label className="lbl" style={{ fontFamily: 'Oswald', fontSize: '0.72rem', marginBottom: 4, display: 'block' }}>
+            <label className="lbl" style={{ marginBottom: 4, display: 'block' }}>
               Work Area
             </label>
             <input className="inp" value={workArea} onChange={e => setWorkArea(e.target.value)}
-              placeholder="e.g. Block A 3rd Floor" style={{ height: 38, fontSize: '0.82rem' }} />
+              placeholder="e.g. Block A 3rd Floor" style={{ height: 38, }} />
           </div>
         </div>
 
         {/* Consumed By */}
         <div>
-          <label className="lbl" style={{ fontFamily: 'Oswald', fontSize: '0.72rem', marginBottom: 4, display: 'block' }}>
+          <label className="lbl" style={{ marginBottom: 4, display: 'block' }}>
             Consumed By *
           </label>
           <input className="inp" value={consumedBy} onChange={e => setConsumedBy(e.target.value)} required
-            placeholder="Worker / Contractor name" style={{ height: 38, fontSize: '0.82rem' }} />
+            placeholder="Worker / Contractor name" style={{ height: 38, }} />
         </div>
 
         {/* Notes */}
         <div>
-          <label className="lbl" style={{ fontFamily: 'Oswald', fontSize: '0.72rem', marginBottom: 4, display: 'block' }}>
+          <label className="lbl" style={{ marginBottom: 4, display: 'block' }}>
             Notes
           </label>
           <textarea className="inp" value={notes} onChange={e => setNotes(e.target.value)} rows={3}
-            placeholder="Additional remarks..." style={{ fontSize: '0.82rem', resize: 'vertical' }} />
+            placeholder="Additional remarks..." style={{ resize: 'vertical' }} />
         </div>
 
         {/* Error */}
         {error && (
           <div style={{
             background: 'var(--red-dim)', border: '1px solid var(--red)',
-            borderRadius: 8, padding: '8px 12px', fontSize: '0.78rem', color: 'var(--red)',
+            borderRadius: 8, padding: '8px 12px', color: 'var(--red)',
             display: 'flex', alignItems: 'center', gap: 6,
           }}>
             <AlertTriangle size={14} /> {error}
@@ -241,7 +240,7 @@ function LogConsumptionModal({ materials, stock, sites, userId, onClose, onSaved
 
         {/* Submit */}
         <button type="submit" className="btn-primary" disabled={saving}
-          style={{ height: 42, fontSize: '0.85rem', marginTop: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          style={{ height: 42, marginTop: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
           {saving ? <><Loader2 size={16} className="spin" /> Logging...</> : <><Flame size={16} /> Log Consumption</>}
         </button>
       </form>
@@ -381,14 +380,14 @@ export default function ConsumptionTab({ materials, stock, sites, onRefresh }) {
 
       {/* Bulk delete bar */}
       {selectedIds.size > 0 && (
-        <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 16px', background:'var(--red-dim)', borderBottom:'1px solid rgba(239,68,68,0.2)' }}>
-          <span style={{ fontSize:'0.82rem', color:'var(--red)', fontWeight:600 }}>{selectedIds.size} record{selectedIds.size > 1 ? 's' : ''} selected</span>
+        <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 16px', background:'var(--red-dim)', borderBottom:'1px solid var(--status-danger-soft)' }}>
+          <span style={{ color:'var(--red)', }}>{selectedIds.size} record{selectedIds.size > 1 ? 's' : ''} selected</span>
           <button onClick={() => handleBulkDelete([...selectedIds])}
-            style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:6, padding:'6px 14px', borderRadius:10, background:'var(--red)', border:'none', color:'white', cursor:'pointer', fontSize:'0.78rem', fontWeight:600 }}>
+            style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:6, padding:'6px 14px', borderRadius:10, background:'var(--red)', border:'none', color:'white', cursor:'pointer', }}>
             <Trash2 size={13}/> Delete Selected
           </button>
           <button onClick={clearSel}
-            style={{ display:'flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:10, background:'var(--bg-3)', border:'1.5px solid var(--border)', color:'var(--text-2)', cursor:'pointer', fontSize:'0.78rem' }}>
+            style={{ display:'flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:10, background:'var(--bg-3)', border:'1.5px solid var(--border)', color:'var(--text-2)', cursor:'pointer', }}>
             <X size={13}/> Cancel
           </button>
         </div>
@@ -398,7 +397,7 @@ export default function ConsumptionTab({ materials, stock, sites, onRefresh }) {
       {loading && (
         <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-3)' }}>
           <Loader2 size={24} className="spin" style={{ margin: '0 auto 12px' }} />
-          <div style={{ fontSize: '0.85rem' }}>Loading consumption records...</div>
+          <div >Loading consumption records...</div>
         </div>
       )}
 
@@ -424,59 +423,59 @@ export default function ConsumptionTab({ materials, stock, sites, onRefresh }) {
               </thead>
               <tbody>
                 {filtered.map(rec => (
-                  <tr key={rec.id} style={{ background: selectedIds.has(rec.id) ? 'rgba(239,68,68,0.04)' : undefined }}>
+                  <tr key={rec.id} style={{ background: selectedIds.has(rec.id) ? 'var(--status-danger-soft)' : undefined }}>
                     <td><input type="checkbox" checked={selectedIds.has(rec.id)} onChange={() => toggleOne(rec.id)} style={{ cursor:'pointer' }}/></td>
                     <td>
-                      <span style={{ fontSize: '0.78rem', color: 'var(--text-2)', fontFamily: 'DM Mono' }}>
+                      <span style={{ color: 'var(--text-2)', }}>
                         {new Date(rec.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </span>
                     </td>
                     <td>
-                      <span style={{ fontFamily: 'DM Mono', fontWeight: 700, fontSize: '0.82rem', color: 'var(--red)' }}>
+                      <span style={{ color: 'var(--red)' }}>
                         {rec.consumption_no}
                       </span>
                     </td>
                     <td>
-                      <div style={{ fontSize: '0.82rem', color: 'var(--text-0)', fontWeight: 600 }}>
-                        {rec.materials?.material_name || '—'}
+                      <div style={{ color: 'var(--text-0)', }}>
+                        {rec.materials?.material_name || '-'}
                       </div>
-                      <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', fontFamily: 'DM Mono' }}>
+                      <div style={{ color: 'var(--text-3)', }}>
                         {rec.materials?.material_code || ''}
                       </div>
                     </td>
-                    <td style={{ fontSize: '0.82rem', color: 'var(--text-2)' }}>
-                      {rec.site || '—'}
+                    <td style={{ color: 'var(--text-2)' }}>
+                      {rec.site || '-'}
                     </td>
                     <td>
-                      <span style={{ fontFamily: 'DM Mono', fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-0)' }}>
+                      <span style={{ color: 'var(--text-0)' }}>
                         {rec.quantity}
                       </span>
-                      <span style={{ fontSize: '0.68rem', color: 'var(--text-3)', marginLeft: 4 }}>
+                      <span style={{ color: 'var(--text-3)', marginLeft: 4 }}>
                         {rec.materials?.unit || ''}
                       </span>
                     </td>
                     <td style={{
-                      fontSize: '0.82rem', color: 'var(--text-2)', maxWidth: 160,
+                      color: 'var(--text-2)', maxWidth: 160,
                       overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     }}>
-                      {rec.purpose || '—'}
+                      {rec.purpose || '-'}
                     </td>
                     <td style={{
-                      fontSize: '0.82rem', color: 'var(--text-2)', maxWidth: 160,
+                      color: 'var(--text-2)', maxWidth: 160,
                       overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     }}>
-                      {rec.work_area || '—'}
+                      {rec.work_area || '-'}
                     </td>
-                    <td style={{ fontSize: '0.82rem', color: 'var(--text-0)', fontWeight: 600 }}>
-                      {rec.consumed_by || '—'}
+                    <td style={{ color: 'var(--text-0)', }}>
+                      {rec.consumed_by || '-'}
                     </td>
-                    <td style={{ fontSize: '0.82rem', color: 'var(--text-2)' }}>
-                      {rec.logger?.full_name || '—'}
+                    <td style={{ color: 'var(--text-2)' }}>
+                      {rec.logger?.full_name || '-'}
                     </td>
                     <td style={{ textAlign: 'right' }}>
                       <button onClick={() => handleBulkDelete([rec.id])} title="Delete"
                         style={{ padding: '5px 7px', borderRadius: 8, background: 'var(--red-dim)',
-                          border: '1.5px solid rgba(239,68,68,0.2)', cursor: 'pointer', color: 'var(--red)' }}>
+                          border: '1.5px solid var(--status-danger-soft)', cursor: 'pointer', color: 'var(--red)' }}>
                         <Trash2 size={13} />
                       </button>
                     </td>
@@ -508,36 +507,36 @@ export default function ConsumptionTab({ materials, stock, sites, onRefresh }) {
             >
               {/* Row 1: Consumption No + Date */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                <span style={{ fontFamily: 'DM Mono', fontWeight: 700, fontSize: '0.82rem', color: 'var(--red)' }}>
+                <span style={{ color: 'var(--red)' }}>
                   {rec.consumption_no}
                 </span>
-                <span style={{ fontFamily: 'DM Mono', fontSize: '0.68rem', color: 'var(--text-3)' }}>
+                <span style={{ color: 'var(--text-3)' }}>
                   {new Date(rec.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
                 </span>
               </div>
 
               {/* Row 2: Material + Qty */}
-              <div style={{ fontSize: '0.82rem', color: 'var(--text-0)', fontWeight: 600, marginBottom: 4 }}>
-                {rec.materials?.material_name || '—'}
-                <span style={{ fontFamily: 'DM Mono', fontWeight: 700, color: 'var(--red)', marginLeft: 8 }}>
+              <div style={{ color: 'var(--text-0)', marginBottom: 4 }}>
+                {rec.materials?.material_name || '-'}
+                <span style={{ color: 'var(--red)', marginLeft: 8 }}>
                   {rec.quantity} {rec.materials?.unit || ''}
                 </span>
               </div>
 
               {/* Row 3: Site + Consumed By */}
-              <div style={{ display: 'flex', gap: 10, fontSize: '0.72rem', color: 'var(--text-3)', marginBottom: 4, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 10, color: 'var(--text-3)', marginBottom: 4, flexWrap: 'wrap' }}>
                 {rec.site && (
                   <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                     <MapPin size={10} /> {rec.site}
                   </span>
                 )}
                 <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                  <User size={10} /> {rec.consumed_by || '—'}
+                  <User size={10} /> {rec.consumed_by || '-'}
                 </span>
               </div>
 
               {/* Row 4: Purpose + Work Area */}
-              <div style={{ display: 'flex', gap: 10, fontSize: '0.72rem', color: 'var(--text-2)', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 10, color: 'var(--text-2)', flexWrap: 'wrap' }}>
                 {rec.purpose && (
                   <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                     <FileText size={10} /> {rec.purpose}
@@ -552,7 +551,7 @@ export default function ConsumptionTab({ materials, stock, sites, onRefresh }) {
             </div>
           ))}
           {filtered.length === 0 && (
-            <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-3)', fontSize: '0.85rem' }}>
+            <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-3)', }}>
               <Flame size={32} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
               {search ? 'No matching consumption records found.' : 'No consumption records yet.'}
             </div>

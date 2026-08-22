@@ -149,21 +149,21 @@ export default function AssetTimeline({ asset, movements = [], maintenance = {},
               animationDelay: `${Math.min(index * 50, 500)}ms`
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, flexWrap: 'wrap', gap: 8 }}>
-                <h4 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-0)', fontWeight: 600 }}>{ev.title}</h4>
+                <h4 style={{ margin: 0, color: 'var(--text-0)', }}>{ev.title}</h4>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-2)' }}>
+                  <div style={{ color: 'var(--text-2)' }}>
                     {ev.date.toLocaleDateString()} {ev.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </div>
-                  <div style={{ fontSize: '0.65rem', color: 'var(--text-3)', fontFamily: "'DM Mono', monospace" }}>{timeAgo(ev.date)}</div>
+                  <div style={{ color: 'var(--text-3)', }}>{timeAgo(ev.date)}</div>
                 </div>
               </div>
               
-              <p style={{ margin: '0 0 10px 0', fontSize: '0.85rem', color: 'var(--text-2)', lineHeight: 1.5 }}>
+              <p style={{ margin: '0 0 10px 0', color: 'var(--text-2)', }}>
                 {ev.description}
               </p>
               
               {ev.user && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.7rem', color: 'var(--text-3)', fontWeight: 500 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-3)', }}>
                   <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'var(--bg-3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {ev.user.charAt(0).toUpperCase()}
                   </div>

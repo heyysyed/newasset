@@ -3,7 +3,7 @@ import { X, CheckCircle2, MapPin, Loader2, FileText, XCircle, MinusCircle } from
 
 const RESPONSE_BTNS = [
   { value: 'pass', label: 'Pass', color: 'var(--green)', bg: 'rgba(34,197,94,0.1)' },
-  { value: 'fail', label: 'Fail', color: 'var(--red)',   bg: 'rgba(239,68,68,0.1)' },
+  { value: 'fail', label: 'Fail', color: 'var(--red)',   bg: 'var(--status-danger-soft)' },
   { value: 'na',   label: 'N/A',  color: 'var(--text-3)', bg: 'var(--bg-3)' },
 ]
 
@@ -91,11 +91,11 @@ export default function MaintenanceChecklistForm({ checklist, asset, siteInfo, o
               <FileText size={18} />
             </div>
             <div style={{ minWidth: 0 }}>
-              <h2 className="font-display" style={{ fontSize: '0.92rem', fontWeight: 700, letterSpacing: '0.04em', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <h2 className="font-display" style={{ letterSpacing: '0.04em', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {checklist.name}
               </h2>
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-3)', fontFamily: 'DM Sans' }}>
-                {asset?.asset_code} — {asset?.asset_name}
+              <span style={{ color: 'var(--text-3)', }}>
+                {asset?.asset_code} - {asset?.asset_name}
               </span>
             </div>
           </div>
@@ -104,7 +104,7 @@ export default function MaintenanceChecklistForm({ checklist, asset, siteInfo, o
 
         {/* Progress bar */}
         <div style={{ padding: '8px 20px', background: 'var(--bg-2)', borderBottom: '1px solid var(--border)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: '0.7rem', fontFamily: 'DM Sans', color: 'var(--text-3)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, color: 'var(--text-3)' }}>
             <span>{answered} / {total} answered</span>
             <span style={{ display: 'flex', gap: 10 }}>
               <span style={{ color: 'var(--green)' }}>{results.filter(r => r.answer === 'pass').length} Pass</span>
@@ -134,10 +134,10 @@ export default function MaintenanceChecklistForm({ checklist, asset, siteInfo, o
                   border: '1px solid rgba(43,127,255,0.15)',
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 }}>
-                  <span style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '0.8rem', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  <span style={{ color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     {sectionName}
                   </span>
-                  <span style={{ fontSize: '0.65rem', fontFamily: 'DM Sans', color: 'var(--text-3)' }}>
+                  <span style={{ color: 'var(--text-3)' }}>
                     {sectionItems.filter(r => r.answer).length}/{sectionItems.length}
                   </span>
                 </div>
@@ -145,8 +145,8 @@ export default function MaintenanceChecklistForm({ checklist, asset, siteInfo, o
                 {/* Items */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   {sectionItems.map((item, ii) => {
-                    const ansColor = item.answer === 'pass' ? 'rgba(34,197,94,0.05)' : item.answer === 'fail' ? 'rgba(239,68,68,0.05)' : 'var(--bg-2)'
-                    const borderColor = item.answer === 'pass' ? 'rgba(34,197,94,0.25)' : item.answer === 'fail' ? 'rgba(239,68,68,0.25)' : 'var(--border)'
+                    const ansColor = item.answer === 'pass' ? 'rgba(34,197,94,0.05)' : item.answer === 'fail' ? 'var(--status-danger-soft)' : 'var(--bg-2)'
+                    const borderColor = item.answer === 'pass' ? 'rgba(34,197,94,0.25)' : item.answer === 'fail' ? 'var(--status-danger-soft)' : 'var(--border)'
                     return (
                       <div key={item.id} style={{
                         padding: '10px 12px', borderRadius: 8,
@@ -158,11 +158,11 @@ export default function MaintenanceChecklistForm({ checklist, asset, siteInfo, o
                           <span style={{
                             width: 20, height: 20, borderRadius: 5, background: 'var(--bg-3)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: '0.62rem', fontFamily: 'Oswald', fontWeight: 600, color: 'var(--text-3)', flexShrink: 0, marginTop: 1,
+                            color: 'var(--text-3)', flexShrink: 0, marginTop: 1,
                           }}>
                             {ii + 1}
                           </span>
-                          <p style={{ fontSize: '0.78rem', fontFamily: 'DM Sans', color: 'var(--text-1)', margin: 0, flex: 1, lineHeight: 1.4 }}>
+                          <p style={{ color: 'var(--text-1)', margin: 0, flex: 1, }}>
                             {item.question}
                           </p>
                         </div>
@@ -174,8 +174,7 @@ export default function MaintenanceChecklistForm({ checklist, asset, siteInfo, o
                             return (
                               <button key={btn.value} onClick={() => updateResult(item._idx, 'answer', active ? '' : btn.value)}
                                 style={{
-                                  padding: '4px 12px', borderRadius: 6, fontSize: '0.68rem', fontWeight: 700,
-                                  fontFamily: 'DM Sans', textTransform: 'uppercase', letterSpacing: '0.03em',
+                                  padding: '4px 12px', borderRadius: 6, textTransform: 'uppercase', letterSpacing: '0.03em',
                                   border: `1.5px solid ${active ? btn.color : 'var(--border)'}`,
                                   background: active ? btn.bg : 'transparent',
                                   color: active ? btn.color : 'var(--text-3)',
@@ -192,9 +191,8 @@ export default function MaintenanceChecklistForm({ checklist, asset, siteInfo, o
                               onChange={e => updateResult(item._idx, 'remarks', e.target.value)}
                               placeholder="Remarks / Actions required..."
                               style={{
-                                flex: 1, padding: '4px 8px', borderRadius: 6, fontSize: '0.72rem',
-                                border: '1px solid var(--border)', background: 'var(--bg-1)',
-                                fontFamily: 'DM Sans', color: 'var(--text-1)', minWidth: 0,
+                                flex: 1, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-1)',
+                                color: 'var(--text-1)', minWidth: 0,
                               }}
                             />
                           )}
@@ -204,16 +202,16 @@ export default function MaintenanceChecklistForm({ checklist, asset, siteInfo, o
                         {item.answer === 'fail' && (
                           <div style={{
                             marginTop: 10, marginLeft: 28, padding: 10, borderRadius: 8,
-                            background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)',
+                            background: 'var(--status-danger-soft)', border: '1px solid var(--status-danger-soft)',
                             display: 'flex', flexDirection: 'column', gap: 8
                           }}>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                               <div>
-                                <label className="lbl" style={{ fontSize: '0.65rem', marginBottom: 2 }}>Defect Category *</label>
+                                <label className="lbl" style={{ marginBottom: 2 }}>Defect Category *</label>
                                 <select 
                                   value={item.defect_category || 'Mechanical'} 
                                   onChange={e => updateResult(item._idx, 'defect_category', e.target.value)}
-                                  className="sel" style={{ fontSize: '0.72rem', height: 28 }}
+                                  className="sel" style={{ height: 28 }}
                                 >
                                   <option value="Mechanical">Mechanical</option>
                                   <option value="Electrical">Electrical</option>
@@ -223,11 +221,11 @@ export default function MaintenanceChecklistForm({ checklist, asset, siteInfo, o
                                 </select>
                               </div>
                               <div>
-                                <label className="lbl" style={{ fontSize: '0.65rem', marginBottom: 2 }}>Severity Level *</label>
+                                <label className="lbl" style={{ marginBottom: 2 }}>Severity Level *</label>
                                 <select 
                                   value={item.severity || 'Medium'} 
                                   onChange={e => updateResult(item._idx, 'severity', e.target.value)}
-                                  className="sel" style={{ fontSize: '0.72rem', height: 28 }}
+                                  className="sel" style={{ height: 28 }}
                                 >
                                   <option value="Low">Low</option>
                                   <option value="Medium">Medium</option>
@@ -238,13 +236,13 @@ export default function MaintenanceChecklistForm({ checklist, asset, siteInfo, o
                             </div>
 
                             <div>
-                              <label className="lbl" style={{ fontSize: '0.65rem', marginBottom: 2 }}>Defect Details & Photo Proof URL *</label>
+                              <label className="lbl" style={{ marginBottom: 2 }}>Defect Details & Photo Proof URL *</label>
                               <input 
                                 type="text"
                                 placeholder="Describe defect & paste photo proof link..."
                                 value={item.remarks || ''}
                                 onChange={e => updateResult(item._idx, 'remarks', e.target.value)}
-                                className="inp" style={{ fontSize: '0.72rem', height: 28 }}
+                                className="inp" style={{ height: 28 }}
                               />
                             </div>
                           </div>
@@ -265,8 +263,7 @@ export default function MaintenanceChecklistForm({ checklist, asset, siteInfo, o
             rows={2}
             style={{
               width: '100%', padding: 10, borderRadius: 8, border: '1px solid var(--border)',
-              background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.82rem',
-              resize: 'vertical', marginBottom: 16, color: 'var(--text-1)',
+              background: 'var(--bg-2)', resize: 'vertical', marginBottom: 16, color: 'var(--text-1)',
             }}
           />
 
@@ -278,7 +275,7 @@ export default function MaintenanceChecklistForm({ checklist, asset, siteInfo, o
             placeholder="Full name..."
             style={{
               width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)',
-              background: 'var(--bg-2)', fontFamily: 'DM Sans', fontSize: '0.82rem', marginBottom: 16, color: 'var(--text-1)',
+              background: 'var(--bg-2)', marginBottom: 16, color: 'var(--text-1)',
             }}
           />
 
@@ -288,13 +285,13 @@ export default function MaintenanceChecklistForm({ checklist, asset, siteInfo, o
             border: '1px solid rgba(14,165,233,0.15)', display: 'flex', alignItems: 'center', gap: 8,
           }}>
             <MapPin size={14} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-2)', fontFamily: 'DM Sans' }}>
+            <span style={{ color: 'var(--text-2)', }}>
               GPS coordinates and date will be captured on submit.
             </span>
           </div>
 
           {gpsError && (
-            <p style={{ fontSize: '0.72rem', color: 'var(--red)', fontFamily: 'DM Sans', marginTop: 8 }}>{gpsError}</p>
+            <p style={{ color: 'var(--red)', marginTop: 8 }}>{gpsError}</p>
           )}
         </div>
 
@@ -303,8 +300,8 @@ export default function MaintenanceChecklistForm({ checklist, asset, siteInfo, o
           padding: '14px 20px', borderTop: '1px solid var(--border)', background: 'var(--bg-2)',
           display: 'flex', gap: 8, justifyContent: 'flex-end',
         }}>
-          <button onClick={onClose} className="btn-ghost" style={{ fontSize: '0.82rem' }}>Cancel</button>
-          <button onClick={handleSubmit} disabled={submitting} className="btn-primary" style={{ fontSize: '0.82rem' }}>
+          <button onClick={onClose} className="btn-ghost" >Cancel</button>
+          <button onClick={handleSubmit} disabled={submitting} className="btn-primary" >
             {submitting ? <><Loader2 size={13} className="spin" /> Submitting...</> : <><CheckCircle2 size={13} /> Submit Checklist</>}
           </button>
         </div>
