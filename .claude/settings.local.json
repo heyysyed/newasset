@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__claude_ai_Supabase__list_projects",
+      "mcp__claude_ai_Supabase__list_tables",
+      "mcp__claude_ai_Supabase__execute_sql",
+      "mcp__claude_ai_Supabase__apply_migration",
+      "Bash(find 'd:\\\\birthday\\\\images\\\\assetpro-v3 last\\\\assetpro-v3 - Copy \\(3\\)\\\\assetpro\\\\src' -type f \\\\\\(-iname *user* -o -iname *auth* -o -iname *profile* -o -iname *form* -o -iname *modal* \\\\\\))"
+    ]
+  }
+}
