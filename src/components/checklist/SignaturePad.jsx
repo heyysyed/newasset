@@ -79,3 +79,5 @@ export default function SignaturePad({ onSave, onClear, label = 'Sign here' }) {
     </div>
   )
 }
+
+

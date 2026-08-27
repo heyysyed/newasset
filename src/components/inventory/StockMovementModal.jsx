@@ -177,3 +177,5 @@ export default function StockMovementModal({ isOpen, onClose, items, user, onSav
     </div>
   )
 }
+
+

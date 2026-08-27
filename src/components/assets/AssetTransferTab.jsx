@@ -183,7 +183,7 @@ function CreateTransferModal({ onClose, assets, sites, onSubmit }) {
   useEffect(() => {
     if (!form.from_site) { setSiteAssets([]); return }
     supabase.from('assets')
-      .select('id, asset_code, asset_name, category, site, quantity, uom, asset_type')
+      .select('id, asset_code, asset_name, category, site, quantity, asset_type')
       .or('notes.is.null,notes.not.ilike.%[Migrated to Bulk Module]%')
       .eq('site', form.from_site).order('asset_name')
       .then(({ data }) => setSiteAssets(data || []))
@@ -191,7 +191,7 @@ function CreateTransferModal({ onClose, assets, sites, onSubmit }) {
 
   // Asset picker helpers
   function addLine() {
-    setLineItems(p => [...p, { asset_id: '', description: '', quantity: 1, unit: 'nos', remarks: '' }])
+    setLineItems(p => [...p, { asset_id: '', description: '', quantity: 1, remarks: '' }])
   }
   function removeLine(i) {
     setLineItems(p => p.filter((_, idx) => idx !== i))
@@ -207,14 +207,12 @@ function CreateTransferModal({ onClose, assets, sites, onSubmit }) {
         ...it, asset_id: assetId,
         description: `${a.asset_name}${a.asset_code ? ' (' + a.asset_code + ')' : ''}`,
         quantity: isBulk ? '' : 1,
-        unit: a.uom || 'nos',
         _isBulk: isBulk,
         _availableQty: Number(a.quantity) || 1,
-        _uom: a.uom || 'nos',
       } : it))
       if (a.site && !form.from_site) set('from_site', a.site)
     } else {
-      setLineItems(p => p.map((it, idx) => idx === i ? { ...it, asset_id: '', description: '', _isBulk: false, _availableQty: 0, _uom: 'nos' } : it))
+      setLineItems(p => p.map((it, idx) => idx === i ? { ...it, asset_id: '', description: '', _isBulk: false, _availableQty: 0 } : it))
     }
   }
 
@@ -361,7 +359,7 @@ function CreateTransferModal({ onClose, assets, sites, onSubmit }) {
                       const isBulkAsset = a.asset_type === 'bulk' || (Number(a.quantity) > 1)
                       return (
                         <option key={a.id} value={a.id}>
-                          {a.asset_code ? `${a.asset_code} - ` : ''}{a.asset_name}{a.category ? ` [${a.category}]` : ''}{isBulkAsset ? ` (${a.quantity} ${a.uom || 'nos'})` : ''}
+                          {a.asset_code ? `${a.asset_code} - ` : ''}{a.asset_name}{a.category ? ` [${a.category}]` : ''}{isBulkAsset ? ` (${a.quantity} units)` : ''}
                         </option>
                       )
                     })}
@@ -374,7 +372,7 @@ function CreateTransferModal({ onClose, assets, sites, onSubmit }) {
                   {/* Bulk asset info */}
                   {li._isBulk && li._availableQty > 0 && (
                     <div style={{ color: 'var(--accent)', background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', borderRadius: 6, padding: '5px 10px', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
-                      <Package size={12} /> Bulk Asset - Available: <strong>{li._availableQty} {li._uom}</strong>. Enter qty to transfer.
+                      <Package size={12} /> Bulk Asset - Available: <strong>{li._availableQty} units</strong>. Enter qty to transfer.
                     </div>
                   )}
 
@@ -1002,3 +1000,5 @@ export default function AssetTransferTab({ assets = [], sites = [], onRefresh })
     </div>
   )
 }
+
+

@@ -69,3 +69,5 @@ export default function SkeletonLoader({ type = 'card', count = 3, rows = 5, col
   if (type === 'table') return <SkeletonTable rows={rows} cols={cols} />
   return <SkeletonCard count={count} />
 }
+
+

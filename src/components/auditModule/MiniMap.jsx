@@ -87,3 +87,5 @@ export default function MiniMap({ site, items = [] }) {
     </div>
   );
 }
+
+

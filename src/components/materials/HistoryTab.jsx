@@ -148,3 +148,5 @@ export default function HistoryTab({ txns, canWrite, onBulkDelete }) {
     </>
   )
 }
+
+

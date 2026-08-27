@@ -1060,3 +1060,5 @@ async function _inventoryAdapter({ siteId }) {
   const catMap = {}; rows.forEach(r => { catMap[r.category] = (catMap[r.category] || 0) + r.total_value })
   return { state: rows.length === 0 ? 'NO_DATA' : 'DATA_AVAILABLE', summary: { totalSKUs: rows.length, totalInventoryValue: totalVal, reorderCount }, chartData: Object.entries(catMap).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value), columns: [{ key: 'item_code', label: 'Item Code' }, { key: 'item_name', label: 'Item Name' }, { key: 'category', label: 'Category' }, { key: 'unit', label: 'Unit' }, { key: 'current_stock', label: 'Stock', format: 'number' }, { key: 'reorder_level', label: 'Reorder Level', format: 'number' }, { key: 'unit_cost', label: 'Unit Cost (₹)', format: 'currency' }, { key: 'total_value', label: 'Total Value (₹)', format: 'currency' }, { key: 'stock_status', label: 'Status', format: 'badge_stock' }], rows }
 }
+
+

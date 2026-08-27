@@ -1943,3 +1943,28 @@ export async function syncOfflineActionsQueue(userId) {
 
 
 
+
+
+
+// --- Category Management (added Aug 26) ---------------------------------------
+export async function fetchCategories() {
+  const { data, error } = await supabase.from('asset_categories').select('*').order('name')
+  if (error) throw error
+  return data || []
+}
+
+export async function addCategory(name) {
+  const { data, error } = await supabase.from('asset_categories').insert({ name: name.trim() }).select().single()
+  if (error) throw error
+  return data
+}
+
+export async function renameCategory(oldName, newName) {
+  const { error } = await supabase.from('asset_categories').update({ name: newName.trim() }).eq('name', oldName)
+  if (error) throw error
+}
+
+export async function deleteCategory(id) {
+  const { error } = await supabase.from('asset_categories').delete().eq('id', id)
+  if (error) throw error
+}

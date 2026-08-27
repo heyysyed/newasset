@@ -37,6 +37,17 @@ import {
   getDataQualityReport,
   getOperationalExceptionsReport
 } from './reports_domain'
+import {
+  getComponentRegisterReport,
+  getComponentReplacementReport,
+  getScrappedComponentsReport,
+  getComponentCostAnalysis,
+  getComponentLifecycleHistory,
+  getAssetComponentChangeHistory,
+  getSerializedComponentInventory,
+  getCompleteAssetLifecycle,
+  getComponentMovementReport
+} from './reports_components'
 
 export { CONSTRUCTION_REPORT_CATEGORIES as REPORT_CATEGORIES }
 
@@ -1073,6 +1084,77 @@ export const ALL_REPORTS = [
     exportFormats: ['pdf', 'xlsx', 'csv', 'print'],
   },
   {
+    id: 'comp_register',
+    name: 'Asset Component Register',
+    category: 'components',
+    description: 'Register of all serialized components, their statuses, and current locations.',
+    fetch: getComponentRegisterReport,
+    drilldown: {
+      column: 'Asset',
+      route: '/assets'
+    }
+  },
+  {
+    id: 'comp_lifecycle',
+    name: 'Component Lifecycle History',
+    category: 'components',
+    description: 'Chronological ledger of all component events from purchase to scrap.',
+    fetch: getComponentLifecycleHistory
+  },
+  {
+    id: 'comp_change_history',
+    name: 'Asset Component Change History',
+    category: 'components',
+    description: 'Ledger of component swaps, installs, and removals per asset.',
+    fetch: getAssetComponentChangeHistory
+  },
+  {
+    id: 'comp_replacements',
+    name: 'Component Replacement Report',
+    category: 'components',
+    description: 'Audit log of component replacements linked to work orders.',
+    fetch: getComponentReplacementReport,
+    drilldown: {
+      column: 'Work Order',
+      route: '/maintenance/tickets'
+    }
+  },
+  {
+    id: 'comp_scrapped',
+    name: 'Scrapped Components & Loss',
+    category: 'components',
+    description: 'Summary of components disposed of or failed.',
+    fetch: getScrappedComponentsReport
+  },
+  {
+    id: 'comp_cost_analysis',
+    name: 'Component Cost Distribution',
+    category: 'components',
+    description: 'Distribution of capital across component categories.',
+    fetch: getComponentCostAnalysis
+  },
+  {
+    id: 'comp_inventory',
+    name: 'Serialized Component Inventory',
+    category: 'components',
+    description: 'Stock status for all physical parts (Available, Installed, Reserved).',
+    fetch: getSerializedComponentInventory
+  },
+  {
+    id: 'comp_complete_lifecycle',
+    name: 'Complete Asset Lifecycle Cost',
+    category: 'components',
+    description: 'Total Cost of Ownership including base asset, components, and maintenance.',
+    fetch: getCompleteAssetLifecycle
+  },
+  {
+    id: 'comp_movement',
+    name: 'Component Movement Report',
+    category: 'components',
+    description: 'Audit log of physical movement of serialized components.',
+    fetch: getComponentMovementReport
+  },
+  {
     id: 'consumables_burn',
     title: 'CONSUMABLES & MATERIAL BURN RATE',
     category: 'inventory',
@@ -1613,3 +1695,5 @@ export const ALL_REPORTS = [
     exportFormats: ['pdf', 'xlsx', 'csv', 'print'],
   },
 ]
+
+

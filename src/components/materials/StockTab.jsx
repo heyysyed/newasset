@@ -206,3 +206,5 @@ export default function StockTab({ rows, canWrite, onEditReorder, onDeleteStock,
     </>
   )
 }
+
+

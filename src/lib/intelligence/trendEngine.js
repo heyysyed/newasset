@@ -36,3 +36,5 @@ export function calculateTrend(currentValue, previousValue, minimumDataThreshold
     direction
   }
 }
+
+

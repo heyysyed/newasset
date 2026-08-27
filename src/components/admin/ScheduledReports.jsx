@@ -112,7 +112,7 @@ export default function ScheduledReports({ settings, setSettings }) {
               </div>
               <div style={{ gridColumn: 'span 2' }}>
                 <label className="lbl">Slack / Teams Webhook Integration URL (Optional)</label>
-                <input className="inp" value={draft.webhook_url || ''} onChange={e => setDraft(d => ({ ...d, webhook_url: e.target.value }))} placeholder="https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX" />
+                <input className="inp" value={draft.webhook_url || ''} onChange={e => setDraft(d => ({ ...d, webhook_url: e.target.value }))} placeholder="https://hooks.slack.com/services/YOUR-WEBHOOK-URL" />
               </div>
             </div>
 
@@ -159,3 +159,5 @@ export default function ScheduledReports({ settings, setSettings }) {
     </div>
   )
 }
+
+

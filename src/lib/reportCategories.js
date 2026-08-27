@@ -65,5 +65,14 @@ export const CONSTRUCTION_REPORT_CATEGORIES = [
     subtitle: 'Heavy machinery tracking, vehicle booking & driver logs',
     color: '#06b6d4',
     icon: Tag
+  },
+  {
+    id: 'components',
+    title: '10. Serialized Components & Parts',
+    subtitle: 'Lifecycle history, replacements, cost analysis & scrap reports',
+    color: '#3b82f6',
+    icon: Layers
   }
 ]
+
+

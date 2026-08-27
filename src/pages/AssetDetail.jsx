@@ -21,6 +21,7 @@ import { useAuth } from '../context/AuthContext'
 import { calculateBookValue, formatCurrency } from '../lib/depreciation'
 import { calculateAssetHealth } from '../lib/predictiveMaintenance'
 import AssetTimeline from '../components/assets/AssetTimeline'
+import AssetComponentsTab from '../components/assets/AssetComponentsTab'
 
 /* ───── constants ───── */
 const STATUS_BADGE = {
@@ -211,6 +212,9 @@ export default function AssetDetail() {
   const [copied, setCopied] = useState(false)
   const [photoPreview, setPhotoPreview] = useState(null)
   
+  // Components
+  const [assetComponentsData, setAssetComponentsData] = useState([])
+  
   // Documents
   const [documents, setDocuments] = useState([])
   const [docUploading, setDocUploading] = useState(false)
@@ -237,6 +241,17 @@ export default function AssetDetail() {
 
   // Condition editing
   const [editingCondition, setEditingCondition] = useState(false)
+
+  // Calculate unique components installed over lifetime that are not included in asset cost
+  const componentExpenditure = useMemo(() => {
+    const uniqueComps = {};
+    assetComponentsData.forEach(ac => {
+      if (ac.components && !ac.components.included_in_asset_cost) {
+        uniqueComps[ac.component_id] = ac.components.purchase_cost || 0;
+      }
+    });
+    return Object.values(uniqueComps).reduce((sum, cost) => sum + cost, 0);
+  }, [assetComponentsData]);
 
   const assigneeLabel = useMemo(() => {
     if (!asset) return 'Unassigned'
@@ -272,7 +287,7 @@ export default function AssetDetail() {
       const a = await fetchAsset(id)
       if (!a) throw new Error('Asset not found')
 
-      const [mov, tkt, sch, utl, aud, mlg, ph, att, docs] = await Promise.all([
+      const [mov, tkt, sch, utl, aud, mlg, ph, att, docs, acData] = await Promise.all([
         supabase.from('asset_movements').select('*, profiles:profiles!moved_by(full_name)').eq('asset_id', id).order('moved_at', { ascending: false }),
         supabase.from('maintenance_tickets').select('*, profiles:profiles!reported_by(full_name)').eq('asset_id', id).order('created_at', { ascending: false }),
         supabase.from('maintenance_schedules').select('*').eq('asset_id', id).order('next_due'),
@@ -282,6 +297,7 @@ export default function AssetDetail() {
         fetchAssetPhotos(id),
         fetchAssetAttachments(id),
         fetchAssetDocuments(id),
+        supabase.from('asset_components').select('component_id, components:component_id(purchase_cost, included_in_asset_cost)').eq('asset_id', id)
       ])
 
       setAsset(a)
@@ -292,6 +308,7 @@ export default function AssetDetail() {
       setPhotos(ph)
       setAttachments(att)
       setDocuments(docs)
+      setAssetComponentsData(acData.data || [])
 
       // Fetch child assets
       try {
@@ -609,8 +626,6 @@ export default function AssetDetail() {
               <InfoField label="Serial No" value={asset.serial_no} mono icon={Clipboard} />
               <InfoField label="Capacity" value={asset.capacity} />
               <InfoField label="Purchase Order" value={asset.purchase_order_no} mono />
-              <InfoField label="Quantity" value={asset.quantity ? `${asset.quantity} ${(asset.uom || 'nos').toUpperCase()}` : null} icon={Package} />
-              {asset.asset_type === 'bulk' && <InfoField label="Asset Type" value="Bulk (Qty Tracked)" icon={Layers} accent="var(--amber)" />}
               <InfoField label="Department" value={asset.department} icon={Building2} />
               <InfoField label="Type Code" value={asset.type_code} mono />
               {customFields.map(([k, v]) => <InfoField key={k} label={k} value={String(v)} />)}
@@ -640,6 +655,29 @@ export default function AssetDetail() {
                   <div style={{ padding: 16, borderRadius: 14, background: 'linear-gradient(135deg, var(--status-danger-soft), var(--status-danger-soft))', border: '1px solid var(--status-danger-soft)', textAlign: 'center' }}>
                     <p style={{ color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 4px' }}>Total Depreciation</p>
                     <div style={{ color: 'var(--red)' }}>{formatCurrency(Number(asset.purchase_value) - calculateBookValue(asset))}</div>
+                  </div>
+                </div>
+
+                {/* TCO Card */}
+                <div style={{ marginBottom: 16, padding: '16px 20px', background: 'linear-gradient(135deg, var(--bg-1), var(--bg-2))', borderRadius: 14, border: '1px solid var(--border)' }}>
+                  <h4 style={{ margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: 8 }}><Layers size={16} /> Total Cost of Ownership (TCO)</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
+                    <div>
+                      <p style={{ color: 'var(--text-3)', fontSize: '0.8rem', margin: '0 0 4px' }}>Base Asset</p>
+                      <div style={{ color: 'var(--text-0)', fontWeight: 600 }}>{formatCurrency(asset.purchase_value || 0)}</div>
+                    </div>
+                    <div>
+                      <p style={{ color: 'var(--text-3)', fontSize: '0.8rem', margin: '0 0 4px' }}>Components</p>
+                      <div style={{ color: 'var(--status-warning)', fontWeight: 600 }}>+ {formatCurrency(componentExpenditure)}</div>
+                    </div>
+                    <div>
+                      <p style={{ color: 'var(--text-3)', fontSize: '0.8rem', margin: '0 0 4px' }}>Maintenance</p>
+                      <div style={{ color: 'var(--accent)', fontWeight: 600 }}>+ {formatCurrency(totalMaintenanceCost)}</div>
+                    </div>
+                    <div style={{ borderLeft: '1px solid var(--border)', paddingLeft: 12 }}>
+                      <p style={{ color: 'var(--text-3)', fontSize: '0.8rem', margin: '0 0 4px' }}>Total Lifecycle Cost</p>
+                      <div style={{ color: 'var(--green)', fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency((Number(asset.purchase_value) || 0) + componentExpenditure + totalMaintenanceCost)}</div>
+                    </div>
                   </div>
                 </div>
 
@@ -735,11 +773,9 @@ export default function AssetDetail() {
                 }}>
                   <Package size={32} style={{ color: 'var(--amber)' }} />
                 </div>
-                <p style={{ color: 'var(--text-0)', marginBottom: 4 }}>
-                  {asset.quantity} {(asset.uom || 'nos').toUpperCase()}
-                </p>
-                <p style={{ color: 'var(--text-2)', marginBottom: 4 }}>Bulk / Quantity-tracked asset</p>
-                <p style={{ color: 'var(--text-3)', margin: 0 }}>No individual QR code · Partial transfers supported</p>
+                <p style={{ color: 'var(--text-0)', marginBottom: 4 }}>Serialized Asset</p>
+                <p style={{ color: 'var(--text-2)', marginBottom: 4 }}>Individual trackable unit</p>
+                <p style={{ color: 'var(--text-3)', margin: 0 }}>Has unique QR code · Full lifecycle tracking</p>
               </div>
             </SectionCard>
           ) : (
@@ -1275,6 +1311,45 @@ export default function AssetDetail() {
       deleted: { color: 'var(--red)', bg: 'var(--red-dim)', icon: Trash2, label: 'Deleted' },
       transferred: { color: 'var(--cyan)', bg: 'var(--cyan-dim)', icon: Send, label: 'Transferred' },
     }
+
+    const parseChanges = (data) => {
+      if (!data) return null
+      let result = data
+      let attempts = 0
+      while (typeof result === 'string' && attempts < 3) {
+        try {
+          const parsed = JSON.parse(result)
+          if (parsed === result) break
+          result = parsed
+        } catch (e) {
+          break
+        }
+        attempts++
+      }
+      return result
+    }
+
+    const renderChanges = (changesObj) => {
+      if (!changesObj || typeof changesObj !== 'object') {
+        return <p style={{ color: 'var(--text-3)', margin: '4px 0 0' }}>{String(changesObj)}</p>
+      }
+      const skipFields = ['id', 'updated_at', 'added_by', 'added_on', 'custom_fields', 'qty_status', 'asset_type', 'uom', 'quantity']
+      const entries = Object.entries(changesObj).filter(([k, v]) => !skipFields.includes(k) && v !== null && v !== '')
+      if (entries.length === 0) return <div style={{ color: 'var(--text-3)', fontSize: '13px', margin: '4px 0 0' }}>Asset details updated</div>
+      return (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 12px', marginTop: 10 }}>
+          {entries.map(([key, value]) => (
+            <div key={key} style={{ background: 'var(--bg-1)', padding: '6px 10px', borderRadius: 6, border: '1px solid var(--border)' }}>
+              <div style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 2 }}>{key.replace(/_/g, ' ')}</div>
+              <div style={{ fontSize: '12px', color: 'var(--text-1)', fontWeight: 500, maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+              </div>
+            </div>
+          ))}
+        </div>
+      )
+    }
+
     return (
       <SectionCard title={`Audit Trail (${audit.length})`} icon={ClipboardList} noPad accentColor="var(--purple)">
         {audit.length > 0 ? (
@@ -1301,11 +1376,7 @@ export default function AssetDetail() {
                         background: cfg.bg, color: cfg.color, textTransform: 'uppercase',
                       }}>{cfg.label}</span>
                     </div>
-                    {log.changes && (
-                      <p style={{ color: 'var(--text-3)', margin: '4px 0 0', }}>
-                        {typeof log.changes === 'string' ? log.changes : JSON.stringify(log.changes)}
-                      </p>
-                    )}
+                    {renderChanges(parseChanges(log.changes))}
                   </div>
                   <span style={{ color: 'var(--text-3)', flexShrink: 0, whiteSpace: 'nowrap' }}>
                     {new Date(log.created_at).toLocaleString()}
@@ -1640,6 +1711,7 @@ export default function AssetDetail() {
         paddingBottom: 4, msOverflowStyle: 'none', scrollbarWidth: 'none',
       }}>
         <PillTab active={activeTab === 'general'} onClick={() => setActiveTab('general')} icon={Info} label="General" />
+        <PillTab active={activeTab === 'components'} onClick={() => setActiveTab('components')} icon={Layers} label="Components" />
         <PillTab active={activeTab === 'movements'} onClick={() => setActiveTab('movements')} icon={History} label="Lifecycle" />
         <PillTab active={activeTab === 'maintenance'} onClick={() => setActiveTab('maintenance')} icon={Wrench} label="Maintenance" count={maintenance.logs.length} />
         <PillTab active={activeTab === 'documents'} onClick={() => setActiveTab('documents')} icon={FileText} label="Documents" count={documents.length} />
@@ -1651,6 +1723,7 @@ export default function AssetDetail() {
       {/* ── TAB CONTENT ── */}
       <div style={{ minHeight: 400 }}>
         {activeTab === 'general' && renderGeneral()}
+        {activeTab === 'components' && <AssetComponentsTab assetId={id} />}
         {activeTab === 'movements' && renderMovements()}
         {activeTab === 'maintenance' && renderMaintenance()}
         {activeTab === 'documents' && renderDocuments()}
@@ -1729,3 +1802,5 @@ export default function AssetDetail() {
     </div>
   )
 }
+
+

@@ -577,3 +577,5 @@ export default function ConsumptionTab({ materials, stock, sites, onRefresh }) {
     </div>
   )
 }
+
+

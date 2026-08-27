@@ -197,3 +197,5 @@ export default function MobileInventoryPage({
     </div>
   )
 }
+
+

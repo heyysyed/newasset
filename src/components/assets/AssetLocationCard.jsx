@@ -68,3 +68,5 @@ export default function AssetLocationCard({ location, assigneeLabel, assigneeTyp
     </div>
   )
 }
+
+

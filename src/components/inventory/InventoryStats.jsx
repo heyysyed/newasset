@@ -41,3 +41,5 @@ export default function InventoryStats({ items, transactions, assets = [] }) {
     </div>
   )
 }
+
+

@@ -16,6 +16,7 @@ import GatePassTab from '../components/inventory/GatePassTab'
 import IssueSlipTab from '../components/materials/IssueSlipTab'
 import { useIsMobile } from '../hooks/useBreakpoint'
 import MobileInventoryPage from '../components/mobile/MobileInventoryPage'
+import SerializedComponentsTab from '../components/inventory/SerializedComponentsTab'
 
 const TabBtn = ({ active, icon: Icon, label, onClick }) => (
   <button onClick={onClick} className={`tab-btn ${active ? 'active' : ''}`}>
@@ -1143,6 +1144,7 @@ function InventoryPageContent() {
           <div className="tab-container" style={{ overflow: 'visible', flexWrap: 'nowrap', minWidth: 'max-content' }}>
             <TabBtn active={tab === 'stock'} icon={Boxes} label="Site Stock" onClick={() => setTab('stock')} />
             <TabBtn active={tab === 'master'} icon={Package} label="Master Catalog" onClick={() => setTab('master')} />
+            <TabBtn active={tab === 'components'} icon={Layers} label="Serialized Components" onClick={() => setTab('components')} />
             
             <div style={{ width: 1, height: 24, background: 'var(--border)', margin: '4px', flexShrink: 0 }} />
             
@@ -1256,6 +1258,7 @@ function InventoryPageContent() {
           <>
             {tab === 'stock' && renderStock()}
             {tab === 'master' && renderItems()}
+            {tab === 'components' && <SerializedComponentsTab sites={sites} />}
             {tab === 'transactions' && renderTransactions()}
             
             {tab === 'gate_pass' && (
@@ -1658,3 +1661,5 @@ export default function InventoryPage(props) {
     </InventoryErrorBoundary>
   )
 }
+
+

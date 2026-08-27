@@ -182,3 +182,5 @@ export function calculatePortfolioRisk(assets = [], tickets = [], movements = []
     }
   })
 }
+
+

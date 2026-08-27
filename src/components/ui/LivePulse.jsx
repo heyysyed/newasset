@@ -53,3 +53,5 @@ export default function LivePulse({ color = '#0ea5e9', size = 12, label = null }
     </span>
   )
 }
+
+

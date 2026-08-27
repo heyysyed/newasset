@@ -384,3 +384,5 @@ export function buildAsset360(asset, { tickets = [], movements = [], site = null
     generatedAt: new Date().toISOString()
   }
 }
+
+

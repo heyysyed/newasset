@@ -12,13 +12,12 @@ import { useIsMobile } from '../hooks/useBreakpoint'
 const OCRInvoiceParser = lazy(() => import('../components/common/OCRInvoiceParser'))
 
 const STATUSES   = ['Active', 'Inactive', 'Under Repair', 'Disposed', 'On Hire']
-const CATEGORIES = ['Plant & Machinery', 'Tools & Equipment', 'Vehicles', 'Electronics', 'Safety Equipment', 'Scaffolding', 'IT', 'Other']
-const UOM_OPTIONS = ['nos', 'kg', 'meters', 'liters', 'boxes', 'pieces', 'sets', 'rolls', 'bags', 'tons', 'sqm', 'cum', 'rft']
+const STATIC_CATEGORIES = ['Plant & Machinery', 'Tools & Equipment', 'Vehicles', 'Electronics', 'Safety Equipment', 'Scaffolding', 'IT', 'Other']
 
 const EMPTY = {
   asset_code:'', asset_name:'', make:'', model_no:'', purchase_order_no:'',
   serial_no:'', capacity:'', status:'Active', category:'', site:'', type_code:'',
-  purchase_date:'', warranty_expiry: '', notes:'', parent_asset_id: null, quantity:'1', uom:'nos', asset_type:'serialized',
+  purchase_date:'', warranty_expiry: '', notes:'', parent_asset_id: null, asset_type:'serialized',
   purchase_value:'', salvage_value:'', useful_life_years:'5',
   depreciation_method:'Straight Line', depreciation_rate_percent:'',
   assigned_to: null, assigned_employee_id: null,
@@ -100,6 +99,7 @@ export default function AssetForm() {
   const [profiles, setProfiles] = useState([])
   const [employees, setEmployees] = useState([])
   const [checklists, setChecklists] = useState([])
+  const [dbCategories, setDbCategories] = useState([])
 
   const customFields = settings?.custom_fields || []
 
@@ -107,15 +107,17 @@ export default function AssetForm() {
     supabase.from('assets').select('id, asset_code, asset_name, category').or('notes.is.null,notes.not.ilike.%[Migrated to Bulk Module]%').order('asset_name').then(({ data }) => setAllAssets(data || []))
     fetchSites().then(sitesData => {
       setAllSitesList(sitesData || [])
-      const fromTable = (sitesData || []).map(s => s.name)
-      supabase.from('assets').select('site').then(assetsRes => {
-        const fromAssets = (assetsRes.data || []).map(a => a.site).filter(Boolean)
-        setSiteOptions([...new Set([...fromTable, ...fromAssets])].sort())
-      })
+      // Only use official registered sites — no fallback from asset history
+      setSiteOptions((sitesData || []).map(s => s.name).sort())
     }).catch(console.error)
     supabase.from('profiles').select('id, full_name, email, is_active').eq('is_active', true).order('full_name').then(({ data }) => setProfiles(data || []))
     fetchEmployees().then(data => setEmployees((data || []).filter(e => e.is_active))).catch(console.error)
     supabase.from('maintenance_checklists').select('id, name, frequency').order('name').then(({ data }) => setChecklists(data || [])).catch(console.error)
+    // Load categories from DB master list
+    supabase.from('asset_categories').select('name').order('name').then(({ data }) => {
+      if (data && data.length > 0) setDbCategories(data.map(c => c.name))
+      else setDbCategories(STATIC_CATEGORIES)
+    }).catch(() => setDbCategories(STATIC_CATEGORIES))
   }, [])
 
   useEffect(() => {
@@ -156,6 +158,17 @@ export default function AssetForm() {
     e.preventDefault()
     const errs = {}
     if (!form.asset_name.trim()) errs.asset_name = 'Required'
+    
+    // Strict site validation
+    if (form.site) {
+      const siteResolution = resolveSite(form.site, allSitesList)
+      if (!siteResolution.matched) {
+        errs.site = 'Site does not match any registered site'
+      }
+    } else {
+      errs.site = 'Site is required'
+    }
+
     if (Object.keys(errs).length) { setErrors(errs); return }
 
     setSaving(true)
@@ -169,14 +182,14 @@ export default function AssetForm() {
       else payload.checklist_template_id = null
       if (!payload.parent_asset_id) delete payload.parent_asset_id
       
-      const numFields = ['purchase_value', 'salvage_value', 'useful_life_years', 'depreciation_rate_percent', 'latitude', 'longitude', 'quantity']
+      const numFields = ['purchase_value', 'salvage_value', 'useful_life_years', 'depreciation_rate_percent', 'latitude', 'longitude']
       numFields.forEach(f => {
         if (payload[f] === '') payload[f] = null
         else if (payload[f] !== null) payload[f] = Number(payload[f])
       })
-
-      payload.asset_type = (Number(payload.quantity) || 1) > 1 ? 'bulk' : 'serialized'
-      if (!payload.uom) payload.uom = 'nos'
+      // Assets created from this form are always single serialized units
+      payload.asset_type = 'serialized'
+      payload.quantity = 1
 
       if (isEdit) await updateAsset(id, payload, user?.id)
       else await createAsset(payload, user?.id)
@@ -268,7 +281,11 @@ export default function AssetForm() {
                 <label className="lbl" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-2)', marginBottom: 8 }}><Factory size={14}/> Category</label>
                 <select value={form.category} onChange={e=>handleSet('category',e.target.value)} disabled={fieldDisabled('category')} className="sel">
                   <option value="">Select Category...</option>
-                  {CATEGORIES.map(c=><option key={c} value={c}>{c}</option>)}
+                  {dbCategories.map(c=><option key={c} value={c}>{c}</option>)}
+                  {/* Show existing custom category if not in master list */}
+                  {form.category && !dbCategories.includes(form.category) && (
+                    <option value={form.category}>{form.category}</option>
+                  )}
                 </select>
               </div>
             )}
@@ -276,25 +293,6 @@ export default function AssetForm() {
             {isFieldVisible('model_no')   && <Field fkey="model_no"   label="Model Number" mono {...fieldProps}/>}
             {isFieldVisible('serial_no')  && <Field fkey="serial_no"  label="Serial / VIN Number" mono {...fieldProps}/>}
             {isFieldVisible('capacity')   && <Field fkey="capacity"   label="Capacity / Specs" {...fieldProps}/>}
-            
-            <div className="col-span-1 md:col-span-2 flex gap-4">
-              <div className="flex-[2]">
-                <Field fkey="quantity" label="Quantity Received" type="number" {...fieldProps}/>
-              </div>
-              <div className="flex-1">
-                <label className="flex items-center gap-1.5 text-text-2 text-caption mb-2">Unit of Measure</label>
-                <select value={form.uom || 'nos'} onChange={e => handleSet('uom', e.target.value)} className="sel w-full bg-bg-1 border border-border text-text-0 rounded-xl focus:border-accent">
-                  {UOM_OPTIONS.map(u => <option key={u} value={u}>{u}</option>)}
-                </select>
-              </div>
-            </div>
-            
-            {Number(form.quantity) > 1 && (
-              <div className="col-span-1 md:col-span-2 px-5 py-4 bg-accent/5 border border-accent/20 rounded-xl text-small text-accent font-sans flex items-center gap-3">
-                <Package size={18} className="shrink-0" /> 
-                <span><strong>Bulk Asset Detected:</strong> Tracked as a batch ({form.quantity} {form.uom || 'nos'}). Individual QR tags will not be generated for each item.</span>
-              </div>
-            )}
           </Section>
 
           <Section title="Location & Assignment" icon={MapPin}>
@@ -565,3 +563,5 @@ export default function AssetForm() {
     </form>
   )
 }
+
+

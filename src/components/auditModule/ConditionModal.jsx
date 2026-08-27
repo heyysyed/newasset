@@ -149,3 +149,5 @@ export default function ConditionModal({ asset, onSubmit, onClose }) {
     </div>
   )
 }
+
+

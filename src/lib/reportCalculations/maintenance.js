@@ -43,3 +43,5 @@ export function calculatePMCompliancePct(completedOnTime = 0, totalDue = 1) {
   const completed = Math.max(0, Number(completedOnTime) || 0)
   return Math.min(100, Math.round((completed / due) * 100))
 }
+
+

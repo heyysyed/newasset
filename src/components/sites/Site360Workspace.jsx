@@ -48,7 +48,7 @@ const SectionCard360 = ({ title, icon: Icon, confidence, children, accent = 'var
 export default function Site360Workspace({ site, siteAssets, siteTickets }) {
   const { can } = useAuth()
   const intel = useMemo(() => {
-    return buildSite360(site, siteAssets, siteTickets, { hasFinancialAccess: can('view_financials') })
+    return buildSite360(site, { assets: siteAssets, tickets: siteTickets, hasFinancialAccess: can('view_financials') })
   }, [site, siteAssets, siteTickets, can])
 
   if (!intel || !site) return null
@@ -89,7 +89,7 @@ export default function Site360Workspace({ site, siteAssets, siteTickets }) {
       </div>
 
       {/* 2. TODAY'S ATTENTION */}
-      {intel.attention.length > 0 && (
+      {intel.attention?.length > 0 && (
         <SectionCard360 title="Site Attention Required" icon={AlertTriangle} accent="var(--amber)">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {intel.attention.map((att, i) => (
@@ -225,7 +225,7 @@ export default function Site360Workspace({ site, siteAssets, siteTickets }) {
       </div>
       
       {/* 7. RECOMMENDATIONS */}
-      {intel.recommendations.length > 0 && (
+      {intel.recommendations?.length > 0 && (
         <div className="card" style={{ padding: 24, background: 'var(--accent-glow)', border: '1px solid var(--accent-soft)', marginTop: 20 }}>
           <h3 style={{ margin: '0 0 16px', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Activity size={18} /> Strategic Recommendations
@@ -240,3 +240,5 @@ export default function Site360Workspace({ site, siteAssets, siteTickets }) {
     </div>
   )
 }
+
+

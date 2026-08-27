@@ -84,3 +84,5 @@ export default function OCRInvoiceParser({ onParsedData }) {
     </div>
   )
 }
+
+

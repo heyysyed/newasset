@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Package, Tag, FileSpreadsheet,
   Settings, LogOut, Menu, X, ChevronRight, Shield, ClipboardCheck,
   Wrench, Boxes, Search, HelpCircle, MapPin, BarChart2, ScanLine,
-  PanelLeftClose, PanelLeftOpen, MoreHorizontal
+  PanelLeftClose, PanelLeftOpen, MoreHorizontal, FolderOpen
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useImport } from '../context/ImportContext'
@@ -21,6 +21,7 @@ const PAGE_TITLES = {
   '/': 'Dashboard',
   '/assets': 'Assets',
   '/sites': 'Sites',
+  '/categories': 'Categories',
   '/maintenance': 'Maintenance',
   '/inventory': 'Inventory',
   '/reports': 'Reports',
@@ -77,6 +78,7 @@ export default function Layout() {
       items: [
         { to: '/assets', icon: Package, label: 'Assets', exact: false, show: isAdmin || isMod },
         { to: '/sites', icon: MapPin, label: 'Sites', exact: false, show: isAdmin || isMod },
+        { to: '/categories', icon: FolderOpen, label: 'Categories', exact: false, show: isAdmin },
       ]
     },
     {
@@ -360,3 +362,5 @@ export default function Layout() {
     </div>
   )
 }
+
+

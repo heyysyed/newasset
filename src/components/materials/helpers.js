@@ -118,3 +118,5 @@ export function generateDocNo(prefix) {
   const seq = String(Math.floor(Math.random() * 9999) + 1).padStart(4, '0')
   return `${prefix}-${date}-${seq}`
 }
+
+

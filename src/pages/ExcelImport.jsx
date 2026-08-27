@@ -84,7 +84,7 @@ function fmt(bytes) {
 }
 
 // ── Validation (pure function, runs on every edit) ───────────────────────────
-function validateRows(rows) {
+function validateRows(rows, availableSites = []) {
   const errors = [], warnings = [], seen = new Map()
   rows.forEach(a => {
     if (!a.asset_code) {
@@ -92,6 +92,12 @@ function validateRows(rows) {
     } else {
       if (seen.has(a.asset_code)) errors.push({ row: a._row, msg: `Duplicate code "${a.asset_code}" in file`, field: 'asset_code' })
       seen.set(a.asset_code, a._row)
+    }
+    if (a.site) {
+      const res = resolveSite(a.site, availableSites)
+      if (!res.matched) {
+        errors.push({ row: a._row, msg: `Site "${a.site}" does not match any registered site or alias.`, field: 'site' })
+      }
     }
     if (a.status && !VALID_STATUSES.some(s => s.toLowerCase() === String(a.status).toLowerCase()))
       warnings.push({ row: a._row, msg: `Unknown status "${a.status}"`, field: 'status' })
@@ -285,7 +291,11 @@ export default function ExcelImport() {
   let newRowCounter = useRef(0)
 
   React.useEffect(() => {
-    fetchSites().then(s => setAvailableSites(s || [])).catch(console.error)
+    fetchSites().then(s => {
+      const fetchedSites = s || []
+      setAvailableSites(fetchedSites)
+      if (editRows.length > 0) applyRows(editRows, fetchedSites)
+    }).catch(console.error)
   }, [])
 
   if (!can('import')) return (
@@ -295,9 +305,9 @@ export default function ExcelImport() {
     </div>
   )
 
-  function applyRows(rows) {
+  function applyRows(rows, sites = availableSites) {
     setEditRows(rows)
-    const v = validateRows(rows)
+    const v = validateRows(rows, sites)
     setErrors(v.errors)
     setWarnings(v.warnings)
   }
@@ -921,3 +931,5 @@ export default function ExcelImport() {
     </div>
   )
 }
+
+

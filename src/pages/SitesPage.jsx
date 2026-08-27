@@ -173,13 +173,13 @@ export default function SitesPage() {
     const assetIds = siteAssets.map(a => a.id)
     const siteTickets = tickets.filter(t => assetIds.includes(t.asset_id))
 
-    return { total: siteAssets.length, active: activeAssets.length, value: totalBookValue, openTickets: siteTickets.length }
+    return { total: siteAssets?.length || 0, active: activeAssets?.length || 0, value: totalBookValue || 0, openTickets: siteTickets?.length || 0 }
   }
 
   // Calculate default map center
-  const validSites = sites.filter(s => s.latitude && s.longitude)
-  const defaultCenter = validSites.length > 0 
-    ? [validSites[0].latitude, validSites[0].longitude] 
+  const validSites = (sites || []).filter(s => s?.latitude && s?.longitude)
+  const defaultCenter = validSites?.length > 0 
+    ? [Number(validSites[0].latitude), Number(validSites[0].longitude)] 
     : [20.5937, 78.9629] // Default to India roughly
 
   if (isMobile) {
@@ -348,7 +348,7 @@ export default function SitesPage() {
       ) : viewMode === 'map' ? (
         /* ── INTERACTIVE MAP VIEW ── */
         <div className="card animate-fade-up sites-map-container" style={{ height: 'calc(100vh - 200px)', minHeight: 500, overflow: 'hidden', position: 'relative' }}>
-          <MapContainer center={defaultCenter} zoom={validSites.length > 0 ? 5 : 4} style={{ height: '100%', width: '100%' }} zoomControl={false}>
+          <MapContainer center={defaultCenter} zoom={validSites?.length > 0 ? 5 : 4} style={{ height: '100%', width: '100%' }} zoomControl={false}>
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
               url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
@@ -403,7 +403,7 @@ export default function SitesPage() {
               <div style={{ background: 'var(--accent-glow)', color: 'var(--accent)', padding: 8, borderRadius: 8 }}><MapPin size={20} /></div>
               <div>
                 <div style={{ color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', }}>Total Sites</div>
-                <div style={{ color: '#111', }}>{sites.length}</div>
+                <div style={{ color: '#111', }}>{sites?.length || 0}</div>
               </div>
             </div>
           </div>
@@ -425,7 +425,7 @@ export default function SitesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {sites.length === 0 && (
+                  {(!sites || sites?.length === 0) && (
                     <tr>
                       <td colSpan={6} style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-3)', }}>
                         <MapPin size={32} style={{ opacity: 0.3, margin: '0 auto 12px', display: 'block' }} />
@@ -451,7 +451,7 @@ export default function SitesPage() {
                               )}
                               <span style={{ letterSpacing: '0.02em' }}>{site.name}</span>
                             </div>
-                            {Array.isArray(site.aliases) && site.aliases.length > 0 && (
+                            {Array.isArray(site.aliases) && site.aliases?.length > 0 && (
                               <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                                 {site.aliases.slice(0, 3).map((a, idx) => (
                                   <span key={idx} style={{ color: 'var(--text-2)', background: 'var(--bg-1)', padding: '1px 6px', borderRadius: 4, border: '1px solid var(--border)' }}>
@@ -511,7 +511,7 @@ export default function SitesPage() {
           </div>
 
           <div className="mobile-cards">
-            {sites.length === 0 ? (
+            {(!sites || sites?.length === 0) ? (
               <div className="card" style={{ padding: 24, textAlign: 'center', color: 'var(--text-3)', }}>
                 <MapPin size={32} style={{ opacity: 0.3, margin: '0 auto 12px', display: 'block' }} />
                 No sites configured. Add your first site to map your assets.
@@ -875,3 +875,5 @@ export default function SitesPage() {
     </div>
   )
 }
+
+

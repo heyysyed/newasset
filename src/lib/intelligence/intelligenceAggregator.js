@@ -181,3 +181,5 @@ export async function getEnterpriseIntelligence(filters = {}) {
     methodology: 'Enterprise Intelligence v2A.8.0 — deterministic calculations, real Supabase data, isolated domain failures. Attention Engine replaces basic exceptions.'
   })
 }
+
+

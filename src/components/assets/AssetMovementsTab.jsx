@@ -94,3 +94,5 @@ export default function AssetMovementsTab({ asset, movements, maintenance, audit
     </div>
   )
 }
+
+

@@ -65,3 +65,5 @@ export function getAssetAgeBucket(ageInYears) {
   if (age <= 10) return '5 - 10 Years'
   return '> 10 Years'
 }
+
+

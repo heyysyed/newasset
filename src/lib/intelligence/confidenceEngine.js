@@ -41,3 +41,5 @@ export function determineConfidence({ sampleSize, totalPopulation, requiredField
   return { level: CONFIDENCE_LEVELS.LIMITED, score, reason: 'Insufficient data coverage or significant missing fields. Metrics should be treated as directional only.' }
 
 }
+
+

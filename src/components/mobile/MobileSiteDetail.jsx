@@ -236,3 +236,5 @@ export default function MobileSiteDetail({ site, siteAssets, siteTickets, can, o
     </div>
   )
 }
+
+

@@ -177,3 +177,5 @@ export default function AssetTimeline({ asset, movements = [], maintenance = {},
     </div>
   )
 }
+
+

@@ -7,23 +7,26 @@ import { supabase } from './lib/supabase'
 import { ImportProvider } from './context/ImportContext'
 import Layout from './components/Layout'
 import SkeletonLoader from './components/SkeletonLoader'
+import QAAuditRunner from './pages/QAAuditRunner'
 
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const AssetList = lazy(() => import('./pages/AssetList'))
 const AssetForm = lazy(() => import('./pages/AssetForm'))
 const AssetDetail = lazy(() => import('./pages/AssetDetail'))
+const ComponentDetail = lazy(() => import('./pages/ComponentDetail'))
 const StickerPage = lazy(() => import('./pages/StickerPage'))
 const ExcelImport = lazy(() => import('./pages/ExcelImport'))
 const AdminPage = lazy(() => import('./pages/AdminPage'))
 const PublicAssetView = lazy(() => import('./pages/PublicAssetView'))
-const MaintenancePage = lazy(() => import('./pages/MaintenancePage'))
+const MaintenanceCommandCenter = lazy(() => import('./pages/maintenance/MaintenanceCommandCenter'))
 const InventoryPage = lazy(() => import('./pages/InventoryPage'))
 const AuditModulePage = lazy(() => import('./pages/AuditModulePage'))
 const SitesPage = lazy(() => import('./pages/SitesPage'))
 const ReportsPage = lazy(() => import('./pages/ReportsPage'))
 const MobileFieldView = lazy(() => import('./pages/MobileFieldView'))
-
+const CategoriesPage = lazy(() => import('./pages/CategoriesPage'))
+const Phase1Verification = lazy(() => import('./pages/Phase1Verification'))
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -124,13 +127,17 @@ function AppRoutes() {
           <Route path="assets/new" element={<AssetForm />} />
           <Route path="assets/:id" element={<AssetDetail />} />
           <Route path="assets/:id/edit" element={<AssetForm />} />
+          <Route path="categories" element={<Guard require="admin"><CategoriesPage /></Guard>} />
           <Route path="stickers" element={<StickerPage />} />
+          <Route path="qa-audit" element={<QAAuditRunner />} />
           <Route path="import"  element={<ExcelImport />} />
           <Route path="audit"   element={<AuditModulePage />} />
-          <Route path="maintenance" element={<MaintenancePage />} />
+          <Route path="maintenance/*" element={<MaintenanceCommandCenter />} />
           <Route path="inventory"   element={<InventoryPage />} />
+          <Route path="inventory/components/:id" element={<ComponentDetail />} />
           <Route path="reports"     element={<ReportsPage />} />
           <Route path="reports/:reportId" element={<ReportsPage />} />
+          <Route path="phase1-verify" element={<Phase1Verification />} />
           <Route path="admin"   element={<Guard require="admin"><ErrorBoundary><AdminPage /></ErrorBoundary></Guard>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
@@ -156,3 +163,5 @@ export default function App() {
     </QueryClientProvider>
   )
 }
+
+

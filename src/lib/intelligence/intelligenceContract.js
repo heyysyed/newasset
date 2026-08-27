@@ -63,3 +63,5 @@ export function createGlobalContract(params = {}) {
     error: params.error || null
   }
 }
+
+

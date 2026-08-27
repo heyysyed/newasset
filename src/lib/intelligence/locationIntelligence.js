@@ -72,3 +72,5 @@ export function buildLocationIntelligenceContract(locationResolution) {
     data: locationResolution
   })
 }
+
+

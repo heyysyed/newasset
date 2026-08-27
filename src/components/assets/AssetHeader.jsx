@@ -99,3 +99,5 @@ export default function AssetHeader({ asset, asset360, onTransfer, onDownloadQR,
     </div>
   )
 }
+
+

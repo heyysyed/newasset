@@ -51,3 +51,5 @@ export default function FinancialWaterfallChart({ purchaseValue = 0, depreciatio
     </div>
   )
 }
+
+

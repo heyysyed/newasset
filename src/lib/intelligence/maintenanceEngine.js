@@ -139,3 +139,5 @@ export function calculateMaintenanceIntelligence(tickets = [], logs = []) {
     }
   })
 }
+
+

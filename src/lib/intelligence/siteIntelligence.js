@@ -230,3 +230,5 @@ export function buildSite360(site, { assets = [], tickets = [], hasFinancialAcce
     generatedAt: new Date().toISOString()
   }
 }
+
+

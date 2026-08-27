@@ -605,3 +605,5 @@ export default function IssueSlipTab({ items, stock, sites, onRefresh }) {
     </div>
   )
 }
+
+

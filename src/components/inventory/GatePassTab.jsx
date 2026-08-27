@@ -626,3 +626,5 @@ function GatePassDetailModal({ gp, gpItems, loading, user, isAdmin, isMod, cc, o
     </div>
   )
 }
+
+

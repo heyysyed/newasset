@@ -61,3 +61,5 @@ export function calculateAssetHealth(asset, maintenanceLogs = []) {
     breakdownCount: breakdowns
   }
 }
+
+

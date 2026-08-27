@@ -25,3 +25,5 @@ export default function GeoStatusBadge({ verified, latitude, longitude }) {
     </span>
   )
 }
+
+

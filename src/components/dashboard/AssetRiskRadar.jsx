@@ -48,3 +48,5 @@ export default function AssetRiskRadar({ repairCount = 0, overdueCount = 0, anom
     </div>
   )
 }
+
+

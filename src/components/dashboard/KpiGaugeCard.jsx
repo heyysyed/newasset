@@ -70,3 +70,5 @@ export default function KpiGaugeCard({ title, value = 0, target = 95, unit = "%"
     </div>
   )
 }
+
+

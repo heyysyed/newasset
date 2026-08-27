@@ -48,3 +48,5 @@ export function calculateStockoutForecast(currentQuantity = 0, monthlyBurnQuanti
     dailyBurnRate: Math.round(dailyBurn * 10) / 10
   }
 }
+
+

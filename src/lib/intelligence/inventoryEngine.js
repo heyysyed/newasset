@@ -104,3 +104,5 @@ export function calculateInventoryIntelligence(items = [], transactions = []) {
     }
   })
 }
+
+

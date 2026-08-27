@@ -189,3 +189,5 @@ export function generateAssetDossierPDF(asset, intel) {
 
   doc.save(`Asset_Dossier_${asset.asset_code || asset.id}.pdf`)
 }
+
+
