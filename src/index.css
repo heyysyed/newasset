@@ -91,8 +91,11 @@
   --radius-pill: 9999px;
 }
 
-html, body, #root, button, input, select, textarea {
+html, body, #root, button, input, select, textarea, * {
   font-family: var(--font-sans);
+}
+.font-mono, .text-technical, .data-mono, code, pre {
+  font-family: var(--font-mono) !important;
 }
 
 body {

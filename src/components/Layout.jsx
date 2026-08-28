@@ -277,7 +277,7 @@ export default function Layout() {
           id="main-scroll-container"
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         >
-          <div className="w-full max-w-[1600px] mx-auto p-4 lg:p-6 pb-20 md:pb-6">
+          <div className="w-full p-4 lg:p-6 pb-20 md:pb-6">
             <Outlet />
           </div>
         </main>
