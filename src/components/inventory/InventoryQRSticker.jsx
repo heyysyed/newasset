@@ -9,7 +9,7 @@ export default function InventoryQRSticker({ item }) {
 
   useEffect(() => {
     if (!item?.item_code) return
-    const url = `${window.location.origin}/inventory?item=${item.item_code}`
+    const url = `${window.location.origin}/#/inventory?item=${item.item_code}`
     QRCode.toDataURL(url, { width: 300, margin: 1, color: { dark: '#000000', light: '#ffffff' } }, (err, dataUrl) => {
       if (!err) setQrUrl(dataUrl)
     })

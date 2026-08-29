@@ -19,7 +19,7 @@ async function getOrMakeQR(assetCode, assetId) {
   const keys = Object.keys(QR_CACHE)
   if (keys.length > 500) keys.slice(0, 100).forEach(k => delete QR_CACHE[k])
   try {
-    const url = `${window.location.origin}/scan/${assetId}`
+    const url = `${window.location.origin}/#/scan/${assetId}`
     const dataUrl = await QRCode.toDataURL(url, { width: 300, margin: 1, color: { dark: '#000000', light: '#ffffff' } })
     QR_CACHE[assetCode] = dataUrl
     return dataUrl

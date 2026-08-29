@@ -1,6 +1,6 @@
 import React from 'react'
 import { Draggable } from '@hello-pangea/dnd'
-import { Clock, MapPin, User, AlertCircle, FileText, ChevronRight } from 'lucide-react'
+import { Clock, MapPin, User, AlertCircle, FileText, ChevronRight, Truck, Calendar } from 'lucide-react'
 
 const PRIORITY_COLORS = {
   low: { bg: 'var(--bg-3)', text: 'var(--text-2)' },
@@ -17,35 +17,32 @@ export default function WorkOrderCard({ workOrder, index, onClick }) {
     asset,
     ticket,
     assigned_to,
+    vendor,
     description,
     estimated_hours,
-    actual_hours
+    actual_hours,
+    scheduled_end
   } = workOrder
 
   const pColor = PRIORITY_COLORS[priority] || PRIORITY_COLORS.normal
 
   return (
-    <Draggable draggableId={id} index={index}>
-      {(provided, snapshot) => (
-        <div
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          onClick={() => onClick(workOrder)}
-          style={{
-            ...provided.draggableProps.style,
-            background: 'var(--bg-1)',
-            border: snapshot.isDragging ? '1.5px solid var(--accent)' : '1px solid var(--border)',
-            borderRadius: '12px',
-            padding: '14px',
-            marginBottom: '10px',
-            boxShadow: snapshot.isDragging ? '0 8px 24px rgba(0,0,0,0.12)' : 'var(--clay-shadow-sm)',
-            cursor: 'grab',
-            position: 'relative',
-            opacity: snapshot.isDragging ? 0.9 : 1
-          }}
-          className="wo-card"
-        >
+    <div
+      onClick={() => onClick(workOrder)}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        background: 'var(--bg-1)',
+        border: '1px solid var(--border)',
+        borderRadius: '12px',
+        padding: '14px',
+        boxShadow: 'var(--clay-shadow-sm)',
+        cursor: 'pointer',
+        position: 'relative'
+      }}
+      className="wo-card"
+    >
           {/* Header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--accent)' }}>
@@ -86,33 +83,41 @@ export default function WorkOrderCard({ workOrder, index, onClick }) {
           )}
 
           {/* Footer */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: 10 }}>
+          <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: 10 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <div style={{ 
-                width: 20, height: 20, borderRadius: '50%', background: 'var(--accent-soft)', 
-                display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)', overflow: 'hidden'
+                width: 20, height: 20, borderRadius: '50%', background: vendor ? 'var(--status-warning-soft)' : 'var(--accent-soft)', 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', color: vendor ? 'var(--status-warning)' : 'var(--accent)', overflow: 'hidden'
               }}>
-                {assigned_to?.avatar_url ? (
+                {vendor ? (
+                  <Truck size={12} />
+                ) : assigned_to?.avatar_url ? (
                   <img src={assigned_to.avatar_url} alt="A" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
                   <User size={12} />
                 )}
               </div>
               <span style={{ fontSize: '11px', color: 'var(--text-2)', maxWidth: 80 }} className="truncate">
-                {assigned_to?.full_name?.split(' ')[0] || 'Unassigned'}
+                {vendor ? vendor.name : (assigned_to?.full_name?.split(' ')[0] || 'Unassigned')}
               </span>
             </div>
 
-            {(estimated_hours || actual_hours) && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-3)', fontSize: '11px' }}>
-                <Clock size={12} />
-                <span>{actual_hours || 0} / {estimated_hours || '-'}h</span>
-              </div>
-            )}
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              {scheduled_end && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--status-info)', fontSize: '11px' }}>
+                  <Calendar size={12} />
+                  <span>{new Date(scheduled_end).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                </div>
+              )}
+              {(estimated_hours || actual_hours) && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-3)', fontSize: '11px' }}>
+                  <Clock size={12} />
+                  <span>{actual_hours || 0} / {estimated_hours || '-'}h</span>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
-    </Draggable>
+    </div>
   )
 }
 

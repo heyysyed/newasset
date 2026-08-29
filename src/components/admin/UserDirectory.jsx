@@ -56,8 +56,6 @@ export default function UserDirectory({
 
   return (
     <div style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 18, overflow: 'hidden', boxShadow: 'var(--clay-shadow)' }}>
-      <SectionHead icon={Users} title="USER MANAGEMENT & ACCOUNT CONTROL" sub="Manage user roles, provision accounts, inspect sessions, & assign site privileges" color='var(--status-info)'/>
-
       {/* Search & Filter bar */}
       <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', background: 'var(--bg-1)', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {/* Search + View Toggle + Add Buttons */}
@@ -97,17 +95,20 @@ export default function UserDirectory({
         </div>
 
         {/* Role filters */}
-        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', borderTop: '1px solid var(--border)', paddingTop: 10, marginTop: 4 }}>
           {['all', ...(isSuperAdmin ? ['super_admin'] : []), 'admin', 'moderator', 'user'].map(r => (
             <button key={r} onClick={() => setRoleFilter(r)} style={{
-              padding: '5px 10px', borderRadius: 8, border: '1.5px solid', cursor: 'pointer',
+              padding: '4px 0', border: 'none', background: 'transparent', cursor: 'pointer',
               transition: 'all 0.15s',
-              borderColor: roleFilter === r ? 'var(--accent)' : 'var(--border)',
-              background: roleFilter === r ? 'var(--accent-glow)' : 'var(--bg-3)',
-              color: roleFilter === r ? 'var(--accent-light)' : 'var(--text-3)',
+              fontWeight: roleFilter === r ? 600 : 500,
+              color: roleFilter === r ? 'var(--accent)' : 'var(--text-2)',
+              borderBottom: roleFilter === r ? '2px solid var(--accent)' : '2px solid transparent',
+              display: 'flex', alignItems: 'center', gap: 6,
             }}>
               {r === 'all' ? 'All' : ROLE_META[r]?.label}
-              {r !== 'all' && <span style={{ marginLeft: 3, opacity: 0.7 }}>({(users || []).filter(u => u.role === r).length})</span>}
+              <span style={{ fontSize: 10, opacity: roleFilter === r ? 1 : 0.6, background: roleFilter === r ? 'var(--accent-glow)' : 'var(--bg-3)', padding: '2px 6px', borderRadius: 10 }}>
+                {(users || []).filter(u => u.role === r || r === 'all').length}
+              </span>
             </button>
           ))}
         </div>
@@ -210,13 +211,14 @@ export default function UserDirectory({
             {/* Table Header */}
             <div style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-              padding: '8px 18px', background: 'var(--bg-3)', borderBottom: '1px solid var(--border)',
-              color: 'var(--text-3)',
-              letterSpacing: '0.08em', textTransform: 'uppercase'
+              padding: '10px 18px', borderBottom: '1px solid var(--border)',
+              color: 'var(--text-3)', fontSize: '11px',
+              letterSpacing: '0.04em', textTransform: 'uppercase', fontWeight: 600
             }}>
-              <span style={{ minWidth: 180, flex: '1 1 180px' }}>USER PROFILE</span>
-              <span style={{ flexShrink: 0, width: 175 }}>ROLE & STATUS</span>
-              <span style={{ flexShrink: 0 }}>QUICK ACTIONS & SITE PRIVILEGES</span>
+              <span style={{ minWidth: 200, flex: '1 1 200px' }}>User</span>
+              <span style={{ width: 140, flexShrink: 0 }}>Role</span>
+              <span style={{ width: 100, flexShrink: 0 }}>Status</span>
+              <span style={{ width: 180, flexShrink: 0, textAlign: 'right' }}>Actions</span>
             </div>
 
             {filteredUsers.map((u, i) => {
@@ -231,70 +233,83 @@ export default function UserDirectory({
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                 >
                   {/* 1. User Info (Avatar + Name + Email) */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: '1 1 180px', minWidth: 180 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: '1 1 200px', minWidth: 200 }}>
                     <div style={{ position: 'relative', flexShrink: 0 }}>
                       {u.photo_url
-                        ? <img src={u.photo_url} alt={u.full_name || 'user'} style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${rm.color}` }}/>
-                        : <div style={{ width: 38, height: 38, borderRadius: '50%', background: `linear-gradient(135deg, ${rm.color}, ${rm.color}88)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', }}>
+                        ? <img src={u.photo_url} alt={u.full_name || 'user'} style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }}/>
+                        : <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--bg-3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-2)', border: '1px solid var(--border)' }}>
                             {(u.full_name || u.email || 'U')[0].toUpperCase()}
                           </div>
                       }
                       <span style={{
-                        position: 'absolute', bottom: 0, right: 0, width: 9, height: 9, borderRadius: '50%',
-                        background: u.is_active ? '#22c55e' : 'var(--status-danger)', border: '2px solid var(--bg-2)', boxShadow: u.is_active ? '0 0 6px #22c55e' : 'none'
+                        position: 'absolute', bottom: -2, right: -2, width: 10, height: 10, borderRadius: '50%',
+                        background: u.is_active ? '#22c55e' : 'var(--status-danger)', border: '2px solid var(--bg-1)'
                       }} />
                     </div>
 
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ color: 'var(--text-0)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <div style={{ color: 'var(--text-0)', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {u.full_name || '-'}
                       </div>
-                      <div style={{ color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.email}</div>
+                      <div style={{ color: 'var(--text-3)', fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.email}</div>
                     </div>
                   </div>
 
-                  {/* 2. Role Selector & Account Status Button */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                    <select value={u.role} onChange={e => changeRole(u.id, e.target.value)} className="sel" style={{ width: 115, padding: '4px 6px', borderRadius: 8, height: 30, background: 'var(--bg-3)', border: '1px solid var(--border)', cursor: 'pointer' }}>
+                  {/* 2. Role Selector */}
+                  <div style={{ width: 140, flexShrink: 0 }}>
+                    <select value={u.role} onChange={e => changeRole(u.id, e.target.value)} style={{ 
+                      width: '100%', padding: '4px 6px', borderRadius: 6, height: 28, 
+                      background: 'transparent', border: '1px solid transparent', 
+                      color: 'var(--text-1)', fontSize: '13px', cursor: 'pointer',
+                      transition: 'border 0.2s', outline: 'none'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'transparent'}
+                    >
                       {(ROLES || []).map(r => <option key={r} value={r}>{ROLE_META[r]?.label || r}</option>)}
                     </select>
+                  </div>
 
+                  {/* 3. Account Status Button (Minimal) */}
+                  <div style={{ width: 100, flexShrink: 0 }}>
                     <button onClick={() => toggleActive(u.id, u.is_active)}
                       style={{
-                        padding: '4px 8px', borderRadius: 8, cursor: 'pointer', border: '1px solid', height: 30, display: 'flex', alignItems: 'center', gap: 4, transition: 'all 0.15s', flexShrink: 0,
-                        background: u.is_active ? 'var(--status-danger-soft)' : 'rgba(34,197,94,0.08)',
-                        color: u.is_active ? 'var(--status-danger)' : '#22c55e',
-                        borderColor: u.is_active ? 'var(--status-danger-soft)' : 'rgba(34,197,94,0.25)',
-                      }}>
-                      {u.is_active ? 'Suspend' : 'Activate'}
+                        padding: '2px 8px', borderRadius: 12, cursor: 'pointer', border: 'none', fontSize: '11px', fontWeight: 500,
+                        background: u.is_active ? 'rgba(34,197,94,0.1)' : 'var(--status-danger-soft)',
+                        color: u.is_active ? '#22c55e' : 'var(--status-danger)',
+                      }}
+                      title={u.is_active ? "Click to suspend" : "Click to activate"}
+                    >
+                      {u.is_active ? 'Active' : 'Suspended'}
                     </button>
                   </div>
 
-                  {/* 3. Action Buttons Cluster */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
-                    <button onClick={() => setSiteUser(u)} className="btn-ghost"
-                      style={{ padding: '4px 9px', height: 30, borderRadius: 8, background: 'var(--status-info-soft)', color: 'var(--status-info)', border: '1px solid var(--status-info-soft)', display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
-                      <MapPin size={12}/> Site Access
-                    </button>
-                    
-                    <button onClick={() => setSessionUser(u)} className="btn-ghost"
-                      style={{ padding: '4px 8px', height: 30, borderRadius: 8, background: 'var(--bg-3)', color: 'var(--text-1)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
-                      <Laptop size={12}/> Sessions
-                    </button>
-                    
-                    <button onClick={() => setDelegationUser(u)} className="btn-ghost"
-                      style={{ padding: '4px 8px', height: 30, borderRadius: 8, background: 'var(--bg-3)', color: 'var(--text-1)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
-                      <Clock size={12}/> Delegate
-                    </button>
-
-                    {setProfileUser && (
-                      <button onClick={() => setProfileUser(u)} className="btn-ghost"
-                        style={{ padding: '4px 8px', height: 30, borderRadius: 8, background: 'var(--bg-3)', color: 'var(--text-1)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
-                        <UserCircle2 size={12}/> Profile
+                  {/* 4. Action Buttons Cluster (Icon Only) */}
+                  <div style={{ width: 180, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6, flexShrink: 0 }}>
+                    {[
+                      { icon: MapPin, action: () => setSiteUser(u), title: "Site Access", color: 'var(--status-info)' },
+                      { icon: Laptop, action: () => setSessionUser(u), title: "Sessions", color: 'var(--text-2)' },
+                      { icon: Clock, action: () => setDelegationUser(u), title: "Delegate", color: 'var(--text-2)' },
+                      ...(setProfileUser ? [{ icon: UserCircle2, action: () => setProfileUser(u), title: "Profile", color: 'var(--text-2)' }] : [])
+                    ].map((btn, idx) => (
+                      <button 
+                        key={idx}
+                        onClick={btn.action}
+                        title={btn.title}
+                        className="flex items-center justify-center transition-colors"
+                        style={{ 
+                          width: 28, height: 28, borderRadius: 6, 
+                          color: btn.color, background: 'transparent', border: 'none', cursor: 'pointer' 
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-2)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <btn.icon size={15}/>
                       </button>
-                    )}
+                    ))}
                   </div>
                 </div>
+
               )
             })}
           </div>

@@ -43,6 +43,36 @@ export const scheduleService = {
     } catch (error) {
       return { count: 0, error };
     }
+  },
+
+  async update(id, payload, userId) {
+    try {
+      const { data, error } = await supabase
+        .from('maintenance_schedules')
+        .update(payload)
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      await logEvent('schedule', id, 'updated', userId, null, payload);
+      return { data, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  },
+
+  async delete(id, userId) {
+    try {
+      const { error } = await supabase
+        .from('maintenance_schedules')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      await logEvent('schedule', id, 'deleted', userId, null, null);
+      return { error: null };
+    } catch (error) {
+      return { error };
+    }
   }
 };
 

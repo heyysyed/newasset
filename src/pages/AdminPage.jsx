@@ -68,21 +68,30 @@ const USER_PERMS = [
 ]
 
 // ── Compact Context Stat Indicator ────────────────────────────
-function StatCard({ label, value, icon: Icon, color, sub }) {
+function StatCard({ label, value, icon: Icon, tone, sub }) {
+  const toneMap = {
+    primary: 'var(--accent)',
+    warning: 'var(--amber)',
+    special: 'var(--purple)',
+    success: 'var(--green)',
+    danger:  'var(--red)'
+  }
+  const color = toneMap[tone] || toneMap.primary;
+
   return (
-    <div className="bg-bg-1 border border-border rounded-lg px-3.5 py-2.5 flex items-center gap-3 shadow-sm">
+    <div className="bg-bg-1 border border-border rounded-xl px-4 py-3 flex items-center gap-3.5 shadow-sm hover:shadow-md transition-shadow">
       <div 
-        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+        className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
         style={{ background: `${color}15`, border: `1px solid ${color}30` }}
       >
-        <Icon size={16} style={{ color }} />
+        <Icon size={18} style={{ color }} />
       </div>
       <div className="min-w-0 flex-1">
-        <div className="flex items-baseline gap-2 min-w-0">
-          <span className="text-body font-mono text-text-0 leading-tight truncate shrink-0 max-w-[60%]">{value}</span>
-          <span className="text-[11px] text-body-medium text-text-3 truncate">{label}</span>
+        <div className="flex items-baseline gap-2 min-w-0 mb-0.5">
+          <span className="text-[1.25rem] font-mono font-semibold text-text-0 leading-none truncate shrink-0 max-w-[60%]">{value}</span>
+          <span className="text-[11px] font-semibold tracking-wide uppercase text-text-3 truncate">{label}</span>
         </div>
-        {sub && <div className="text-[10px] text-text-3 font-mono truncate">{sub}</div>}
+        {sub && <div className="text-[11px] text-text-2 font-medium truncate">{sub}</div>}
       </div>
     </div>
   )
@@ -434,7 +443,6 @@ export default function AdminPage() {
     { id: 'useraccess', label: 'User Access Rules',  icon: UserCog,        count: null, group: 'People & Access', desc: 'Set user-level browsing boundaries and inspection access' },
     { id: 'fields',     label: 'Field Visibility',   icon: Eye,            count: null, group: 'Asset Configuration', desc: 'Control visible asset fields across desktop and mobile forms' },
     { id: 'custom',     label: 'Custom Fields',     icon: Database,       count: (settings?.custom_fields || []).length || null, group: 'Asset Configuration', desc: 'Define dynamic user-defined attributes for assets' },
-    ...(isSuperAdmin ? [{ id: 'qrconfig', label: 'QR Configuration', icon: Hash, count: null, group: 'Asset Configuration', desc: 'Customize QR label layout, prefix, and print presets' }] : []),
     { id: 'tracking',   label: 'Task SLA Tracking',  icon: ClipboardCheck, count: (auditAssignments || []).length || null, group: 'Operations & Security', desc: 'Track maintenance and inspection SLA resolution deadlines' },
     { id: 'reports',    label: 'Scheduled Reports', icon: FileSpreadsheet, count: (settings?.scheduled_reports || []).length || null, group: 'Operations & Security', desc: 'Configure automated scheduled report delivery' },
     { id: 'logs',       label: 'Activity Audit Logs', icon: History,       count: null, group: 'Operations & Security', desc: 'Complete chronological audit log of all system changes' },
@@ -647,155 +655,33 @@ export default function AdminPage() {
   return (
     <div className="w-full flex flex-col gap-4">
 
-      {/* ── Desktop & Tablet 2-Column Layout ── */}
-      <div className="admin-layout flex flex-col md:flex-row gap-5 items-start">
-
-        {/* ── Left Navigation Sidebar (240px) ── */}
-        <div className="admin-sidebar hidden md:flex flex-col w-[240px] shrink-0 sticky top-4 bg-bg-1 border border-border rounded-xl shadow-sm overflow-hidden divide-y divide-border">
-          
-          {/* Group 0: Admin Overview */}
-          <div className="p-2.5">
-            <h4 className="text-[10px] text-text-3 uppercase tracking-wider px-2.5 mb-1.5">Admin</h4>
+      {/* ── Unified Top Navigation Tabs (Wrapped) ── */}
+      <div className="flex flex-wrap gap-2 pb-3 w-full mb-2 border-b border-border">
+        {TABS.map(t => {
+          const active = tab === t.id
+          return (
             <button
-              onClick={() => handleTabChange('overview')}
-              className={`flex items-center justify-between px-3 py-2 rounded-lg text-caption  transition-all text-left w-full ${
-                tab === 'overview' ? 'bg-accent text-white shadow-sm ' : 'text-text-2 hover:bg-bg-2 hover:text-text-0'
+              key={t.id}
+              onClick={() => handleTabChange(t.id)}
+              className={`flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium rounded-lg transition-all border ${
+                active 
+                  ? 'bg-accent text-white border-accent shadow-sm' 
+                  : 'bg-bg-1 text-text-2 border-border hover:bg-bg-2 hover:text-text-1 hover:border-text-3'
               }`}
             >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <LayoutGrid size={15} className={`shrink-0 ${tab === 'overview' ? 'text-white' : 'text-text-3'}`} />
-                <span className="truncate">Admin Overview</span>
-              </div>
+              <t.icon size={14} className={active ? 'text-white' : 'text-text-3'} />
+              <span>{t.label}</span>
+              {t.count !== null && (
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ml-1 transition-colors ${
+                  active ? 'bg-white/20 text-white' : 'bg-bg-2 text-text-3'
+                }`}>
+                  {t.count}
+                </span>
+              )}
             </button>
-          </div>
-
-          {/* Group 1: People & Access */}
-          <div className="p-2.5">
-            <h4 className="text-[10px] text-text-3 uppercase tracking-wider px-2.5 mb-1.5">People & Access</h4>
-            <div className="flex flex-col gap-0.5">
-              {[
-                { id: 'users', label: 'User Directory', icon: Users, count: (users || []).length },
-                { id: 'employees', label: 'Employees', icon: Briefcase, count: (employees || []).length },
-                { id: 'modperms', label: 'Roles & Permissions', icon: Shield, count: null },
-                { id: 'useraccess', label: 'Access Rules', icon: UserCog, count: null },
-              ].map(t => {
-                const active = tab === t.id
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => handleTabChange(t.id)}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-caption  transition-all text-left w-full ${
-                      active ? 'bg-accent text-white shadow-sm ' : 'text-text-2 hover:bg-bg-2 hover:text-text-0'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <t.icon size={15} className={`shrink-0 ${active ? 'text-white' : 'text-text-3'}`} />
-                      <span className="truncate">{t.label}</span>
-                    </div>
-                    {t.count !== null && (
-                      <span className={`text-[10px] font-mono  px-1.5 py-0.5 rounded-md ${
-                        active ? 'bg-[var(--bg-surface)]/20 text-white' : 'bg-bg-0 text-text-2 border border-border'
-                      }`}>
-                        {t.count}
-                      </span>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Group 2: Asset & Customization */}
-          <div className="p-2.5">
-            <h4 className="text-[10px] text-text-3 uppercase tracking-wider px-2.5 mb-1.5">Asset Configuration</h4>
-            <div className="flex flex-col gap-0.5">
-              {[
-                { id: 'fields', label: 'Field Visibility', icon: Eye, count: null },
-                { id: 'custom', label: 'Custom Fields', icon: Database, count: (settings?.custom_fields || []).length || null },
-                ...(isSuperAdmin ? [{ id: 'qrconfig', label: 'QR Configuration', icon: Hash, count: null }] : []),
-              ].map(t => {
-                const active = tab === t.id
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => handleTabChange(t.id)}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-caption  transition-all text-left w-full ${
-                      active ? 'bg-accent text-white shadow-sm ' : 'text-text-2 hover:bg-bg-2 hover:text-text-0'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <t.icon size={15} className={`shrink-0 ${active ? 'text-white' : 'text-text-3'}`} />
-                      <span className="truncate">{t.label}</span>
-                    </div>
-                    {t.count !== null && (
-                      <span className={`text-[10px] font-mono  px-1.5 py-0.5 rounded-md ${
-                        active ? 'bg-[var(--bg-surface)]/20 text-white' : 'bg-bg-0 text-text-2 border border-border'
-                      }`}>
-                        {t.count}
-                      </span>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Group 3: Operations & System */}
-          <div className="p-2.5">
-            <h4 className="text-[10px] text-text-3 uppercase tracking-wider px-2.5 mb-1.5">Operations & Security</h4>
-            <div className="flex flex-col gap-0.5">
-              {[
-                { id: 'tracking', label: 'Task SLA Tracking', icon: ClipboardCheck, count: (auditAssignments || []).length || null },
-                { id: 'reports', label: 'Scheduled Reports', icon: FileSpreadsheet, count: (settings?.scheduled_reports || []).length || null },
-                { id: 'logs', label: 'Activity Audit Logs', icon: History, count: null },
-                { id: 'trash', label: 'Trash / Recovery', icon: Trash2, count: (deletedAssets || []).length || null },
-              ].map(t => {
-                const active = tab === t.id
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => handleTabChange(t.id)}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-caption  transition-all text-left w-full ${
-                      active ? 'bg-accent text-white shadow-sm ' : 'text-text-2 hover:bg-bg-2 hover:text-text-0'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <t.icon size={15} className={`shrink-0 ${active ? 'text-white' : 'text-text-3'}`} />
-                      <span className="truncate">{t.label}</span>
-                    </div>
-                    {t.count !== null && (
-                      <span className={`text-[10px] font-mono  px-1.5 py-0.5 rounded-md ${
-                        active ? 'bg-[var(--bg-surface)]/20 text-white' : 'bg-bg-0 text-text-2 border border-border'
-                      }`}>
-                        {t.count}
-                      </span>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-        </div>
-
-        {/* ── Mobile Tab Strip ── */}
-        <div className="md:hidden flex overflow-x-auto gap-1.5 pb-2 mb-2 w-full custom-scrollbar">
-          {TABS.map(t => {
-            const active = tab === t.id
-            return (
-              <button
-                key={t.id}
-                onClick={() => handleTabChange(t.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-caption  whitespace-nowrap border shrink-0 ${
-                  active ? 'bg-accent text-white border-accent' : 'bg-bg-1 text-text-2 border-border'
-                }`}
-              >
-                <t.icon size={13} />
-                <span>{t.label}</span>
-              </button>
-            )
-          })}
-        </div>
+          )
+        })}
+      </div>
 
         {/* ── Content Workspace ── */}
         <div key={tab} className="flex-1 min-w-0 w-full flex flex-col gap-4">
@@ -804,19 +690,19 @@ export default function AdminPage() {
           {(() => {
             const currentTabObj = TABS.find(t => t.id === tab)
             return (
-              <div className="bg-bg-1 border border-border rounded-xl px-4 py-3 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="bg-bg-1 border border-border rounded-xl px-5 py-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden z-10">
                 <div>
-                  <div className="flex items-center gap-1.5 text-[11px] text-text-3 uppercase tracking-wider mb-1">
+                  <div className="flex items-center gap-1.5 text-[11px] font-semibold text-text-3 uppercase tracking-wider mb-1.5">
                     <span>Admin</span>
                     <span>/</span>
                     <span>{currentTabObj?.group || 'Settings'}</span>
                     <span>/</span>
                     <span className="text-accent">{currentTabObj?.label}</span>
                   </div>
-                  <h2 className="text-page-title m-0 mb-1 tracking-wide uppercase text-text-0">
+                  <h2 className="text-[1.25rem] font-bold text-text-0 m-0 mb-1 tracking-tight">
                     {currentTabObj?.label}
                   </h2>
-                  <p className="text-body-medium text-text-2 m-0 truncate max-w-xl">
+                  <p className="text-[0.9rem] text-text-2 m-0 truncate max-w-xl">
                     {currentTabObj?.desc}
                   </p>
                 </div>
@@ -918,60 +804,62 @@ export default function AdminPage() {
               {/* 2-Column Operational Health Panes */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Pane 1: Access & Configuration Posture */}
-                <div className="bg-bg-1 border border-border rounded-xl p-4 shadow-sm flex flex-col gap-3">
-                  <div className="flex items-center justify-between border-b border-border pb-2.5">
-                    <div className="flex items-center gap-2">
+                <div className="bg-bg-1 border border-border rounded-xl p-5 shadow-sm flex flex-col gap-4">
+                  <div className="flex items-center justify-between border-b border-border pb-3">
+                    <div className="flex items-center gap-2.5">
                       <Shield size={16} className="text-accent" />
-                      <h3 className="text-caption text-text-0 uppercase tracking-wider m-0">Configuration & Access Posture</h3>
+                      <h3 className="text-[11px] font-bold text-text-0 uppercase tracking-wider m-0">Configuration Posture</h3>
                     </div>
-                    <span className="text-[11px] text-green bg-green/10 px-2 py-0.5 rounded-full border border-green/20">
+                    <span className="text-[10px] font-bold text-green bg-green/10 px-2.5 py-1 rounded-md border border-green/20 uppercase tracking-wide">
                       Active
                     </span>
                   </div>
 
-                  <div className="flex flex-col divide-y divide-border text-caption">
-                    <div className="py-2 flex items-center justify-between">
-                      <span className="text-text-3">Custom Field Attributes</span>
-                      <span className="font-mono text-text-0">{(settings?.custom_fields || []).length} defined</span>
+                  <div className="flex flex-col divide-y divide-border text-[0.85rem] font-medium">
+                    <div className="py-2.5 flex items-center justify-between">
+                      <span className="text-text-2">Custom Field Attributes</span>
+                      <span className="font-mono text-text-0 font-semibold bg-bg-2 px-2 py-0.5 rounded border border-border">{(settings?.custom_fields || []).length} defined</span>
                     </div>
-                    <div className="py-2 flex items-center justify-between">
-                      <span className="text-text-3">Scheduled Automated Reports</span>
-                      <span className="font-mono text-text-0">{(settings?.scheduled_reports || []).length} configured</span>
+                    <div className="py-2.5 flex items-center justify-between">
+                      <span className="text-text-2">Scheduled Automated Reports</span>
+                      <span className="font-mono text-text-0 font-semibold bg-bg-2 px-2 py-0.5 rounded border border-border">{(settings?.scheduled_reports || []).length} configured</span>
                     </div>
-                    <div className="py-2 flex items-center justify-between">
-                      <span className="text-text-3">Deleted Equipment in Trash</span>
-                      <span className="font-mono text-danger">{(deletedAssets || []).length} items</span>
+                    <div className="py-2.5 flex items-center justify-between">
+                      <span className="text-text-2">Deleted Equipment in Trash</span>
+                      <span className="font-mono text-danger font-semibold bg-red/10 px-2 py-0.5 rounded border border-red/20">{(deletedAssets || []).length} items</span>
                     </div>
-                    <div className="py-2 flex items-center justify-between">
-                      <span className="text-text-3">Super Admin Configuration</span>
-                      <span className="font-mono text-accent">{isSuperAdmin ? 'Enabled (Master)' : 'Standard Admin'}</span>
+                    <div className="py-2.5 flex items-center justify-between">
+                      <span className="text-text-2">Super Admin Configuration</span>
+                      <span className="font-mono text-accent font-semibold bg-accent/10 px-2 py-0.5 rounded border border-accent/20">{isSuperAdmin ? 'Enabled (Master)' : 'Standard Admin'}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Pane 2: Recent Activity Audit Stream */}
-                <div className="bg-bg-1 border border-border rounded-xl p-4 shadow-sm flex flex-col gap-3">
-                  <div className="flex items-center justify-between border-b border-border pb-2.5">
-                    <div className="flex items-center gap-2">
+                <div className="bg-bg-1 border border-border rounded-xl p-5 shadow-sm flex flex-col gap-4">
+                  <div className="flex items-center justify-between border-b border-border pb-3">
+                    <div className="flex items-center gap-2.5">
                       <History size={16} className="text-accent" />
-                      <h3 className="text-caption text-text-0 uppercase tracking-wider m-0">Recent Administrative Events</h3>
+                      <h3 className="text-[11px] font-bold text-text-0 uppercase tracking-wider m-0">Recent Administrative Events</h3>
                     </div>
-                    <button onClick={() => setTab('logs')} className="text-caption text-accent flex items-center gap-1">
-                      <span>View All Logs</span>
-                      <ChevronRight size={13} />
+                    <button onClick={() => setTab('logs')} className="text-[11px] font-semibold text-accent hover:text-accent-hover transition-colors flex items-center gap-1">
+                      <span>View Logs</span>
+                      <ChevronRight size={14} />
                     </button>
                   </div>
 
                   {actLogs.length === 0 ? (
-                    <p className="text-caption text-text-3 m-0 py-2">No administrative activity recorded yet.</p>
+                    <div className="flex flex-col items-center justify-center flex-1 py-4">
+                      <p className="text-[0.85rem] text-text-3 m-0 italic">No administrative activity recorded yet.</p>
+                    </div>
                   ) : (
-                    <div className="flex flex-col divide-y divide-border text-caption">
+                    <div className="flex flex-col divide-y divide-border text-[0.85rem]">
                       {actLogs.slice(0, 4).map(log => (
-                        <div key={log.id} className="py-2 flex items-center justify-between">
-                          <div className="min-w-0 pr-2">
-                            <span className="text-text-0 block truncate capitalize">{log.action || 'System Change'}</span>
+                        <div key={log.id} className="py-2.5 flex items-center justify-between group">
+                          <div className="min-w-0 pr-3">
+                            <span className="text-text-0 font-semibold block truncate capitalize group-hover:text-accent transition-colors">{log.action || 'System Change'}</span>
                             <span className="text-[11px] text-text-3 font-mono block mt-0.5 truncate">
-                              {log.entity_type || 'System'} • {log.profiles?.full_name || 'Administrator'}
+                              {log.entity_type || 'System'} <span className="opacity-50 mx-1">•</span> {log.profiles?.full_name || 'Administrator'}
                             </span>
                           </div>
                           <span className="text-[10px] text-text-3 font-mono shrink-0">
@@ -985,35 +873,43 @@ export default function AdminPage() {
               </div>
 
               {/* Quick Jump Shortcuts Grid */}
-              <div className="bg-bg-1 border border-border rounded-xl p-4 shadow-sm">
-                <h3 className="text-caption text-text-3 uppercase tracking-wider mb-3 flex items-center gap-2 m-0">
-                  <Settings2 size={15} className="text-accent" />
+              <div className="bg-bg-1 border border-border rounded-xl p-5 shadow-sm">
+                <h3 className="text-[11px] font-bold text-text-3 uppercase tracking-wider mb-4 flex items-center gap-2 m-0">
+                  <Settings2 size={15} className="text-text-3" />
                   <span>Administrative Control Shortcuts</span>
                 </h3>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  <button onClick={() => setTab('users')} className="p-3 bg-bg-0 hover:bg-bg-2 border border-border rounded-lg text-left active:scale-[0.99] transition-all">
-                    <Users size={16} className="text-accent mb-1" />
-                    <div className="text-caption text-text-0">User Directory</div>
-                    <div className="text-[10px] text-text-3">{totalUsers} accounts</div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <button onClick={() => setTab('users')} className="p-4 bg-bg-0 hover:bg-bg-2 border border-border rounded-lg text-left transition-colors flex flex-col items-start">
+                    <div className="w-8 h-8 rounded bg-accent/10 flex items-center justify-center mb-3">
+                      <Users size={16} className="text-accent" />
+                    </div>
+                    <div className="text-[0.9rem] font-semibold text-text-0">User Directory</div>
+                    <div className="text-[11px] text-text-3 mt-0.5">{totalUsers} accounts</div>
                   </button>
 
-                  <button onClick={() => setTab('employees')} className="p-3 bg-bg-0 hover:bg-bg-2 border border-border rounded-lg text-left active:scale-[0.99] transition-all">
-                    <Briefcase size={16} className="text-green mb-1" />
-                    <div className="text-caption text-text-0">Employees</div>
-                    <div className="text-[10px] text-text-3">{(employees || []).length} records</div>
+                  <button onClick={() => setTab('employees')} className="p-4 bg-bg-0 hover:bg-bg-2 border border-border rounded-lg text-left transition-colors flex flex-col items-start">
+                    <div className="w-8 h-8 rounded bg-green/10 flex items-center justify-center mb-3">
+                      <Briefcase size={16} className="text-green" />
+                    </div>
+                    <div className="text-[0.9rem] font-semibold text-text-0">Employees</div>
+                    <div className="text-[11px] text-text-3 mt-0.5">{(employees || []).length} records</div>
                   </button>
 
-                  <button onClick={() => setTab('custom')} className="p-3 bg-bg-0 hover:bg-bg-2 border border-border rounded-lg text-left active:scale-[0.99] transition-all">
-                    <Database size={16} className="text-amber mb-1" />
-                    <div className="text-caption text-text-0">Custom Fields</div>
-                    <div className="text-[10px] text-text-3">{(settings?.custom_fields || []).length} attributes</div>
+                  <button onClick={() => setTab('custom')} className="p-4 bg-bg-0 hover:bg-bg-2 border border-border rounded-lg text-left transition-colors flex flex-col items-start">
+                    <div className="w-8 h-8 rounded bg-amber/10 flex items-center justify-center mb-3">
+                      <Database size={16} className="text-amber" />
+                    </div>
+                    <div className="text-[0.9rem] font-semibold text-text-0">Custom Fields</div>
+                    <div className="text-[11px] text-text-3 mt-0.5">{(settings?.custom_fields || []).length} attributes</div>
                   </button>
 
-                  <button onClick={() => setTab('trash')} className="p-3 bg-bg-0 hover:bg-bg-2 border border-border rounded-lg text-left active:scale-[0.99] transition-all">
-                    <Trash2 size={16} className="text-danger mb-1" />
-                    <div className="text-caption text-text-0">Trash Recovery</div>
-                    <div className="text-[10px] text-text-3">{(deletedAssets || []).length} deleted</div>
+                  <button onClick={() => setTab('trash')} className="p-4 bg-bg-0 hover:bg-bg-2 border border-border rounded-lg text-left transition-colors flex flex-col items-start">
+                    <div className="w-8 h-8 rounded bg-red/10 flex items-center justify-center mb-3">
+                      <Trash2 size={16} className="text-danger" />
+                    </div>
+                    <div className="text-[0.9rem] font-semibold text-text-0">Trash Recovery</div>
+                    <div className="text-[11px] text-text-3 mt-0.5">{(deletedAssets || []).length} deleted</div>
                   </button>
                 </div>
               </div>
@@ -1094,14 +990,6 @@ export default function AdminPage() {
             />
           )}
 
-          {/* ── QR CONFIG TAB ── */}
-          {isSuperAdmin && tab === 'qrconfig' && (
-            <QrStickerDesigner
-              config={qrConfig}
-              setConfig={setQrConfig}
-            />
-          )}
-
           {/* ── ACTIVITY LOGS TAB ── */}
           {tab === 'logs' && (
             <ActivityLogsHub
@@ -1127,8 +1015,6 @@ export default function AdminPage() {
           )}
 
         </div>{/* end Content Workspace */}
-      </div>{/* end Sidebar + Content Layout */}
-
       <style>{`
         @keyframes spin{to{transform:rotate(360deg)}}
         @keyframes admin-fade-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}

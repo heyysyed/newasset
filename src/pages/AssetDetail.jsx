@@ -377,7 +377,7 @@ export default function AssetDetail() {
   const isBulk = asset ? (asset.asset_type === 'bulk' || Number(asset.quantity) > 1) : false
   useEffect(() => {
     if (!asset?.id || isBulk) return
-    const url = `${window.location.origin}/scan/${asset.id}`
+    const url = `${window.location.origin}/#/scan/${asset.id}`
     QRCode.toDataURL(url, {
       width: 300, margin: 1, color: { dark: '#0d1117', light: '#ffffff' }
     }).then(setQrUrl).catch(console.error)

@@ -1,8 +1,10 @@
-import { useToast } from '../../../../hooks/useToast'
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../../../context/AuthContext';
 import { supabase, autoCreateOverdueTickets, deleteMaintenanceSchedule } from '../../../../lib/supabase';
-import { Calendar, CheckCircle2, Edit2, Trash2 } from 'lucide-react';
+import { scheduleService } from '../../services/scheduleService';
+import { Calendar, CheckCircle2, Edit2, Trash2, Plus, Loader2 } from 'lucide-react';
+import PMScheduleFormModal from './PMScheduleFormModal';
 
 const FREQ_MAP = {
   daily: 'Daily',
@@ -13,42 +15,43 @@ const FREQ_MAP = {
 };
 
 export default function PMWorkspace() {
-  const { toast } = useToast();
   const { user, isAdmin, currentCompany } = useAuth();
   const cc = currentCompany?.code;
 
-  const [schedules, setSchedules] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [schedFilterStatus, setSchedFilterStatus] = useState('all');
   const [search, setSearch] = useState('');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedSchedule, setSelectedSchedule] = useState(null);
 
-  useEffect(() => {
-    fetchSchedules();
-  }, [cc]);
-
-  async function fetchSchedules() {
-    setLoading(true);
-    try {
-      let sQ = supabase.from('maintenance_schedules').select('*, assets(asset_name, asset_code)').order('next_due');
-      const { data } = await sQ;
-      // Filter by cc if needed, but original didn't
-      setSchedules(data || []);
-      await autoCreateOverdueTickets(user.id);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
+  const { data: schedules = [], isLoading } = useQuery({
+    queryKey: ['maintenance_schedules', cc],
+    queryFn: async () => {
+      const { data, error } = await scheduleService.getSchedules();
+      if (error) throw error;
+      // Auto-create tickets in background without blocking query
+      autoCreateOverdueTickets(user.id).catch(console.error);
+      return data || [];
     }
-  }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      const { error } = await scheduleService.delete(id, user?.id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['maintenance_schedules'] }),
+    onError: (e) => alert(e.message)
+  });
 
   async function handleDeleteSchedule(id) {
-    if (!window.confirm('Are you sure?')) return
-    try {
-      await deleteMaintenanceSchedule(id);
-      fetchSchedules();
-    } catch (e) {
-      toast.info(e.message);
-    }
+    if (!window.confirm('Are you sure you want to delete this schedule?')) return;
+    deleteMutation.mutate(id);
+  }
+
+  function handleEditSchedule(s) {
+    setSelectedSchedule(s);
+    setIsFormOpen(true);
   }
 
   const filteredSchedules = useMemo(() => schedules.filter(s => {
@@ -102,7 +105,16 @@ export default function PMWorkspace() {
                   </span>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  {isAdmin && <button className="btn-ghost" style={{ padding: '6px 12px', color: 'var(--red)' }} onClick={() => handleDeleteSchedule(s.id)}><Trash2 size={14} /></button>}
+                  {isAdmin && (
+                    <>
+                      <button className="btn-ghost" style={{ padding: '6px 12px', color: 'var(--text-2)' }} onClick={() => handleEditSchedule(s)}>
+                        <Edit2 size={14} />
+                      </button>
+                      <button className="btn-ghost" style={{ padding: '6px 12px', color: 'var(--red)' }} onClick={() => handleDeleteSchedule(s.id)} disabled={deleteMutation.isPending}>
+                        {deleteMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             );
@@ -119,6 +131,13 @@ export default function PMWorkspace() {
           <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-0)', margin: '0 0 4px 0' }}>Preventive Maintenance</h1>
           <p style={{ margin: 0, color: 'var(--text-2)', fontSize: '0.9rem' }}>Manage recurring schedules and tasks.</p>
         </div>
+        <button 
+          className="btn-primary" 
+          onClick={() => { setSelectedSchedule(null); setIsFormOpen(true); }}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px' }}
+        >
+          <Plus size={16} /> New Schedule
+        </button>
       </div>
 
       <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
@@ -129,7 +148,7 @@ export default function PMWorkspace() {
         <span style={{ color: 'var(--text-3)', marginLeft: 'auto' }}>{filteredSchedules.length} schedules</span>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-3)' }}>Loading schedules...</div>
       ) : filteredSchedules.length === 0 ? (
         <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-3)' }}>No schedules found.</div>
@@ -139,6 +158,14 @@ export default function PMWorkspace() {
           {renderGroup('Next 30 Days', groups.Upcoming, 'var(--status-warning)')}
           {renderGroup('Later', groups.Later, 'var(--text-3)')}
         </div>
+      )}
+
+      {isFormOpen && (
+        <PMScheduleFormModal 
+          isOpen={isFormOpen} 
+          onClose={() => { setIsFormOpen(false); setSelectedSchedule(null); }} 
+          schedule={selectedSchedule} 
+        />
       )}
     </div>
   );

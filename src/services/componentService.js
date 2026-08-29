@@ -120,7 +120,8 @@ export async function removeComponent(componentId, woId, reason, disposition, us
     p_reason: reason || null,
     p_disposition: disposition || null,
     p_user_id: userId,
-    p_new_status: newStatus || null
+    p_new_status: newStatus || null,
+    p_scrap_value: null
   });
   if (error) throw error;
   return data;
@@ -136,7 +137,8 @@ export async function replaceComponent(oldId, newId, assetId, position, woId, re
     p_reason: reason || null,
     p_disposition: disposition || null,
     p_user_id: userId,
-    p_old_new_status: oldNewStatus || null
+    p_old_new_status: oldNewStatus || null,
+    p_scrap_value: null
   });
   if (error) throw error;
   return data;

@@ -5,7 +5,7 @@ export const workOrderService = {
   async getWorkOrders() {
     const { data, error } = await supabase
       .from('maintenance_work_orders')
-      .select('*, ticket:maintenance_tickets(ticket_no), asset:assets(asset_name, site), assigned_to:profiles!maintenance_work_orders_assigned_to_fkey(full_name, avatar_url)')
+      .select('*, ticket:maintenance_tickets(ticket_no), asset:assets(asset_name, site), assigned_to:profiles!maintenance_work_orders_assigned_to_fkey(full_name), vendor:vendors(name)')
       .order('created_at', { ascending: false });
     return { data, error };
   },

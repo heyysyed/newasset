@@ -623,10 +623,10 @@ function InventoryPageContent() {
                     const usableQty = Number(s.usable_qty || 0)
                     const siteValuation = usableQty * unitPrice
                     const isLowStock = usableQty < 25;
-                    const rowBg = selectedStock.has(s.id) ? 'var(--bg-2)' : (isLowStock ? 'var(--status-danger-soft)' : 'transparent');
+                    const rowBg = selectedStock.has(s.id) ? 'var(--bg-2)' : 'transparent';
 
                     return (
-                      <tr key={s.id} style={{ background: rowBg, transition: 'background 0.2s' }}>
+                      <tr key={s.id} style={{ background: rowBg, transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-2)'} onMouseLeave={e => e.currentTarget.style.background = rowBg}>
                         {canWrite && (
                           <td style={{ textAlign: 'center' }}>
                             <input 
@@ -667,10 +667,10 @@ function InventoryPageContent() {
                           </span>
                         </td>
                         <td style={{ textAlign:'right' }}>
-                          <div style={{ color: isLowStock ? 'var(--red)' : 'var(--green)' }}>
-                            {fmt(usableQty)} <span >{s.bulk_items?.unit || 'nos'}</span>
+                          <div style={{ color: isLowStock ? 'var(--red)' : 'var(--green)', fontWeight: 500 }}>
+                            {fmt(usableQty)} <span style={{ color: 'var(--text-3)', fontWeight: 400, fontSize: '0.9em' }}>{s.bulk_items?.unit || 'nos'}</span>
                           </div>
-                          {isLowStock && <div style={{ color: 'var(--red)', textTransform: 'uppercase', marginTop: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}><AlertCircle size={10}/> Low Stock</div>}
+                          {isLowStock && <div style={{ color: 'var(--red)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', marginTop: 4, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}><AlertCircle size={12}/> Low Stock</div>}
                         </td>
                         <td style={{ textAlign:'right', color:'var(--text-1)' }}>
                           {unitPrice > 0 ? `₹${fmt(unitPrice)}` : <span style={{ color: 'var(--text-3)' }}>-</span>}
@@ -690,16 +690,18 @@ function InventoryPageContent() {
                         </td>
                         {canWrite && (
                           <td style={{ textAlign:'right', paddingRight: 16 }}>
-                            <div style={{ display:'flex', gap:6, justifyContent:'flex-end' }}>
-                              <button onClick={() => { setEditStockRecord({ ...s, unit_price: unitPrice }); setShowEditStockModal(true); }} className="btn-ghost" style={{ padding:'4px 8px', minHeight:28, display: 'flex', alignItems: 'center', gap: 3 }} title="Edit Stock Details">
-                                <Pencil size={12}/> Edit
+                            <div style={{ display:'flex', gap:4, justifyContent:'flex-end' }}>
+                              <button onClick={() => { setEditStockRecord({ ...s, unit_price: unitPrice }); setShowEditStockModal(true); }} className="btn-ghost" style={{ padding:'6px', color: 'var(--text-1)' }} title="Edit Stock Details">
+                                <Pencil size={15}/>
                               </button>
-                              <button onClick={() => openTx('transfer', s.item_id, s.site)} className="btn-primary" style={{ padding:'4px 10px', minHeight:28, display: 'flex', alignItems: 'center', gap: 4 }}>
-                                <ArrowRightLeft size={12}/> Transfer
+                              <button onClick={() => openTx('transfer', s.item_id, s.site)} className="btn-ghost" style={{ padding:'6px', color: 'var(--accent)' }} title="Transfer">
+                                <ArrowRightLeft size={15}/>
                               </button>
-                              <button onClick={() => openTx('deploy', s.item_id, s.site)} className="btn-ghost" style={{ padding:'4px 8px', minHeight:28 }}>Deploy</button>
-                              <button title="Scrap / Write-off" onClick={() => openTx('scrap', s.item_id, s.site)} className="btn-ghost" style={{ padding:'4px 8px', color:'var(--red)', minHeight:28, border:'1px solid var(--status-danger-soft)' }}>
-                                <Trash2 size={12}/> Scrap
+                              <button onClick={() => openTx('deploy', s.item_id, s.site)} className="btn-ghost" style={{ padding:'6px', color: 'var(--green)' }} title="Deploy">
+                                <Hammer size={15}/>
+                              </button>
+                              <button onClick={() => openTx('scrap', s.item_id, s.site)} className="btn-ghost" style={{ padding:'6px', color: 'var(--red)' }} title="Scrap">
+                                <Trash2 size={15}/>
                               </button>
                             </div>
                           </td>
@@ -901,15 +903,15 @@ function InventoryPageContent() {
                                 </td>
                                 {canWrite && (
                                   <td style={{ textAlign: 'right' }}>
-                                    <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                                      <button onClick={() => { setEditStockRecord({ id: sb.id, site: sb.site, usable_qty: sb.usable_qty, in_use_qty: sb.in_use_qty, scrap_qty: sb.scrap_qty, unit_price: sb.unitPrice, bulk_items: item }); setShowEditStockModal(true); }} className="btn-ghost" style={{ padding: '4px 8px', minHeight: 26, display: 'flex', alignItems: 'center', gap: 3 }}>
-                                        <Pencil size={11} /> Edit
+                                    <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+                                      <button onClick={() => { setEditStockRecord({ id: sb.id, site: sb.site, usable_qty: sb.usable_qty, in_use_qty: sb.in_use_qty, scrap_qty: sb.scrap_qty, unit_price: sb.unitPrice, bulk_items: item }); setShowEditStockModal(true); }} className="btn-ghost" style={{ padding: '6px', color: 'var(--text-1)' }} title="Edit">
+                                        <Pencil size={15} />
                                       </button>
-                                      <button onClick={() => openTx('transfer', sb.item_id, sb.site)} className="btn-primary" style={{ padding: '4px 8px', minHeight: 26 }}>
-                                        Transfer
+                                      <button onClick={() => openTx('transfer', sb.item_id, sb.site)} className="btn-ghost" style={{ padding: '6px', color: 'var(--accent)' }} title="Transfer">
+                                        <ArrowRightLeft size={15} />
                                       </button>
-                                      <button onClick={() => openTx('scrap', sb.item_id, sb.site)} className="btn-ghost" style={{ padding: '4px 8px', minHeight: 26, color: 'var(--red)', border: '1px solid var(--status-danger-soft)' }}>
-                                        Scrap
+                                      <button onClick={() => openTx('scrap', sb.item_id, sb.site)} className="btn-ghost" style={{ padding: '6px', color: 'var(--red)' }} title="Scrap">
+                                        <Trash2 size={15} />
                                       </button>
                                     </div>
                                   </td>

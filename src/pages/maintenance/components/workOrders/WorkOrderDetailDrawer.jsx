@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { X, Save, Clock, CheckCircle2, FileText, User, ArrowRight, Truck, Wrench } from 'lucide-react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { supabase } from '../../../../lib/supabase'
 import WorkOrderPartsPanel from './WorkOrderPartsPanel'
 import WorkOrderHistoryPanel from './WorkOrderHistoryPanel'
@@ -9,14 +9,48 @@ import WorkOrderHistoryPanel from './WorkOrderHistoryPanel'
 export default function WorkOrderDetailDrawer({ workOrder, isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState('details')
   const [actualHours, setActualHours] = useState('')
+  const [estimatedHours, setEstimatedHours] = useState('')
   const [notes, setNotes] = useState('')
+  const [assignedTo, setAssignedTo] = useState('')
+  const [vendorId, setVendorId] = useState('')
+  const [priority, setPriority] = useState('normal')
+  const [scheduledStart, setScheduledStart] = useState('')
+  const [scheduledEnd, setScheduledEnd] = useState('')
+  const [estimatedCost, setEstimatedCost] = useState('')
+  const [actualCost, setActualCost] = useState('')
+  const [status, setStatus] = useState('')
   
   const queryClient = useQueryClient()
+
+  const { data: profiles = [] } = useQuery({
+    queryKey: ['profiles_list_lite'],
+    queryFn: async () => {
+      const { data } = await supabase.from('profiles').select('id, full_name').order('full_name')
+      return data || []
+    }
+  })
+
+  const { data: vendors = [] } = useQuery({
+    queryKey: ['vendors_list_lite'],
+    queryFn: async () => {
+      const { data } = await supabase.from('vendors').select('id, name').order('name')
+      return data || []
+    }
+  })
 
   useEffect(() => {
     if (isOpen && workOrder) {
       setActualHours(workOrder.actual_hours || '')
+      setEstimatedHours(workOrder.estimated_hours || '')
       setNotes(workOrder.description || '')
+      setAssignedTo(workOrder.assigned_to || '')
+      setVendorId(workOrder.vendor_id || '')
+      setPriority(workOrder.priority || 'normal')
+      setStatus(workOrder.status || 'DRAFT')
+      setScheduledStart(workOrder.scheduled_start ? new Date(workOrder.scheduled_start).toISOString().slice(0,16) : '')
+      setScheduledEnd(workOrder.scheduled_end ? new Date(workOrder.scheduled_end).toISOString().slice(0,16) : '')
+      setEstimatedCost(workOrder.estimated_cost || '')
+      setActualCost(workOrder.actual_cost || '')
     }
   }, [isOpen, workOrder])
 
@@ -32,7 +66,7 @@ export default function WorkOrderDetailDrawer({ workOrder, isOpen, onClose }) {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['maintenance_work_orders'])
+      queryClient.invalidateQueries({ queryKey: ['maintenance_work_orders'] })
       onClose()
     },
     onError: (err) => {
@@ -45,7 +79,16 @@ export default function WorkOrderDetailDrawer({ workOrder, isOpen, onClose }) {
   const handleSave = () => {
     updateMutation.mutate({
       actual_hours: actualHours ? Number(actualHours) : null,
-      description: notes
+      estimated_hours: estimatedHours ? Number(estimatedHours) : null,
+      description: notes,
+      assigned_to: assignedTo || null,
+      vendor_id: vendorId || null,
+      priority: priority || 'normal',
+      status: status || 'DRAFT',
+      scheduled_start: scheduledStart || null,
+      scheduled_end: scheduledEnd || null,
+      estimated_cost: estimatedCost ? Number(estimatedCost) : null,
+      actual_cost: actualCost ? Number(actualCost) : null
     })
   }
 
@@ -133,18 +176,80 @@ export default function WorkOrderDetailDrawer({ workOrder, isOpen, onClose }) {
 
               <div style={{ display: 'flex', gap: 16 }}>
                 <div style={{ flex: 1 }}>
+                  <label className="lbl">Assign To Employee</label>
+                  <select className="inp" value={assignedTo} onChange={e => setAssignedTo(e.target.value)}>
+                    <option value="">-- Unassigned --</option>
+                    {profiles.map(p => (
+                      <option key={p.id} value={p.id}>{p.full_name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="lbl">Or Assign Vendor</label>
+                  <select className="inp" value={vendorId} onChange={e => setVendorId(e.target.value)}>
+                    <option value="">-- Internal Maintenance --</option>
+                    {vendors.map(v => (
+                      <option key={v.id} value={v.id}>{v.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 16 }}>
+                <div style={{ flex: 1 }}>
+                  <label className="lbl">Status</label>
+                  <select className="sel" value={status} onChange={e => setStatus(e.target.value)}>
+                    <option value="DRAFT">Draft</option>
+                    <option value="AWAITING_APPROVAL">Awaiting Approval</option>
+                    <option value="SCHEDULED">Scheduled</option>
+                    <option value="ASSIGNED">Assigned</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="ON_HOLD">On Hold</option>
+                    <option value="COMPLETED">Completed</option>
+                    <option value="CLOSED">Closed</option>
+                  </select>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="lbl">Priority</label>
+                  <select className="sel" value={priority} onChange={e => setPriority(e.target.value)}>
+                    <option value="low">Low</option>
+                    <option value="normal">Normal</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 16 }}>
+                <div style={{ flex: 1 }}>
+                  <label className="lbl">Scheduled Start</label>
+                  <input type="datetime-local" className="inp" value={scheduledStart} onChange={e => setScheduledStart(e.target.value)} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="lbl">Scheduled End</label>
+                  <input type="datetime-local" className="inp" value={scheduledEnd} onChange={e => setScheduledEnd(e.target.value)} />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 16 }}>
+                <div style={{ flex: 1 }}>
                   <label className="lbl">Estimated Hours</label>
-                  <input type="number" className="inp" value={workOrder.estimated_hours || ''} readOnly disabled style={{ width: '100%', background: 'var(--bg-3)' }} />
+                  <input type="number" step="0.5" className="inp" value={estimatedHours} onChange={e => setEstimatedHours(e.target.value)} style={{ width: '100%' }} />
                 </div>
                 <div style={{ flex: 1 }}>
                   <label className="lbl">Actual Hours</label>
-                  <input 
-                    type="number" 
-                    className="inp" 
-                    value={actualHours}
-                    onChange={e => setActualHours(e.target.value)}
-                    style={{ width: '100%' }} 
-                  />
+                  <input type="number" step="0.5" className="inp" value={actualHours} onChange={e => setActualHours(e.target.value)} style={{ width: '100%' }} />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 16 }}>
+                <div style={{ flex: 1 }}>
+                  <label className="lbl">Estimated Cost</label>
+                  <input type="number" step="0.01" className="inp" value={estimatedCost} onChange={e => setEstimatedCost(e.target.value)} style={{ width: '100%' }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="lbl">Actual Cost</label>
+                  <input type="number" step="0.01" className="inp" value={actualCost} onChange={e => setActualCost(e.target.value)} style={{ width: '100%' }} />
                 </div>
               </div>
 

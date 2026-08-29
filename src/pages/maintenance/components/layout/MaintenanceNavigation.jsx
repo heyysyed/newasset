@@ -35,10 +35,12 @@ export default function MaintenanceNavigation() {
             padding: '14px 16px',
             color: isActive ? 'var(--accent)' : 'var(--text-2)',
             borderBottom: isActive ? '2px solid var(--accent)' : '2px solid transparent',
+            marginBottom: '-1px',
             fontWeight: isActive ? 600 : 500,
             textDecoration: 'none',
             fontSize: '0.9rem',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s ease',
+            outline: 'none'
           })}
         >
           <item.icon size={16} />

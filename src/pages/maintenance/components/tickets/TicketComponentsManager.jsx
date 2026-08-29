@@ -153,8 +153,8 @@ function ActionModal({ type, selectedComp, availableStock, onClose, onConfirm })
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {(type === 'install' || type === 'replace') && (
             <div className="form-group">
-              <label>Select Component</label>
-              <select className="form-select" required value={newComponentId} onChange={e => setNewComponentId(e.target.value)}>
+              <label className="lbl">Select Component</label>
+              <select className="sel" required value={newComponentId} onChange={e => setNewComponentId(e.target.value)}>
                 <option value="">-- Select Available Component --</option>
                 {availableStock.map(c => (
                   <option key={c.id} value={c.id}>{c.name} (SN: {c.serial_number}) - {formatCurrency(c.purchase_cost, c.currency)}</option>
@@ -165,20 +165,20 @@ function ActionModal({ type, selectedComp, availableStock, onClose, onConfirm })
 
           {(type === 'install' || type === 'replace') && (
             <div className="form-group">
-              <label>Position / Slot (Optional)</label>
-              <input type="text" className="form-input" value={position} onChange={e => setPosition(e.target.value)} placeholder="e.g. Bay 1, Front Left" />
+              <label className="lbl">Position / Slot (Optional)</label>
+              <input type="text" className="inp" value={position} onChange={e => setPosition(e.target.value)} placeholder="e.g. Bay 1, Front Left" />
             </div>
           )}
 
           {(type === 'remove' || type === 'replace') && (
             <>
               <div className="form-group">
-                <label>Reason</label>
-                <input type="text" className="form-input" required value={reason} onChange={e => setReason(e.target.value)} placeholder="e.g. Failed, Scheduled Maintenance" />
+                <label className="lbl">Reason</label>
+                <input type="text" className="inp" required value={reason} onChange={e => setReason(e.target.value)} placeholder="e.g. Failed, Scheduled Maintenance" />
               </div>
               <div className="form-group">
-                <label>Disposition of old component</label>
-                <select className="form-select" value={disposition} onChange={e => setDisposition(e.target.value)}>
+                <label className="lbl">Disposition of old component</label>
+                <select className="sel" value={disposition} onChange={e => setDisposition(e.target.value)}>
                   <option value="AVAILABLE">Return to Inventory (Available)</option>
                   <option value="REPAIR">Send for Repair</option>
                   <option value="VENDOR">Return to Vendor</option>
@@ -189,7 +189,7 @@ function ActionModal({ type, selectedComp, availableStock, onClose, onConfirm })
           )}
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 8 }}>
-            <button type="button" className="btn-secondary" onClick={onClose}>Cancel</button>
+            <button type="button" className="btn-ghost" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn-primary">Confirm</button>
           </div>
         </form>

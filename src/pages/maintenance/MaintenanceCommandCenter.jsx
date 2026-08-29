@@ -9,9 +9,9 @@ import WorkOrdersWorkspace from './components/workOrders/WorkOrdersWorkspace';
 
 const AnalyticsWorkspace = lazy(() => import('./components/analytics/AnalyticsWorkspace'));
 const VendorsWorkspace   = lazy(() => import('./components/vendors/VendorsWorkspace'));
+const PMWorkspace        = lazy(() => import('./components/pm/PMWorkspace'));
+const LogsWorkspace      = lazy(() => import('./components/logs/LogsWorkspace'));
 
-const PMPlaceholder   = () => <div style={{ padding: 24, color: 'var(--text-1)' }}>Preventive Maintenance (Phase 2.6)</div>;
-const LogsPlaceholder = () => <div style={{ padding: 24, color: 'var(--text-1)' }}>Maintenance Logs (Phase 2.7)</div>;
 const Loading         = () => <div style={{ padding: 24, color: 'var(--text-2)' }}>Loading…</div>;
 
 export default function MaintenanceCommandCenter() {
@@ -27,8 +27,8 @@ export default function MaintenanceCommandCenter() {
             <Route path="overview"     element={<MaintenanceOverview />} />
             <Route path="tickets"      element={<TicketsWorkspace />} />
             <Route path="work-orders"  element={<WorkOrdersWorkspace />} />
-            <Route path="preventive"   element={<PMPlaceholder />} />
-            <Route path="logs"         element={<LogsPlaceholder />} />
+            <Route path="preventive"   element={<PMWorkspace />} />
+            <Route path="logs"         element={<LogsWorkspace />} />
             <Route path="analytics"    element={<AnalyticsWorkspace />} />
             <Route path="vendors"      element={<VendorsWorkspace />} />
             <Route path="*"            element={<Navigate to="/maintenance/overview" replace />} />
