@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { Boxes, Search, AlertTriangle, CheckCircle2, Shield, RefreshCw, Loader2, ArrowRight } from 'lucide-react'
+import { Boxes, Search, AlertTriangle, CheckCircle2, Shield, RefreshCw, Loader2, ArrowRight, MapPin, TrendingUp, TrendingDown } from 'lucide-react'
 import { supabase, submitStockAuditReconciliation } from '../../lib/supabase'
 import { formatCurrency } from '../../lib/depreciation'
 
@@ -132,104 +132,106 @@ export default function StockReconciliationAuditView({ sites = [], profile, onAu
         </div>
       </div>
 
-      {/* Audit Table */}
-      <div style={{ overflowX: 'auto', background: 'var(--bg-1)', borderRadius: 14, border: '1px solid var(--border)' }}>
-        <table className="tbl" style={{ width: '100%', minWidth: 850 }}>
-          <thead>
-            <tr style={{ background: 'var(--bg-2)' }}>
-              <th>Site</th>
-              <th>SKU / Item</th>
-              <th style={{ textAlign: 'right' }}>System Usable</th>
-              <th style={{ width: 140 }}>Physical Count</th>
-              <th>Variance</th>
-              <th>Audit Reasoning</th>
-              <th style={{ textAlign: 'right' }}>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredStock.length === 0 && (
-              <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--text-3)' }}>No inventory stock records found for audit.</td></tr>
-            )}
-            {filteredStock.map(r => {
-              const key = `${r.site}_${r.item_id}`
-              const sys = Number(r.usable_qty || 0)
-              const physVal = physicalCounts[key]
-              const phys = physVal !== undefined && physVal !== '' ? Number(physVal) : sys
-              const variance = phys - sys
-              const variancePct = sys > 0 ? Math.abs(variance / sys) * 100 : (phys > 0 ? 100 : 0)
-              const unitPrice = Number(r.bulk_items?.unit_price || 0)
-              const varianceValue = Math.abs(variance) * unitPrice
-              
-              // Value-Based Variance Alerting: High-Risk if % > 10% OR Value > ₹25,000
-              const isHighRisk = (variancePct >= 10 && Math.abs(variance) > 2) || (varianceValue > 25000)
+      {/* ── Stock List Cards ── */}
+      <div className="flex flex-col gap-4">
+        {filteredStock.length === 0 && (
+          <div className="text-center p-10 text-[var(--text-3)] bg-[var(--bg-1)] rounded-2xl border border-[var(--border)]">
+            No inventory stock records found for audit.
+          </div>
+        )}
+        {filteredStock.map(r => {
+          const key = `${r.site}_${r.item_id}`
+          const sys = Number(r.usable_qty || 0)
+          const physVal = physicalCounts[key]
+          const phys = physVal !== undefined && physVal !== '' ? Number(physVal) : sys
+          const variance = phys - sys
+          const variancePct = sys > 0 ? Math.abs(variance / sys) * 100 : (phys > 0 ? 100 : 0)
+          const unitPrice = Number(r.bulk_items?.unit_price || 0)
+          const varianceValue = Math.abs(variance) * unitPrice
+          
+          // Value-Based Variance Alerting: High-Risk if % > 10% OR Value > ₹25,000
+          const isHighRisk = (variancePct >= 10 && Math.abs(variance) > 2) || (varianceValue > 25000)
 
-              return (
-                <tr key={r.id}>
-                  <td>
-                    <span style={{ color: 'var(--text-0)', }}>
-                      {r.site}
-                    </span>
-                  </td>
-                  <td>
-                    <div style={{ color: 'var(--text-0)' }}>{r.bulk_items?.item_name || 'Item'}</div>
-                    <div style={{ color: 'var(--text-3)', }}>
-                      SKU: {r.bulk_items?.item_code} • ₹{unitPrice}/{r.bulk_items?.unit || 'nos'}
-                    </div>
-                  </td>
-                  <td style={{ textAlign: 'right', color: 'var(--text-0)' }}>
-                    {sys} <span >{r.bulk_items?.unit || 'nos'}</span>
-                  </td>
-                  <td>
-                    <input 
-                      type="number" 
-                      className="inp" 
-                      placeholder={sys}
-                      value={physicalCounts[key] ?? ''} 
-                      onChange={e => setPhysicalCounts({ ...physicalCounts, [key]: e.target.value })} 
-                      style={{ width: 110, padding: '6px 10px', borderColor: isHighRisk ? 'var(--red)' : 'var(--border)' }}
-                    />
-                  </td>
-                  <td>
-                    {variance === 0 ? (
-                      <span style={{ color: 'var(--green)', }}>0 (Match)</span>
+          return (
+            <div key={r.id} className="relative bg-[var(--bg-0)] p-4 md:p-5 rounded-2xl border border-[var(--border)] shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col lg:flex-row gap-5 lg:items-center justify-between transition-all duration-200 hover:shadow-md hover:border-[var(--accent)]/30 group">
+              
+              {/* High Risk Alert Badge */}
+              {isHighRisk && variance !== 0 && (
+                <div className="absolute -top-2.5 right-4 bg-[var(--red)] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1 border-2 border-[var(--bg-0)] z-10">
+                   <AlertTriangle size={10} /> HIGH RISK ({Math.round(variancePct)}% | {formatCurrency(varianceValue)})
+                </div>
+              )}
+
+              {/* Site & Item Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                  <span className="text-[10px] font-bold text-[var(--accent)] bg-[var(--accent)]/10 px-2 py-0.5 rounded flex items-center gap-1 uppercase tracking-wider border border-[var(--accent)]/20">
+                    <MapPin size={10} /> {r.site}
+                  </span>
+                  <span className="text-[11px] text-[var(--text-3)] font-semibold truncate">SKU: {r.bulk_items?.item_code}</span>
+                </div>
+                <h3 className="text-base font-bold text-[var(--text-0)] m-0 leading-tight truncate">{r.bulk_items?.item_name || 'Item'}</h3>
+                <div className="text-xs text-[var(--text-2)] mt-1.5 flex items-center gap-2">
+                  <span>System: <strong className="text-[var(--text-1)]">{sys} {r.bulk_items?.unit || 'nos'}</strong></span>
+                  <span className="text-[var(--border)]">|</span>
+                  <span>₹{unitPrice}/{r.bulk_items?.unit || 'nos'}</span>
+                </div>
+              </div>
+
+              {/* Inputs & Actions */}
+              <div className="flex flex-col sm:flex-row gap-3 sm:items-stretch bg-[var(--bg-1)] p-3 rounded-xl border border-[var(--border)] group-hover:border-[var(--border-hover)] transition-colors w-full lg:w-auto shrink-0">
+                
+                {/* Physical Count */}
+                <div className="flex flex-col gap-1.5 w-full sm:w-28 shrink-0">
+                  <label className="text-[10px] uppercase font-bold text-[var(--text-3)] tracking-wider">Physical Count</label>
+                  <input 
+                    type="number" 
+                    placeholder={sys}
+                    value={physicalCounts[key] ?? ''} 
+                    onChange={e => setPhysicalCounts({ ...physicalCounts, [key]: e.target.value })} 
+                    className={`w-full bg-[var(--bg-0)] border rounded-lg px-3 py-2 text-sm font-semibold text-[var(--text-0)] outline-none focus:ring-2 focus:ring-[var(--accent)]/20 transition-all ${isHighRisk ? 'border-[var(--red)] focus:border-[var(--red)]' : 'border-[var(--border)] focus:border-[var(--accent)]'}`}
+                  />
+                </div>
+
+                {/* Variance & Reason */}
+                <div className="flex flex-col gap-1.5 w-full sm:w-48 shrink-0">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] uppercase font-bold text-[var(--text-3)] tracking-wider">Reason</label>
+                    {variance !== 0 ? (
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5 ${variance > 0 ? 'bg-[var(--green)]/10 text-[var(--green)]' : 'bg-[var(--red)]/10 text-[var(--red)]'}`}>
+                        {variance > 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+                        {variance > 0 ? '+' : ''}{variance}
+                      </span>
                     ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        <span style={{ color: variance > 0 ? 'var(--green)' : 'var(--red)' }}>
-                          {variance > 0 ? `+${variance}` : variance} ({formatCurrency(varianceValue)})
-                        </span>
-                        {isHighRisk && (
-                          <span style={{ color: 'var(--red)', background: 'var(--status-danger-soft)', padding: '2px 6px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                            <AlertTriangle size={10} /> HIGH RISK ({Math.round(variancePct)}% | {formatCurrency(varianceValue)})
-                          </span>
-                        )}
-                      </div>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[var(--green)]/10 text-[var(--green)] flex items-center gap-0.5">
+                        <CheckCircle2 size={10} /> Match
+                      </span>
                     )}
-                  </td>
-                  <td>
-                    <input 
-                      type="text" 
-                      className="inp" 
-                      placeholder={variance !== 0 ? 'Reason for variance *' : 'Optional notes...'} 
-                      value={reasonings[key] ?? ''} 
-                      onChange={e => setReasonings({ ...reasonings, [key]: e.target.value })} 
-                      style={{ padding: '6px 10px', width: '100%' }}
-                    />
-                  </td>
-                  <td style={{ textAlign: 'right' }}>
-                    <button 
-                      onClick={() => handleAuditSubmit(r)} 
-                      className="btn-primary" 
-                      disabled={submittingId === key}
-                      style={{ padding: '6px 14px', display: 'inline-flex', alignItems: 'center', gap: 5 }}
-                    >
-                      {submittingId === key ? <Loader2 className="spin" size={13} /> : <Shield size={13} />} Reconcile
-                    </button>
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+                  </div>
+                  <input 
+                    type="text" 
+                    placeholder={variance !== 0 ? 'Reason for variance *' : 'Optional notes...'} 
+                    value={reasonings[key] ?? ''} 
+                    onChange={e => setReasonings({ ...reasonings, [key]: e.target.value })} 
+                    className={`w-full bg-[var(--bg-0)] border rounded-lg px-3 py-2 text-sm font-medium text-[var(--text-0)] outline-none focus:ring-2 transition-all ${variance !== 0 && (!reasonings[key] || reasonings[key].trim() === '') ? 'border-[var(--amber)] focus:border-[var(--amber)] focus:ring-[var(--amber)]/20' : 'border-[var(--border)] focus:border-[var(--accent)] focus:ring-[var(--accent)]/20'}`}
+                  />
+                </div>
+
+                {/* Reconcile Button */}
+                <div className="flex flex-col justify-end h-full sm:mt-0 shrink-0">
+                  <button 
+                    onClick={() => handleAuditSubmit(r)} 
+                    disabled={submittingId === key || (variance !== 0 && (!reasonings[key] || reasonings[key].trim() === ''))}
+                    className="bg-[var(--accent)] text-white font-semibold text-sm px-4 h-[38px] rounded-lg flex items-center justify-center gap-2 hover:bg-[var(--accent-hover)] active:scale-95 transition-all disabled:opacity-50 disabled:active:scale-100 disabled:grayscale"
+                  >
+                    {submittingId === key ? <Loader2 className="animate-spin" size={16} /> : <Shield size={16} />} 
+                    <span>Reconcile</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )
+        })}
       </div>
     </div>
   )

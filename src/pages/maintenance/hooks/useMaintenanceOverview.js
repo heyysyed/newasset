@@ -20,13 +20,23 @@ export function useMaintenanceOverview() {
     // Fetch real SLA config from Phase 1 table
     async function fetchConfig() {
       try {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('maintenance_config')
-          .select('config_data')
-          .eq('config_key', 'sla_settings')
-          .single();
-        if (data && data.config_data) {
-          setSlaConfig(data.config_data);
+          .select('*')
+          .limit(1)
+          .maybeSingle();
+          
+        if (error && error.code !== 'PGRST116') {
+          console.error("Supabase config error:", error);
+        }
+
+        if (data) {
+          setSlaConfig({
+            critical: { resolution_hours: data.critical_sla_hours || 4 },
+            high: { resolution_hours: data.high_sla_hours || 24 },
+            medium: { resolution_hours: data.normal_sla_hours || 72 },
+            low: { resolution_hours: data.low_sla_hours || 168 }
+          });
         }
       } catch (err) {
         console.error("Failed to load SLA config, using defaults", err);

@@ -4,10 +4,10 @@ import { AlertTriangle, Clock, Activity, ArrowRight } from 'lucide-react';
 export default function MaintenanceAlerts({ attentionQueue, isLoading }) {
   if (isLoading) {
     return (
-      <div style={{ background: 'var(--bg-0)', border: '1px solid var(--border)', borderRadius: 12, padding: 24 }}>
-        <h3 className="skeleton" style={{ width: 150, height: 24, marginBottom: 16 }}></h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 8 }}></div>)}
+      <div className="bg-[var(--bg-0)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
+        <div className="skeleton w-36 h-6 mb-4 rounded"></div>
+        <div className="flex flex-col gap-3">
+          {[1,2,3].map(i => <div key={i} className="skeleton h-20 rounded-xl"></div>)}
         </div>
       </div>
     );
@@ -16,27 +16,27 @@ export default function MaintenanceAlerts({ attentionQueue, isLoading }) {
   const items = (attentionQueue || []).slice(0, 8); // Max 8 items
 
   return (
-    <div style={{ background: 'var(--bg-0)', border: '1px solid var(--border)', borderRadius: 12, display: 'flex', flexDirection: 'column' }}>
-      <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <AlertTriangle size={20} color="var(--status-danger)" />
-          <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-0)' }}>
+    <div className="bg-[var(--bg-0)] border border-[var(--border)] rounded-2xl flex flex-col shadow-sm overflow-hidden">
+      <div className="px-5 py-4 border-b border-[var(--border)] flex items-center justify-between bg-[var(--bg-0)]">
+        <div className="flex items-center gap-2.5">
+          <AlertTriangle size={20} className="text-[var(--status-danger)]" />
+          <h3 className="m-0 text-lg font-bold text-[var(--text-0)]">
             Requires Attention
           </h3>
         </div>
         {items.length > 0 && (
-          <span style={{ background: 'var(--status-danger)', color: 'white', padding: '2px 8px', borderRadius: 12, fontSize: '0.75rem', fontWeight: 600 }}>
+          <span className="bg-[var(--status-danger)] text-white px-2.5 py-0.5 rounded-full text-xs font-bold shadow-sm">
             {attentionQueue.length}
           </span>
         )}
       </div>
 
-      <div style={{ padding: 24, flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="p-4 md:p-5 flex-1 flex flex-col gap-3 overflow-y-auto max-h-[500px]">
         {items.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-3)' }}>
-            <CheckCircle2 size={40} style={{ margin: '0 auto 16px', opacity: 0.5, color: 'var(--status-success)' }} />
-            <p style={{ margin: 0, fontWeight: 500, color: 'var(--text-1)' }}>All maintenance operations are currently within target.</p>
-            <p style={{ margin: '4px 0 0', fontSize: '0.85rem' }}>No urgent items require attention.</p>
+          <div className="text-center py-10 text-[var(--text-3)] flex flex-col items-center">
+            <CheckCircle2 size={48} className="mb-4 opacity-40 text-[var(--status-success)]" />
+            <p className="m-0 font-semibold text-[var(--text-1)]">All clear!</p>
+            <p className="mt-1 text-sm">No urgent items require attention.</p>
           </div>
         ) : (
           items.map((item, idx) => {
@@ -46,41 +46,38 @@ export default function MaintenanceAlerts({ attentionQueue, isLoading }) {
             return (
               <div 
                 key={`${item.type}-${item.id}`} 
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: 16,
-                  background: 'var(--bg-1)',
-                  borderRadius: 8,
-                  borderLeft: `4px solid ${isBreached ? 'var(--status-danger)' : isCritical ? 'var(--status-warning)' : 'var(--accent)'}`,
-                  cursor: 'pointer'
-                }}
+                className={`group flex items-center justify-between p-3.5 md:p-4 bg-[var(--bg-1)] rounded-xl border-l-4 shadow-sm hover:shadow transition-all cursor-pointer ${
+                  isBreached ? 'border-[var(--status-danger)]' : isCritical ? 'border-[var(--status-warning)]' : 'border-[var(--accent)]'
+                }`}
               >
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: 'var(--bg-2)', color: 'var(--text-2)' }}>
+                <div className="flex flex-col gap-1.5 flex-1 min-w-0 pr-3">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[var(--bg-2)] text-[var(--text-2)]">
                       {item.type.replace('_', ' ')}
                     </span>
-                    <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-0)' }}>{item.title}</span>
+                    <h4 className="text-sm md:text-base font-semibold text-[var(--text-0)] truncate m-0">
+                      {item.title}
+                    </h4>
                   </div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <span>{item.assets?.name} ({item.assets?.sites?.name})</span>
+                  <div className="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-3 mt-0.5">
+                    <span className="text-xs md:text-sm text-[var(--text-2)] truncate max-w-full">
+                      {item.assets?.name} {item.assets?.sites?.name ? `(${item.assets.sites.name})` : ''}
+                    </span>
                     {isBreached ? (
-                      <span style={{ color: 'var(--status-danger)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span className="text-[var(--status-danger)] text-xs font-medium flex items-center gap-1 shrink-0">
                         <Clock size={12} /> Breached SLA
                       </span>
                     ) : (
-                      <span style={{ color: 'var(--status-warning)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span className="text-[var(--status-warning)] text-xs font-medium flex items-center gap-1 shrink-0">
                         <Clock size={12} /> SLA At Risk
                       </span>
                     )}
                   </div>
                 </div>
                 
-                <button className="btn-ghost" style={{ padding: 8, borderRadius: 8 }}>
-                  <ArrowRight size={18} color="var(--text-2)" />
-                </button>
+                <div className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-[var(--bg-2)] group-hover:bg-[var(--bg-3)] transition-colors">
+                  <ArrowRight size={16} className="text-[var(--text-2)] group-hover:text-[var(--text-0)] transition-colors" />
+                </div>
               </div>
             );
           })
@@ -88,8 +85,8 @@ export default function MaintenanceAlerts({ attentionQueue, isLoading }) {
       </div>
 
       {attentionQueue?.length > 8 && (
-        <div style={{ padding: '12px 24px', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
-          <button className="btn-ghost" style={{ fontSize: '0.85rem', fontWeight: 500 }}>
+        <div className="px-6 py-3 border-t border-[var(--border)] text-center bg-[var(--bg-0)]">
+          <button className="text-sm font-semibold text-[var(--text-2)] hover:text-[var(--text-0)] transition-colors">
             View all {attentionQueue.length} items
           </button>
         </div>
@@ -98,7 +95,6 @@ export default function MaintenanceAlerts({ attentionQueue, isLoading }) {
   );
 }
 
-// Needed CheckCircle2 import inside the file since it's used in the empty state
 import { CheckCircle2 } from 'lucide-react';
 
 

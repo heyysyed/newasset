@@ -1,5 +1,5 @@
-import React, { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { lazy, Suspense, useState } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import MaintenanceHeader from './components/layout/MaintenanceHeader';
 import MaintenanceNavigation from './components/layout/MaintenanceNavigation';
 
@@ -15,12 +15,59 @@ const LogsWorkspace      = lazy(() => import('./components/logs/LogsWorkspace'))
 const Loading         = () => <div style={{ padding: 24, color: 'var(--text-2)' }}>Loading…</div>;
 
 export default function MaintenanceCommandCenter() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  // Ordered list of routes to match the tabs order
+  const routes = ['overview', 'tickets', 'work-orders', 'preventive', 'logs', 'vendors', 'analytics'];
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe || isRightSwipe) {
+      // Find current active route index based on URL
+      const currentPath = location.pathname.split('/').pop();
+      const currentIndex = routes.indexOf(currentPath);
+      
+      if (currentIndex === -1) return;
+
+      if (isLeftSwipe && currentIndex < routes.length - 1) {
+        // Swiped left, go to next tab
+        navigate(`/maintenance/${routes[currentIndex + 1]}`);
+      }
+      if (isRightSwipe && currentIndex > 0) {
+        // Swiped right, go to previous tab
+        navigate(`/maintenance/${routes[currentIndex - 1]}`);
+      }
+    }
+  };
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--bg-1)' }}>
+    <div className="flex flex-col h-full bg-transparent">
       <MaintenanceHeader />
       <MaintenanceNavigation />
       
-      <div style={{ flex: 1, overflow: 'auto' }}>
+      <div 
+        className="flex-1 overflow-auto overflow-x-hidden"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         <Suspense fallback={<Loading />}>
           <Routes>
             <Route index element={<Navigate to="/maintenance/overview" replace />} />

@@ -224,8 +224,8 @@ export default function Layout() {
           <div className="flex items-center gap-3 flex-1 min-w-0">
             {/* Mobile only: logo + page title */}
             <div className="flex items-center gap-2.5 md:hidden min-w-0">
-              <img src={companyLogo} alt="Strongbuilt" className="h-7 object-contain shrink-0" />
-              <span className="text-[15px] text-text-0 truncate tracking-tight">{mobileTitle}</span>
+              <img src={companyLogo} alt="Strongbuilt" className="h-9 w-auto object-contain shrink-0" />
+              <span className="text-[16px] font-medium text-text-0 truncate tracking-tight">{mobileTitle}</span>
             </div>
 
 

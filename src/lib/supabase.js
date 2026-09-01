@@ -743,9 +743,8 @@ export async function fetchStats(cc) {
 }
 
 export async function fetchFilterOptions() {
-  const [assetsRes, invRes, sitesRes] = await Promise.all([
+  const [assetsRes, sitesRes] = await Promise.all([
     supabase.from('assets').select('category, site'),
-    supabase.from('inventory_items').select('location'),
     supabase.from('sites').select('id, name, site_code').order('name'),
   ])
   if (assetsRes.error) throw assetsRes.error
@@ -754,8 +753,7 @@ export async function fetchFilterOptions() {
   const formattedDbSites = dbSites.map(s => s.site_code ? `[${s.site_code}] ${s.name}` : s.name)
   
   const rawSites = [
-    ...(assetsRes.data || []).map(a => a.site),
-    ...(invRes.data || []).map(a => a.location),
+    ...(assetsRes.data || []).map(a => a.site)
   ].filter(Boolean)
 
   const uniqueSites = new Set(formattedDbSites)
@@ -883,7 +881,6 @@ export async function fetchMaintenanceLogsPaginated(filters = {}, page = 0, page
     .select('*, assets(asset_name, asset_code), profiles!performed_by(full_name)', { count: 'exact' })
     .order('performed_at', { ascending: false })
     .range(from, to)
-  if (filters.company_code) q = q.eq('company_code', filters.company_code)
   if (filters.asset_id) q = q.eq('asset_id', filters.asset_id)
   if (filters.search) q = q.or(`work_done.ilike.%${filters.search}%`)
   const { data, error, count } = await q

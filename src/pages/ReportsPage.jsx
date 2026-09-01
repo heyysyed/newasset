@@ -533,28 +533,31 @@ export default function ReportsPage() {
   return (
     <div style={{ padding: 'clamp(12px, 2.5vw, 24px)', maxWidth: 1400, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-      {/* ── HEADER ──────────────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-            <h1 className="text-page-title m-0 tracking-wide uppercase">
-              ASSET INTELLIGENCE <span className="text-accent">CENTER</span>
-            </h1>
-            <LivePulse color="#0ea5e9" size={8} label="LIVE" />
+      {/* ── Header (Premium Style) ── */}
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between bg-[var(--bg-0)] p-4 md:p-6 rounded-2xl border border-[var(--border)] shadow-sm mb-6 gap-4">
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-[var(--accent)] text-white flex items-center justify-center shrink-0 shadow-sm shadow-[var(--accent-glow)]">
+            <BarChart3 size={20} className="md:w-6 md:h-6" />
           </div>
-          <p style={{ color: 'var(--text-2)', margin: 0 }}>
-            Enterprise decision support · Early warning · Risk monitoring
-            {minutesAgo !== null && (
-              <span style={{ marginLeft: 10, color: 'var(--text-3)', }}>
-                · Updated {minutesAgo === 0 ? 'just now' : `${minutesAgo}m ago`}
-              </span>
-            )}
-          </p>
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl md:text-2xl font-bold text-[var(--text-0)] m-0 leading-tight">
+                Asset Intelligence Center
+              </h1>
+              <LivePulse color="#0ea5e9" size={8} label="LIVE" />
+            </div>
+            <p className="text-xs text-[var(--text-3)] tracking-wider m-0 mt-1 font-medium leading-tight">
+              Enterprise decision support · Early warning · Risk monitoring
+              {minutesAgo !== null && (
+                <span> · Updated {minutesAgo === 0 ? 'just now' : `${minutesAgo}m ago`}</span>
+              )}
+            </p>
+          </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="flex flex-wrap items-center gap-2 md:gap-3 w-full xl:w-auto">
           {/* Mode switcher */}
-          <div style={{ display: 'flex', gap: 2, background: 'var(--bg-2)', padding: 3, borderRadius: 12, border: '1px solid var(--border)', flexWrap: 'wrap' }}>
+          <div className="flex flex-wrap gap-1 bg-[var(--bg-2)] p-1 rounded-xl border border-[var(--border)]">
             {VIEW_MODES.map(m => {
               const Icon = m.icon
               const active = viewMode === m.id
@@ -565,19 +568,8 @@ export default function ReportsPage() {
                   title={m.label}
                   aria-label={`Switch to ${m.label} mode`}
                   aria-pressed={active}
-                  style={{
-                    padding: '6px 10px',
-                    borderRadius: 9,
-                    border: 'none',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 5,
-                    transition: 'all 0.15s',
-                    background: active ? m.color : 'transparent',
-                    color: active ? '#fff' : 'var(--text-2)',
-                    whiteSpace: 'nowrap',
-                  }}
+                  className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${active ? 'text-white' : 'text-[var(--text-2)] hover:bg-[var(--bg-3)]'}`}
+                  style={active ? { backgroundColor: m.color } : {}}
                 >
                   <Icon size={13} />
                   {m.label}

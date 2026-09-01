@@ -11,7 +11,7 @@ import {
 import {
   Edit2, ArrowLeft, Tag, Trash2, Calendar, MapPin, Clock, History, Wrench,
   Gauge, Info, IndianRupee, ClipboardList, Send, X, Camera, Image, Upload,
-  FileText, Download, Loader2, ChevronDown, ChevronRight, Eye, Copy, Layers,
+  FileText, Download, Loader2, ChevronDown, ChevronRight, ChevronLeft, Eye, Copy, Layers,
   GitBranch, Link2, Unlink, Search, Plus, Package, Shield, AlertTriangle,
   CheckCircle2, XCircle, TrendingDown, Hash, Building2, User, Clipboard,
   BarChart3, Activity, Zap, ArrowRight, ExternalLink, MoreVertical, HelpCircle,
@@ -69,23 +69,17 @@ function warrantyDaysLeft(dateStr) {
 
 /* ───── Reusable Pill Tab ───── */
 const PillTab = ({ active, onClick, icon: Icon, label, count }) => (
-  <button onClick={onClick} style={{
-    display: 'flex', alignItems: 'center', gap: 7, padding: '9px 18px',
-    borderRadius: 12, cursor: 'pointer',
-    background: active ? 'linear-gradient(135deg, var(--accent), #6b96ff)' : 'var(--bg-2)',
-    color: active ? '#fff' : 'var(--text-2)', boxShadow: active ? '0 4px 16px var(--accent-soft)' : 'var(--clay-shadow-sm)',
-    border: active ? '1.5px solid var(--accent)' : '1.5px solid var(--border)',
-    whiteSpace: 'nowrap',
-  }}>
-    <Icon size={14} />
+  <button onClick={onClick} className={`flex items-center gap-2 px-4 py-2.5 rounded-full cursor-pointer whitespace-nowrap transition-all font-medium text-[13px] md:text-sm ${
+    active ? 'bg-[var(--accent)] text-white shadow-md' : 'bg-[var(--bg-2)] text-[var(--text-2)] hover:bg-[var(--bg-3)] hover:text-[var(--text-0)] shadow-sm'
+  }`}>
+    <Icon size={16} className={active ? 'text-white' : 'text-[var(--text-3)]'} />
     <span>{label}</span>
     {count !== undefined && count !== null && (
-      <span style={{
-        padding: '1px 7px', borderRadius: 10,
-        background: active ? 'rgba(255,255,255,0.25)' : 'var(--bg-3)',
-        color: active ? '#fff' : 'var(--text-3)',
-        minWidth: 20, textAlign: 'center',
-      }}>{count}</span>
+      <span className={`px-2 py-0.5 rounded-full text-[10px] md:text-xs font-semibold min-w-[20px] text-center ${
+        active ? 'bg-white/25 text-white' : 'bg-[var(--bg-3)] text-[var(--text-3)]'
+      }`}>
+        {count}
+      </span>
     )}
   </button>
 )
@@ -95,22 +89,17 @@ function SectionCard({ title, icon: Icon, children, defaultOpen = true, actions,
   const [open, setOpen] = useState(defaultOpen)
   const accent = accentColor || 'var(--accent)'
   return (
-    <div style={{
-      background: 'var(--bg-2)', border: '1.5px solid var(--border)', borderRadius: 18,
-      boxShadow: 'var(--clay-shadow)', overflow: 'hidden',
-    }}>
-      <div onClick={() => setOpen(!open)} style={{
-        display: 'flex', alignItems: 'center', gap: 10, padding: '14px 20px',
-        cursor: 'pointer', borderBottom: open ? '1px solid var(--border)' : 'none',
+    <div className="bg-[var(--bg-2)] border-[1.5px] border-[var(--border)] rounded-xl md:rounded-2xl shadow-sm md:shadow-[var(--clay-shadow)] overflow-hidden">
+      <div onClick={() => setOpen(!open)} className="flex items-center gap-2 md:gap-3 p-3 md:p-4 cursor-pointer" style={{
+        borderBottom: open ? '1px solid var(--border)' : 'none',
       }}>
         <div style={{
-          width: 30, height: 30, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
           background: `${accent}12`, color: accent, flexShrink: 0,
         }}>
-          {Icon && <Icon size={15} />}
+          {Icon && <Icon size={14} />}
         </div>
-        <h3 style={{ textTransform: 'uppercase',
-          margin: 0, color: 'var(--text-1)', flex: 1, letterSpacing: '0.04em', }}>{title}</h3>
+        <h3 className="m-0 text-[var(--text-1)] flex-1 tracking-wider text-xs md:text-sm uppercase font-bold">{title}</h3>
         {actions && <div onClick={e => e.stopPropagation()} style={{ display: 'flex', gap: 6 }}>{actions}</div>}
         <div style={{
           width: 24, height: 24, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -119,7 +108,7 @@ function SectionCard({ title, icon: Icon, children, defaultOpen = true, actions,
           {open ? <ChevronDown size={13} style={{ color: 'var(--text-3)' }} /> : <ChevronRight size={13} style={{ color: 'var(--text-3)' }} />}
         </div>
       </div>
-      {open && <div style={{ padding: noPad ? 0 : 20 }}>{children}</div>}
+      {open && <div className={noPad ? 'p-0' : 'p-3 md:p-5'}>{children}</div>}
     </div>
   )
 }
@@ -148,23 +137,18 @@ const InfoField = ({ label, value, mono, icon: FieldIcon, accent }) => {
 
 /* ───── Stat Mini Card ───── */
 const StatMini = ({ label, value, icon: Icon, color, sub }) => (
-  <div style={{
-    padding: '16px', background: 'var(--bg-2)', borderRadius: 14,
-    border: '1.5px solid var(--border)', boxShadow: 'var(--clay-shadow-sm)',
-    display: 'flex', alignItems: 'center', gap: 14,
-    position: 'relative', overflow: 'hidden',
-  }}>
+  <div className="relative overflow-hidden flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-3.5 p-3 md:p-4 bg-[var(--bg-2)] border-[1.5px] border-[var(--border)] rounded-xl md:rounded-2xl shadow-sm">
     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${color}, ${color}60)` }} />
     <div style={{
-      width: 42, height: 42, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: `${color}12`, color: color, flexShrink: 0,
-    }}>
-      <Icon size={20} />
+    }} className="md:w-[42px] md:h-[42px] md:rounded-xl">
+      <Icon size={18} className="md:w-5 md:h-5" />
     </div>
-    <div style={{ flex: 1, minWidth: 0 }}>
-      <p style={{ color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 2px' }}>{label}</p>
-      <p style={{ color: 'var(--text-0)', margin: 0 }}>{value}</p>
-      {sub && <p style={{ color: 'var(--text-3)', margin: '2px 0 0' }}>{sub}</p>}
+    <div className="flex-1 min-w-0 w-full">
+      <p className="text-[var(--text-3)] uppercase tracking-wider text-[10px] md:text-xs m-0 mb-0.5">{label}</p>
+      <p className="text-[var(--text-0)] m-0 font-bold text-sm md:text-base truncate">{value}</p>
+      {sub && <p className="text-[var(--text-3)] text-[9px] md:text-xs m-0 mt-0.5 md:mt-1 truncate">{sub}</p>}
     </div>
   </div>
 )
@@ -195,6 +179,36 @@ export default function AssetDetail() {
   const { user, isAdmin, can, canEditField, visibleFields } = useAuth()
 
   const [activeTab, setActiveTab] = useState('general')
+
+  // Swipe handling
+  const [touchStart, setTouchStart] = useState(null)
+  const [touchEnd, setTouchEnd] = useState(null)
+  const tabsList = ['general', 'components', 'movements', 'maintenance', 'documents', 'children', 'checklists', 'audit']
+
+  const minSwipeDistance = 50
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX)
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+    if (isLeftSwipe || isRightSwipe) {
+      const currentIndex = tabsList.indexOf(activeTab)
+      if (isLeftSwipe && currentIndex < tabsList.length - 1) {
+        setActiveTab(tabsList[currentIndex + 1])
+      }
+      if (isRightSwipe && currentIndex > 0) {
+        setActiveTab(tabsList[currentIndex - 1])
+      }
+    }
+  }
   const [loading, setLoading] = useState(true)
   const [asset, setAsset] = useState(null)
   const [movements, setMovements] = useState([])
@@ -579,9 +593,9 @@ export default function AssetDetail() {
   const renderGeneral = () => {
     const health = calculateAssetHealth(asset, maintenance.logs)
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div className="flex flex-col gap-5 md:gap-6">
         {/* Quick Stats Row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-4 px-4 md:px-0">
           <StatMini
             label="Health Score" value={`${health.score}/100`}
             icon={Activity} color={health.color}
@@ -616,7 +630,7 @@ export default function AssetDetail() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {/* Technical Specs */}
           <SectionCard title="Technical Specifications" icon={Info} accentColor="var(--accent)">
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(155px, 1fr))', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
               <InfoField label="Asset Code" value={asset.asset_code} mono icon={Hash} accent="var(--accent)" />
               <InfoField label="Category" value={asset.category} icon={Tag} />
               <InfoField label="Site / Location" value={asset.site} icon={Building2} accent="var(--cyan)" />
@@ -643,7 +657,7 @@ export default function AssetDetail() {
             {asset.purchase_value ? (
               <>
                 {/* Value Cards */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 16 }}>
                   <div style={{ padding: 16, borderRadius: 14, background: 'linear-gradient(135deg, rgba(0,185,107,0.08), rgba(0,185,107,0.02))', border: '1px solid rgba(0,185,107,0.15)', textAlign: 'center' }}>
                     <p style={{ color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 4px' }}>Purchase Price</p>
                     <div style={{ color: 'var(--text-0)' }}>{formatCurrency(asset.purchase_value)}</div>
@@ -661,7 +675,7 @@ export default function AssetDetail() {
                 {/* TCO Card */}
                 <div style={{ marginBottom: 16, padding: '16px 20px', background: 'linear-gradient(135deg, var(--bg-1), var(--bg-2))', borderRadius: 14, border: '1px solid var(--border)' }}>
                   <h4 style={{ margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: 8 }}><Layers size={16} /> Total Cost of Ownership (TCO)</h4>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
                     <div>
                       <p style={{ color: 'var(--text-3)', fontSize: '0.8rem', margin: '0 0 4px' }}>Base Asset</p>
                       <div style={{ color: 'var(--text-0)', fontWeight: 600 }}>{formatCurrency(asset.purchase_value || 0)}</div>
@@ -760,7 +774,7 @@ export default function AssetDetail() {
         </div>
 
         {/* RIGHT COLUMN */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div className="flex flex-col gap-4 md:gap-5">
           {/* QR Code or Bulk Badge */}
           {isBulk ? (
             <SectionCard title="Bulk Asset" icon={Package} accentColor="var(--amber)">
@@ -1631,63 +1645,54 @@ export default function AssetDetail() {
      PAGE LAYOUT
      ═══════════════════════════════════════════════════════════ */
   return (
-    <div style={{ maxWidth: '100%', margin: '0 auto', padding: '0 4px' }}>
+    <div className="w-full mx-auto md:p-4 pb-16">
       {/* ── HERO HEADER ── */}
-      <div style={{
+      <div className="relative overflow-hidden mb-4 md:mb-6 md:rounded-2xl border-b-[1.5px] md:border-[1.5px] border-[var(--border)] p-4 sm:p-5 md:p-7 shadow-sm md:shadow-md" style={{
         background: 'linear-gradient(135deg, var(--accent-soft), rgba(107,150,255,0.03), rgba(6,182,212,0.04))',
-        border: '1.5px solid var(--border)', borderRadius: 20, padding: '24px 28px',
-        marginBottom: 24, position: 'relative', overflow: 'hidden',
-        boxShadow: 'var(--clay-shadow)',
       }}>
         {/* Gradient accent bar */}
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: 'linear-gradient(90deg, var(--accent), var(--cyan), var(--purple))' }} />
 
         {/* Top row: back + actions */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Link to="/assets" style={{
-              padding: 10, borderRadius: 12, color: 'var(--text-2)', display: 'inline-flex',
-              background: 'var(--bg-2)', border: '1.5px solid var(--border)', textDecoration: 'none',
-              boxShadow: 'var(--clay-shadow-sm)', transition: 'all 0.15s',
-            }}><ArrowLeft size={18} /></Link>
+        <div className="flex items-start md:items-center justify-between mb-4 md:mb-5 flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <Link to="/assets" className="flex items-center justify-center bg-[var(--bg-2)] border-[1.5px] border-[var(--border)] rounded-xl text-[var(--text-2)] hover:text-[var(--text-1)] shadow-sm transition-all h-9 w-9 md:h-10 md:w-10 shrink-0" style={{ textDecoration: 'none' }}>
+              <ArrowLeft size={18} />
+            </Link>
             <div>
-              <p style={{ letterSpacing: '0.12em', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 2 }}>Asset Management</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <h1 className="font-mono" style={{ color: 'var(--accent)', margin: 0 }}>{asset.asset_code}</h1>
-                <button onClick={copyAssetCode} title="Copy code" style={{
+              <p className="tracking-widest text-[10px] md:text-xs text-[var(--text-3)] uppercase m-0 mb-0.5">Asset Management</p>
+              <div className="flex items-center gap-2">
+                <h1 className="font-mono text-lg md:text-2xl text-[var(--accent)] m-0 font-bold leading-tight">{asset.asset_code}</h1>
+                <button onClick={copyAssetCode} title="Copy code" className="cursor-pointer rounded-md p-1 md:px-1.5 md:py-1 flex items-center justify-center transition-all" style={{
                   background: copied ? 'var(--green-dim)' : 'var(--bg-2)', border: `1px solid ${copied ? 'var(--green)' : 'var(--border)'}`,
-                  cursor: 'pointer', borderRadius: 6, padding: '3px 6px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: copied ? 'var(--green)' : 'var(--text-3)', transition: 'all 0.2s',
+                  color: copied ? 'var(--green)' : 'var(--text-3)',
                 }}>
                   {copied ? <CheckCircle2 size={13} /> : <Copy size={13} />}
                 </button>
               </div>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button onClick={printAssetPDF} className="btn-ghost" style={{ border: '1.5px solid var(--border)' }}><Download size={14} /> PDF</button>
-            {can('edit') && <button onClick={handleUpdateGPS} className="btn-ghost" style={{ border: '1.5px solid var(--border)' }} disabled={updatingGPS}>{updatingGPS ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <MapPin size={14} />} {updatingGPS ? 'UPDATING...' : 'UPDATE GPS'}</button>}
-            {can('edit') && <button onClick={() => setShowTransfer(true)} className="btn-ghost" style={{ border: '1.5px solid var(--border)' }}><Send size={14} /> TRANSFER</button>}
-            {can('print_stickers') && <Link to={`/stickers?ids=${asset.id}`} className="btn-ghost" style={{ textDecoration: 'none' }}><Tag size={14} /> TAG</Link>}
-            {(isAdmin || canEditField('status')) && <Link to={`/assets/${id}/edit`} className="btn-primary" style={{ textDecoration: 'none' }}><Edit2 size={14} /> EDIT</Link>}
-            {can('delete') && <button onClick={handleDelete} className="btn-danger" style={{ padding: '9px 12px' }}><Trash2 size={14} /></button>}
+          <div className="grid grid-cols-3 gap-2 w-full lg:w-auto mt-2 lg:mt-0 pb-1">
+            <button onClick={printAssetPDF} className="btn-ghost flex items-center justify-center whitespace-nowrap text-[11px] md:text-sm px-1" style={{ border: '1.5px solid var(--border)' }}><Download size={14} /> PDF</button>
+            {can('edit') && <button onClick={handleUpdateGPS} className="btn-ghost flex items-center justify-center whitespace-nowrap text-[11px] md:text-sm px-1" style={{ border: '1.5px solid var(--border)' }} disabled={updatingGPS}>{updatingGPS ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <MapPin size={14} />} {updatingGPS ? 'UPDATING' : 'GPS'}</button>}
+            {can('edit') && <button onClick={() => setShowTransfer(true)} className="btn-ghost flex items-center justify-center whitespace-nowrap text-[11px] md:text-sm px-1" style={{ border: '1.5px solid var(--border)' }}><Send size={14} /> TRANSFER</button>}
+            {can('print_stickers') && <Link to={`/stickers?ids=${asset.id}`} className="btn-ghost flex items-center justify-center whitespace-nowrap text-[11px] md:text-sm px-1" style={{ textDecoration: 'none' }}><Tag size={14} /> TAG</Link>}
+            {(isAdmin || canEditField('status')) && <Link to={`/assets/${id}/edit`} className="btn-primary flex items-center justify-center whitespace-nowrap text-[11px] md:text-sm px-1" style={{ textDecoration: 'none' }}><Edit2 size={14} /> EDIT</Link>}
+            {can('delete') && <button onClick={handleDelete} className="btn-danger flex items-center justify-center whitespace-nowrap text-[11px] md:text-sm px-1" style={{ padding: '9px 12px' }}><Trash2 size={14} /></button>}
           </div>
         </div>
 
         {/* Asset Name + Status */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12 }}>
+        <div className="flex justify-between items-end flex-wrap gap-3 mt-1 md:mt-2">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, flexWrap: 'wrap' }}>
-              <h2 style={{ margin: 0, color: 'var(--text-0)' }}>{asset.asset_name}</h2>
-              <span className={`badge ${STATUS_BADGE[asset.status] || 'badge-inactive'}`} style={{ height: 'fit-content', padding: '5px 12px', }}>{asset.status?.toUpperCase()}</span>
-              <span style={{
-                padding: '4px 10px', borderRadius: 6,
-                background: `${condColor}12`, color: condColor, display: 'flex', alignItems: 'center', gap: 4,
-              }}>
+            <div className="flex items-center gap-2 md:gap-3 mb-1.5 flex-wrap">
+              <h2 className="m-0 text-[var(--text-0)] text-xl md:text-2xl font-bold">{asset.asset_name}</h2>
+              <span className={`badge ${STATUS_BADGE[asset.status] || 'badge-inactive'} h-fit px-2 py-0.5 md:px-3 md:py-1 text-[10px] md:text-xs`}>{asset.status?.toUpperCase()}</span>
+              <span className="px-2 py-0.5 md:px-2.5 md:py-1 rounded-md flex items-center gap-1 text-[10px] md:text-xs font-medium" style={{ background: `${condColor}12`, color: condColor }}>
                 <CondIcon size={12} /> {asset.condition || 'N/A'}
               </span>
             </div>
-            <p style={{ color: 'var(--text-3)', margin: 0 }}>
+            <p className="text-[var(--text-3)] m-0 text-xs md:text-sm">
               {[asset.make, asset.model_no && `Model ${asset.model_no}`, asset.category].filter(Boolean).join(' · ')}
             </p>
             {parentAsset && (
@@ -1705,32 +1710,98 @@ export default function AssetDetail() {
         </div>
       </div>
 
-      {/* ── PILL TABS ── */}
-      <div style={{
-        display: 'flex', gap: 8, marginBottom: 24, overflowX: 'auto', WebkitOverflowScrolling: 'touch',
-        paddingBottom: 4, msOverflowStyle: 'none', scrollbarWidth: 'none',
-      }}>
-        <PillTab active={activeTab === 'general'} onClick={() => setActiveTab('general')} icon={Info} label="General" />
-        <PillTab active={activeTab === 'components'} onClick={() => setActiveTab('components')} icon={Layers} label="Components" />
-        <PillTab active={activeTab === 'movements'} onClick={() => setActiveTab('movements')} icon={History} label="Lifecycle" />
-        <PillTab active={activeTab === 'maintenance'} onClick={() => setActiveTab('maintenance')} icon={Wrench} label="Maintenance" count={maintenance.logs.length} />
-        <PillTab active={activeTab === 'documents'} onClick={() => setActiveTab('documents')} icon={FileText} label="Documents" count={documents.length} />
-        <PillTab active={activeTab === 'children'} onClick={() => setActiveTab('children')} icon={GitBranch} label="Children" count={childAssets.length} />
-        <PillTab active={activeTab === 'checklists'} onClick={() => setActiveTab('checklists')} icon={ClipboardList} label="Checklists" count={checklistHistory.length} />
-        <PillTab active={activeTab === 'audit'} onClick={() => setActiveTab('audit')} icon={Shield} label="Audit" count={audit.length} />
-      </div>
+        <style>{`
+          @keyframes pageEnter {
+            from { opacity: 0; transform: translateX(15px); }
+            to { opacity: 1; transform: translateX(0); }
+          }
+          .animate-page-enter {
+            animation: pageEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          }
+        `}</style>
 
-      {/* ── TAB CONTENT ── */}
-      <div style={{ minHeight: 400 }}>
-        {activeTab === 'general' && renderGeneral()}
-        {activeTab === 'components' && <AssetComponentsTab assetId={id} />}
-        {activeTab === 'movements' && renderMovements()}
-        {activeTab === 'maintenance' && renderMaintenance()}
-        {activeTab === 'documents' && renderDocuments()}
-        {activeTab === 'children' && renderChildren()}
-        {activeTab === 'checklists' && renderChecklists()}
-        {activeTab === 'audit' && renderAudit()}
-      </div>
+        {/* ── TAB CONTENT WITH HEADER ── */}
+        <div style={{ minHeight: 400, overflowX: 'hidden' }} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+          
+          <div className="animate-page-enter" key={activeTab}>
+            {/* Pagination Dots */}
+            <div className="flex justify-center gap-1.5 mb-3">
+              {tabsList.map((tab) => (
+                <button 
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer hover:bg-[var(--text-3)] ${activeTab === tab ? 'w-6 bg-[var(--accent)]' : 'w-1.5 bg-[var(--border)]'}`}
+                  aria-label={`Go to ${tab}`}
+                />
+              ))}
+            </div>
+
+            {/* Dynamic Page Header */}
+            <div className="flex items-center gap-3.5 mb-5 p-4 rounded-2xl border-[1px] border-[var(--border)] shadow-sm bg-[var(--bg-1)]">
+                {(() => {
+                  const heads = {
+                    general: { title: 'General Information', icon: Info, color: 'var(--accent)' },
+                    components: { title: 'Asset Components', icon: Layers, color: 'var(--cyan)' },
+                    movements: { title: 'Lifecycle & Movements', icon: History, color: 'var(--purple)' },
+                    maintenance: { title: 'Maintenance Logs', icon: Wrench, color: 'var(--warning)' },
+                    documents: { title: 'Compliance & Documents', icon: FileText, color: 'var(--danger)' },
+                    children: { title: 'Child Assets', icon: GitBranch, color: 'var(--success)' },
+                    checklists: { title: 'Checklists', icon: ClipboardList, color: 'var(--accent)' },
+                    audit: { title: 'Audit Trail', icon: Shield, color: 'var(--text-3)' }
+                  };
+                  const current = heads[activeTab] || heads.general;
+                  const Icon = current.icon;
+                  return (
+                    <>
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-sm shrink-0" style={{ backgroundColor: current.color }}>
+                        <Icon size={20} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h2 className="text-lg md:text-xl font-bold text-[var(--text-0)] m-0 leading-tight truncate">{current.title}</h2>
+                        <p className="text-xs text-[var(--text-3)] m-0 mt-0.5">Swipe or use arrows to navigate</p>
+                      </div>
+
+                      {/* Desktop Navigation Arrows */}
+                      <div className="hidden sm:flex items-center gap-1">
+                        <button 
+                          onClick={() => {
+                            const currentIndex = tabsList.indexOf(activeTab)
+                            if (currentIndex > 0) setActiveTab(tabsList[currentIndex - 1])
+                          }}
+                          disabled={tabsList.indexOf(activeTab) === 0}
+                          className="p-2 rounded-xl text-[var(--text-2)] hover:text-[var(--text-0)] hover:bg-[var(--bg-2)] disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                        >
+                          <ChevronLeft size={20} />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            const currentIndex = tabsList.indexOf(activeTab)
+                            if (currentIndex < tabsList.length - 1) setActiveTab(tabsList[currentIndex + 1])
+                          }}
+                          disabled={tabsList.indexOf(activeTab) === tabsList.length - 1}
+                          className="p-2 rounded-xl text-[var(--text-2)] hover:text-[var(--text-0)] hover:bg-[var(--bg-2)] disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                        >
+                          <ChevronRight size={20} />
+                        </button>
+                      </div>
+                    </>
+                  )
+                })()}
+              </div>
+
+            {/* Content */}
+            <div>
+              {activeTab === 'general' && renderGeneral()}
+              {activeTab === 'components' && <AssetComponentsTab assetId={id} />}
+              {activeTab === 'movements' && renderMovements()}
+              {activeTab === 'maintenance' && renderMaintenance()}
+              {activeTab === 'documents' && renderDocuments()}
+              {activeTab === 'children' && renderChildren()}
+              {activeTab === 'checklists' && renderChecklists()}
+              {activeTab === 'audit' && renderAudit()}
+            </div>
+          </div>
+        </div>
 
       {/* ── TRANSFER MODAL ── */}
       {showTransfer && (

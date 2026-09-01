@@ -27,7 +27,6 @@ export default function VendorsWorkspace() {
     setLoading(true);
     try {
       let q = supabase.from('maintenance_logs').select('cost, vendor_id');
-      if (cc) q = q.eq('company_code', cc);
       
       const [al, v] = await Promise.all([
         q,

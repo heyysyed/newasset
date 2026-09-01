@@ -4,10 +4,10 @@ import { CalendarClock } from 'lucide-react';
 export default function PMForecast({ schedules, isLoading }) {
   if (isLoading) {
     return (
-      <div style={{ background: 'var(--bg-0)', border: '1px solid var(--border)', borderRadius: 12, padding: 24 }}>
-        <h3 className="skeleton" style={{ width: 150, height: 24, marginBottom: 16 }}></h3>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          {[1,2,3,4].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 8 }}></div>)}
+      <div className="bg-[var(--bg-0)] border border-[var(--border)] rounded-2xl p-5 md:p-6 shadow-sm">
+        <div className="skeleton w-36 h-6 mb-5 rounded"></div>
+        <div className="grid grid-cols-3 gap-3 md:gap-4">
+          {[1, 2, 3].map(i => <div key={i} className="skeleton h-24 rounded-xl"></div>)}
         </div>
       </div>
     );
@@ -28,34 +28,38 @@ export default function PMForecast({ schedules, isLoading }) {
   });
 
   return (
-    <div style={{ background: 'var(--bg-0)', border: '1px solid var(--border)', borderRadius: 12, padding: 24 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
-        <CalendarClock size={20} color="var(--text-1)" />
-        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-0)' }}>
+    <div className="bg-[var(--bg-0)] border border-[var(--border)] rounded-2xl p-5 md:p-6 shadow-sm flex flex-col h-full">
+      <div className="flex items-center gap-2.5 mb-5">
+        <CalendarClock size={20} className="text-[var(--text-1)]" />
+        <h3 className="m-0 text-lg font-bold text-[var(--text-0)]">
           PM Forecast
         </h3>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-        <div style={{ background: 'var(--bg-1)', padding: 16, borderRadius: 8, textAlign: 'center', borderTop: '3px solid var(--status-danger)' }}>
-          <div style={{ fontSize: '2rem', fontWeight: 700, color: overdue > 0 ? 'var(--status-danger)' : 'var(--text-2)' }}>{overdue}</div>
-          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-3)', marginTop: 4 }}>OVERDUE</div>
+      <div className="grid grid-cols-3 gap-3 md:gap-4 flex-1">
+        <div className="bg-[var(--bg-1)] p-3 rounded-xl flex flex-col items-center justify-center border-t-4 border-[var(--status-danger)] shadow-sm">
+          <div className={`text-2xl md:text-3xl font-bold leading-none ${overdue > 0 ? 'text-[var(--status-danger)]' : 'text-[var(--text-2)]'}`}>{overdue}</div>
+          <div className="text-[10px] md:text-xs font-bold text-[var(--text-3)] mt-2 tracking-wider text-center leading-tight">OVERDUE</div>
         </div>
         
-        <div style={{ background: 'var(--bg-1)', padding: 16, borderRadius: 8, textAlign: 'center', borderTop: '3px solid var(--status-warning)' }}>
-          <div style={{ fontSize: '2rem', fontWeight: 700, color: today > 0 ? 'var(--status-warning)' : 'var(--text-2)' }}>{today}</div>
-          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-3)', marginTop: 4 }}>DUE TODAY</div>
+        <div className="bg-[var(--bg-1)] p-3 rounded-xl flex flex-col items-center justify-center border-t-4 border-[var(--status-warning)] shadow-sm">
+          <div className={`text-2xl md:text-3xl font-bold leading-none ${today > 0 ? 'text-[var(--status-warning)]' : 'text-[var(--text-2)]'}`}>{today}</div>
+          <div className="text-[10px] md:text-xs font-bold text-[var(--text-3)] mt-2 tracking-wider text-center leading-tight">DUE TODAY</div>
         </div>
 
-        <div style={{ background: 'var(--bg-1)', padding: 16, borderRadius: 8, textAlign: 'center', borderTop: '3px solid var(--accent)' }}>
-          <div style={{ fontSize: '2rem', fontWeight: 700, color: upcoming > 0 ? 'var(--accent)' : 'var(--text-2)' }}>{upcoming}</div>
-          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-3)', marginTop: 4 }}>UPCOMING (30D)</div>
+        <div className="bg-[var(--bg-1)] p-3 rounded-xl flex flex-col items-center justify-center border-t-4 border-[var(--accent)] shadow-sm">
+          <div className={`text-2xl md:text-3xl font-bold leading-none ${upcoming > 0 ? 'text-[var(--accent)]' : 'text-[var(--text-2)]'}`}>{upcoming}</div>
+          <div className="text-[10px] md:text-xs font-bold text-[var(--text-3)] mt-2 tracking-wider text-center leading-tight">UPCOMING <span className="hidden sm:inline">(30D)</span></div>
         </div>
       </div>
 
-      <div style={{ marginTop: 24, display: 'flex', gap: 12 }}>
-        <button className="btn-primary" style={{ flex: 1, padding: '8px 0', fontSize: '0.85rem' }}>View Schedule</button>
-        <button className="btn-ghost" style={{ flex: 1, padding: '8px 0', fontSize: '0.85rem', background: 'var(--bg-2)' }}>Generate Tasks</button>
+      <div className="mt-5 flex flex-col sm:flex-row gap-3">
+        <button className="flex-1 btn-primary py-2.5 text-sm rounded-lg font-semibold shadow-sm">
+          View Schedule
+        </button>
+        <button className="flex-1 bg-[var(--bg-2)] hover:bg-[var(--bg-3)] text-[var(--text-1)] transition-colors py-2.5 text-sm rounded-lg font-semibold">
+          Generate Tasks
+        </button>
       </div>
     </div>
   );

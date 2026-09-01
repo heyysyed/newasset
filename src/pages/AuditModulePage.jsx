@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import {
   ClipboardCheck, Plus, Search, CheckCircle2, XCircle, Circle, Loader2,
-  QrCode, Camera, ChevronRight, X, Trash2, MapPin, Eye, Filter,
+  QrCode, Camera, ChevronRight, ChevronLeft, X, Trash2, MapPin, Eye, Filter,
   FileSpreadsheet, Download, AlertTriangle, Shield, Clock, Users, Building2,
   CalendarDays, ChevronDown, RefreshCw, Settings, Link2, Boxes
 } from 'lucide-react'
@@ -70,6 +70,33 @@ export default function AuditModulePage() {
   // Tab state
   const [tab, setTab] = useState('assignments')
   const [loading, setLoading] = useState(true)
+
+  // Touch Swipe State
+  const [touchStart, setTouchStart] = useState(null)
+  const [touchEnd, setTouchEnd] = useState(null)
+  const minSwipeDistance = 50
+  const tabsList = ['assignments', 'stock_audit', 'checklists', 'approvals']
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+  const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX)
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+    const currentIndex = tabsList.indexOf(tab)
+    if (isLeftSwipe && currentIndex < tabsList.length - 1) {
+      setTab(tabsList[currentIndex + 1])
+      if (tabsList[currentIndex + 1] === 'assignments') setSelectedAssignment(null)
+    }
+    if (isRightSwipe && currentIndex > 0) {
+      setTab(tabsList[currentIndex - 1])
+      if (tabsList[currentIndex - 1] === 'assignments') setSelectedAssignment(null)
+    }
+  }
 
   // Data
   const [assignments, setAssignments] = useState([])
@@ -581,45 +608,34 @@ export default function AuditModulePage() {
 
   return (
     <div style={{ width: '100%' }}>
-      {/* ── Header (matches AssetList) ── */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <h1 className="text-page-title m-0 mb-1 tracking-wide uppercase">
-              AUDIT <span className="text-accent">&amp; MAINTENANCE</span>
-            </h1>
+      {/* ── Header (Premium Style) ── */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between bg-[var(--bg-0)] p-4 md:p-6 rounded-2xl border border-[var(--border)] shadow-sm mb-6 gap-4">
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-[var(--accent)] text-white flex items-center justify-center shrink-0 shadow-sm shadow-[var(--accent-glow)]">
+            <Shield size={20} className="md:w-6 md:h-6" />
           </div>
-          <p style={{ color: 'var(--text-2)', }}>
-            {stats.total} audit{stats.total !== 1 ? 's' : ''} · {stats.completed} completed · {myPendingApprovals.length} pending approvals
-          </p>
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold text-[var(--text-0)] m-0 leading-tight">
+              Audit & Maintenance
+            </h1>
+            <p className="text-xs text-[var(--text-3)] tracking-wider m-0 mt-1 font-medium leading-tight max-w-[250px] md:max-w-none">
+              {stats.total} audit{stats.total !== 1 ? 's' : ''} · {stats.completed} completed · {myPendingApprovals.length} pending approvals
+            </p>
+          </div>
         </div>
         {(isAdmin || isMod) && (
-          <div style={{ display: 'flex', gap: 10 }}>
-            <button onClick={() => setShowCreateForm(true)} className="btn-primary" style={{ textDecoration: 'none' }}>
-              <Plus size={15} /> New Audit
+          <div className="flex w-full md:w-auto">
+            <button onClick={() => setShowCreateForm(true)} className="w-full md:w-auto bg-[var(--accent)] text-white font-semibold text-sm px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-[var(--accent-hover)] active:scale-95 transition-all shadow-sm">
+              <Plus size={16} /> New Audit
             </button>
           </div>
         )}
       </div>
 
-      {/* ── Tab Toggle ── */}
-      <div className="tab-container">
-        {[
-          { id: 'assignments', icon: ClipboardCheck, label: 'Assignments', count: myAssignments.length },
-          { id: 'stock_audit', icon: Boxes, label: 'Stock Reconciliation', count: 'Live' },
-          { id: 'checklists', icon: FileSpreadsheet, label: 'Checklists', count: checklists.length },
-          { id: 'approvals', icon: Shield, label: 'Approvals', count: myPendingApprovals.length },
-        ].map(t => (
-          <button key={t.id} onClick={() => { setTab(t.id); if (t.id === 'assignments') setSelectedAssignment(null) }}
-            className={`tab-btn ${tab === t.id ? 'active' : ''}`}>
-            <t.icon size={14} /> {t.label}
-            <span className="tab-badge">{t.count}</span>
-          </button>
-        ))}
-      </div>
+      {/* (Old tab container removed in favor of swipeable cards) */}
 
       {/* ── Stats Cards (matches AssetList stat cards) ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, marginBottom: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 20 }}>
         {[
           { icon: ClipboardCheck, label: 'Total Audits', val: stats.total, color: 'var(--accent)' },
           { icon: Clock, label: 'Pending', val: stats.pending, color: 'var(--amber)' },
@@ -627,15 +643,101 @@ export default function AuditModulePage() {
           { icon: CheckCircle2, label: 'Completed', val: stats.completed, color: 'var(--green)' },
           { icon: Shield, label: 'My Approvals', val: myPendingApprovals.length, color: myPendingApprovals.length > 0 ? 'var(--red)' : 'var(--text-3)' },
         ].map(s => (
-          <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'var(--bg-2)', borderRadius: 10, border: '1px solid var(--border)' }}>
-            <s.icon size={16} style={{ color: s.color, flexShrink: 0 }} />
+          <div key={s.label} className="group" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'var(--bg-0)', borderRadius: 16, border: '1px solid var(--border)', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', transition: 'all 0.2s ease-in-out' }} onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseOut={e => e.currentTarget.style.transform = 'none'}>
+            <s.icon size={18} style={{ color: s.color, flexShrink: 0 }} />
             <div>
-              <div style={{ color: 'var(--text-0)' }}>{s.val}</div>
-              <div style={{ color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
+              <div style={{ color: 'var(--text-0)', fontWeight: 600 }}>{s.val}</div>
+              <div style={{ color: 'var(--text-3)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500, marginTop: 2 }}>{s.label}</div>
             </div>
           </div>
         ))}
       </div>
+
+      {/* ── SWIPEABLE TAB CONTENT ── */}
+      <style>{`
+        @keyframes pageEnter {
+          from { opacity: 0; transform: translateX(15px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-page-enter {
+          animation: pageEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
+      
+      <div style={{ minHeight: 400, overflowX: 'hidden' }} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+        <div className="animate-page-enter" key={tab}>
+          {/* Pagination Dots */}
+          <div className="flex justify-center gap-1.5 mb-3">
+            {tabsList.map((t) => (
+              <button 
+                key={t}
+                onClick={() => { setTab(t); if (t === 'assignments') setSelectedAssignment(null); }}
+                className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer hover:bg-[var(--text-3)] ${tab === t ? 'w-6 bg-[var(--accent)]' : 'w-1.5 bg-[var(--border)]'}`}
+                aria-label={`Go to ${t}`}
+              />
+            ))}
+          </div>
+
+          {/* Dynamic Page Header */}
+          <div className="flex items-center gap-3.5 mb-5 p-4 rounded-2xl border-[1px] border-[var(--border)] shadow-sm bg-[var(--bg-1)]">
+              {(() => {
+                const heads = {
+                  assignments: { title: 'Assignments', icon: ClipboardCheck, color: 'var(--accent)', count: myAssignments.length },
+                  stock_audit: { title: 'Stock Reconciliation', icon: Boxes, color: 'var(--cyan)', count: 'Live' },
+                  checklists: { title: 'Checklists', icon: FileSpreadsheet, color: 'var(--purple)', count: checklists.length },
+                  approvals: { title: 'Approvals', icon: Shield, color: 'var(--danger)', count: myPendingApprovals.length }
+                };
+                const current = heads[tab] || heads.assignments;
+                const Icon = current.icon;
+                return (
+                  <>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-sm shrink-0 relative" style={{ backgroundColor: current.color }}>
+                      <Icon size={20} />
+                      {current.count !== undefined && current.count !== 0 && current.count !== 'Live' && (
+                         <span className="absolute -top-2 -right-2 bg-[var(--bg-0)] text-[var(--text-0)] text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm border border-[var(--border)]">{current.count}</span>
+                      )}
+                      {current.count === 'Live' && (
+                         <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">LIVE</span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-lg md:text-xl font-bold text-[var(--text-0)] m-0 leading-tight truncate">{current.title}</h2>
+                      <p className="text-xs text-[var(--text-3)] m-0 mt-0.5">Swipe or use arrows to navigate</p>
+                    </div>
+
+                    {/* Desktop Navigation Arrows */}
+                    <div className="hidden sm:flex items-center gap-1">
+                      <button 
+                        onClick={() => {
+                          const currentIndex = tabsList.indexOf(tab)
+                          if (currentIndex > 0) {
+                            setTab(tabsList[currentIndex - 1])
+                            if (tabsList[currentIndex - 1] === 'assignments') setSelectedAssignment(null)
+                          }
+                        }}
+                        disabled={tabsList.indexOf(tab) === 0}
+                        className="p-2 rounded-xl text-[var(--text-2)] hover:text-[var(--text-0)] hover:bg-[var(--bg-2)] disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                      >
+                        <ChevronLeft size={20} />
+                      </button>
+                      <button 
+                        onClick={() => {
+                          const currentIndex = tabsList.indexOf(tab)
+                          if (currentIndex < tabsList.length - 1) {
+                            setTab(tabsList[currentIndex + 1])
+                            if (tabsList[currentIndex + 1] === 'assignments') setSelectedAssignment(null)
+                          }
+                        }}
+                        disabled={tabsList.indexOf(tab) === tabsList.length - 1}
+                        className="p-2 rounded-xl text-[var(--text-2)] hover:text-[var(--text-0)] hover:bg-[var(--bg-2)] disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                      >
+                        <ChevronRight size={20} />
+                      </button>
+                    </div>
+                  </>
+                )
+              })()}
+          </div>
 
       {/* ── TAB: STOCK RECONCILIATION ── */}
       {tab === 'stock_audit' && (
@@ -650,20 +752,23 @@ export default function AuditModulePage() {
           {/* Search & Filter */}
           <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
-              <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
+              <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
               <input
                 value={search} onChange={e => setSearch(e.target.value)}
                 placeholder="Search audits..."
+                className="transition-all hover:border-accent/40 focus:border-accent focus:ring-2 focus:ring-accent/20"
                 style={{
-                  width: '100%', padding: '8px 10px 8px 32px', borderRadius: 8,
-                  border: '1px solid var(--border)', background: 'var(--bg-1)',
-                  color: 'var(--text-1)',
+                  width: '100%', padding: '10px 12px 10px 36px', borderRadius: 12,
+                  border: '1px solid var(--border)', background: 'var(--bg-0)',
+                  color: 'var(--text-0)', boxShadow: '0 2px 10px rgba(0,0,0,0.02)', outline: 'none'
                 }}
               />
             </div>
-            <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{
-              padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)',
-              background: 'var(--bg-1)', color: 'var(--text-1)',
+            <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} 
+              className="transition-all hover:border-accent/40 focus:border-accent focus:ring-2 focus:ring-accent/20"
+              style={{
+              padding: '10px 14px', borderRadius: 12, border: '1px solid var(--border)',
+              background: 'var(--bg-0)', color: 'var(--text-0)', boxShadow: '0 2px 10px rgba(0,0,0,0.02)', outline: 'none'
             }}>
               <option value="all">All Statuses</option>
               <option value="pending">Pending</option>
@@ -684,34 +789,35 @@ export default function AuditModulePage() {
                 const sc = STATUS_COLORS[a.status] || STATUS_COLORS.pending
                 return (
                   <div key={a.id} onClick={() => openAssignment(a)} style={{
-                    padding: '14px 16px', borderRadius: 12, background: 'var(--bg-1)',
+                    padding: '16px', borderRadius: 16, background: 'var(--bg-0)',
                     border: '1px solid var(--border)', cursor: 'pointer',
-                    transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 14,
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)', display: 'flex', alignItems: 'center', gap: 16,
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.03)'
                   }}
-                  onMouseOver={e => e.currentTarget.style.borderColor = 'var(--accent)'}
-                  onMouseOut={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                  onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,0.06)' }}
+                  onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.03)' }}
                   >
                     <div style={{
-                      width: 40, height: 40, borderRadius: 10, background: a.audit_type === 'asset_count' ? 'rgba(14,165,233,0.1)' : 'rgba(34,197,94,0.1)',
+                      width: 48, height: 48, borderRadius: 12, background: a.audit_type === 'asset_count' ? 'rgba(14,165,233,0.1)' : 'rgba(34,197,94,0.1)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                       color: a.audit_type === 'asset_count' ? 'var(--accent)' : 'var(--green)',
                     }}>
-                      {a.audit_type === 'asset_count' ? <QrCode size={18} /> : <FileSpreadsheet size={18} />}
+                      {a.audit_type === 'asset_count' ? <QrCode size={20} /> : <FileSpreadsheet size={20} />}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-                        <span style={{ color: 'var(--text-0)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                        <span style={{ color: 'var(--text-0)', fontWeight: 500 }}>
                           {a.title}
                         </span>
                         <span style={{
-                          padding: '2px 8px', borderRadius: 10,
-                          textTransform: 'uppercase',
+                          padding: '2px 8px', borderRadius: 6,
+                          textTransform: 'uppercase', fontSize: '10px', fontWeight: 600, letterSpacing: '0.02em',
                           background: sc.bg, color: sc.color,
                         }}>{sc.label}</span>
                         <span style={{
-                          padding: '2px 8px', borderRadius: 10,
-                          textTransform: 'uppercase',
-                          background: 'var(--bg-3)', color: 'var(--text-3)',
+                          padding: '2px 8px', borderRadius: 6,
+                          textTransform: 'uppercase', fontSize: '10px', fontWeight: 600, letterSpacing: '0.02em',
+                          background: 'var(--bg-2)', color: 'var(--text-2)', border: '1px solid var(--border)'
                         }}>{a.audit_type === 'asset_count' ? 'Asset Count' : 'Maintenance'}</span>
                       </div>
                       <div style={{ display: 'flex', gap: 14, color: 'var(--text-3)', }}>
@@ -1076,37 +1182,29 @@ export default function AuditModulePage() {
           TAB: CHECKLISTS
           ════════════════════════════════════════════════════════ */}
       {tab === 'checklists' && (
-        <div>
+        <div className="flex flex-col gap-6">
           {/* Upload for specific asset type */}
           {(isAdmin || isMod) && (
-            <div style={{
-              padding: 14, borderRadius: 12, background: 'var(--bg-1)', border: '1px dashed var(--border)',
-              marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
-            }}>
-              <div style={{ flex: 1, minWidth: 200 }}>
-                <p style={{ margin: '0 0 4px', color: 'var(--text-0)' }}>
-                  UPLOAD CHECKLIST FOR ASSET TYPE
-                </p>
-                <p style={{ color: 'var(--text-3)', margin: 0 }}>
+            <div className="bg-[var(--bg-1)] border border-dashed border-[var(--border)] rounded-2xl p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-5 shadow-sm">
+              <div className="flex-1 min-w-[200px]">
+                <h3 className="m-0 mb-1.5 text-[var(--text-0)] font-bold text-[13px] uppercase tracking-wider">
+                  Upload Checklist for Asset Type
+                </h3>
+                <p className="text-[var(--text-3)] m-0 text-sm">
                   Select an asset type, then upload its Excel checklist. It will auto-link to all matching assets.
                 </p>
               </div>
-              <select
-                id="upload-asset-type"
-                style={{
-                  padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)',
-                  background: 'var(--bg-2)', color: 'var(--text-1)', minWidth: 180,
-                }}
-              >
-                <option value="">Select asset type...</option>
-                {assetNames.map(n => <option key={n} value={n}>{n}</option>)}
-              </select>
-              <label style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px',
-                borderRadius: 8, background: 'var(--accent)', color: 'white', cursor: 'pointer',
-                }}>
-                <FileSpreadsheet size={14} /> Upload Excel
-                <input type="file" accept=".xlsx,.xls,.csv" style={{ display: 'none' }} onChange={async (e) => {
+              <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                <select
+                  id="upload-asset-type"
+                  className="px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-2)] text-[var(--text-1)] w-full sm:w-56 text-sm outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition-all"
+                >
+                  <option value="">Select asset type...</option>
+                  {assetNames.map(n => <option key={n} value={n}>{n}</option>)}
+                </select>
+                <label className="btn-primary w-full sm:w-auto flex items-center justify-center gap-2 cursor-pointer py-2.5 px-5 rounded-xl text-sm font-semibold whitespace-nowrap shadow-sm shadow-[var(--accent-glow)] transition-transform active:scale-95">
+                  <FileSpreadsheet size={16} /> Upload Excel
+                  <input type="file" accept=".xlsx,.xls,.csv" style={{ display: 'none' }} onChange={async (e) => {
                   const file = e.target.files?.[0]
                   const assetType = document.getElementById('upload-asset-type')?.value
                   if (!file) return
@@ -1168,16 +1266,17 @@ export default function AuditModulePage() {
                   reader.readAsBinaryString(file)
                   e.target.value = ''
                 }} />
-              </label>
+                </label>
+              </div>
             </div>
           )}
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-            <p style={{ color: 'var(--text-3)', margin: 0 }}>
-              Maintenance checklist templates - upload per asset type or import bulk
-            </p>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h2 className="text-[var(--text-2)] text-[15px] font-medium m-0 leading-tight">
+              Maintenance checklist templates &mdash; upload per asset type or build from scratch
+            </h2>
             {(isAdmin || isMod) && (
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full md:w-auto">
                 <button onClick={() => {
                   const ws = XLSX.utils.aoa_to_sheet([
                     ['checklist_name', 'frequency', 'section', 'inspection_item'],
@@ -1194,11 +1293,11 @@ export default function AuditModulePage() {
                   const wb = XLSX.utils.book_new()
                   XLSX.utils.book_append_sheet(wb, ws, 'Checklists')
                   XLSX.writeFile(wb, 'checklist_template.xlsx')
-                }} className="btn-ghost" style={{ padding: '7px 14px' }}>
-                  <Download size={14} /> Download Template
+                }} className="btn-ghost w-full sm:w-auto justify-center px-4 py-2.5 text-sm rounded-xl border border-[var(--border)] bg-[var(--bg-1)] hover:bg-[var(--bg-2)] transition-colors flex items-center gap-2 font-medium">
+                  <Download size={16} /> <span className="sm:hidden lg:inline">Download</span> Template
                 </button>
-                <button onClick={() => setShowBuilderModal(true)} className="btn-primary" style={{ padding: '7px 14px' }}>
-                  <Plus size={14} /> Build Checklist
+                <button onClick={() => setShowBuilderModal(true)} className="btn-primary w-full sm:w-auto justify-center px-5 py-2.5 text-sm rounded-xl shadow-sm flex items-center gap-2 font-semibold">
+                  <Plus size={16} /> Build <span className="sm:hidden lg:inline">Checklist</span>
                 </button>
               </div>
             )}
@@ -1216,65 +1315,63 @@ export default function AuditModulePage() {
               })),
             ]
             return allChecklists.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-3)' }}>
-              <FileSpreadsheet size={36} style={{ marginBottom: 10, opacity: 0.4 }} />
-              <p >No maintenance checklists yet</p>
-              <p >Import checklists from Excel to get started</p>
+            <div className="text-center py-16 px-5 text-[var(--text-3)] bg-[var(--bg-0)] rounded-2xl border border-[var(--border)] shadow-sm">
+              <FileSpreadsheet size={48} className="mx-auto mb-4 opacity-30" />
+              <p className="text-lg font-medium m-0 mb-1 text-[var(--text-1)]">No maintenance checklists yet</p>
+              <p className="text-sm m-0">Import checklists from Excel to get started</p>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 10 }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
               {allChecklists.map(cl => {
                 const fc = FREQ_COLORS[cl.frequency] || FREQ_COLORS.monthly
                 const linked = cl.linked_asset_names || []
                 return (
-                  <div key={cl.id} style={{
-                    padding: '14px 16px', borderRadius: 12, background: 'var(--bg-1)',
-                    border: '1px solid var(--border)',
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                      <span >{cl.name}</span>
-                      <span style={{
-                        padding: '2px 8px', borderRadius: 10,
-                        background: fc.bg, color: fc.color, textTransform: 'uppercase',
-                      }}>{cl.frequency || 'monthly'}</span>
+                  <div key={cl.id} className="bg-[var(--bg-0)] border border-[var(--border)] rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+                    <div className="flex items-start justify-between gap-3 mb-4">
+                      <h3 className="font-bold text-[var(--text-0)] text-base m-0 leading-snug">{cl.name}</h3>
+                      <span className="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap leading-none mt-0.5" style={{ background: fc.bg, color: fc.color }}>
+                        {cl.frequency || 'monthly'}
+                      </span>
                     </div>
+                    
                     {cl.category && (
-                      <p style={{ color: 'var(--text-3)', margin: '0 0 4px' }}>
-                        Category: {cl.category}
+                      <p className="text-sm text-[var(--text-2)] m-0 mb-1.5 flex items-center gap-2">
+                        <span className="text-[11px] font-bold tracking-wider uppercase text-[var(--text-3)]">Category:</span>
+                        <span className="font-medium text-[var(--text-1)]">{cl.category}</span>
                       </p>
                     )}
-                    <p style={{ color: 'var(--text-2)', margin: '0 0 8px' }}>
-                      {(cl.items || []).length} inspection items
+                    
+                    <p className="text-sm text-[var(--text-2)] m-0 mb-5 flex items-center gap-2">
+                       <span className="text-[11px] font-bold tracking-wider uppercase text-[var(--text-3)]">Items:</span>
+                       <span className="font-medium text-[var(--text-1)]">{(cl.items || []).length} inspection items</span>
                     </p>
 
                     {/* Linked Assets */}
-                    <div style={{ marginBottom: 8 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                        <Link2 size={11} style={{ color: 'var(--accent)' }} />
-                        <span style={{ color: 'var(--accent)', letterSpacing: '0.03em' }}>
-                          LINKED TO ({linked.length} asset type{linked.length !== 1 ? 's' : ''})
-                        </span>
+                    <div className="mt-auto pt-4 border-t border-[var(--border)]">
+                      <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--accent)] mb-3 uppercase tracking-wider">
+                        <Link2 size={12} /> Linked to {linked.length} asset type{linked.length !== 1 ? 's' : ''}
                       </div>
+                      
                       {linked.length > 0 && (
-                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 6 }}>
+                        <div className="flex flex-wrap gap-2 mb-4">
                           {linked.map((name, i) => (
-                            <span key={i} style={{
-                              display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 6,
-                              background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)',
-                              color: 'var(--green)', }}>
+                            <span key={i} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--green)]/10 border border-[var(--green)]/20 text-[11px] font-semibold text-[var(--green)] leading-tight">
                               {name}
                               {(isAdmin || isMod) && (
-                                <X size={10} style={{ cursor: 'pointer', opacity: 0.7 }} onClick={async () => {
+                                <button onClick={async () => {
                                   const updated = linked.filter((_, j) => j !== i)
                                   const table = cl.source === 'old' ? 'checklist_templates' : 'maintenance_checklists'
                                   await supabase.from(table).update({ linked_asset_names: updated }).eq('id', cl.id)
                                   await loadAll()
-                                }} />
+                                }} className="hover:text-[var(--status-danger)] hover:bg-[var(--status-danger)]/10 rounded p-0.5 transition-colors" title={`Unlink ${name}`}>
+                                  <X size={10} />
+                                </button>
                               )}
                             </span>
                           ))}
                         </div>
                       )}
+                      
                       {(isAdmin || isMod) && (
                         <select
                           value=""
@@ -1285,10 +1382,7 @@ export default function AuditModulePage() {
                             await supabase.from(table).update({ linked_asset_names: newLinked }).eq('id', cl.id)
                             await loadAll()
                           }}
-                          style={{
-                            width: '100%', padding: '5px 8px', borderRadius: 6, border: '1px dashed var(--border)',
-                            background: 'var(--bg-2)', color: 'var(--text-2)',
-                          }}
+                          className="w-full px-3 py-2 rounded-lg border border-dashed border-[var(--border)] bg-[var(--bg-2)] text-[var(--text-2)] text-xs font-medium outline-none focus:border-[var(--accent)] transition-colors"
                         >
                           <option value="">+ Link to asset type...</option>
                           {assetNames.filter(n => !linked.some(l => l.toLowerCase() === n.toLowerCase())).map(n => (
@@ -1299,17 +1393,17 @@ export default function AuditModulePage() {
                     </div>
 
                     {(isAdmin || isMod) && (
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6, marginTop: 4 }}>
-                        <button onClick={() => setEditingChecklist(cl)} className="btn-ghost" style={{ padding: '3px 8px' }}>
-                          <Settings size={11} /> Edit
+                      <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-[var(--border)]">
+                        <button onClick={() => setEditingChecklist(cl)} className="btn-ghost px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-[var(--border)] bg-[var(--bg-1)] hover:bg-[var(--bg-2)]">
+                          <Settings size={12} /> Edit
                         </button>
                         <button onClick={async () => {
                           if (!window.confirm(`Delete "${cl.name}"? This cannot be undone.`)) return
                           const table = cl.source === 'old' ? 'checklist_templates' : 'maintenance_checklists'
                           await supabase.from(table).delete().eq('id', cl.id)
                           await loadAll()
-                        }} className="btn-ghost" style={{ color: 'var(--red)', padding: '3px 8px' }}>
-                          <Trash2 size={11} /> Delete
+                        }} className="btn-ghost px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 text-[var(--red)] border border-transparent hover:border-[var(--red)]/20 hover:bg-[var(--red)]/10">
+                          <Trash2 size={12} /> Delete
                         </button>
                       </div>
                     )}
@@ -1447,6 +1541,8 @@ export default function AuditModulePage() {
       {/* ════════════════════════════════════════════════════════
           MODALS
           ════════════════════════════════════════════════════════ */}
+        </div>
+      </div>
 
       {/* CREATE ASSIGNMENT MODAL */}
       {showCreateForm && (

@@ -745,27 +745,36 @@ export default function AssetList() {
 
   return (
     <div style={{ width: '100%' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <h1 className="text-page-title m-0 mb-1 tracking-wide uppercase">
-            ASSET <span className="text-accent">REGISTER</span>
-          </h1>
-          <p style={{ color: 'var(--text-2)', }}>
-            {totalCount} assets
-          </p>
+      {/* ── Header (Premium Style) ── */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between bg-[var(--bg-0)] p-4 md:p-6 rounded-2xl border border-[var(--border)] shadow-sm mb-6 gap-4">
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-[var(--accent)] text-white flex items-center justify-center shrink-0 shadow-sm shadow-[var(--accent-glow)]">
+            <Package size={20} className="md:w-6 md:h-6" />
+          </div>
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold text-[var(--text-0)] m-0 leading-tight">
+              Asset Register
+            </h1>
+            <p className="text-xs text-[var(--text-3)] tracking-wider m-0 mt-1 font-medium leading-tight">
+              {totalCount} assets
+            </p>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <button onClick={() => queryClient.invalidateQueries({ queryKey: ['assets'] })} className="btn-ghost" style={{ padding: '9px 12px', background: 'white' }}>
-            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+        <div className="flex flex-wrap items-center gap-2 md:gap-3 w-full md:w-auto">
+          <button onClick={() => queryClient.invalidateQueries({ queryKey: ['assets'] })} className="flex items-center justify-center w-10 h-10 md:w-auto md:px-4 rounded-xl border border-[var(--border)] bg-[var(--bg-1)] hover:bg-[var(--bg-2)] transition-colors text-[var(--text-2)] hover:text-[var(--text-0)] shadow-sm">
+            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
           </button>
           {selected.size > 0 && isAdmin && (
-            <button onClick={() => handleDelete([...selected])} className="btn-danger" disabled={deleting} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              {deleting ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
+            <button onClick={() => handleDelete([...selected])} className="flex-1 md:flex-none bg-[var(--danger)] text-white font-semibold text-sm px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 shadow-sm" disabled={deleting}>
+              {deleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
               {deleting ? 'Deleting…' : `Delete (${selected.size})`}
             </button>
           )}
-          {can('add') && <Link to="/assets/new" className="btn-primary" style={{ textDecoration: 'none', borderRadius: 8, padding: '8px 16px', }}><PlusCircle size={16} /> Add Asset</Link>}
+          {can('add') && (
+            <Link to="/assets/new" className="flex-1 md:flex-none bg-[var(--accent)] text-white font-semibold text-sm px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-[var(--accent-hover)] active:scale-95 transition-all shadow-sm no-underline">
+              <PlusCircle size={16} /> Add Asset
+            </Link>
+          )}
         </div>
       </div>
 

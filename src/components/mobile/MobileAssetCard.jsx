@@ -54,12 +54,15 @@ export default function MobileAssetCard({ asset, onMoreClick }) {
   return (
     <div 
       onClick={() => navigate(`/assets/${asset.id}`)}
-      className="bg-bg-1 border border-border rounded-xl p-4 shadow-sm active:border-accent transition-colors relative flex flex-col gap-3"
+      className="group relative bg-bg-0/90 backdrop-blur-xl border border-border/60 rounded-2xl p-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)] active:scale-[0.98] transition-all duration-300 flex flex-col gap-4 overflow-hidden"
     >
+      {/* Decorative background glow */}
+      <div className="absolute -top-12 -right-12 w-32 h-32 bg-accent/10 rounded-full blur-3xl pointer-events-none transition-colors" />
+
       {/* Top row: Status Badge & More ⋮ */}
-      <div className="flex items-center justify-between">
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px]  border ${cfg.bg}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+      <div className="flex items-center justify-between relative z-10">
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold tracking-wide border shadow-sm ${cfg.bg}`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot} animate-pulse`} />
           {cfg.label}
         </span>
 
@@ -68,7 +71,7 @@ export default function MobileAssetCard({ asset, onMoreClick }) {
             e.stopPropagation()
             onMoreClick(asset)
           }}
-          className="p-1.5 text-text-3 hover:text-text-0 hover:bg-bg-2 rounded-lg transition-colors -mr-1"
+          className="p-1.5 text-text-3 hover:text-text-0 bg-bg-2/50 hover:bg-bg-3 rounded-full transition-colors backdrop-blur-sm -mr-1"
           aria-label="More actions"
         >
           <MoreVertical size={18} />
@@ -76,49 +79,57 @@ export default function MobileAssetCard({ asset, onMoreClick }) {
       </div>
 
       {/* Asset Name & Code */}
-      <div>
-        <h3 className="text-[15px] text-text-0 leading-snug m-0 line-clamp-2">
+      <div className="relative z-10 pl-0.5">
+        <h3 className="text-[17px] font-bold text-text-0 leading-tight m-0 line-clamp-2 tracking-tight">
           {asset.asset_name || 'Unnamed Asset'}
         </h3>
-        <div className="font-mono text-caption text-text-2 tracking-wider mt-0.5">
+        <div className="font-mono text-[12px] font-bold text-accent tracking-[0.15em] mt-1.5 uppercase">
           {asset.asset_code || 'NO-CODE'}
         </div>
       </div>
 
-      {/* Location & Category */}
-      <div className="grid grid-cols-2 gap-2 text-caption text-text-2 py-1.5 border-y border-border-light">
-        <div className="flex items-center gap-1.5 truncate">
-          <MapPin size={14} className="text-accent shrink-0" />
-          <span className="truncate">{asset.site || 'No Site'}</span>
+      {/* Location & Category Cards */}
+      <div className="grid grid-cols-2 gap-2 mt-1 relative z-10">
+        <div className="flex items-center gap-2 p-2.5 bg-bg-1 rounded-xl border border-border/50 shadow-sm">
+          <div className="p-1.5 bg-bg-0 rounded-lg shadow-sm border border-border/30">
+            <MapPin size={14} className="text-accent" />
+          </div>
+          <span className="text-[12px] font-semibold text-text-2 truncate">{asset.site || 'No Site'}</span>
         </div>
-        <div className="flex items-center gap-1.5 truncate">
-          <Tag size={13} className="text-text-3 shrink-0" />
-          <span className="truncate">{asset.category || 'General'}</span>
+        <div className="flex items-center gap-2 p-2.5 bg-bg-1 rounded-xl border border-border/50 shadow-sm">
+          <div className="p-1.5 bg-bg-0 rounded-lg shadow-sm border border-border/30">
+            <Tag size={14} className="text-text-3" />
+          </div>
+          <span className="text-[12px] font-semibold text-text-2 truncate">{asset.category || 'General'}</span>
         </div>
       </div>
 
       {/* Health & Valuation Strip */}
-      <div className="flex items-center justify-between text-caption pt-0.5">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[11px] text-text-3 uppercase">Condition:</span>
-          <span className={` ${conditionColor}`}>{conditionText}</span>
+      <div className="flex items-center justify-between pt-3 border-t border-border/50 relative z-10 mt-1">
+        <div className="flex flex-col">
+          <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest mb-1">Condition</span>
+          <span className={`text-[13px] font-bold ${conditionColor}`}>{conditionText}</span>
         </div>
-        <div className="font-mono text-text-0">
-          {formatCurrency(calculateBookValue(asset))}
+        <div className="flex flex-col items-end">
+          <span className="text-[10px] font-bold text-text-3 uppercase tracking-widest mb-1">Value</span>
+          <span className="font-mono text-[15px] font-bold text-text-0">
+            {formatCurrency(calculateBookValue(asset))}
+          </span>
         </div>
       </div>
 
       {/* Primary Action Button */}
-      <div className="pt-1">
+      <div className="pt-1 relative z-10">
         <button
           onClick={(e) => {
             e.stopPropagation()
             navigate(`/assets/${asset.id}`)
           }}
-          className="w-full flex items-center justify-center gap-1.5 py-2.5 px-3 bg-bg-0 hover:bg-bg-2 border border-border rounded-lg text-caption text-text-0 active:bg-bg-3 transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-bg-1 to-bg-2 hover:from-bg-2 hover:to-bg-3 border border-border shadow-sm rounded-xl text-[13px] font-bold text-text-0 active:scale-[0.98] transition-all duration-200"
         >
-          <Eye size={14} className="text-accent" />
-          <span>View Asset Details</span>
+          <Eye size={16} className="text-accent" />
+          <span>View Full Details</span>
+          <ArrowRight size={14} className="text-text-3 ml-auto opacity-50" />
         </button>
       </div>
     </div>

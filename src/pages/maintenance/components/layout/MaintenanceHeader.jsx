@@ -4,7 +4,6 @@ import { Search, Plus, QrCode, HardHat, Wrench } from 'lucide-react';
 export default function MaintenanceHeader() {
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Debounced search simulation for Phase 2.1
   useEffect(() => {
     const t = setTimeout(() => {
       if (searchQuery) {
@@ -15,68 +14,61 @@ export default function MaintenanceHeader() {
   }, [searchQuery]);
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'space-between',
-      padding: '16px 24px',
-      background: 'var(--bg-0)',
-      borderBottom: '1px solid var(--border)',
-      gap: 20
-    }}>
-      {/* Title Area */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <div style={{ 
-          width: 40, height: 40, borderRadius: 8, 
-          background: 'var(--accent)', color: 'white', 
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          flexShrink: 0
-        }}>
-          <Wrench size={20} />
+    <div className="pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between bg-[var(--bg-0)] p-4 md:p-6 rounded-2xl border border-[var(--border)] shadow-sm gap-4 md:gap-6">
+      {/* Mobile Top Header: Title + QR */}
+      <div className="flex items-center justify-between w-full md:w-auto">
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-[var(--accent)] text-white flex items-center justify-center shrink-0 shadow-sm shadow-[var(--accent-glow)]">
+            <Wrench size={20} className="md:w-6 md:h-6" />
+          </div>
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold text-[var(--text-0)] m-0 leading-tight">
+              Maintenance
+            </h1>
+            <p className="text-xs text-[var(--text-3)] uppercase tracking-wider m-0 mt-0.5 font-medium leading-tight hidden sm:block max-w-[200px] md:max-w-none">
+              Command Center
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-0)', lineHeight: 1.2 }}>
-            Maintenance
-          </h1>
-          <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', lineHeight: 1.2 }}>
-            Asset maintenance & reliability command center
-          </p>
-        </div>
-      </div>
-
-      {/* Search Area */}
-      <div style={{ flex: 1, maxWidth: 400 }}>
-        <div style={{ position: 'relative' }}>
-          <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
-          <input 
-            type="text" 
-            placeholder="Search assets, tickets, work orders..." 
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            style={{ 
-              width: '100%', 
-              padding: '8px 12px 8px 36px', 
-              borderRadius: 20, 
-              border: '1px solid var(--border)',
-              background: 'var(--bg-2)',
-              color: 'var(--text-1)',
-              fontSize: '0.9rem'
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Primary Actions */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button className="btn-ghost" style={{ padding: '8px', borderRadius: 8 }} title="Scan Asset">
+        
+        {/* QR Button (Mobile Only) */}
+        <button className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--bg-1)] border border-[var(--border)] text-[var(--text-1)] active:scale-95 transition-transform">
           <QrCode size={18} />
         </button>
-        <button className="btn-ghost" style={{ padding: '8px 12px', gap: 6, borderRadius: 8, display: 'flex', alignItems: 'center' }}>
-          <Plus size={16} /> New Ticket
-        </button>
-        <button className="btn-primary" style={{ padding: '8px 16px', gap: 8, borderRadius: 8, display: 'flex', alignItems: 'center' }}>
-          <HardHat size={16} /> New Work Order
-        </button>
+      </div>
+
+      {/* Actions Container */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto flex-1 md:justify-end">
+        
+        {/* Search */}
+        <div className="relative w-full sm:max-w-[240px] lg:max-w-[320px]">
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-3)]" />
+          <input 
+            type="text" 
+            placeholder="Search assets, tickets..." 
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="w-full py-2.5 pl-10 pr-4 rounded-xl border border-[var(--border)] bg-[var(--bg-1)] text-[var(--text-1)] text-sm font-medium focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition-all placeholder-[var(--text-3)]"
+          />
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2.5 sm:gap-2">
+          {/* QR Button (Desktop Only) */}
+          <button className="hidden md:flex flex-shrink-0 p-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-1)] hover:bg-[var(--bg-2)] transition-colors text-[var(--text-1)]" title="Scan Asset">
+            <QrCode size={18} />
+          </button>
+          
+          <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-1)] hover:bg-[var(--bg-2)] transition-colors text-[var(--text-1)] text-sm font-semibold whitespace-nowrap">
+            <Plus size={16} /> <span className="sm:hidden lg:inline">New</span> Ticket
+          </button>
+          
+          <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--accent)] hover:opacity-90 transition-opacity text-white text-sm font-semibold whitespace-nowrap shadow-sm shadow-[var(--accent-glow)]">
+            <HardHat size={16} /> <span className="sm:hidden lg:inline">New</span> Work Order
+          </button>
+        </div>
+        </div>
       </div>
     </div>
   );

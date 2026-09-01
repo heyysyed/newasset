@@ -1370,7 +1370,7 @@ export default function StickerPage() {
         <button onClick={handlePrint} disabled={genning}
           className="sticker-mobile-fab"
           style={{
-            position: 'fixed', bottom: 24, right: 20, zIndex: 100,
+            position: 'fixed', bottom: 90, right: 20, zIndex: 100,
             width: 56, height: 56, borderRadius: '50%',
             background: 'linear-gradient(135deg, var(--accent) 0%, #6b96ff 100%)',
             color: 'white', border: 'none',

@@ -182,7 +182,7 @@ export default function MaintenancePage() {
       if (cc) tQ = tQ.eq('company_code', cc)
       let aQ = supabase.from('assets').select('id, asset_name, asset_code, warranty_expiry, site, category').or('notes.is.null,notes.not.ilike.%[Migrated to Bulk Module]%').order('asset_name')
       if (cc) aQ = aQ.eq('company_code', cc)
-      let iQ = supabase.from('inventory_items').select('id, item_name, current_stock, unit').eq('is_active', true).order('item_name')
+      let iQ = supabase.from('bulk_items').select('id, item_name, unit').eq('is_active', true).order('item_name')
       const [s, t, al, a, v, i, p] = await Promise.all([
         sQ,
         tQ,

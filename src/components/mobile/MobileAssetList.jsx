@@ -58,7 +58,7 @@ export default function MobileAssetList({
     <div className="flex flex-col min-h-full pb-20">
       
       {/* ── Sticky Top Bar: Search & Filter ── */}
-      <div className="sticky top-0 z-30 bg-bg-1 pt-2 pb-3 px-4 border-b border-border shadow-sm flex flex-col gap-3">
+      <div className="sticky top-0 z-30 bg-bg-0/85 backdrop-blur-xl pt-3 pb-3 px-4 border-b border-border/50 shadow-[0_4px_30px_rgb(0,0,0,0.06)] flex flex-col gap-3 transition-all">
         <div className="flex items-center gap-3">
           <MobileSearchBar
             value={searchQ || ''}

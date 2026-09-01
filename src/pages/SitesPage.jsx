@@ -305,21 +305,27 @@ export default function SitesPage() {
     <div style={{ width: '100%' }}>
       {/* Header & Toggles */}
       <div className="animate-fade-up" style={{ marginBottom: 24 }}>
-        {/* Title Row */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
-          <div>
-            <h1 className="text-page-title m-0 mb-1 tracking-wide uppercase">
-              SITE <span className="text-accent">MANAGEMENT</span>
-            </h1>
-            <p style={{ margin: 0, color: 'var(--text-2)', }} className="hidden md:block">
-              Manage geographical locations, geofencing coordinates, and view site analytics.
-            </p>
+        {/* ── Header (Premium Style) ── */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between bg-[var(--bg-0)] p-4 md:p-6 rounded-2xl border border-[var(--border)] shadow-sm mb-6 gap-4">
+          <div className="flex items-center gap-3 md:gap-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-[var(--accent)] text-white flex items-center justify-center shrink-0 shadow-sm shadow-[var(--accent-glow)]">
+              <MapPin size={20} className="md:w-6 md:h-6" />
+            </div>
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold text-[var(--text-0)] m-0 leading-tight">
+                Site Management
+              </h1>
+              <p className="text-xs text-[var(--text-3)] tracking-wider m-0 mt-1 font-medium leading-tight hidden md:block">
+                Manage geographical locations, geofencing coordinates, and view site analytics.
+              </p>
+            </div>
           </div>
-
           {(isAdmin || isMod || can('add')) && (
-            <button onClick={openNew} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px', minHeight: 44 }}>
-              <PlusCircle size={16} /> Add Site
-            </button>
+            <div className="flex w-full md:w-auto">
+              <button onClick={openNew} className="w-full md:w-auto bg-[var(--accent)] text-white font-semibold text-sm px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-[var(--accent-hover)] active:scale-95 transition-all shadow-sm">
+                <PlusCircle size={16} /> Add Site
+              </button>
+            </div>
           )}
         </div>
 

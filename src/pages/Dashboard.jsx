@@ -187,8 +187,8 @@ export default function Dashboard() {
         .select('id, title, status, created_at')
         .order('created_at', { ascending: false }).limit(10)
 
-      let invQ = supabase.from('inventory_items')
-        .select('id, item_name, current_stock, reorder_level, unit, location')
+      let invQ = supabase.from('bulk_items')
+        .select('id, item_name, unit')
         .eq('is_active', true).order('item_name')
 
       let mlQ = supabase.from('maintenance_logs')
@@ -235,7 +235,7 @@ export default function Dashboard() {
     load()
     const ch1 = supabase.channel('dash-assets').on('postgres_changes', { event: '*', schema: 'public', table: 'assets' }, load).subscribe()
     const ch2 = supabase.channel('dash-tickets').on('postgres_changes', { event: '*', schema: 'public', table: 'maintenance_tickets' }, load).subscribe()
-    const ch3 = supabase.channel('dash-inventory').on('postgres_changes', { event: '*', schema: 'public', table: 'inventory_items' }, load).subscribe()
+    const ch3 = supabase.channel('dash-inventory').on('postgres_changes', { event: '*', schema: 'public', table: 'bulk_items' }, load).subscribe()
     const ch4 = supabase.channel('dash-audit').on('postgres_changes', { event: '*', schema: 'public', table: 'asset_audit' }, load).subscribe()
     return () => {
       supabase.removeChannel(ch1)

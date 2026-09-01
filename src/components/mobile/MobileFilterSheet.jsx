@@ -86,10 +86,10 @@ export function MobileFilterTrigger({ onClick, activeCount = 0, label = 'Filter'
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-2 px-4 rounded-xl border text-body-medium text-small transition-colors shrink-0
+      className={`flex items-center gap-2 px-4 rounded-xl border text-body-medium text-small transition-all shrink-0 shadow-sm
         ${activeCount > 0
-          ? 'bg-accent text-white border-accent'
-          : 'bg-bg-1 text-text-1 border-border hover:border-accent/50'
+          ? 'bg-accent text-white border-accent shadow-accent/20'
+          : 'bg-bg-0/60 backdrop-blur-md text-text-1 border-border/60 hover:border-accent/50 hover:bg-bg-1'
         }
       `}
       style={{ height: 48, minWidth: 80 }}
@@ -116,10 +116,10 @@ export function MobileChipFilter({ options, value, onChange }) {
           <button
             key={opt.value}
             onClick={() => onChange(isActive ? '' : opt.value)}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-small text-body-medium whitespace-nowrap shrink-0 transition-all
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-small text-body-medium whitespace-nowrap shrink-0 transition-all shadow-sm
               ${isActive
-                ? 'bg-accent text-white shadow-sm shadow-accent/30'
-                : 'bg-bg-1 text-text-1 border border-border hover:border-accent/40'
+                ? 'bg-accent text-white shadow-accent/30 border border-accent'
+                : 'bg-bg-0/60 backdrop-blur-md text-text-1 border border-border/60 hover:border-accent/40 hover:bg-bg-1'
               }
             `}
             style={{ minHeight: 36 }}

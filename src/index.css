@@ -375,6 +375,7 @@ h1, h2, h3, h4, h5, h6, .lbl {
 /* ── Unified Pillbox Tab Navigation ── */
 .tab-container {
   display: flex;
+  flex-wrap: nowrap;
   gap: 4px;
   margin-bottom: 16px;
   background: var(--bg-3);
@@ -384,6 +385,8 @@ h1, h2, h3, h4, h5, h6, .lbl {
   width: fit-content;
   overflow-x: auto;
   max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
 }
 
 .tab-container::-webkit-scrollbar {
@@ -403,6 +406,7 @@ h1, h2, h3, h4, h5, h6, .lbl {
   font-size: 0.875rem;
   transition: all 0.2s;
   white-space: nowrap;
+  flex-shrink: 0;
   background: transparent;
   color: var(--text-2);
 }
