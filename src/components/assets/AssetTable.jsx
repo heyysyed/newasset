@@ -85,12 +85,16 @@ export default function AssetTable({
               if (siteVal === '-') return siteVal
               const resolved = getResolvedSite(siteVal)
               if (resolved && resolved.site_code) {
+                let cleanName = resolved.name;
+                if (cleanName.toUpperCase().startsWith(resolved.site_code.toUpperCase())) {
+                  cleanName = cleanName.substring(resolved.site_code.length).replace(/^[\s-]+/, '');
+                }
                 return (
                   <span className="inline-flex items-center gap-1.5">
                     <span className="font-mono bg-accent-subtle text-accent px-1.5 py-0.5 rounded text-[10px] border border-accent/20">
                       {resolved.site_code}
                     </span>
-                    <span>{resolved.name}</span>
+                    <span>{cleanName}</span>
                   </span>
                 )
               }
@@ -179,7 +183,21 @@ export default function AssetTable({
                         <div className="flex items-center justify-between flex-wrap gap-3">
                           <div className="flex items-center gap-3">
                             {isGroupExpanded ? <ChevronDown size={16} className="text-text-2" /> : <ChevronRight size={16} className="text-text-2" />}
-                            <span className="text-small text-text-0 uppercase">{group.key}</span>
+                            <span className="text-small text-text-0 uppercase">
+                              {(() => {
+                                if (typeof group.key !== 'string') return group.key;
+                                const resolved = getResolvedSite(group.key);
+                                if (resolved) {
+                                  // Clean up cases where site name itself includes the code, e.g. "P149 MARQUEE" and code is "P149"
+                                  let cleanName = resolved.name;
+                                  if (resolved.site_code && cleanName.toUpperCase().startsWith(resolved.site_code.toUpperCase())) {
+                                    cleanName = cleanName.substring(resolved.site_code.length).replace(/^[\s-]+/, '');
+                                  }
+                                  return resolved.site_code ? `[${resolved.site_code}] ${cleanName}` : cleanName;
+                                }
+                                return group.key.replace(/^([a-z0-9]+)\s*-\s*\1\s+/i, '$1 ');
+                              })()}
+                            </span>
                             <span className="bg-bg-3 text-text-1 text-caption text-body-medium px-2 py-0.5 rounded-full">{group.subgroupsArray.length}</span>
                             <span className="text-caption text-text-3 flex items-center gap-2">
                               {group.subgroupsArray.length} types <span className="text-border">|</span> Active: {group.activeCount}

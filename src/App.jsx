@@ -27,6 +27,7 @@ const ReportsPage = lazy(() => import('./pages/ReportsPage'))
 const MobileFieldView = lazy(() => import('./pages/MobileFieldView'))
 const CategoriesPage = lazy(() => import('./pages/CategoriesPage'))
 const Phase1Verification = lazy(() => import('./pages/Phase1Verification'))
+const ScanPage = lazy(() => import('./pages/ScanPage'))
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -124,6 +125,7 @@ function AppRoutes() {
               <SitesPage />
             </PermGuard>
           } />
+          <Route path="scan" element={<ScanPage />} />
           <Route path="assets/new" element={<AssetForm />} />
           <Route path="assets/:id" element={<AssetDetail />} />
           <Route path="assets/:id/edit" element={<AssetForm />} />

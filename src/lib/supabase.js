@@ -218,12 +218,52 @@ async function backupAsset(asset, userId) {
   await supabase.from('deleted_assets').insert({ ...safeAsset, id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`, original_id: asset.id, deleted_by: userId })
 }
 
+async function deleteAssetDependencies(ids) {
+  const tableConfigs = [
+    { name: 'asset_audit', col: 'asset_id' },
+    { name: 'asset_movements', col: 'asset_id' },
+    { name: 'asset_attachments', col: 'asset_id' },
+    { name: 'asset_photos', col: 'asset_id' },
+    { name: 'asset_documents', col: 'asset_id' },
+    { name: 'maintenance_schedules', col: 'asset_id' },
+    { name: 'maintenance_tickets', col: 'asset_id' },
+    { name: 'maintenance_logs', col: 'asset_id' },
+    { name: 'maintenance_photos', col: 'asset_id' },
+    { name: 'checklist_submissions', col: 'asset_id' },
+    { name: 'gate_pass_items', col: 'asset_id' },
+    { name: 'audit_item_results', col: 'asset_id' },
+    { name: 'audit_assignment_items', col: 'asset_id' },
+    { name: 'component_lifecycle_events', col: 'asset_id' },
+    { name: 'asset_components', col: 'asset_id' },
+    { name: 'component_replacements', col: 'asset_id' }
+  ];
+  for (const table of tableConfigs) {
+    try {
+      const { error } = await supabase.from(table.name).delete().in(table.col, ids);
+      if (error) console.error(`Error deleting from ${table.name}:`, error);
+    } catch (e) {
+      console.error(`Exception deleting from ${table.name}:`, e);
+    }
+  }
+
+  // For serialized_components, un-assign them instead of deleting them
+  try {
+    const { error } = await supabase.from('serialized_components').update({ current_asset_id: null, status: 'In Stock' }).in('current_asset_id', ids);
+    if (error) console.error('Error updating serialized_components:', error);
+  } catch (e) {
+    console.error('Exception updating serialized_components:', e);
+  }
+}
+
 export async function deleteAsset(id, userId) {
   // Backup before delete
   const { data: a } = await supabase.from('assets').select('*').eq('id', id).single()
   if (a) await backupAsset(a, userId)
   await logAudit(id, userId, 'deleted', {})
   await logActivity(userId, 'deleted', 'asset', id, a?.asset_name || id, { asset_code: a?.asset_code })
+  
+  await deleteAssetDependencies([id])
+  
   const { data: deletedRows, error } = await supabase.from('assets').delete().eq('id', id).select('id')
   if (error) throw error
   if (!deletedRows || deletedRows.length === 0) throw new Error('Could not delete asset. It may be linked to other records or you lack permission.')
@@ -248,6 +288,9 @@ export async function bulkDeleteAssets(ids, userId) {
       batch.map(id => ({ asset_id: id, user_id: userId, action: 'deleted', changes: {} }))
     )
     if (auditErr) console.error('Audit log error:', auditErr)
+    
+    await deleteAssetDependencies(batch)
+
     const { data: deletedRows, error } = await supabase.from('assets').delete().in('id', batch).select('id')
     if (error) throw error
     if (!deletedRows || deletedRows.length === 0) throw new Error('Could not delete assets. They may be linked to other records or you lack permission.')

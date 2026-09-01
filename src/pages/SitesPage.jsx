@@ -367,7 +367,15 @@ export default function SitesPage() {
                             [{site.site_code}]
                           </span>
                         )}
-                        <strong style={{ color: '#111', }}>{site.name}</strong>
+                        <strong style={{ color: '#111', }}>
+                          {(() => {
+                            let cleanName = site.name;
+                            if (site.site_code && cleanName.toUpperCase().startsWith(site.site_code.toUpperCase())) {
+                              cleanName = cleanName.substring(site.site_code.length).replace(/^[\s-]+/, '');
+                            }
+                            return cleanName;
+                          })()}
+                        </strong>
                       </div>
                       <p style={{ margin: '0 0 12px 0', color: '#666', }}>{site.address || 'No address provided'}</p>
                       
@@ -449,7 +457,15 @@ export default function SitesPage() {
                                   [{site.site_code}]
                                 </span>
                               )}
-                              <span style={{ letterSpacing: '0.02em' }}>{site.name}</span>
+                              <span style={{ letterSpacing: '0.02em' }}>
+                                {(() => {
+                                  let cleanName = site.name;
+                                  if (site.site_code && cleanName.toUpperCase().startsWith(site.site_code.toUpperCase())) {
+                                    cleanName = cleanName.substring(site.site_code.length).replace(/^[\s-]+/, '');
+                                  }
+                                  return cleanName;
+                                })()}
+                              </span>
                             </div>
                             {Array.isArray(site.aliases) && site.aliases?.length > 0 && (
                               <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
