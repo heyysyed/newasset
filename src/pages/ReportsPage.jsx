@@ -57,7 +57,7 @@ const SEVERITY_BG = { CRITICAL: 'var(--status-danger-soft)', HIGH: 'var(--status
 const FINANCIAL_ROLES = ['admin', 'super_admin']
 
 export default function ReportsPage() {
-  const { profile } = useAuth()
+  const { profile, can } = useAuth()
   const { reportId } = useParams()
   const navigate = useNavigate()
   const isMobile = useIsMobile()

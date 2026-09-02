@@ -5,7 +5,7 @@ import {
   ChevronUp, ChevronDown, Loader2, ChevronLeft, ChevronRight, Copy, ArrowRight,
   X, MapPin, Package, IndianRupee, Activity, Check, ArrowRightLeft,
   FileSpreadsheet, FileText, ChevronDown as ChevronDownIcon, Layers,
-  Clock, Ticket, BarChart3, Columns, Save
+  Clock, Ticket, BarChart3, Columns, Save, AlertTriangle
 } from 'lucide-react'
 import { supabase, fetchAssetsPaginated, bulkDeleteAssets, bulkUpdateAssets, fetchFilterOptions, createAsset, generateAssetCode, transferAsset, bulkCreateMaintenanceTickets, getAssetSelectCols } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
@@ -16,7 +16,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { calculateBookValue, formatCurrency } from '../lib/depreciation'
 import AssetTransferTab from '../components/assets/AssetTransferTab'
 import AssetMap from '../components/AssetMap'
-import DepreciationChart from '../components/DepreciationChart'
 import AssetHistoryDrawer from '../components/AssetHistoryDrawer'
 import AssetFilters from '../components/assets/AssetFilters'
 import AssetTable from '../components/assets/AssetTable'
@@ -304,9 +303,16 @@ export default function AssetList() {
     setBulkLoading(true)
     try {
       await bulkUpdateAssets([...selected], { status: bulkStatusVal }, user.id)
-      setShowBulkStatus(false); setBulkStatusVal(''); setSelected(new Set()); queryClient.invalidateQueries({ queryKey: ['assets'] })
-    } catch (e) { alert(e.message) }
-    finally { setBulkLoading(false) }
+      setShowBulkStatus(false)
+      setBulkStatusVal('')
+      setSelected(new Set())
+      queryClient.invalidateQueries({ queryKey: ['assets'] })
+      alert(`Successfully updated status for ${selected.size} assets!`)
+    } catch (e) { 
+      alert(`Error updating status: ${e.message || e}`) 
+    } finally { 
+      setBulkLoading(false) 
+    }
   }
 
   async function handleBulkTransfer() {
@@ -320,9 +326,16 @@ export default function AssetList() {
           await transferAsset(id, user.id, asset.site || '', bulkTransferSite, 'Bulk transfer')
         }
       }
-      setShowBulkTransfer(false); setBulkTransferSite(''); setSelected(new Set()); queryClient.invalidateQueries({ queryKey: ['assets'] })
-    } catch (e) { alert(e.message) }
-    finally { setBulkLoading(false) }
+      setShowBulkTransfer(false)
+      setBulkTransferSite('')
+      setSelected(new Set())
+      queryClient.invalidateQueries({ queryKey: ['assets'] })
+      alert(`Successfully transferred ${selected.size} assets to ${bulkTransferSite}!`)
+    } catch (e) { 
+      alert(`Error transferring assets: ${e.message || e}`) 
+    } finally { 
+      setBulkLoading(false) 
+    }
   }
 
   async function handleClone() {
@@ -340,10 +353,14 @@ export default function AssetList() {
   async function handleInlineSave() {
     if (!inlineEdit) return
     try {
-      await supabase.from('assets').update({ [inlineEdit.field]: inlineEdit.value }).eq('id', inlineEdit.id)
+      const { error } = await supabase.from('assets').update({ [inlineEdit.field]: inlineEdit.value }).eq('id', inlineEdit.id)
+      if (error) throw error
       queryClient.invalidateQueries({ queryKey: ['assets'] })
       setInlineEdit(null)
-    } catch (e) { console.error(e) }
+    } catch (e) {
+      alert(`Failed to save edit: ${e.message || e}`)
+      console.error(e) 
+    }
   }
 
   function handleExportDossier(asset) {
@@ -362,10 +379,13 @@ export default function AssetList() {
       const ids = assignGroupAssets.map(a => a.id)
       await bulkUpdateAssets(ids, { asset_name: finalName.trim() }, user.id)
       setShowAssignGroup(false)
+      setAssignGroupNewName('')
+      setAssignGroupSelected('')
       queryClient.invalidateQueries({ queryKey: ['assets'] })
+      alert(`Group assigned successfully!`)
     } catch (e) {
       console.error(e)
-      alert("Failed to assign group")
+      alert(`Failed to assign group: ${e.message || e}`)
     } finally {
       setAssignGroupLoading(false)
     }
@@ -667,7 +687,6 @@ export default function AssetList() {
     { k: 'age', l: 'Age' },
     { k: 'health', l: 'Health' },
     { k: 'risk', l: 'Risk' },
-    { k: 'location_precision', l: 'Location' },
     { k: 'condition', l: 'Condition' },
     { k: 'purchase_value', l: 'Book Value' },
     { k: 'status', l: 'Status' },
@@ -701,6 +720,7 @@ export default function AssetList() {
     try {
       await bulkCreateMaintenanceTickets([...selected], { ...bulkMaintenanceForm, reported_by: user.id })
       setShowBulkMaintenance(false)
+      setBulkMaintenanceForm({ title: '', description: '', priority: 'normal', ticket_type: 'preventive' })
       setSelected(new Set())
       alert(`Successfully created ${selected.size} maintenance tickets!`)
     } catch (err) {
@@ -765,7 +785,7 @@ export default function AssetList() {
             <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
           </button>
           {selected.size > 0 && isAdmin && (
-            <button onClick={() => handleDelete([...selected])} className="flex-1 md:flex-none bg-[var(--danger)] text-white font-semibold text-sm px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 shadow-sm" disabled={deleting}>
+            <button onClick={() => handleDelete([...selected])} className="flex-1 md:flex-none bg-[var(--red)] text-white font-semibold text-sm px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed transition-all" disabled={deleting}>
               {deleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
               {deleting ? 'Deleting…' : `Delete (${selected.size})`}
             </button>
@@ -783,8 +803,7 @@ export default function AssetList() {
         {[
           { id: 'register', label: 'Asset Register', icon: Package },
           { id: 'transfers', label: 'Transfers', icon: ArrowRightLeft },
-          { id: 'map', label: 'Map View', icon: MapPin },
-          { id: 'depreciation', label: 'Forecasting', icon: BarChart3 }
+          { id: 'map', label: 'Map View', icon: MapPin }
         ].map(tab => (
           <button key={tab.id} onClick={() => setViewMode(tab.id)}
             style={{ flex: 1, minWidth: 140, justifyContent: 'center', display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: 6,
@@ -822,8 +841,6 @@ export default function AssetList() {
       {viewMode === 'map' && <AssetMap assets={assets} sites={sites} />}
 
       {/* Depreciation Chart View */}
-      {viewMode === 'depreciation' && <DepreciationChart assets={assets} />}
-
       {/* Register View */}
       {viewMode === 'register' && <>
       {/* Summary Stats Bar */}

@@ -164,8 +164,8 @@ export default function SitesPage() {
   }
 
   // Analytics helper for drawer
-  const getSiteAnalytics = (siteName) => {
-    const siteAssets = assets.filter(a => isSiteMatch(a.site, siteName))
+  const getSiteAnalytics = (site) => {
+    const siteAssets = assets.filter(a => isSiteMatch(a.site, site))
     const activeAssets = siteAssets.filter(a => a.status === 'Active')
     const totalBookValue = siteAssets.reduce((sum, a) => sum + calculateBookValue(a), 0)
     
@@ -221,13 +221,13 @@ export default function SitesPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: 'var(--text-3)' }}>
                     <Package size={16} /> <span style={{ textTransform: 'uppercase', }}>Total Assets</span>
                   </div>
-                  <div style={{ color: 'var(--text-0)' }}>{getSiteAnalytics(selectedSite.name).total}</div>
+                  <div style={{ color: 'var(--text-0)' }}>{getSiteAnalytics(selectedSite).total}</div>
                 </div>
                 <div style={{ background: 'rgba(220,38,38,0.05)', padding: '16px', borderRadius: 12, border: '1px solid rgba(220,38,38,0.1)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: 'var(--red)' }}>
                     <Activity size={16} /> <span style={{ textTransform: 'uppercase', }}>Open Tickets</span>
                   </div>
-                  <div style={{ color: 'var(--red)' }}>{getSiteAnalytics(selectedSite.name).openTickets}</div>
+                  <div style={{ color: 'var(--red)' }}>{getSiteAnalytics(selectedSite).openTickets}</div>
                 </div>
               </div>
               <div style={{ background: 'var(--bg-2)', borderRadius: 12, border: '1px solid var(--border)', overflow: 'hidden' }}>
@@ -356,8 +356,8 @@ export default function SitesPage() {
         <div className="card animate-fade-up sites-map-container" style={{ height: 'calc(100vh - 200px)', minHeight: 500, overflow: 'hidden', position: 'relative' }}>
           <MapContainer center={defaultCenter} zoom={validSites?.length > 0 ? 5 : 4} style={{ height: '100%', width: '100%' }} zoomControl={false}>
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             <ZoomControl position="bottomright" />
             
@@ -388,11 +388,11 @@ export default function SitesPage() {
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
                         <div style={{ background: '#f5f7fa', padding: '6px 8px', borderRadius: 6, textAlign: 'center' }}>
                           <div style={{ color: '#666', textTransform: 'uppercase' }}>Assets</div>
-                          <div style={{ color: '#333' }}>{getSiteAnalytics(site.name).total}</div>
+                          <div style={{ color: '#333' }}>{getSiteAnalytics(site).total}</div>
                         </div>
                         <div style={{ background: '#fef2f2', padding: '6px 8px', borderRadius: 6, textAlign: 'center' }}>
                           <div style={{ color: 'var(--status-danger)', textTransform: 'uppercase' }}>Alerts</div>
-                          <div style={{ color: 'var(--status-danger)' }}>{getSiteAnalytics(site.name).openTickets}</div>
+                          <div style={{ color: 'var(--status-danger)' }}>{getSiteAnalytics(site).openTickets}</div>
                         </div>
                       </div>
                       
@@ -448,7 +448,7 @@ export default function SitesPage() {
                     </tr>
                   )}
                   {sites.map(site => {
-                    const analytics = getSiteAnalytics(site.name)
+                    const analytics = getSiteAnalytics(site)
                     return (
                     <tr key={site.id} onClick={() => openDrawer(site)} style={{ cursor: 'pointer', transition: 'background 0.2s' }} onMouseOver={e => e.currentTarget.style.background = 'var(--bg-2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
                       <td style={{ color: 'var(--text-0)' }}>
@@ -540,7 +540,7 @@ export default function SitesPage() {
               </div>
             ) : (
               sites.map(site => {
-                const analytics = getSiteAnalytics(site.name)
+                const analytics = getSiteAnalytics(site)
                 return (
                   <div 
                     key={site.id} 
@@ -710,8 +710,8 @@ export default function SitesPage() {
         isMobile ? (
           <MobileSiteDetail 
             site={selectedSite}
-            siteAssets={assets.filter(a => isSiteMatch(a.site, selectedSite.name))} 
-            siteTickets={tickets.filter(t => assets.filter(a => isSiteMatch(a.site, selectedSite.name)).map(a => a.id).includes(t.asset_id))}
+            siteAssets={assets.filter(a => isSiteMatch(a.site, selectedSite))} 
+            siteTickets={tickets.filter(t => assets.filter(a => isSiteMatch(a.site, selectedSite)).map(a => a.id).includes(t.asset_id))}
             can={can}
             onClose={() => setShowDrawer(false)}
             navigate={navigate}
@@ -736,8 +736,8 @@ export default function SitesPage() {
               <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
                 <Site360Workspace 
                   site={selectedSite} 
-                  siteAssets={assets.filter(a => isSiteMatch(a.site, selectedSite.name))} 
-                  siteTickets={tickets.filter(t => assets.filter(a => isSiteMatch(a.site, selectedSite.name)).map(a => a.id).includes(t.asset_id))} 
+                  siteAssets={assets.filter(a => isSiteMatch(a.site, selectedSite))} 
+                  siteTickets={tickets.filter(t => assets.filter(a => isSiteMatch(a.site, selectedSite)).map(a => a.id).includes(t.asset_id))} 
                 />
               </div>
               
@@ -820,7 +820,7 @@ export default function SitesPage() {
                 </label>
                 <div style={{ flex: 1, minHeight: 300, borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)' }}>
                   <MapContainer center={[Number(form.latitude) || 20.5937, Number(form.longitude) || 78.9629]} zoom={form.latitude ? 15 : 4} style={{ height: '100%', width: '100%' }}>
-                    <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
+                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
                     <FormMapHandler 
                       position={{ lat: Number(form.latitude) || 0, lng: Number(form.longitude) || 0 }} 
                       setPosition={(pos) => setForm({ ...form, latitude: pos.lat.toFixed(6), longitude: pos.lng.toFixed(6) })}

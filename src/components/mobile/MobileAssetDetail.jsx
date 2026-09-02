@@ -224,7 +224,7 @@ export default function MobileAssetDetail({
                 style={{ height: '100%', width: '100%' }} 
                 zoomControl={false} dragging={false} scrollWheelZoom={false}
               >
-                <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
                 <Marker position={[intel.location.data.latitude, intel.location.data.longitude]} />
                 {intel.location.data.precision === 'SITE-LEVEL' && site?.radius_meters && (
                   <Circle center={[intel.location.data.latitude, intel.location.data.longitude]} radius={site.radius_meters} pathOptions={{ color: '#3b82f6', fillOpacity: 0.1 }} />

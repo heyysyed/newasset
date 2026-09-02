@@ -166,7 +166,7 @@ export default function Dashboard() {
   const [selectedSite, setSelectedSite] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [timeframe, setTimeframe] = useState('all') // '30' | '90' | 'year' | 'all'
-  const [forecastYears, setForecastYears] = useState(0)
+  const [timeRange, setTimeRange] = useState('YTD')
   const [actionCenterTab, setActionCenterTab] = useState('pending') // 'pending' | 'stock' | 'activity'
 
   const load = useCallback(async () => {
@@ -369,17 +369,6 @@ export default function Dashboard() {
     return { total, byStatus, byCategory, bySite }
   }, [filteredAssets])
 
-  // Financial Forecast calculation
-  const forecastStats = useMemo(() => {
-    const totalPV = filteredAssets.reduce((acc, a) => acc + (Number(a.purchase_value) || 0), 0)
-    const currentBV = filteredAssets.reduce((acc, a) => acc + calculateBookValue(a), 0)
-    const projectedBV = filteredAssets.reduce((acc, a) => {
-      return acc + calculateProjectedBookValue(a, Number(forecastYears))
-    }, 0)
-    const currentDepr = totalPV - currentBV
-    const projectedDepr = totalPV - projectedBV
-    return { totalPV, currentBV, projectedBV, currentDepr, projectedDepr }
-  }, [filteredAssets, forecastYears])
 
   // Charts data derivation
   const { valueByCategory, pieData, barData, siteData, activeCount, repairCount, sitesCount } = useMemo(() => {
@@ -723,82 +712,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-
-        {/* ── Interactive Depreciation Forecast Widget ── */}
-        {(isAdmin || isMod) && (
-          <div className="card animate-fade-up h-full flex flex-col" style={{ animationDelay: '440ms' }}>
-            <div className="card-header border-none pb-0">
-              <h2 style={{ letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>DEPRECIATION FORECAST SIMULATOR</h2>
-              <span style={{ color: 'var(--text-3)', }}>Interactive projection tool</span>
-            </div>
-            <div className="card-body flex-1 flex flex-col gap-6 justify-center">
-              {/* Projection Slider */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <div>
-                  <label className="lbl">Projection Period: <span style={{ color: 'var(--accent)', }}>{forecastYears} {forecastYears === 1 ? 'Year' : 'Years'}</span></label>
-                  <input 
-                    type="range" 
-                    min="0" 
-                    max="5" 
-                    step="1" 
-                    value={forecastYears} 
-                    onChange={e => setForecastYears(Number(e.target.value))} 
-                    className="sticker-slider"
-                    style={{ width: '100%', marginTop: 8 }}
-                  />
-                </div>
-                <p style={{ color: 'var(--text-2)', margin: 0 }}>
-                  Simulates the declining book value of the current set of filtered assets over the next 5 years using their straight-line or declining balance rules.
-                </p>
-              </div>
-              
-              {/* Comparative Metrics */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, background: 'var(--bg-1)', padding: 16, borderRadius: 12, border: '1px solid var(--border)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--text-2)', }}>Initial Cost:</span>
-                  <span className="font-mono" style={{ color: 'var(--text-0)' }}>{formatCurrency(forecastStats.totalPV)}</span>
-                </div>
-                
-                <div style={{ height: 1, background: 'var(--border)' }} />
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--text-2)', }}>Current Book Value:</span>
-                  <span className="font-mono" style={{ color: 'var(--text-1)' }}>{formatCurrency(forecastStats.currentBV)}</span>
-                </div>
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--text-2)', }}>Future Book Value:</span>
-                  <span className="font-mono" style={{ color: 'var(--accent)' }}>{formatCurrency(forecastStats.projectedBV)}</span>
-                </div>
-                
-                {/* Visual Bar chart / indicator */}
-                <div style={{ marginTop: 4 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 4 }}>
-                    <span>Current BV ({Math.round((forecastStats.currentBV / (forecastStats.totalPV || 1)) * 100)}%)</span>
-                    <span>Future BV ({Math.round((forecastStats.projectedBV / (forecastStats.totalPV || 1)) * 100)}%)</span>
-                  </div>
-                  <div style={{ height: 8, borderRadius: 8, background: 'var(--bg-3)', overflow: 'hidden', display: 'flex' }}>
-                    <div style={{ 
-                      height: '100%', 
-                      width: `${(forecastStats.projectedBV / (forecastStats.totalPV || 1)) * 100}%`, 
-                      background: 'linear-gradient(90deg, var(--accent), var(--cyan))',
-                      transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-                    }} />
-                    <div style={{ 
-                      height: '100%', 
-                      width: `${((forecastStats.currentBV - forecastStats.projectedBV) / (forecastStats.totalPV || 1)) * 100}%`, 
-                      background: 'var(--accent-glow)',
-                      transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-                    }} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── Unified Action Center Card ── */}
+      <div className="w-full">        {/* ── Unified Action Center Card ── */}
         <div className="card animate-fade-up h-full flex flex-col" style={{ animationDelay: '480ms' }}>
           <div className="card-header border-none pb-0 flex-col items-start gap-4">
             <h2 style={{ letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>ACTION CENTER</h2>

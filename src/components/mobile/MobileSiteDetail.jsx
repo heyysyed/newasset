@@ -190,7 +190,7 @@ export default function MobileSiteDetail({ site, siteAssets, siteTickets, can, o
                 dragging={false} 
                 scrollWheelZoom={false}
               >
-                <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
                 <Marker position={[Number(site.latitude), Number(site.longitude)]} />
                 <Circle 
                   center={[Number(site.latitude), Number(site.longitude)]} 

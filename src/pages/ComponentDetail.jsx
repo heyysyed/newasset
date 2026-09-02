@@ -18,6 +18,7 @@ import {
 export default function ComponentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [component, setComponent] = useState(null);
   const [lifecycle, setLifecycle] = useState([]);
   const [replacements, setReplacements] = useState([]);

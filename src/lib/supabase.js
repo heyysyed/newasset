@@ -220,6 +220,7 @@ async function backupAsset(asset, userId) {
 
 async function deleteAssetDependencies(ids) {
   const tableConfigs = [
+    { name: 'asset_components', col: 'asset_id' },
     { name: 'asset_audit', col: 'asset_id' },
     { name: 'asset_movements', col: 'asset_id' },
     { name: 'asset_attachments', col: 'asset_id' },
@@ -228,30 +229,47 @@ async function deleteAssetDependencies(ids) {
     { name: 'maintenance_schedules', col: 'asset_id' },
     { name: 'maintenance_tickets', col: 'asset_id' },
     { name: 'maintenance_logs', col: 'asset_id' },
-    { name: 'maintenance_photos', col: 'asset_id' },
     { name: 'checklist_submissions', col: 'asset_id' },
     { name: 'gate_pass_items', col: 'asset_id' },
-    { name: 'audit_item_results', col: 'asset_id' },
     { name: 'audit_assignment_items', col: 'asset_id' },
-    { name: 'component_lifecycle_events', col: 'asset_id' },
-    { name: 'asset_components', col: 'asset_id' },
-    { name: 'component_replacements', col: 'asset_id' }
+    { name: 'asset_transfers', col: 'asset_id' },
+    { name: 'audit_items', col: 'asset_id' },
+    { name: 'utility_readings', col: 'asset_id' },
+    { name: 'pm_schedules', col: 'asset_id' },
+    { name: 'tool_transactions', col: 'asset_id' },
+    { name: 'asset_downtime', col: 'asset_id' },
+    { name: 'maintenance_work_orders', col: 'asset_id' }
   ];
+  // Postgres/PostgREST codes meaning "this relation or column is not part of
+  // this deployment" — harmless to skip. Anything else (FK violation, RLS
+  // denial) must surface, otherwise the asset delete fails later with no clue.
+  const MISSING_SCHEMA_CODES = ['42P01', '42703', 'PGRST204', 'PGRST205'];
   for (const table of tableConfigs) {
-    try {
-      const { error } = await supabase.from(table.name).delete().in(table.col, ids);
-      if (error) console.error(`Error deleting from ${table.name}:`, error);
-    } catch (e) {
-      console.error(`Exception deleting from ${table.name}:`, e);
+    const { error } = await supabase.from(table.name).delete().in(table.col, ids);
+    if (!error) continue;
+    if (MISSING_SCHEMA_CODES.includes(error.code)) {
+      console.warn(`Skipping ${table.name}: not present in this schema.`);
+      continue;
     }
+    throw error;
   }
 
   // For serialized_components, un-assign them instead of deleting them
-  try {
-    const { error } = await supabase.from('serialized_components').update({ current_asset_id: null, status: 'In Stock' }).in('current_asset_id', ids);
-    if (error) console.error('Error updating serialized_components:', error);
-  } catch (e) {
-    console.error('Exception updating serialized_components:', e);
+  const { error } = await supabase.from('serialized_components').update({ current_asset_id: null, status: 'AVAILABLE' }).in('current_asset_id', ids);
+  if (error) throw error;
+  
+  // For event ledgers or purchase histories, we nullify the asset_id to keep the history intact
+  // Note: component_lifecycle_events has an immutable trigger, so we cannot update it from here.
+  // The database must be configured with ON DELETE SET NULL and a relaxed trigger to allow cascading nulls.
+  await supabase.from('po_items').update({ asset_id: null }).in('asset_id', ids);
+
+  // Fetch work orders for these assets to nullify their references in component tables (prevents FK blocks)
+  const { data: wos } = await supabase.from('maintenance_work_orders').select('id').in('asset_id', ids);
+  if (wos && wos.length > 0) {
+    const woIds = wos.map(w => w.id);
+    await supabase.from('component_replacements').update({ work_order_id: null }).in('work_order_id', woIds);
+    // Also asset_components might reference install_work_order_id
+    await supabase.from('asset_components').update({ install_work_order_id: null }).in('install_work_order_id', woIds);
   }
 }
 
@@ -700,24 +718,16 @@ function abbreviate(name) {
 }
 
 export function getAssetCodePrefix(assetName, category, companyCode = 'SBC') {
-  if (!assetName || !category) return ''
+  // The user requested a simple 'SBC' prefix rather than Category/Name initials.
   const co = abbreviate(companyCode || 'SBC')
-  const catCode  = CATEGORY_CODE[category] || abbreviate(category)
-  const nameCode = abbreviate(assetName)
-  return `${co}/${catCode}/${nameCode}/`
+  return `${co}`
 }
 
 export async function generateAssetCode(assetName, category, companyCode = 'SBC') {
   const prefix = getAssetCodePrefix(assetName, category, companyCode)
-  if (!prefix) return ''
-
-  const { count } = await supabase
-    .from('assets')
-    .select('id', { count: 'exact', head: true })
-    .ilike('asset_code', `${prefix}%`)
-
-  const next = (count || 0) + 1
-  return `${prefix}${String(next).padStart(3, '0')}`
+  // Generate a random 6-digit number as requested by the user
+  const randomNum = Math.floor(100000 + Math.random() * 900000)
+  return `${prefix}${randomNum}`
 }
 
 export async function bulkInsertAssets(assets) {
