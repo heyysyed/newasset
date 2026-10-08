@@ -43,7 +43,7 @@ export default function InventoryParetoChart() {
     if (!active || !payload?.length) return null
     const item = payload[0].payload
     return (
-      <div style={{ background: '#0f172a', color: '#fff', padding: '8px 12px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+      <div style={{ background: 'var(--bg-3)', color: 'var(--text-0)', padding: '8px 12px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
         <div style={{ color: 'var(--status-info)' }}>{item.name}</div>
         <div>Stock Value: <strong style={{ color: '#34d399', }}>{formatCurrency(item.value)}</strong></div>
         <div>Cumulative Share: <strong style={{ color: '#fbbf24', }}>{item.cumulativePct}%</strong></div>
@@ -52,13 +52,13 @@ export default function InventoryParetoChart() {
   }
 
   return (
-    <div className="card" style={{ padding: 20, background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 12 }}>
+    <div className="card" style={{ padding: 20, background: 'var(--bg-1)', border: '1px solid var(--border)', borderRadius: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
         <div>
-          <h3 style={{ margin: 0, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <h3 style={{ margin: 0, color: 'var(--text-1)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Inventory Pareto (80/20) Analysis
           </h3>
-          <p style={{ margin: 0, color: '#64748b' }}>Bar = Category Value (₹) | Line = Cumulative %</p>
+          <p style={{ margin: 0, color: 'var(--text-2)' }}>Bar = Category Value (₹) | Line = Cumulative %</p>
         </div>
         <Layers size={18} color="#7c3aed" />
       </div>

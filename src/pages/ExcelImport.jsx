@@ -287,6 +287,9 @@ export default function ExcelImport() {
   const [excelCols,   setExcelCols]   = useState([])
   const [userMapping, setUserMapping] = useState({})
   const [availableSites, setAvailableSites] = useState([])
+  const [generating, setGenerating] = useState(false)
+  const [showAddCol, setShowAddCol] = useState(false)
+  const [extraCols, setExtraCols] = useState([])
   const fileRef = useRef()
   let newRowCounter = useRef(0)
 
@@ -380,8 +383,6 @@ export default function ExcelImport() {
     applyRows([...editRows, newRow])
   }
 
-  const [generating, setGenerating] = useState(false)
-
   async function autoGenerateCodes() {
     const missing = editRows.filter(r => !r.asset_code && r.asset_name && r.category)
     if (!missing.length) return alert('All rows either have codes already, or are missing Asset Name / Category needed to generate.')
@@ -389,36 +390,17 @@ export default function ExcelImport() {
     try {
       const updated = [...editRows]
       
-      // 1. Group missing rows by their computed prefix
-      const prefixGroups = {}
       for (const row of missing) {
         const rowCompanyCode = row.company_code || currentCompany?.code || 'SBC'
         const prefix = getAssetCodePrefix(row.asset_name, row.category, rowCompanyCode)
         if (!prefix) continue
-        if (!prefixGroups[prefix]) prefixGroups[prefix] = []
-        prefixGroups[prefix].push(row)
-      }
-
-      // 2. Query the DB for the count of each unique prefix concurrently
-      const prefixCounts = {}
-      const queries = Object.keys(prefixGroups).map(async (prefix) => {
-        const { count } = await supabase
-          .from('assets')
-          .select('id', { count: 'exact', head: true })
-          .ilike('asset_code', `${prefix}%`)
-        prefixCounts[prefix] = count || 0
-      })
-      await Promise.all(queries)
-
-      // 3. Assign sequential codes in memory
-      for (const [prefix, rows] of Object.entries(prefixGroups)) {
-        let currentCount = prefixCounts[prefix] + 1
-        for (const row of rows) {
-          const idx = updated.findIndex(r => r._row === row._row)
-          if (idx === -1) continue
-          const finalCode = `${prefix}${String(currentCount).padStart(3, '0')}`
-          updated[idx] = { ...updated[idx], asset_code: finalCode, company_code: row.company_code || currentCompany?.code || 'SBC' }
-          currentCount++
+        
+        const randomNum = Math.floor(100000 + Math.random() * 900000)
+        const finalCode = `${prefix}${randomNum}`
+        
+        const idx = updated.findIndex(r => r._row === row._row)
+        if (idx !== -1) {
+          updated[idx] = { ...updated[idx], asset_code: finalCode, company_code: rowCompanyCode }
         }
       }
 
@@ -508,9 +490,6 @@ export default function ExcelImport() {
   }
 
   // ── Add Column ─────────────────────────────────────────────────────────────
-  const [showAddCol, setShowAddCol] = useState(false)
-  const [extraCols, setExtraCols] = useState([])
-
   const availableCols = Object.entries(DB_LABELS).filter(([k]) =>
     !(colInfo?.recognized || []).some(c => c.db === k) && !extraCols.includes(k)
   )
@@ -749,7 +728,7 @@ export default function ExcelImport() {
               className="btn-primary" style={{ padding: '10px 20px', gap: 8, width: '100%', justifyContent: 'center' }}>
               {generating
                 ? <><div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }}/> Generating codes…</>
-                : <><FileSpreadsheet size={15}/> Auto-Generate Asset Codes (SBC/Category/Name/001)</>
+                : <><FileSpreadsheet size={15}/> Auto-Generate Asset Codes (SBC123456)</>
               }
             </button>
           )}

@@ -25,7 +25,7 @@ import AssetTimeline from '../components/assets/AssetTimeline'
 import AssetComponentsTab from '../components/assets/AssetComponentsTab'
 
 /* ───── constants ───── */
-const STATUS_BADGE = {
+export const STATUS_BADGE = {
   Active: 'badge-active', Inactive: 'badge-inactive',
   'Under Repair': 'badge-repair', Disposed: 'badge-disposed', 'On Hire': 'badge-onhire'
 }
@@ -86,7 +86,7 @@ const PillTab = ({ active, onClick, icon: Icon, label, count }) => (
 )
 
 /* ───── Section Card ───── */
-function SectionCard({ title, icon: Icon, children, defaultOpen = true, actions, noPad, accentColor }) {
+export function SectionCard({ title, icon: Icon, children, defaultOpen = true, actions, noPad, accentColor }) {
   const [open, setOpen] = useState(defaultOpen)
   const accent = accentColor || 'var(--accent)'
   return (
@@ -137,7 +137,7 @@ const InfoField = ({ label, value, mono, icon: FieldIcon, accent }) => {
 }
 
 /* ───── Stat Mini Card ───── */
-const StatMini = ({ label, value, icon: Icon, color, sub }) => (
+export const StatMini = ({ label, value, icon: Icon, color, sub }) => (
   <div className="relative overflow-hidden flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-3.5 p-3 md:p-4 bg-[var(--bg-2)] border-[1.5px] border-[var(--border)] rounded-xl md:rounded-2xl shadow-sm">
     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${color}, ${color}60)` }} />
     <div style={{
@@ -155,7 +155,7 @@ const StatMini = ({ label, value, icon: Icon, color, sub }) => (
 )
 
 /* ───── Empty State ───── */
-const EmptyState = ({ icon: Icon, title, description, action }) => (
+export const EmptyState = ({ icon: Icon, title, description, action }) => (
   <div style={{ padding: '48px 20px', textAlign: 'center' }}>
     <div style={{
       width: 64, height: 64, borderRadius: 20, margin: '0 auto 16px',

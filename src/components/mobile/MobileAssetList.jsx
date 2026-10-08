@@ -88,7 +88,7 @@ export default function MobileAssetList({
         {loading ? (
           <div className="flex flex-col gap-3">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-40 bg-bg-1 border border-border rounded-xl animate-pulse" />
+              <div key={`skel3-${i}`} className="h-40 bg-bg-1 border border-border rounded-xl animate-pulse" />
             ))}
           </div>
         ) : assets.length === 0 ? (

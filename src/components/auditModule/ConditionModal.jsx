@@ -137,8 +137,8 @@ export default function ConditionModal({ asset, onSubmit, onClose }) {
 
         {/* ALWAYS VISIBLE STICKY FOOTER */}
         <div style={{
-          padding: '14px 20px', borderTop: '1px solid var(--border)', background: '#ffffff',
-          display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 12, flexShrink: 0, boxShadow: '0 -4px 12px rgba(0,0,0,0.05)'
+          padding: '14px 20px', borderTop: '1px solid var(--border)', background: 'var(--bg-1)',
+          display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 12, flexShrink: 0
         }}>
           <button onClick={onClose} className="btn-ghost" style={{ padding: '12px', borderRadius: 10, }}>Cancel</button>
           <button onClick={handleSubmit} disabled={!condition || gettingLocation} className="btn-primary" style={{ padding: '12px', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>

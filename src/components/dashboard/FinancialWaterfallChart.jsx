@@ -15,7 +15,7 @@ export default function FinancialWaterfallChart({ purchaseValue = 0, depreciatio
     if (!active || !payload?.length) return null
     const item = payload[0].payload
     return (
-      <div style={{ background: '#0f172a', color: '#fff', padding: '8px 12px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+      <div style={{ background: 'var(--bg-3)', color: 'var(--text-0)', padding: '8px 12px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
         <div >{item.name}</div>
         <div style={{ color: item.fill }}>{formatCurrency(item.value)}</div>
       </div>
@@ -23,13 +23,13 @@ export default function FinancialWaterfallChart({ purchaseValue = 0, depreciatio
   }
 
   return (
-    <div className="card" style={{ padding: 20, background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 12 }}>
+    <div className="card" style={{ padding: 20, background: 'var(--bg-1)', border: '1px solid var(--border)', borderRadius: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <div>
-          <h3 style={{ margin: 0, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <h3 style={{ margin: 0, color: 'var(--text-1)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Financial Waterfall Ledger
           </h3>
-          <p style={{ margin: 0, color: '#64748b' }}>Capital expenditure vs depreciation & repair deductions</p>
+          <p style={{ margin: 0, color: 'var(--text-2)' }}>Capital expenditure vs depreciation & repair deductions</p>
         </div>
         <IndianRupee size={18} color='var(--accent)' />
       </div>
@@ -37,8 +37,8 @@ export default function FinancialWaterfallChart({ purchaseValue = 0, depreciatio
       <div style={{ height: 220, width: '100%' }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
-            <XAxis dataKey="name" stroke="#64748b" fontSize={11} tickLine={false} axisLine={{ stroke: '#e2e8f0' }} />
-            <YAxis stroke="#64748b" fontSize={10} tickLine={false} axisLine={{ stroke: '#e2e8f0' }} tickFormatter={(v) => `₹${(v/100000).toFixed(1)}L`} />
+            <XAxis dataKey="name" stroke="#64748b" fontSize={11} tickLine={false} axisLine={{ stroke: 'var(--border)' }} />
+            <YAxis stroke="#64748b" fontSize={10} tickLine={false} axisLine={{ stroke: 'var(--border)' }} tickFormatter={(v) => `₹${(v/100000).toFixed(1)}L`} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="value" radius={[6, 6, 0, 0]}>
               {data.map((entry, index) => (

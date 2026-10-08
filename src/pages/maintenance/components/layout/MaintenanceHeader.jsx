@@ -1,8 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, QrCode, HardHat, Wrench } from 'lucide-react';
+import TicketForm from '../tickets/TicketForm';
+import { useCreateTicket } from '../../hooks/useTickets';
 
 export default function MaintenanceHeader() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [showTicketForm, setShowTicketForm] = useState(false);
+  const [ticketInitialData, setTicketInitialData] = useState(null);
+  
+  const createTicket = useCreateTicket();
+
+  const handleCreateSubmit = (payload) => {
+    createTicket.mutate(payload, {
+      onSuccess: () => {
+        setShowTicketForm(false);
+        setTicketInitialData(null);
+      }
+    });
+  };
   
   useEffect(() => {
     const t = setTimeout(() => {
@@ -33,7 +48,7 @@ export default function MaintenanceHeader() {
         </div>
         
         {/* QR Button (Mobile Only) */}
-        <button className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--bg-1)] border border-[var(--border)] text-[var(--text-1)] active:scale-95 transition-transform">
+        <button onClick={() => alert('Opening QR Code Scanner...')} className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--bg-1)] border border-[var(--border)] text-[var(--text-1)] active:scale-95 transition-transform">
           <QrCode size={18} />
         </button>
       </div>
@@ -56,20 +71,35 @@ export default function MaintenanceHeader() {
         {/* Action Buttons */}
         <div className="flex items-center gap-2.5 sm:gap-2">
           {/* QR Button (Desktop Only) */}
-          <button className="hidden md:flex flex-shrink-0 p-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-1)] hover:bg-[var(--bg-2)] transition-colors text-[var(--text-1)]" title="Scan Asset">
+          <button onClick={() => alert('Opening QR Code Scanner...')} className="hidden md:flex flex-shrink-0 p-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-1)] hover:bg-[var(--bg-2)] transition-colors text-[var(--text-1)]" title="Scan Asset">
             <QrCode size={18} />
           </button>
           
-          <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-1)] hover:bg-[var(--bg-2)] transition-colors text-[var(--text-1)] text-sm font-semibold whitespace-nowrap">
+          <button 
+            onClick={() => { setTicketInitialData(null); setShowTicketForm(true); }} 
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-1)] hover:bg-[var(--bg-2)] transition-colors text-[var(--text-1)] text-sm font-semibold whitespace-nowrap"
+          >
             <Plus size={16} /> <span className="sm:hidden lg:inline">New</span> Ticket
           </button>
           
-          <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--accent)] hover:opacity-90 transition-opacity text-white text-sm font-semibold whitespace-nowrap shadow-sm shadow-[var(--accent-glow)]">
+          <button 
+            onClick={() => { setTicketInitialData({ ticket_type: 'scheduled', priority: 'high' }); setShowTicketForm(true); }} 
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--accent)] hover:opacity-90 transition-opacity text-white text-sm font-semibold whitespace-nowrap shadow-sm shadow-[var(--accent-glow)]"
+          >
             <HardHat size={16} /> <span className="sm:hidden lg:inline">New</span> Work Order
           </button>
         </div>
         </div>
       </div>
+
+      {showTicketForm && (
+        <TicketForm 
+          initialData={ticketInitialData}
+          onClose={() => { setShowTicketForm(false); setTicketInitialData(null); }}
+          onSubmit={handleCreateSubmit}
+          isSubmitting={createTicket.isPending}
+        />
+      )}
     </div>
   );
 }

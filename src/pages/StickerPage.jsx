@@ -1253,7 +1253,7 @@ export default function StickerPage() {
                   </div>
 
                   {loading ? [...Array(6)].map((_, i) => (
-                    <div key={i} className="skeleton" style={{ margin: '10px 12px', height: 38, borderRadius: 8 }}/>
+                    <div key={`skel-${i}`} className="skeleton" style={{ margin: '10px 12px', height: 38, borderRadius: 8 }}/>
                   )) : filtered.length === 0 ? (
                     <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--text-3)', fontSize: '0.82rem' }}>No assets match</div>
                   ) : filtered.map(asset => (

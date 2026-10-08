@@ -124,7 +124,7 @@ export async function updateSettings(updates) {
 }
 
 export const getAssetSelectCols = (canViewFinancials = false) => {
-  const base = 'id, asset_code, asset_name, make, model_no, purchase_order_no, serial_no, capacity, status, category, site, type_code, purchase_date, location, department, assigned_to, notes, custom_fields, latitude, longitude, warranty_expiry, disposal_date, disposal_reason, checklist_template_id, quantity, parent_asset_id, added_on, updated_at, added_by'
+  const base = 'id, asset_code, asset_name, make, model_no, purchase_order_no, serial_no, capacity, status, category, site, type_code, purchase_date, location, department, assigned_to, notes, custom_fields, latitude, longitude, warranty_expiry, disposal_date, disposal_reason, checklist_template_id, quantity, parent_asset_id, nfc_tag_id, added_on, updated_at, added_by'
   const fin = ', purchase_value, salvage_value, useful_life_years, depreciation_method, depreciation_rate_percent'
   return canViewFinancials ? `${base}${fin}` : base
 }
@@ -618,24 +618,16 @@ function abbreviate(name) {
 }
 
 export function getAssetCodePrefix(assetName, category, companyCode = 'SBC') {
-  if (!assetName || !category) return ''
+  // The user requested a simple 'SBC' prefix rather than Category/Name initials.
   const co = abbreviate(companyCode || 'SBC')
-  const catCode  = CATEGORY_CODE[category] || abbreviate(category)
-  const nameCode = abbreviate(assetName)
-  return `${co}/${catCode}/${nameCode}/`
+  return `${co}`
 }
 
 export async function generateAssetCode(assetName, category, companyCode = 'SBC') {
   const prefix = getAssetCodePrefix(assetName, category, companyCode)
-  if (!prefix) return ''
-
-  const { count } = await supabase
-    .from('assets')
-    .select('id', { count: 'exact', head: true })
-    .ilike('asset_code', `${prefix}%`)
-
-  const next = (count || 0) + 1
-  return `${prefix}${String(next).padStart(3, '0')}`
+  // Generate a random 6-digit number as requested by the user
+  const randomNum = Math.floor(100000 + Math.random() * 900000)
+  return `${prefix}${randomNum}`
 }
 
 export async function bulkInsertAssets(assets) {

@@ -278,7 +278,7 @@ export default function AssetTable({
 
         {/* Mobile Card List */}
         <div className="md:hidden flex flex-col gap-3 pb-8">
-          {loading && [...Array(4)].map((_, i) => <div key={i} className="h-32 bg-bg-1 rounded-2xl border border-border animate-pulse" />)}
+          {loading && [...Array(4)].map((_, i) => <div key={`skel3-${i}`} className="h-32 bg-bg-1 rounded-2xl border border-border animate-pulse" />)}
           {!loading && sorted.map(asset => (
             <div key={asset.id} className="bg-bg-0 border border-border rounded-2xl p-4 shadow-sm active:scale-[0.98] transition-transform flex flex-col gap-3 relative" onClick={() => navigate(`/assets/${asset.id}`)}>
               {/* Asset Name, Code & Status */}

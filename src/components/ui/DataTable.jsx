@@ -73,7 +73,7 @@ export default function DataTable({
               {columns.map((col, idx) => (
                 <th 
                   key={idx} 
-                  className={\px-4 py-3  text-[0.8rem] uppercase tracking-wider \ \\}
+                  className={`px-4 py-3 ${col.sortable ? 'cursor-pointer select-none hover:text-text-0' : ''} text-[0.8rem] uppercase tracking-wider ${col.align === 'right' ? 'text-right' : ''}`}
                   onClick={() => requestSort(col.accessor, col.sortable)}
                   style={{ width: col.width }}
                 >
@@ -92,10 +92,10 @@ export default function DataTable({
               <tr 
                 key={row[keyField] || idx}
                 onClick={() => onRowClick && onRowClick(row)}
-                className={\group transition-colors hover:bg-bg-1/50 \ \\}
+                className={`group transition-colors hover:bg-bg-1/50 ${onRowClick ? 'cursor-pointer' : ''} ${rowClassName(row) || ''}`}
               >
                 {columns.map((col, colIdx) => (
-                  <td key={colIdx} className={\px-4 py-3 \\}>
+                  <td key={colIdx} className={`px-4 py-3 ${col.align === 'right' ? 'text-right' : ''}`}>
                     {col.render ? col.render(row) : row[col.accessor]}
                   </td>
                 ))}
@@ -110,7 +110,7 @@ export default function DataTable({
         {sortedData.map((row, idx) => (
           <div 
             key={row[keyField] || idx} 
-            className={\p-4 \ \\}
+            className={`p-4 ${onRowClick ? 'cursor-pointer active:bg-bg-1' : ''} ${rowClassName(row) || ''}`}
             onClick={() => onRowClick && onRowClick(row)}
           >
             {mobileRenderer ? mobileRenderer(row) : (

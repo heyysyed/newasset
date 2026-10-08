@@ -212,7 +212,7 @@ export default function ChecklistImportModal({ onImport, onClose }) {
               {parsed.map((cl, i) => {
                 const fc = FREQ_COLORS[cl.frequency] || FREQ_COLORS.monthly
                 return (
-                  <div key={i} style={{
+                  <div key={`skel2-${i}`} style={{
                     padding: 12, borderRadius: 10, border: '1px solid var(--border)',
                     background: 'var(--bg-2)', marginBottom: 8,
                   }}>

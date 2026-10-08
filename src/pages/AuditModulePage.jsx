@@ -3,7 +3,7 @@ import {
   ClipboardCheck, Plus, Search, CheckCircle2, XCircle, Circle, Loader2,
   QrCode, Camera, ChevronRight, ChevronLeft, X, Trash2, MapPin, Eye, Filter,
   FileSpreadsheet, Download, AlertTriangle, Shield, Clock, Users, Building2,
-  CalendarDays, ChevronDown, RefreshCw, Settings, Link2, Boxes
+  CalendarDays, ChevronDown, RefreshCw, Settings, Link2, Boxes, FileText
 } from 'lucide-react'
 import StockReconciliationAuditView from '../components/auditModule/StockReconciliationAuditView'
 import {
@@ -591,6 +591,12 @@ export default function AuditModulePage() {
     } else if (sub.approval_status === 'pending_hod') {
       await approveAsHOD(submissionId, profile.id, signature, name, notes)
     }
+    setShowApproval(null)
+    await loadAll()
+  }
+
+  const handleRejectSubmission = async (submissionId, notes, role) => {
+    await rejectSubmission(submissionId, profile.id, notes, role)
     setShowApproval(null)
     await loadAll()
   }

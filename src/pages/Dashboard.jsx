@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import {
   Package, Activity, MapPin, Wrench, TrendingUp, ArrowRight, RefreshCw,
@@ -39,15 +40,19 @@ const CAT_COLORS = ['#4f7eff', '#34d399', 'var(--status-warning)', 'var(--status
 
 function StatCard({ icon: Icon, label, value, color, sub, delay = 0, progress }) {
   return (
-    <div 
-      className="card animate-fade-up relative overflow-hidden" 
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: delay / 1000, ease: "easeOut" }}
+      whileHover={{ y: -4, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)" }}
+      className="card relative overflow-hidden" 
       style={{ 
-        animationDelay: `${delay}ms`,
         padding: '20px 24px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         minHeight: 120,
+        backgroundColor: 'var(--bg-2)'
       }}
     >
       <div style={{ position: 'absolute', right: -20, top: -20, opacity: 0.03, transform: 'rotate(-10deg)', pointerEvents: 'none' }}>
@@ -63,14 +68,19 @@ function StatCard({ icon: Icon, label, value, color, sub, delay = 0, progress })
         {sub && <span style={{ color: color, background: `${color}12`, padding: '4px 10px', borderRadius: 20 }}>{sub}</span>}
       </div>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, minWidth: 0 }}>
-        <div title={value} style={{ color: 'var(--text-0)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</div>
+        <div title={value} style={{ color: 'var(--text-0)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '24px', fontWeight: 'bold' }}>{value}</div>
       </div>
       {progress != null && (
         <div style={{ marginTop: 16, height: 4, borderRadius: 4, background: 'var(--bg-3)', overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: `${Math.max(2, Math.min(100, progress))}%`, background: color, transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.max(2, Math.min(100, progress))}%` }}
+            transition={{ duration: 1, delay: 0.2 + (delay / 1000), ease: "easeOut" }}
+            style={{ height: '100%', background: color }} 
+          />
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }
 
@@ -166,7 +176,7 @@ export default function Dashboard() {
   const [selectedSite, setSelectedSite] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [timeframe, setTimeframe] = useState('all') // '30' | '90' | 'year' | 'all'
-  const [forecastYears, setForecastYears] = useState(0)
+  const [timeRange, setTimeRange] = useState('YTD')
   const [actionCenterTab, setActionCenterTab] = useState('pending') // 'pending' | 'stock' | 'activity'
 
   const load = useCallback(async () => {
@@ -369,17 +379,6 @@ export default function Dashboard() {
     return { total, byStatus, byCategory, bySite }
   }, [filteredAssets])
 
-  // Financial Forecast calculation
-  const forecastStats = useMemo(() => {
-    const totalPV = filteredAssets.reduce((acc, a) => acc + (Number(a.purchase_value) || 0), 0)
-    const currentBV = filteredAssets.reduce((acc, a) => acc + calculateBookValue(a), 0)
-    const projectedBV = filteredAssets.reduce((acc, a) => {
-      return acc + calculateProjectedBookValue(a, Number(forecastYears))
-    }, 0)
-    const currentDepr = totalPV - currentBV
-    const projectedDepr = totalPV - projectedBV
-    return { totalPV, currentBV, projectedBV, currentDepr, projectedDepr }
-  }, [filteredAssets, forecastYears])
 
   // Charts data derivation
   const { valueByCategory, pieData, barData, siteData, activeCount, repairCount, sitesCount } = useMemo(() => {
@@ -408,7 +407,7 @@ export default function Dashboard() {
 
   if (loading) return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16 }}>
-      {[...Array(8)].map((_, i) => <div key={i} className="skeleton" style={{ height: 120, borderRadius: 12 }} />)}
+      {[...Array(8)].map((_, i) => <div key={`skel-${i}`} className="skeleton" style={{ height: 120, borderRadius: 12 }} />)}
     </div>
   )
 
@@ -633,7 +632,7 @@ export default function Dashboard() {
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={75} dataKey="value" stroke="var(--bg-1)" strokeWidth={2}>
-                        {pieData.map((entry, i) => <Cell key={i} fill={(STATUS_COLOR[entry.name] || { hex: '#6b7a99' }).hex} />)}
+                        {pieData.map((entry, i) => <Cell key={`cell-${i}`} fill={(STATUS_COLOR[entry.name] || { hex: '#6b7a99' }).hex} />)}
                       </Pie>
                       <Tooltip content={<CustomTooltip />} />
                     </PieChart>
@@ -715,7 +714,7 @@ export default function Dashboard() {
                 <YAxis tick={{ fill: 'var(--text-2)', }} axisLine={false} tickLine={false} tickFormatter={v => v >= 10000000 ? `${(v / 10000000).toFixed(1)}Cr` : v >= 100000 ? `${(v / 100000).toFixed(1)}L` : v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
                 <Tooltip content={<CurrencyTooltip />} cursor={{ fill: 'rgba(43,127,255,0.06)' }} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                  {valueByCategory.map((_, i) => <Cell key={i} fill={`url(#valCatGrad-${i})`} />)}
+                  {valueByCategory.map((_, i) => <Cell key={`cell-${i}`} fill={`url(#valCatGrad-${i})`} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -723,82 +722,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-
-        {/* ── Interactive Depreciation Forecast Widget ── */}
-        {(isAdmin || isMod) && (
-          <div className="card animate-fade-up h-full flex flex-col" style={{ animationDelay: '440ms' }}>
-            <div className="card-header border-none pb-0">
-              <h2 style={{ letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>DEPRECIATION FORECAST SIMULATOR</h2>
-              <span style={{ color: 'var(--text-3)', }}>Interactive projection tool</span>
-            </div>
-            <div className="card-body flex-1 flex flex-col gap-6 justify-center">
-              {/* Projection Slider */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <div>
-                  <label className="lbl">Projection Period: <span style={{ color: 'var(--accent)', }}>{forecastYears} {forecastYears === 1 ? 'Year' : 'Years'}</span></label>
-                  <input 
-                    type="range" 
-                    min="0" 
-                    max="5" 
-                    step="1" 
-                    value={forecastYears} 
-                    onChange={e => setForecastYears(Number(e.target.value))} 
-                    className="sticker-slider"
-                    style={{ width: '100%', marginTop: 8 }}
-                  />
-                </div>
-                <p style={{ color: 'var(--text-2)', margin: 0 }}>
-                  Simulates the declining book value of the current set of filtered assets over the next 5 years using their straight-line or declining balance rules.
-                </p>
-              </div>
-              
-              {/* Comparative Metrics */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, background: 'var(--bg-1)', padding: 16, borderRadius: 12, border: '1px solid var(--border)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--text-2)', }}>Initial Cost:</span>
-                  <span className="font-mono" style={{ color: 'var(--text-0)' }}>{formatCurrency(forecastStats.totalPV)}</span>
-                </div>
-                
-                <div style={{ height: 1, background: 'var(--border)' }} />
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--text-2)', }}>Current Book Value:</span>
-                  <span className="font-mono" style={{ color: 'var(--text-1)' }}>{formatCurrency(forecastStats.currentBV)}</span>
-                </div>
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--text-2)', }}>Future Book Value:</span>
-                  <span className="font-mono" style={{ color: 'var(--accent)' }}>{formatCurrency(forecastStats.projectedBV)}</span>
-                </div>
-                
-                {/* Visual Bar chart / indicator */}
-                <div style={{ marginTop: 4 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 4 }}>
-                    <span>Current BV ({Math.round((forecastStats.currentBV / (forecastStats.totalPV || 1)) * 100)}%)</span>
-                    <span>Future BV ({Math.round((forecastStats.projectedBV / (forecastStats.totalPV || 1)) * 100)}%)</span>
-                  </div>
-                  <div style={{ height: 8, borderRadius: 8, background: 'var(--bg-3)', overflow: 'hidden', display: 'flex' }}>
-                    <div style={{ 
-                      height: '100%', 
-                      width: `${(forecastStats.projectedBV / (forecastStats.totalPV || 1)) * 100}%`, 
-                      background: 'linear-gradient(90deg, var(--accent), var(--cyan))',
-                      transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-                    }} />
-                    <div style={{ 
-                      height: '100%', 
-                      width: `${((forecastStats.currentBV - forecastStats.projectedBV) / (forecastStats.totalPV || 1)) * 100}%`, 
-                      background: 'var(--accent-glow)',
-                      transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-                    }} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── Unified Action Center Card ── */}
+      <div className="w-full">        {/* ── Unified Action Center Card ── */}
         <div className="card animate-fade-up h-full flex flex-col" style={{ animationDelay: '480ms' }}>
           <div className="card-header border-none pb-0 flex-col items-start gap-4">
             <h2 style={{ letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>ACTION CENTER</h2>

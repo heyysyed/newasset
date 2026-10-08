@@ -104,7 +104,7 @@ export default function AnalyticsWorkspace() {
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
                 <Pie data={spendByVendor} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} >
-                  {spendByVendor.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                  {spendByVendor.map((_, i) => <Cell key={`cell-${i}`} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
                 </Pie>
                 <Tooltip formatter={v => formatCurrency(v)} />
               </PieChart>

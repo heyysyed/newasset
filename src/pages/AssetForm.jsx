@@ -2,12 +2,16 @@ import React, { useCallback, useEffect, useState, lazy, Suspense } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { 
   Save, ArrowLeft, AlertCircle, Lock, GitBranch, Package, 
-  MapPin, Tag, ShoppingCart, IndianRupee, Factory, QrCode, ClipboardEdit, Calendar, Loader2
+  MapPin, Tag, ShoppingCart, IndianRupee, Factory, QrCode, ClipboardEdit, Calendar, Loader2,
+  Camera, Image as ImageIcon, UploadCloud, Maximize, Wifi
 } from 'lucide-react'
+import toast from 'react-hot-toast'
 import { createAsset, fetchAsset, updateAsset, fetchSites, supabase, generateAssetCode, fetchEmployees } from '../lib/supabase'
 import { resolveSite } from '../lib/siteResolver'
 import { useAuth } from '../context/AuthContext'
 import { useIsMobile } from '../hooks/useBreakpoint'
+import QRScanner from '../components/checklist/QRScanner'
+import ImageUpload from '../components/common/ImageUpload'
 
 const OCRInvoiceParser = lazy(() => import('../components/common/OCRInvoiceParser'))
 
@@ -21,6 +25,7 @@ const EMPTY = {
   purchase_value:'', salvage_value:'', useful_life_years:'5',
   depreciation_method:'Straight Line', depreciation_rate_percent:'',
   assigned_to: null, assigned_employee_id: null,
+  nfc_tag_id: '',
   custom_fields: {}
 }
 
@@ -92,6 +97,7 @@ export default function AssetForm() {
   const [saving, setSaving]   = useState(false)
   const [errors, setErrors]   = useState({})
   const [saved, setSaved]     = useState(false)
+  const [scannerOpen, setScannerOpen] = useState(false)
   
   const [allAssets, setAllAssets] = useState([])
   const [siteOptions, setSiteOptions] = useState([])
@@ -123,7 +129,7 @@ export default function AssetForm() {
   useEffect(() => {
     if (!isEdit) return
     fetchAsset(id).then(a => {
-      setForm({ ...EMPTY, ...a, purchase_date: a.purchase_date || '', custom_fields: a.custom_fields || {} })
+      setForm({ ...EMPTY, ...a, purchase_date: a.purchase_date || '', custom_fields: a.custom_fields || {}, nfc_tag_id: a.nfc_tag_id || '' })
       setLoading(false)
     }).catch(err => {
       console.error("Fetch error:", err)
@@ -169,10 +175,14 @@ export default function AssetForm() {
       errs.site = 'Site is required'
     }
 
-    if (Object.keys(errs).length) { setErrors(errs); return }
+    if (Object.keys(errs).length) { 
+      setErrors(errs); 
+      toast.error('Please fix the highlighted errors before saving.')
+      return 
+    }
 
     setSaving(true)
-    try {
+    const savePromise = (async () => {
       const payload = { ...form, company_code: companyCode }
       delete payload.profiles
       delete payload.employees
@@ -181,6 +191,7 @@ export default function AssetForm() {
       if (payload.checklist_template_id) payload.checklist_template_id = payload.checklist_template_id
       else payload.checklist_template_id = null
       if (!payload.parent_asset_id) delete payload.parent_asset_id
+      if (!payload.nfc_tag_id) payload.nfc_tag_id = null
       
       const numFields = ['purchase_value', 'salvage_value', 'useful_life_years', 'depreciation_rate_percent', 'latitude', 'longitude']
       numFields.forEach(f => {
@@ -194,10 +205,25 @@ export default function AssetForm() {
       if (isEdit) await updateAsset(id, payload, user?.id)
       else await createAsset(payload, user?.id)
       setSaved(true)
-      setTimeout(() => navigate(isEdit ? `/assets/${id}` : '/assets'), 800)
+      setTimeout(() => navigate(isEdit ? `/assets/${id}` : '/assets'), 1200)
+    })()
+
+    toast.promise(savePromise, {
+      loading: isEdit ? 'Updating asset...' : 'Registering new asset...',
+      success: isEdit ? 'Asset updated successfully!' : 'Asset registered successfully!',
+      error: (err) => {
+        if (err.code === '23505' || err.message?.includes('unique')) {
+          setErrors({ asset_code: 'This Asset Code already exists' })
+          return 'Asset code must be unique'
+        }
+        return 'Failed to save asset: ' + err.message
+      }
+    })
+
+    try {
+      await savePromise
     } catch (err) {
-      if (err.code === '23505' || err.message?.includes('unique')) setErrors({ asset_code: 'This Asset Code already exists' })
-      else alert('Error: ' + err.message)
+      // Error handled by toast.promise
     } finally { setSaving(false) }
   }
 
@@ -234,6 +260,7 @@ export default function AssetForm() {
   const qrPreviewUrl = form.asset_code ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(form.asset_code)}&color=111827&bgcolor=ffffff` : null;
 
   return (
+    <>
     <form onSubmit={handleSubmit} className="w-full max-w-[1240px] mx-auto px-4 md:px-6 py-6 pb-28 md:pb-12 bg-bg-0 min-h-screen">
       
       {/* Header */}
@@ -291,8 +318,83 @@ export default function AssetForm() {
             )}
             {isFieldVisible('make')       && <Field fkey="make"       label="Make / Manufacturer" {...fieldProps}/>}
             {isFieldVisible('model_no')   && <Field fkey="model_no"   label="Model Number" mono {...fieldProps}/>}
-            {isFieldVisible('serial_no')  && <Field fkey="serial_no"  label="Serial / VIN Number" mono {...fieldProps}/>}
+            
+            {isFieldVisible('serial_no') && (
+              <div className="">
+                <label className="flex items-center justify-between text-text-2 text-caption mb-2">
+                  <span className="flex items-center gap-1.5"><QrCode size={14} className="opacity-70" /> Serial / VIN Number</span>
+                  <button type="button" onClick={() => setScannerOpen(true)} className="text-[10px] uppercase font-bold text-accent bg-accent/10 px-2 py-0.5 rounded flex items-center gap-1 hover:bg-accent/20 transition-colors border-none cursor-pointer">
+                    <Maximize size={10} /> Scan
+                  </button>
+                </label>
+                <input
+                  type="text" 
+                  value={form['serial_no']||''} 
+                  onChange={e=>handleSet('serial_no', e.target.value.toUpperCase())}
+                  placeholder={`Enter serial / vin number`} 
+                  disabled={fieldDisabled('serial_no')} 
+                  className={`inp w-full bg-bg-1 border border-border text-text-0 rounded-xl focus:border-accent font-mono text-small`}
+                />
+                {errors['serial_no'] && <p className="text-danger text-[11px] mt-1.5 flex items-center gap-1"><AlertCircle size={12}/>{errors['serial_no']}</p>}
+              </div>
+            )}
+
+            <div className="">
+              <label className="flex items-center justify-between text-text-2 text-caption mb-2">
+                <span className="flex items-center gap-1.5"><Wifi size={14} className="opacity-70" /> NFC Tag ID</span>
+                <button 
+                  type="button" 
+                  onClick={async () => {
+                    if (!('NDEFReader' in window)) {
+                      toast.error('NFC is not supported on this device/browser. Use Chrome on Android.')
+                      return
+                    }
+                    try {
+                      const ndef = new window.NDEFReader()
+                      await ndef.scan()
+                      toast.success('Bring NFC tag close to your phone...')
+                      ndef.onreading = event => {
+                        const { serialNumber } = event
+                        if (serialNumber) {
+                          handleSet('nfc_tag_id', serialNumber)
+                          toast.success('NFC Tag Scanned!')
+                        }
+                      }
+                      ndef.onreadingerror = () => toast.error('Error reading NFC tag')
+                    } catch(err) {
+                      toast.error('NFC Scan failed: ' + err.message)
+                    }
+                  }} 
+                  className="text-[10px] uppercase font-bold text-purple bg-purple/10 px-2 py-0.5 rounded flex items-center gap-1 hover:bg-purple/20 transition-colors border-none cursor-pointer"
+                >
+                  <Wifi size={10} /> Pair Tag
+                </button>
+              </label>
+              <input
+                type="text" 
+                value={form.nfc_tag_id || ''} 
+                onChange={e=>handleSet('nfc_tag_id', e.target.value.toUpperCase())}
+                placeholder={`Empty...`} 
+                disabled={fieldDisabled('nfc_tag_id')} 
+                className={`inp w-full bg-bg-1 border border-border text-text-0 rounded-xl focus:border-accent font-mono text-small`}
+              />
+            </div>
+
             {isFieldVisible('capacity')   && <Field fkey="capacity"   label="Capacity / Specs" {...fieldProps}/>}
+          </Section>
+
+          <Section title="Media & Attachments" icon={ImageIcon}>
+            <div className="col-span-1 md:col-span-2">
+              <label className="flex items-center gap-1.5 text-text-2 text-caption mb-2"><UploadCloud size={14}/> Upload Asset Photos & Documents</label>
+              <ImageUpload 
+                maxFiles={3} 
+                onFilesChange={(newFiles) => {
+                  // If we had a Supabase bucket, we would upload these to 'assets' bucket here
+                  // and set the resulting URLs to form.attachments
+                  console.log("Files ready for upload:", newFiles)
+                }} 
+              />
+            </div>
           </Section>
 
           <Section title="Location & Assignment" icon={MapPin}>
@@ -561,6 +663,17 @@ export default function AssetForm() {
         </div>
       </div>
     </form>
+    
+    {scannerOpen && (
+      <QRScanner 
+        onClose={() => setScannerOpen(false)} 
+        onScan={(data) => {
+          handleSet('serial_no', data.toUpperCase())
+          toast.success(`Scanned: ${data}`)
+        }} 
+      />
+    )}
+    </>
   )
 }
 

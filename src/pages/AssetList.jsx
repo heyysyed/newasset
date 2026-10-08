@@ -5,7 +5,7 @@ import {
   ChevronUp, ChevronDown, Loader2, ChevronLeft, ChevronRight, Copy, ArrowRight,
   X, MapPin, Package, IndianRupee, Activity, Check, ArrowRightLeft,
   FileSpreadsheet, FileText, ChevronDown as ChevronDownIcon, Layers,
-  Clock, Ticket, BarChart3, Columns, Save
+  Clock, Ticket, BarChart3, Columns, Save, AlertTriangle
 } from 'lucide-react'
 import { supabase, fetchAssetsPaginated, bulkDeleteAssets, bulkUpdateAssets, fetchFilterOptions, createAsset, generateAssetCode, transferAsset, bulkCreateMaintenanceTickets, getAssetSelectCols } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
@@ -16,7 +16,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { calculateBookValue, formatCurrency } from '../lib/depreciation'
 import AssetTransferTab from '../components/assets/AssetTransferTab'
 import AssetMap from '../components/AssetMap'
-import DepreciationChart from '../components/DepreciationChart'
 import AssetHistoryDrawer from '../components/AssetHistoryDrawer'
 import AssetFilters from '../components/assets/AssetFilters'
 import AssetTable from '../components/assets/AssetTable'
@@ -304,9 +303,16 @@ export default function AssetList() {
     setBulkLoading(true)
     try {
       await bulkUpdateAssets([...selected], { status: bulkStatusVal }, user.id)
-      setShowBulkStatus(false); setBulkStatusVal(''); setSelected(new Set()); queryClient.invalidateQueries({ queryKey: ['assets'] })
-    } catch (e) { alert(e.message) }
-    finally { setBulkLoading(false) }
+      setShowBulkStatus(false)
+      setBulkStatusVal('')
+      setSelected(new Set())
+      queryClient.invalidateQueries({ queryKey: ['assets'] })
+      alert(`Successfully updated status for ${selected.size} assets!`)
+    } catch (e) { 
+      alert(`Error updating status: ${e.message || e}`) 
+    } finally { 
+      setBulkLoading(false) 
+    }
   }
 
   async function handleBulkTransfer() {
@@ -320,9 +326,16 @@ export default function AssetList() {
           await transferAsset(id, user.id, asset.site || '', bulkTransferSite, 'Bulk transfer')
         }
       }
-      setShowBulkTransfer(false); setBulkTransferSite(''); setSelected(new Set()); queryClient.invalidateQueries({ queryKey: ['assets'] })
-    } catch (e) { alert(e.message) }
-    finally { setBulkLoading(false) }
+      setShowBulkTransfer(false)
+      setBulkTransferSite('')
+      setSelected(new Set())
+      queryClient.invalidateQueries({ queryKey: ['assets'] })
+      alert(`Successfully transferred ${selected.size} assets to ${bulkTransferSite}!`)
+    } catch (e) { 
+      alert(`Error transferring assets: ${e.message || e}`) 
+    } finally { 
+      setBulkLoading(false) 
+    }
   }
 
   async function handleClone() {
@@ -340,10 +353,14 @@ export default function AssetList() {
   async function handleInlineSave() {
     if (!inlineEdit) return
     try {
-      await supabase.from('assets').update({ [inlineEdit.field]: inlineEdit.value }).eq('id', inlineEdit.id)
+      const { error } = await supabase.from('assets').update({ [inlineEdit.field]: inlineEdit.value }).eq('id', inlineEdit.id)
+      if (error) throw error
       queryClient.invalidateQueries({ queryKey: ['assets'] })
       setInlineEdit(null)
-    } catch (e) { console.error(e) }
+    } catch (e) {
+      alert(`Failed to save edit: ${e.message || e}`)
+      console.error(e) 
+    }
   }
 
   function handleExportDossier(asset) {
@@ -362,10 +379,13 @@ export default function AssetList() {
       const ids = assignGroupAssets.map(a => a.id)
       await bulkUpdateAssets(ids, { asset_name: finalName.trim() }, user.id)
       setShowAssignGroup(false)
+      setAssignGroupNewName('')
+      setAssignGroupSelected('')
       queryClient.invalidateQueries({ queryKey: ['assets'] })
+      alert(`Group assigned successfully!`)
     } catch (e) {
       console.error(e)
-      alert("Failed to assign group")
+      alert(`Failed to assign group: ${e.message || e}`)
     } finally {
       setAssignGroupLoading(false)
     }
@@ -667,7 +687,6 @@ export default function AssetList() {
     { k: 'age', l: 'Age' },
     { k: 'health', l: 'Health' },
     { k: 'risk', l: 'Risk' },
-    { k: 'location_precision', l: 'Location' },
     { k: 'condition', l: 'Condition' },
     { k: 'purchase_value', l: 'Book Value' },
     { k: 'status', l: 'Status' },
@@ -701,6 +720,7 @@ export default function AssetList() {
     try {
       await bulkCreateMaintenanceTickets([...selected], { ...bulkMaintenanceForm, reported_by: user.id })
       setShowBulkMaintenance(false)
+      setBulkMaintenanceForm({ title: '', description: '', priority: 'normal', ticket_type: 'preventive' })
       setSelected(new Set())
       alert(`Successfully created ${selected.size} maintenance tickets!`)
     } catch (err) {
@@ -765,7 +785,7 @@ export default function AssetList() {
             <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
           </button>
           {selected.size > 0 && isAdmin && (
-            <button onClick={() => handleDelete([...selected])} className="flex-1 md:flex-none bg-[var(--danger)] text-white font-semibold text-sm px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 shadow-sm" disabled={deleting}>
+            <button onClick={() => handleDelete([...selected])} className="flex-1 md:flex-none bg-[var(--red)] text-white font-semibold text-sm px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed transition-all" disabled={deleting}>
               {deleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
               {deleting ? 'Deleting…' : `Delete (${selected.size})`}
             </button>
@@ -779,21 +799,27 @@ export default function AssetList() {
       </div>
 
       {/* View Toggle */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 16, background: '#fff', borderRadius: 8, padding: 4, border: '1px solid var(--border)', width: '100%', overflowX: 'auto' }}>
+      <div className="flex gap-1.5 mb-5 bg-bg-2 p-1.5 rounded-xl border border-border w-full overflow-x-auto custom-scrollbar">
         {[
           { id: 'register', label: 'Asset Register', icon: Package },
           { id: 'transfers', label: 'Transfers', icon: ArrowRightLeft },
-          { id: 'map', label: 'Map View', icon: MapPin },
-          { id: 'depreciation', label: 'Forecasting', icon: BarChart3 }
-        ].map(tab => (
-          <button key={tab.id} onClick={() => setViewMode(tab.id)}
-            style={{ flex: 1, minWidth: 140, justifyContent: 'center', display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: 6,
-              border: 'none', cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap',
-              background: viewMode === tab.id ? '#4285f4' : 'transparent',
-              color: viewMode === tab.id ? 'white' : 'var(--text-2)' }}>
-            <tab.icon size={16} /> <span className="mobile-hide">{tab.label}</span>
-          </button>
-        ))}
+          { id: 'map', label: 'Map View', icon: MapPin }
+        ].map(tab => {
+          const isActive = viewMode === tab.id
+          return (
+            <button 
+              key={tab.id} 
+              onClick={() => setViewMode(tab.id)}
+              className={`flex-1 min-w-[140px] flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-lg border transition-all whitespace-nowrap text-sm font-medium ${
+                isActive 
+                  ? 'bg-accent text-white border-accent shadow-sm' 
+                  : 'bg-transparent text-text-2 border-transparent hover:bg-bg-1 hover:text-text-1'
+              }`}
+            >
+              <tab.icon size={16} /> <span className="mobile-hide">{tab.label}</span>
+            </button>
+          )
+        })}
       </div>
 
       {isAssetsError && (
@@ -822,23 +848,23 @@ export default function AssetList() {
       {viewMode === 'map' && <AssetMap assets={assets} sites={sites} />}
 
       {/* Depreciation Chart View */}
-      {viewMode === 'depreciation' && <DepreciationChart assets={assets} />}
-
       {/* Register View */}
       {viewMode === 'register' && <>
       {/* Summary Stats Bar */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, marginBottom: 16 }}>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
-          { icon: Package, label: 'Showing', val: assets.length, color: 'var(--accent)' },
-          { icon: Activity, label: 'Active', val: summaryStats.activeCount, color: 'var(--green)' },
-          { icon: MapPin, label: 'Sites', val: summaryStats.siteCount, color: 'var(--cyan)' },
-          { icon: IndianRupee, label: 'Total Value', val: formatCurrency(summaryStats.totalValue), color: 'var(--accent)' },
+          { icon: Package, label: 'Showing', val: assets.length, color: 'var(--accent)', bg: 'rgba(var(--accent-rgb), 0.1)' },
+          { icon: Activity, label: 'Active', val: summaryStats.activeCount, color: 'var(--status-success)', bg: 'rgba(var(--status-success-rgb), 0.1)' },
+          { icon: MapPin, label: 'Sites', val: summaryStats.siteCount, color: 'var(--cyan)', bg: 'rgba(var(--cyan-rgb), 0.1)' },
+          { icon: IndianRupee, label: 'Total Value', val: formatCurrency(summaryStats.totalValue), color: 'var(--accent)', bg: 'rgba(var(--accent-rgb), 0.1)' },
         ].map(s => (
-          <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'var(--bg-2)', borderRadius: 10, border: '1px solid var(--border)' }}>
-            <s.icon size={16} style={{ color: s.color, flexShrink: 0 }} />
-            <div>
-              <div style={{ color: 'var(--text-0)' }}>{s.val}</div>
-              <div style={{ color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
+          <div key={s.label} className="flex items-center gap-4 p-4 bg-bg-1 rounded-xl border border-border hover:border-accent/40 hover:shadow-md transition-all group">
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-110" style={{ backgroundColor: s.bg || 'var(--bg-2)', color: s.color, border: `1px solid ${s.color}20` }}>
+              <s.icon size={18} />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-xl font-semibold text-text-0 truncate leading-tight">{s.val}</span>
+              <span className="text-[11px] font-medium text-text-3 uppercase tracking-wider truncate mt-0.5">{s.label}</span>
             </div>
           </div>
         ))}

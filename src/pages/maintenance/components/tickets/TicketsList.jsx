@@ -24,7 +24,7 @@ export default function TicketsList({ tickets, isLoading, onRowClick }) {
       <div style={{ background: 'var(--bg-0)', border: '1px solid var(--border)', borderRadius: 12, padding: 24 }}>
         <h3 className="skeleton" style={{ width: 200, height: 24, marginBottom: 16 }}></h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {[1,2,3,4,5,6].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 8 }}></div>)}
+          {[1,2,3,4,5,6].map(i => <div key={`skel-${i}`} className="skeleton" style={{ height: 60, borderRadius: 8 }}></div>)}
         </div>
       </div>
     );

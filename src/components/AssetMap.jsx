@@ -48,13 +48,23 @@ export default function AssetMap({ assets, sites }) {
       data[a.site].assets.push(a)
     })
     
-    // Filter out sites that don't have valid coordinates
-    return Object.values(data).filter(s => s.lat && s.lng && !isNaN(s.lat) && !isNaN(s.lng))
+    // Filter out sites that don't have valid coordinates and precalculate intelligence
+    return Object.values(data)
+      .filter(s => s.lat && s.lng && !isNaN(s.lat) && !isNaN(s.lng))
+      .map(s => ({
+        ...s,
+        intel: buildSite360({ name: s.name, latitude: s.lat, longitude: s.lng }, { siteAssets: s.assets, maintenanceTickets: [] })
+      }))
   }, [assets, sites])
 
-  // Get individual assets with coordinates
+  // Get individual assets with coordinates and precalculate intelligence
   const assetMarkers = useMemo(() => {
-    return assets.filter(a => a.latitude && a.longitude && !isNaN(a.latitude) && !isNaN(a.longitude))
+    return assets
+      .filter(a => a.latitude && a.longitude && !isNaN(a.latitude) && !isNaN(a.longitude))
+      .map(a => ({
+        ...a,
+        intel: buildAsset360(a, { tickets: [], logs: [] }, { hasFinancialAccess: true })
+      }))
   }, [assets])
 
   const formatCurrency = (val) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val)
@@ -64,7 +74,7 @@ export default function AssetMap({ assets, sites }) {
 
   return (
     <div className="card" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 180px)', minHeight: 500 }}>
-      <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', background: 'var(--bg-2)', zIndex: 10 }}>
+      <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', background: 'var(--bg-2)', zIndex: 1000, position: 'relative', flexShrink: 0 }}>
         <h3 style={{ margin: 0, color: 'var(--text-0)' }}>GEOGRAPHICAL DISTRIBUTION</h3>
         <p style={{ margin: '4px 0 0', color: 'var(--text-2)', }}>
           Showing {assets.length} total assets mapped across {siteData.length} site locations and {assetMarkers.length} individual machine GPS coordinates.
@@ -82,15 +92,23 @@ export default function AssetMap({ assets, sites }) {
       </div>
       
       <div style={{ flex: 1, position: 'relative' }}>
-        <MapContainer center={center} zoom={siteData.length > 0 ? 5 : 4} style={{ width: '100%', height: '100%' }}>
+        <MapContainer 
+          center={center} 
+          zoom={siteData.length > 0 ? 5 : 4} 
+          minZoom={2}
+          maxBounds={[[-90, -180], [90, 180]]}
+          maxBoundsViscosity={1.0}
+          style={{ width: '100%', height: '100%' }}
+        >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            noWrap={true}
           />
           
           {siteData.map(site => {
             // Compute Site Intelligence
-            const siteIntel = buildSite360({ name: site.name, latitude: site.lat, longitude: site.lng }, { siteAssets: site.assets, maintenanceTickets: [] })
+            const siteIntel = site.intel
             
             return (
               <Marker 
@@ -129,7 +147,7 @@ export default function AssetMap({ assets, sites }) {
           })}
           
           {assetMarkers.map(a => {
-            const assetIntel = buildAsset360(a, { tickets: [], logs: [] }, { hasFinancialAccess: true })
+            const assetIntel = a.intel
             return (
             <Marker 
               key={`asset-${a.id}`} 

@@ -467,7 +467,7 @@ function CreateTransferModal({ onClose, materials, stock, sites, onSubmit }) {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {lineItems.map((li, i) => (
-                <div key={i} style={{
+                <div key={`skel2-${i}`} style={{
                   background: 'var(--bg-1)', border: '1px solid var(--border)', borderRadius: 12,
                   padding: '12px 12px', position: 'relative',
                 }}>

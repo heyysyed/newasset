@@ -41,11 +41,11 @@ export default function RealtimeTickerTile() {
   }
 
   return (
-    <div className="card" style={{ padding: 16, background: '#ffffff', border: flash ? '1px solid #059669' : '1px solid #e2e8f0', borderRadius: 12, transition: 'border-color 0.3s' }}>
+    <div className="card" style={{ padding: 16, background: 'var(--bg-1)', border: flash ? '1px solid #059669' : '1px solid #e2e8f0', borderRadius: 12, transition: 'border-color 0.3s' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <Radio size={15} color="#059669" className="spin" style={{ animationDuration: '3s' }} />
-          <span style={{ color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <span style={{ color: 'var(--text-1)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Real-Time Stream Ticker
           </span>
         </div>
@@ -64,7 +64,7 @@ export default function RealtimeTickerTile() {
               {ev.type === 'audit' ? <Shield size={12} color={ev.isAnomaly ? 'var(--status-danger)' : 'var(--accent)'} /> : <Boxes size={12} color="#059669" />}
               <span style={{ color: ev.isAnomaly ? 'var(--status-danger)' : '#0f172a' }}>{ev.title}</span>
             </div>
-            <span style={{ color: '#64748b', }}>{ev.site}</span>
+            <span style={{ color: 'var(--text-2)', }}>{ev.site}</span>
           </div>
         ))}
       </div>

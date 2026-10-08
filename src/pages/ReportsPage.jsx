@@ -57,7 +57,7 @@ const SEVERITY_BG = { CRITICAL: 'var(--status-danger-soft)', HIGH: 'var(--status
 const FINANCIAL_ROLES = ['admin', 'super_admin']
 
 export default function ReportsPage() {
-  const { profile } = useAuth()
+  const { profile, can } = useAuth()
   const { reportId } = useParams()
   const navigate = useNavigate()
   const isMobile = useIsMobile()
@@ -741,7 +741,7 @@ export default function ReportsPage() {
                     { label: 'PM Compliance', value: intelligence.maintenance.data?.pmCompliance?.score != null ? `${intelligence.maintenance.data.pmCompliance.score}%` : '-', color: (intelligence.maintenance.data?.pmCompliance?.score ?? 100) < 80 ? 'var(--status-danger)' : '#10b981' },
                     { label: 'Repeat Failures', value: intelligence.maintenance.data?.repeatFailuresCount ?? '-', color: (intelligence.maintenance.data?.repeatFailuresCount ?? 0) > 0 ? 'var(--status-warning)' : 'inherit' },
                   ].map((m, i) => (
-                    <div key={i} style={{ padding: '12px 14px', borderRadius: 10, background: 'var(--bg-1)', border: '1px solid var(--border)' }}>
+                    <div key={`skel2-${i}`} style={{ padding: '12px 14px', borderRadius: 10, background: 'var(--bg-1)', border: '1px solid var(--border)' }}>
                       <div style={{ color: 'var(--text-3)', marginBottom: 4 }}>{m.label}</div>
                       <div style={{ color: m.color }}>{m.value}</div>
                     </div>
@@ -780,7 +780,7 @@ export default function ReportsPage() {
                     { label: 'Stock Value', value: canSeeFinancials ? formatCurrency(intelligence.inventory.data?.stockValue) : '-', color: 'inherit' },
                     { label: 'Avg Daily Burn', value: (intelligence.inventory.data?.averageDailyBurn ?? 0) > 0 ? intelligence.inventory.data.averageDailyBurn : 'Insufficient data', color: 'inherit' },
                   ].map((m, i) => (
-                    <div key={i} style={{ padding: '12px 14px', borderRadius: 10, background: 'var(--bg-1)', border: '1px solid var(--border)' }}>
+                    <div key={`skel2-${i}`} style={{ padding: '12px 14px', borderRadius: 10, background: 'var(--bg-1)', border: '1px solid var(--border)' }}>
                       <div style={{ color: 'var(--text-3)', marginBottom: 4 }}>{m.label}</div>
                       <div style={{ color: m.color }}>{m.value}</div>
                     </div>

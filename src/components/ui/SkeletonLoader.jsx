@@ -5,7 +5,7 @@ export function SkeletonCard({ count = 3 }) {
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
       {Array.from({ length: count }).map((_, i) => (
         <div
-          key={i}
+          key={`skel2-${i}`}
           style={{
             padding: 20,
             borderRadius: 14,

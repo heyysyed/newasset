@@ -1,4 +1,4 @@
-import { supabase, getAssetSelectCols } from './supabase'
+import { supabase, getAssetSelectCols, fetchSites } from './supabase'
 
 // ─────────────────────────────────────────────────────────
 // SHARED CONSTANTS

@@ -217,7 +217,7 @@ export default function ApprovalModal({ submission, role, userId, onApprove, onR
               { title: 'Checked By', name: submission.checker_name, sig: submission.checker_signature, date: submission.checked_at },
               { title: 'HOD', name: submission.hod_name, sig: submission.hod_signature, date: submission.approved_at },
             ].map((block, i) => (
-              <div key={i} style={{
+              <div key={`skel2-${i}`} style={{
                 padding: 10, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', textAlign: 'center',
               }}>
                 <p style={{ color: 'var(--accent)', marginBottom: 6, textTransform: 'uppercase' }}>

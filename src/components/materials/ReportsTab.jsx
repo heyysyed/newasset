@@ -226,7 +226,7 @@ export default function ReportsTab({ materials = [], stock = [], txns = [], requ
                 <YAxis tick={axisStyle} tickFormatter={v => fmtCur(v)} width={70}/>
                 <Tooltip content={<CurrencyTooltip />} />
                 <Bar dataKey="value" name="Value" radius={[4,4,0,0]}>
-                  {stockBySite.map((_,i) => <Cell key={i} fill={BAR_PALETTE[i % BAR_PALETTE.length]} />)}
+                  {stockBySite.map((_,i) => <Cell key={`cell-${i}`} fill={BAR_PALETTE[i % BAR_PALETTE.length]} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -281,7 +281,7 @@ export default function ReportsTab({ materials = [], stock = [], txns = [], requ
                   paddingAngle={3} dataKey="value" nameKey="name"
                   label={({ name, percent }) => `${name} ${(percent*100).toFixed(0)}%`}
                   >
-                  {txnBreakdown.map((entry,i) => <Cell key={i} fill={COLORS[entry.name] || BAR_PALETTE[i % BAR_PALETTE.length]} />)}
+                  {txnBreakdown.map((entry,i) => <Cell key={`cell-${i}`} fill={COLORS[entry.name] || BAR_PALETTE[i % BAR_PALETTE.length]} />)}
                 </Pie>
                 <Tooltip content={<CountTooltip />} />
                 <Legend wrapperStyle={{ }}

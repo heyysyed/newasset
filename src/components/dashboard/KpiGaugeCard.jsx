@@ -25,18 +25,18 @@ export default function KpiGaugeCard({ title, value = 0, target = 95, unit = "%"
   const strokeDashoffset = circumference - (numVal / 100) * circumference
 
   return (
-    <div className="card" style={{ padding: '16px 20px', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div className="card" style={{ padding: '16px 20px', background: 'var(--bg-1)', border: '1px solid var(--border)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <div style={{ flex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
           <Icon size={14} color={bandColor} />
-          <span style={{ color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{title}</span>
+          <span style={{ color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{title}</span>
         </div>
         
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-          <span style={{ color: '#0f172a', }}>
+          <span style={{ color: 'var(--text-1)', }}>
             {numVal.toFixed(1)}{unit}
           </span>
-          <span style={{ color: '#64748b' }}>Target: {target}{unit}</span>
+          <span style={{ color: 'var(--text-2)' }}>Target: {target}{unit}</span>
         </div>
 
         <div style={{ marginTop: 8 }}>
@@ -63,7 +63,7 @@ export default function KpiGaugeCard({ title, value = 0, target = 95, unit = "%"
             style={{ transition: 'stroke-dashoffset 0.8s ease' }}
           />
         </svg>
-        <span style={{ position: 'absolute', color: '#0f172a' }}>
+        <span style={{ position: 'absolute', color: 'var(--text-1)' }}>
           {Math.round(numVal)}%
         </span>
       </div>

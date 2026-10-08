@@ -270,7 +270,7 @@ export default function ActivityLogsHub({
                   BEFORE STATE (PREVIOUS)
                 </div>
                 <pre style={{ color: 'var(--text-2)', margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
-                  {JSON.stringify(diffLog.details?.before || { status: 'Initial Record', updated_at: logDate }, null, 2)}
+                  {JSON.stringify(diffLog.details?.before || { status: 'Initial Record', updated_at: diffLog.created_at }, null, 2)}
                 </pre>
               </div>
 

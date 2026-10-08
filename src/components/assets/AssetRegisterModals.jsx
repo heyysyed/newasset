@@ -24,7 +24,7 @@ export default function AssetRegisterModals({
           <div className="modal-content animate-fade-up">
             <div className="modal-header">
               <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Ticket size={20} color="var(--amber)" /> Schedule Bulk Maintenance</h3>
-              <button onClick={() => setShowBulkMaintenance(false)} className="btn-ghost"><X size={18} /></button>
+              <button onClick={() => { setShowBulkMaintenance(false); setBulkMaintenanceForm({ title: '', description: '', priority: 'normal', ticket_type: 'preventive' }); }} className="btn-ghost"><X size={18} /></button>
             </div>
             <form onSubmit={handleBulkMaintenance}>
               <div className="modal-body" style={{ padding: 20 }}>
@@ -60,7 +60,7 @@ export default function AssetRegisterModals({
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" onClick={() => setShowBulkMaintenance(false)} className="btn-ghost">Cancel</button>
+                <button type="button" onClick={() => { setShowBulkMaintenance(false); setBulkMaintenanceForm({ title: '', description: '', priority: 'normal', ticket_type: 'preventive' }); }} className="btn-ghost">Cancel</button>
                 <button type="submit" className="btn-primary" disabled={bulkLoading}>
                   {bulkLoading ? <Loader2 size={16} className="animate-spin" /> : <Ticket size={16} />}
                   Create Tickets
@@ -82,7 +82,7 @@ export default function AssetRegisterModals({
 
       {/* Bulk Status Change */}
       {showBulkStatus && (
-        <div className="modal-bg" style={{ zIndex: 2000 }} onClick={() => setShowBulkStatus(false)}>
+        <div className="modal-bg" style={{ zIndex: 2000 }} onClick={() => { setShowBulkStatus(false); setBulkStatusVal(''); }}>
           <div className="modal" style={{ maxWidth: 400, width: '95%', padding: 32 }} onClick={e => e.stopPropagation()}>
             <h2 style={{ margin: '0 0 20px' }}>CHANGE STATUS ({selectedSize} assets)</h2>
             <select className="sel" value={bulkStatusVal} onChange={e => setBulkStatusVal(e.target.value)} style={{ width: '100%', marginBottom: 16 }}>
@@ -90,7 +90,7 @@ export default function AssetRegisterModals({
               {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <button className="btn-ghost" onClick={() => setShowBulkStatus(false)}>Cancel</button>
+              <button className="btn-ghost" onClick={() => { setShowBulkStatus(false); setBulkStatusVal(''); }}>Cancel</button>
               <button className="btn-primary" onClick={handleBulkStatus} disabled={!bulkStatusVal || bulkLoading}>
                 {bulkLoading ? <Loader2 size={14} className="animate-spin" /> : null} Apply
               </button>
@@ -101,7 +101,7 @@ export default function AssetRegisterModals({
 
       {/* Bulk Transfer */}
       {showBulkTransfer && (
-        <div className="modal-bg" style={{ zIndex: 2000 }} onClick={() => setShowBulkTransfer(false)}>
+        <div className="modal-bg" style={{ zIndex: 2000 }} onClick={() => { setShowBulkTransfer(false); setBulkTransferSite(''); }}>
           <div className="modal" style={{ maxWidth: 400, width: '95%', padding: 32 }} onClick={e => e.stopPropagation()}>
             <h2 style={{ margin: '0 0 20px' }}>TRANSFER {selectedSize} ASSETS</h2>
             <label className="lbl">Destination Site</label>
@@ -110,7 +110,7 @@ export default function AssetRegisterModals({
               {sites.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <button className="btn-ghost" onClick={() => setShowBulkTransfer(false)}>Cancel</button>
+              <button className="btn-ghost" onClick={() => { setShowBulkTransfer(false); setBulkTransferSite(''); }}>Cancel</button>
               <button className="btn-primary" onClick={handleBulkTransfer} disabled={!bulkTransferSite || bulkLoading}>
                 {bulkLoading ? <Loader2 size={14} className="animate-spin" /> : <MapPin size={14} />} Transfer
               </button>
@@ -121,7 +121,7 @@ export default function AssetRegisterModals({
 
       {/* Assign Group Modal */}
       {showAssignGroup && (
-        <div className="modal-bg" style={{ zIndex: 2000 }} onClick={() => setShowAssignGroup(false)}>
+        <div className="modal-bg" style={{ zIndex: 2000 }} onClick={() => { setShowAssignGroup(false); setAssignGroupNewName(''); setAssignGroupSelected(''); }}>
           <div className="modal" style={{ maxWidth: 460, width: '95%', padding: 0, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
             <div style={{ padding: '24px 24px 16px' }}>
               <h2 style={{ margin: '0 0 8px', letterSpacing: '0.05em', color: 'var(--text-0)' }}>ASSIGN GROUP</h2>
@@ -196,7 +196,7 @@ export default function AssetRegisterModals({
             </div>
 
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', padding: '16px 24px', borderTop: '1px solid var(--border)', background: 'var(--bg-1)' }}>
-              <button className="btn-ghost" onClick={() => setShowAssignGroup(false)}>Cancel</button>
+              <button className="btn-ghost" onClick={() => { setShowAssignGroup(false); setAssignGroupNewName(''); setAssignGroupSelected(''); }}>Cancel</button>
               <button className="btn-primary" onClick={handleAssignGroupSubmit} style={{ gap: 6 }} disabled={assignGroupLoading || (assignGroupTab === 'existing' && !assignGroupSelected) || (assignGroupTab === 'new' && !assignGroupNewName.trim())}>
                 {assignGroupLoading ? <Loader2 size={14} className="animate-spin" /> : <Layers size={14} />} Assign Group
               </button>
