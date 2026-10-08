@@ -1,3 +1,4 @@
+import { writePrintDocument } from '../lib/printDocument'
 import React, { useEffect, useState, useRef, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
@@ -895,9 +896,9 @@ export default function StickerPage() {
   function handlePrint() {
     const el = document.getElementById('sticker-print-area')
     if (!el) return
-    const w = window.open('', '_blank')
+    const w = window.open('', '_blank'); if (!w) { alert('Allow pop-ups to open the print preview.'); return }
     if (!w) return
-    w.document.write(`<!DOCTYPE html><html><head><title>Print Stickers</title>
+    writePrintDocument(w, `<!DOCTYPE html><html><head><title>Print Stickers</title>
       <link rel="preconnect" href="https://fonts.googleapis.com"/>
       <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Oswald:wght@400;500;600;700&family=Montserrat:wght@400;600;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet"/>
       <style>

@@ -1,3 +1,4 @@
+import { writePrintDocument } from '../../lib/printDocument'
 import React, { useState, useMemo } from 'react'
 import {
   Plus, Search, X, Loader2, Trash2, Check, XCircle, ChevronRight,
@@ -485,8 +486,8 @@ function GatePassDetailModal({ gp, gpItems, loading, user, isAdmin, isMod, cc, o
     </div>
     <div class="footer">Gate Pass ${gp.pass_no} · Generated on ${new Date().toLocaleString()} · Strongbuilt</div>
     </body></html>`
-    const w = window.open('', '_blank')
-    w.document.write(html)
+    const w = window.open('', '_blank'); if (!w) { alert('Allow pop-ups to open the print preview.'); return }
+    writePrintDocument(w, html)
     w.document.close()
     setTimeout(() => w.print(), 500)
   }

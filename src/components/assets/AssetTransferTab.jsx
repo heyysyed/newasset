@@ -1,3 +1,4 @@
+import { writePrintDocument } from '../../lib/printDocument'
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import {
   Plus, Search, X, Loader2, ArrowLeftRight,
@@ -150,8 +151,8 @@ function printGatePass(transfer, transferItems) {
   <div style="text-align:center; margin-top:12px; font-size:11px; color:#999;" class="no-print">Generated digitally from AssetPro - ${new Date().toLocaleString('en-IN')}</div>
 </body></html>`
 
-  const win = window.open('', '_blank')
-  if (win) { win.document.write(html); win.document.close() }
+  const win = window.open('', '_blank'); if (!win) { alert('Allow pop-ups to open the print preview.'); return }
+  if (win) { writePrintDocument(win, html); win.document.close() }
 }
 
 // ── Create Transfer Modal ────────────────────────────────────────────────────

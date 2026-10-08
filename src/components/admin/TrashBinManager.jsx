@@ -13,7 +13,6 @@ export default function TrashBinManager({
   handleRestore,
   handlePermanentDelete
 }) {
-  const [ttlDays, setTtlDays] = useState(60)
 
   return (
     <div className="card" style={{ overflow: 'hidden' }}>
@@ -22,25 +21,11 @@ export default function TrashBinManager({
           <Archive size={16} style={{ color: 'var(--text-3)' }} />
           <div>
             <h3 style={{ margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Deleted Assets Archive & Recovery</h3>
-            <span style={{ color: 'var(--text-3)', }}>Soft-deleted assets backed up here with 1-click restore & cascade recovery.</span>
+            <span style={{ color: 'var(--text-3)' }}>Archived assets retain their related records. This archive is separate from disaster-recovery backups.</span>
           </div>
         </div>
 
-        {/* TTL Auto-Purge Setting */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Clock size={14} style={{ color: 'var(--accent)' }} />
-          <span style={{ color: 'var(--text-2)', }}>TTL Auto-Purge:</span>
-          <select
-            value={ttlDays}
-            onChange={e => setTtlDays(Number(e.target.value))}
-            style={{ padding: '4px 8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-1)', color: 'var(--text-0)', outline: 'none' }}
-          >
-            <option value={30}>Auto-Purge in 30 Days</option>
-            <option value={60}>Auto-Purge in 60 Days</option>
-            <option value={90}>Auto-Purge in 90 Days</option>
-          </select>
-          <span style={{ color: 'var(--text-3)', marginLeft: 8 }}>{deletedAssets.length} items</span>
-        </div>
+        <span>Archived records are retained until an administrator-approved retention process is configured. {deletedAssets.length} items.</span>
       </div>
 
       {trashLoading ? (
@@ -77,11 +62,7 @@ export default function TrashBinManager({
               <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
                 <button onClick={() => handleRestore(d.id)} disabled={restoring[d.id]}
                   className="btn-primary" style={{ padding: '7px 14px', display: 'flex', alignItems: 'center', gap: 5, background: 'var(--green)', borderColor: 'var(--green)' }}>
-                  {restoring[d.id] ? <RefreshCw size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <RotateCcw size={12} />} Cascade Restore
-                </button>
-                <button onClick={() => handlePermanentDelete(d.id)}
-                  className="btn-danger" style={{ padding: '7px 10px', }}>
-                  <Trash2 size={12} />
+                  {restoring[d.id] ? <RefreshCw size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <RotateCcw size={12} />} Restore
                 </button>
               </div>
             </div>

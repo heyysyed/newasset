@@ -267,7 +267,7 @@ export default function AssetForm() {
                   asset_name: data.model || prev.asset_name,
                   model_no: data.model || prev.model_no,
                   serial_no: data.serial_no || prev.serial_no,
-                  purchase_value: data.purchase_cost || prev.purchase_value,
+                  purchase_value: data.purchase_cost ?? prev.purchase_value,
                   warranty_expiry: data.warranty_expiry || prev.warranty_expiry
                 }))
               }} />

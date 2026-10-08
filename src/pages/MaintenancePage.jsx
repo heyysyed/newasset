@@ -1,3 +1,4 @@
+import { writePrintDocument } from '../lib/printDocument'
 import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import {
   Wrench, Calendar, Ticket, History, Plus, Search, Filter, CheckCircle2, XCircle,
@@ -442,7 +443,7 @@ export default function MaintenancePage() {
     <div class="sig-line"><div class="sig-box">Assigned By: _______________<br/>Date:</div><div class="sig-box">Completed By: _______________<br/>Date:</div></div>
     <p style="margin-top:40px;text-align:center;color:#999;font-size:0.68rem">Strongbuilt Work Order · ${new Date().toLocaleString()}</p>
     </body></html>`
-    const w = window.open('', '_blank'); w.document.write(html); w.document.close(); setTimeout(() => w.print(), 500)
+    const w = window.open('', '_blank'); if (!w) { alert('Allow pop-ups to open the print preview.'); return }; writePrintDocument(w, html); w.document.close(); setTimeout(() => w.print(), 500)
   }
 
   // ── Derived Data ──────────────────────────────────────────────────────

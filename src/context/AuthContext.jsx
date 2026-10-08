@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { supabase, getProfile, getSettings } from '../lib/supabase'
 
 const AuthCtx = createContext(null)
@@ -33,6 +34,10 @@ export function AuthProvider({ children }) {
   const [settings, setSettings] = useState(null)
   const [loading, setLoading] = useState(true)
   const [userSites, setUserSites] = useState([]) // sites assigned to this user
+  const [authError, setAuthError] = useState('')
+  const queryClient = useQueryClient()
+  const generation = useRef(0)
+  const identity = useRef(null)
 
   async function forceSignOut() {
     await supabase.auth.signOut()
@@ -43,9 +48,10 @@ export function AuthProvider({ children }) {
     window.location.href = '/#/login?deactivated=1'
   }
 
-  async function loadProfile(uid) {
+  async function loadProfile(uid, version = generation.current) {
     try {
       const p = await getProfile(uid)
+      if (generation.current !== version || identity.current !== uid) return
       if (p && p.is_active === false) {
         await forceSignOut()
         return
@@ -53,55 +59,86 @@ export function AuthProvider({ children }) {
       setProfile(p)
       // Load assigned sites for site-level isolation
       if (p && (p.role === 'moderator' || p.role === 'user')) {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('user_site_assignments')
           .select('site_name')
           .eq('user_id', uid)
-        setUserSites((data || []).map(d => d.site_name))
+        if (error) throw error
+        if (generation.current === version) setUserSites((data || []).map(d => d.site_name))
       } else {
         setUserSites([]) // admins/super_admins see all
       }
     } catch (e) {
       console.error('Profile load failed', e)
+      if (generation.current === version) { setProfile(null); setUserSites([]); setAuthError('Your permissions could not be loaded. Please retry.') }
+      throw e
     }
   }
 
-  async function loadSettings() {
+  async function loadSettings(version = generation.current) {
     try {
       const s = await getSettings()
-      setSettings(s)
+      if (generation.current === version) setSettings(s)
     } catch (e) {
       console.error('Settings load failed', e)
+      if (generation.current === version) { setSettings(null); setAuthError('Application settings could not be loaded. Please retry.') }
+      throw e
     }
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        Promise.all([loadProfile(session.user.id), loadSettings()]).finally(() => setLoading(false))
-      } else {
-        setLoading(false)
-      }
-    })
-
-    const timeout = setTimeout(() => { setLoading(false) }, 5000)
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        loadProfile(session.user.id)
-        loadSettings()
-      } else {
-        setProfile(null)
-        setSettings(null)
-        setUserSites([])
-      }
-      setLoading(false)
-    })
-
-    return () => {
+    let disposed = false
+    let receivedEvent = false
+    let deferred
+    let timeout
+    function acceptSession(session) {
+      if (disposed) return
+      const uid = session?.user?.id ?? null
+      const changed = identity.current !== uid
+      if (!changed && uid && identity.current) { setUser(session.user); return }
+      const version = ++generation.current
+      identity.current = uid
       clearTimeout(timeout)
+      clearTimeout(deferred)
+      queryClient.clear()
+      setProfile(null); setSettings(null); setUserSites([]); setAuthError('')
+      setUser(session?.user ?? null)
+      setLoading(!!uid)
+      if (!uid) return
+      timeout = setTimeout(() => {
+        if (generation.current === version) {
+          ++generation.current
+          setProfile(null); setSettings(null); setUserSites([])
+          setAuthError('The connection timed out while loading your account. Please retry.')
+          setLoading(false)
+        }
+      }, 15000)
+      // Defer SDK calls until Supabase releases its auth event lock.
+      deferred = setTimeout(() => {
+        Promise.all([loadProfile(uid, version), loadSettings(version)])
+          .catch(() => {})
+          .finally(() => {
+            if (!disposed && generation.current === version) { clearTimeout(timeout); setLoading(false) }
+          })
+      }, 0)
+    }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      receivedEvent = true
+      acceptSession(session)
+    })
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (disposed || receivedEvent) return
+      if (error) throw error
+      acceptSession(data.session)
+    }).catch(() => {
+      if (!disposed) { setAuthError('Your session could not be loaded. Please retry.'); setLoading(false) }
+    })
+    return () => {
+      disposed = true
+      identity.current = null
+      ++generation.current
+      clearTimeout(timeout)
+      clearTimeout(deferred)
       subscription.unsubscribe()
     }
   }, [])
@@ -143,6 +180,7 @@ export function AuthProvider({ children }) {
   const userPerms = settings?.user_permissions      || {}
 
   function can(action) {
+    if (loading || authError || !user || profile?.is_active !== true) return false
     if (isAdmin) return true // super_admin & admin can do everything
     if (isMod) {
       const map = {
@@ -202,7 +240,7 @@ export function AuthProvider({ children }) {
     if (hasGlobalAccess) return items
     return items.filter(item => {
       const s = item[siteKey]
-      return !s || userSites.includes(s)
+      return !!s && userSites.includes(s)
     })
   }
 
@@ -210,7 +248,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthCtx.Provider value={{
-      user, profile, settings, loading,
+      user, profile, settings, loading, authError,
       role, isSuperAdmin, isAdmin, isMod, isUser,
       hasGlobalAccess, userSites,
       can, visibleFields, canEditField, canAccessSite, filterBySite,

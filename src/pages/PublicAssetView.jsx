@@ -5,7 +5,7 @@ import {
   Tag, Layers, Hash, Wrench, FileText,
   CheckCircle2, XCircle, Clock, Hammer, Truck,
 } from 'lucide-react'
-import { fetchAsset, getSettings, updateAssetLocation } from '../lib/supabase'
+import { fetchPublicAsset } from '../lib/supabase'
 import companyLogo from '../assets/logo.png'
 
 const STATUS_CONFIG = {
@@ -38,40 +38,19 @@ export default function PublicAssetView() {
   const [isUpdatingLocation, setIsUpdatingLocation] = useState(false)
 
   useEffect(() => {
-    Promise.all([fetchAsset(id).catch(() => null), getSettings().catch(() => null)])
-      .then(([a, s]) => {
+    let cancelled = false
+    setLoading(true); setError(false)
+    fetchPublicAsset(id)
+      .then(a => {
+        if (cancelled) return
         if (!a) { setError(true); setLoading(false); return }
         setAsset(a)
-        setSettings(s)
         setLoading(false)
       })
+      .catch(() => { if (!cancelled) { setError(true); setLoading(false) } })
+    return () => { cancelled = true }
   }, [id])
 
-  const handleUpdateLocation = () => {
-    if (!navigator.geolocation) return alert('Geolocation is not supported by your browser')
-    setIsUpdatingLocation(true)
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        updateAssetLocation(asset.id, pos.coords.latitude, pos.coords.longitude)
-          .then(() => {
-            setLocationCaptured(true)
-            setIsUpdatingLocation(false)
-          })
-          .catch(err => {
-            console.error("Location update failed", err)
-            setIsUpdatingLocation(false)
-            alert('Failed to update location in database.')
-          })
-      },
-      (err) => {
-        console.error("Geolocation error:", err)
-        setIsUpdatingLocation(false)
-        if (err.code === 1) alert('Please allow location permissions to update asset location.')
-        else alert('Unable to retrieve your location.')
-      },
-      { timeout: 10000 }
-    )
-  }
 
   if (loading) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-0)' }}>
@@ -223,29 +202,7 @@ export default function PublicAssetView() {
           </div>
         )}
 
-        {/* Location Update Button */}
-        <div style={{ margin: '0 22px 18px' }}>
-          <button 
-            onClick={handleUpdateLocation}
-            disabled={isUpdatingLocation || locationCaptured}
-            style={{ 
-              width: '100%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              background: locationCaptured ? 'var(--green-dim)' : 'var(--accent)', 
-              color: locationCaptured ? 'var(--green)' : '#fff', 
-              border: locationCaptured ? '1px solid rgba(0,185,107,0.3)' : 'none',
-              borderRadius: 12, cursor: (isUpdatingLocation || locationCaptured) ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s'
-            }}
-          >
-            {isUpdatingLocation ? (
-              <><div style={{ width: 14, height: 14, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> Updating...</>
-            ) : locationCaptured ? (
-              <><CheckCircle2 size={16} /> Location Recorded</>
-            ) : (
-              <><MapPin size={16} /> Record Current Location</>
-            )}
-          </button>
-        </div>
+        <p style={{ margin: '0 22px 18px' }}>For asset details and location updates, <a href="/#/login">sign in</a>.</p>
 
         {/* Footer */}
         <div style={{ padding: '12px 22px', background: 'var(--bg-3)', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

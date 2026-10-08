@@ -1,3 +1,5 @@
+import { enqueueOffline, drainOffline } from './offlineQueue'
+import { validateDocument } from './safeInput'
 import { createClient } from '@supabase/supabase-js'
 import { isSiteMatch } from './siteMatcher'
 
@@ -204,126 +206,41 @@ export async function updateAssetLocation(assetId, lat, lng) {
   if (error) throw error
 }
 
-const DELETED_ASSETS_COLS = [
-  'asset_code', 'asset_name', 'make', 'model_no', 'purchase_order_no', 'serial_no', 'capacity', 
-  'status', 'category', 'site', 'type_code', 'purchase_date', 'location', 'department', 
-  'assigned_to', 'notes', 'custom_fields', 'purchase_value', 'salvage_value', 'useful_life_years', 
-  'depreciation_method', 'depreciation_rate_percent', 'latitude', 'longitude', 'warranty_expiry', 
-  'disposal_date', 'disposal_reason', 'checklist_template_id', 'added_on', 'added_by'
-];
-
-async function backupAsset(asset, userId) {
-  const safeAsset = {};
-  DELETED_ASSETS_COLS.forEach(c => { if (asset[c] !== undefined) safeAsset[c] = asset[c]; });
-  await supabase.from('deleted_assets').insert({ ...safeAsset, id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`, original_id: asset.id, deleted_by: userId })
+// Archive RPCs keep dependent photos, movements, inspections, and history intact.
+// Missing migrations must fail closed; never fall back to destructive browser deletes.
+export async function deleteAsset(id) {
+  return bulkDeleteAssets([id])
 }
 
-async function deleteAssetDependencies(ids) {
-  const tableConfigs = [
-    { name: 'asset_audit', col: 'asset_id' },
-    { name: 'asset_movements', col: 'asset_id' },
-    { name: 'asset_attachments', col: 'asset_id' },
-    { name: 'asset_photos', col: 'asset_id' },
-    { name: 'asset_documents', col: 'asset_id' },
-    { name: 'maintenance_schedules', col: 'asset_id' },
-    { name: 'maintenance_tickets', col: 'asset_id' },
-    { name: 'maintenance_logs', col: 'asset_id' },
-    { name: 'maintenance_photos', col: 'asset_id' },
-    { name: 'checklist_submissions', col: 'asset_id' },
-    { name: 'gate_pass_items', col: 'asset_id' },
-    { name: 'audit_item_results', col: 'asset_id' },
-    { name: 'audit_assignment_items', col: 'asset_id' },
-    { name: 'component_lifecycle_events', col: 'asset_id' },
-    { name: 'asset_components', col: 'asset_id' },
-    { name: 'component_replacements', col: 'asset_id' }
-  ];
-  for (const table of tableConfigs) {
-    try {
-      const { error } = await supabase.from(table.name).delete().in(table.col, ids);
-      if (error) console.error(`Error deleting from ${table.name}:`, error);
-    } catch (e) {
-      console.error(`Exception deleting from ${table.name}:`, e);
-    }
+export async function bulkDeleteAssets(ids) {
+  if (!Array.isArray(ids) || ids.length < 1 || ids.length > 500) {
+    throw new Error('Select between 1 and 500 assets to archive at a time.')
   }
-
-  // For serialized_components, un-assign them instead of deleting them
-  try {
-    const { error } = await supabase.from('serialized_components').update({ current_asset_id: null, status: 'In Stock' }).in('current_asset_id', ids);
-    if (error) console.error('Error updating serialized_components:', error);
-  } catch (e) {
-    console.error('Exception updating serialized_components:', e);
-  }
-}
-
-export async function deleteAsset(id, userId) {
-  // Backup before delete
-  const { data: a } = await supabase.from('assets').select('*').eq('id', id).single()
-  if (a) await backupAsset(a, userId)
-  await logAudit(id, userId, 'deleted', {})
-  await logActivity(userId, 'deleted', 'asset', id, a?.asset_name || id, { asset_code: a?.asset_code })
-  
-  await deleteAssetDependencies([id])
-  
-  const { data: deletedRows, error } = await supabase.from('assets').delete().eq('id', id).select('id')
+  const { data, error } = await supabase.rpc('archive_assets', { p_ids: ids })
   if (error) throw error
-  if (!deletedRows || deletedRows.length === 0) throw new Error('Could not delete asset. It may be linked to other records or you lack permission.')
+  return data
 }
 
-export async function bulkDeleteAssets(ids, userId) {
-  const CHUNK = 200
-  for (let i = 0; i < ids.length; i += CHUNK) {
-    const batch = ids.slice(i, i + CHUNK)
-    // Backup all assets in this batch
-    const { data: assets } = await supabase.from('assets').select('*').in('id', batch)
-    if (assets?.length) {
-      await supabase.from('deleted_assets').insert(
-        assets.map(a => { 
-          const safeAsset = {};
-          DELETED_ASSETS_COLS.forEach(c => { if (a[c] !== undefined) safeAsset[c] = a[c]; });
-          return { ...safeAsset, original_id: a.id, deleted_by: userId } 
-        })
-      )
-    }
-    const { error: auditErr } = await supabase.from('asset_audit').insert(
-      batch.map(id => ({ asset_id: id, user_id: userId, action: 'deleted', changes: {} }))
-    )
-    if (auditErr) console.error('Audit log error:', auditErr)
-    
-    await deleteAssetDependencies(batch)
-
-    const { data: deletedRows, error } = await supabase.from('assets').delete().in('id', batch).select('id')
-    if (error) throw error
-    if (!deletedRows || deletedRows.length === 0) throw new Error('Could not delete assets. They may be linked to other records or you lack permission.')
-  }
-  await logActivity(userId, 'bulk_deleted', 'asset', null, `${ids.length} assets`, { count: ids.length })
-}
-
-// ── Deleted Assets (Trash) ──────────────────────────────
 export async function fetchDeletedAssets() {
-  const { data, error } = await supabase.from('deleted_assets')
-    .select('*, profiles:deleted_by(full_name)')
-    .order('deleted_at', { ascending: false })
+  const { data, error } = await supabase.rpc('list_archived_assets')
   if (error) throw error
   return data || []
 }
 
-export async function restoreAsset(deletedId) {
-  const { data: d, error: fetchErr } = await supabase.from('deleted_assets').select('*').eq('id', deletedId).single()
-  if (fetchErr) throw fetchErr
-  // Re-insert into assets
-  const { original_id, deleted_by, deleted_at, delete_reason, profiles, ...assetData } = d
-  const { id: _delId, ...insertData } = assetData
-  const { data: restored, error: insErr } = await supabase.from('assets').insert({ ...insertData, id: original_id }).select().single()
-  if (insErr) throw insErr
-  // Remove from trash
-  await supabase.from('deleted_assets').delete().eq('id', deletedId)
-  await logActivity(null, 'restored', 'asset', original_id, restored.asset_name, { asset_code: restored.asset_code })
-  return restored
+export async function restoreAsset(id) {
+  const { data, error } = await supabase.rpc('restore_archived_asset', { p_id: id })
+  if (error) throw error
+  return data
 }
 
-export async function permanentlyDeleteAsset(deletedId) {
-  const { error } = await supabase.from('deleted_assets').delete().eq('id', deletedId)
+export async function permanentlyDeleteAsset() {
+  throw new Error('Permanent deletion requires an administrator-managed retention process and a verified backup.')
+}
+
+export async function fetchPublicAsset(id) {
+  const { data, error } = await supabase.rpc('get_public_asset', { p_id: id })
   if (error) throw error
+  return data
 }
 
 export async function bulkUpdateAssets(ids, updates, userId) {
@@ -489,6 +406,7 @@ export async function fetchAssetAttachments(assetId) {
 }
 
 export async function uploadAssetAttachment(assetId, file, userId) {
+  validateDocument(file)
   const path = `asset-attachments/${assetId}/${Date.now()}-${file.name}`
   const { error: upErr } = await supabase.storage.from('checklist-uploads').upload(path, file, { contentType: file.type })
   if (upErr) throw upErr
@@ -1778,6 +1696,7 @@ export async function fetchAssetDocuments(assetId) {
 }
 
 export async function uploadAssetDocument(assetId, file, meta, userId) {
+  validateDocument(file)
   const path = `documents/${assetId}/${Date.now()}-${file.name}`
   const { error: upErr } = await supabase.storage.from('checklist-uploads').upload(path, file, { contentType: file.type })
   if (upErr) throw upErr
@@ -1886,99 +1805,25 @@ export async function syncAssetStatusWithMaintenance(assetId, newStatus, user) {
 }
 
 // 3. Stock Audit & Anomaly Detection (>10% Variance Alert)
-export async function submitStockAuditReconciliation({ site, itemId, physicalQty, systemQty, reasoning, userId }) {
-  const phys = Number(physicalQty || 0)
-  const sys = Number(systemQty || 0)
-  const variance = phys - sys
-  const variancePct = sys > 0 ? Math.abs(variance / sys) * 100 : (phys > 0 ? 100 : 0)
-
-  let unitPrice = 0
-  try {
-    const { data: itemData } = await supabase.from('bulk_items').select('unit_price').eq('id', itemId).maybeSingle()
-    unitPrice = Number(itemData?.unit_price || 0)
-  } catch {}
-
-  const varianceValueInr = Math.abs(variance) * unitPrice
-  let riskTier = 'LOW'
-  if (variancePct > 10 || varianceValueInr > 50000) riskTier = 'HIGH'
-  else if (variancePct >= 5 || varianceValueInr >= 10000) riskTier = 'MEDIUM'
-
-  const isHighRisk = riskTier === 'HIGH'
-
-  // 1. Record Audit Entry
-  const { data: audit, error } = await supabase.from('bulk_audits').insert([{
-    site,
-    item_id: itemId,
-    system_qty: sys,
-    physical_qty: phys,
-    variance_qty: variance,
-    variance_value_inr: varianceValueInr,
-    risk_tier: riskTier,
-    is_high_risk_anomaly: isHighRisk,
-    reasoning: reasoning || 'Routine Stock Reconciliation',
-    audited_by: userId,
-    frozen: true,
-    audited_at: new Date().toISOString()
-  }]).select().single()
-  if (error) console.error('Audit insert notice:', error)
-
-  // 2. Update Site Stock Level to physical count
-  const { error: stockErr } = await supabase.from('bulk_site_stock').update({
-    usable_qty: phys
-  }).eq('site', site).eq('item_id', itemId)
-  if (stockErr) throw stockErr
-
-  // 3. Log Immutable Security Trail
-  await logActivity(userId, isHighRisk ? 'high_risk_audit_anomaly' : 'stock_reconciliation', 'inventory', itemId, `Site: ${site}`, {
-    systemQty: sys, physicalQty: phys, variance, variancePct: Math.round(variancePct), reasoning
+export async function submitStockAuditReconciliation({ site, itemId, physicalQty, systemQty, reasoning, actionId = crypto.randomUUID() }) {
+  const { data, error } = await supabase.rpc('reconcile_bulk_stock', {
+    p_action_id: actionId, p_item_id: itemId, p_site: site,
+    p_expected: Number(systemQty), p_physical: Number(physicalQty), p_reason: reasoning,
   })
-
-  // 4. Send Super-Admin Alert Notification if High Risk Anomaly
-  if (isHighRisk) {
-    try {
-      const { data: superAdmins } = await supabase.from('profiles').select('id').eq('role', 'super_admin')
-      if (superAdmins) {
-        for (const sa of superAdmins) {
-          await supabase.from('notifications').insert([{
-            user_id: sa.id,
-            title: `🚨 HIGH-RISK STOCK ANOMALY AT ${site.toUpperCase()}`,
-            message: `Audit variance of ${variance > 0 ? '+' : ''}${variance} units (${Math.round(variancePct)}%) detected for item ID ${itemId}. Reason: ${reasoning}`,
-            type: 'alert'
-          }])
-        }
-      }
-    } catch (e) { console.error('Notification dispatch notice:', e) }
-  }
-
-  return { variance, variancePct, isHighRisk }
+  if (error) throw error
+  return data
 }
 
-// 4. Offline Queue Sync Helper
-export function saveOfflineAction(actionType, payload) {
-  try {
-    const queue = JSON.parse(localStorage.getItem('assetpro_offline_queue') || '[]')
-    queue.push({ id: Date.now(), actionType, payload, timestamp: new Date().toISOString() })
-    localStorage.setItem('assetpro_offline_queue', JSON.stringify(queue))
-  } catch (e) { console.error('Failed to queue offline action:', e) }
+export function saveOfflineAction(actionType, payload, userId) {
+  return enqueueOffline(localStorage, userId, actionType, payload)
 }
 
 export async function syncOfflineActionsQueue(userId) {
-  try {
-    const queue = JSON.parse(localStorage.getItem('assetpro_offline_queue') || '[]')
-    if (!queue || queue.length === 0) return 0
-    let synced = 0
-    for (const item of queue) {
-      if (item.actionType === 'audit') {
-        await submitStockAuditReconciliation({ ...item.payload, userId })
-        synced++
-      }
-    }
-    localStorage.removeItem('assetpro_offline_queue')
-    return synced
-  } catch (e) {
-    console.error('Offline queue sync error:', e)
-    return 0
-  }
+  return drainOffline(localStorage, userId, async item => {
+    const { data, error } = await supabase.auth.getUser()
+    if (error || data.user?.id !== userId) throw new Error('Your account changed. Sign in again before syncing.')
+    await submitStockAuditReconciliation({ ...item.payload, actionId: item.id })
+  })
 }
 
 

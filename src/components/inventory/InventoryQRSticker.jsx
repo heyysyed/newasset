@@ -1,3 +1,4 @@
+import { writePrintDocument } from '../../lib/printDocument'
 import React, { useState, useEffect } from 'react'
 import QRCode from 'qrcode'
 import { Printer, X } from 'lucide-react'
@@ -16,8 +17,8 @@ export default function InventoryQRSticker({ item }) {
   }, [item?.item_code])
 
   function handlePrint() {
-    const w = window.open('', '_blank')
-    w.document.write(`<!DOCTYPE html><html><head><title>Sticker - ${item.item_code}</title>
+    const w = window.open('', '_blank'); if (!w) { alert('Allow pop-ups to open the print preview.'); return }
+    writePrintDocument(w, `<!DOCTYPE html><html><head><title>Sticker - ${item.item_code}</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=DM+Mono:wght@400;500&family=Inter:wght@400;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
@@ -36,7 +37,7 @@ body{display:flex;align-items:center;justify-content:center;min-height:100vh;bac
 .dnr{font-size:11px;color:#dc2626;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-top:4px}
 .footer{background:#1e3a8a;padding:5px 14px;text-align:center;font-size:7px;color:#fff;font-weight:600;text-transform:uppercase;letter-spacing:0.1em}
 @media print{body{background:none}.sticker{border:none;box-shadow:none}}
-</style></head><body onload="setTimeout(()=>window.print(),300)">
+</style></head><body>
 <div class="sticker">
   <div class="header">
     <img src="${defaultLogo}" alt="Logo"/>
@@ -59,6 +60,7 @@ body{display:flex;align-items:center;justify-content:center;min-height:100vh;bac
 </div>
 </body></html>`)
     w.document.close()
+    w.addEventListener('load', () => { w.focus(); w.print() }, { once: true })
   }
 
   return (

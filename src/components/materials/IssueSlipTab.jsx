@@ -1,3 +1,4 @@
+import { writePrintDocument } from '../../lib/printDocument'
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import {
   Plus, Search, Loader2, Printer, Package,
@@ -66,9 +67,9 @@ function printSlip(slip) {
   </div>
 </body></html>`
 
-  const win = window.open('', '_blank', 'width=800,height=600')
+  const win = window.open('', '_blank', 'width=800,height=600'); if (!win) { alert('Allow pop-ups to open the print preview.'); return }
   if (win) {
-    win.document.write(html)
+    writePrintDocument(win, html)
     win.document.close()
     win.focus()
     setTimeout(() => win.print(), 400)

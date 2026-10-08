@@ -1,3 +1,4 @@
+import { writePrintDocument } from '../../lib/printDocument'
 import React, { useRef } from 'react'
 import { X, Printer, CheckCircle2, AlertCircle, User, ShieldCheck, Upload, FileImage } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
@@ -25,8 +26,8 @@ export default function ChecklistDetailModal({ submission, onClose, onUploaded }
 
   function handlePrint() {
     const content = printRef.current.innerHTML
-    const win = window.open('', '_blank', 'width=900,height=700')
-    win.document.write(`<!DOCTYPE html><html><head>
+    const win = window.open('', '_blank', 'width=900,height=700'); if (!win) { alert('Allow pop-ups to open the print preview.'); return }
+    writePrintDocument(win, `<!DOCTYPE html><html><head>
       <title>Checklist – ${submission.template?.name || 'Inspection'}</title>
       <style>
         *{box-sizing:border-box;margin:0;padding:0}

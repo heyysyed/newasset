@@ -37,7 +37,7 @@ export default function MobileFieldView() {
       // Navigate to maintenance page with a filter for this asset (or to a specific asset detail view)
       // Since we don't have a dedicated single asset view for logged in users yet, 
       // we can redirect them to maintenance with search filled
-      navigate(`/maintenance?search=${data.asset_code}`)
+      navigate(`/assets/${data.id}`)
 
     } catch (err) {
       setError(err.message)
@@ -78,7 +78,9 @@ export default function MobileFieldView() {
             gap: 12,
             marginBottom: 24,
             cursor: 'pointer'
-          }} onClick={() => alert('Camera access requires HTTPS and a mobile device. For now, enter the code manually below.')}>
+          }} role="button" tabIndex={0} aria-label="Scan an asset QR code"
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate('/scan') } }}
+            onClick={() => navigate('/scan')}>
             <div style={{ width: 64, height: 64, background: 'var(--bg-2)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--clay-shadow-sm)' }}>
               <QrCode size={32} color="var(--accent)" />
             </div>

@@ -1,3 +1,4 @@
+import { writePrintDocument } from '../lib/printDocument'
 import React, { useEffect, useState, useRef, useMemo } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import {
@@ -529,7 +530,7 @@ export default function AssetDetail() {
     ${maintenance.logs.length > 0 ? `<h2>Maintenance History</h2><table style="width:100%;border-collapse:collapse;font-size:0.82rem"><thead><tr style="background:#4f7eff;color:white"><th style="padding:6px 10px;text-align:left">Work</th><th>Cost</th><th>Date</th></tr></thead><tbody>${maintenance.logs.map(l => `<tr><td style="padding:6px 10px;border-bottom:1px solid #e5e7eb">${l.work_done}</td><td style="border-bottom:1px solid #e5e7eb">${formatCurrency(l.cost)}</td><td style="border-bottom:1px solid #e5e7eb">${new Date(l.performed_at).toLocaleDateString()}</td></tr>`).join('')}</tbody></table>` : ''}
     <p style="margin-top:40px;text-align:center;color:#999;font-size:0.68rem">Strongbuilt · Generated ${new Date().toLocaleString()}</p>
     </body></html>`
-    const w = window.open('', '_blank'); w.document.write(html); w.document.close(); setTimeout(() => w.print(), 500)
+    const w = window.open('', '_blank'); if (!w) { alert('Allow pop-ups to open the print preview.'); return }; writePrintDocument(w, html); w.document.close(); setTimeout(() => w.print(), 500)
   }
 
   // ── Depreciation Schedule ─────────────────────────────────────────────
