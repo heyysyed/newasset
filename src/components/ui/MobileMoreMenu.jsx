@@ -25,14 +25,14 @@ export default function MobileMoreMenu({ isOpen, onClose }) {
       label: 'Operations',
       items: [
         { to: '/sites', icon: MapPin, label: 'Sites & Locations', show: isAdmin || isMod },
-        { to: '/inventory', icon: Boxes, label: 'Inventory', show: isAdmin || isMod || can('inventory') },
-        { to: '/audit', icon: ClipboardCheck, label: 'Inspections', show: true },
+        { to: '/inventory', icon: Boxes, label: 'Inventory', show: can('inventory') },
+        { to: '/audit', icon: ClipboardCheck, label: 'Inspections', show: can('audit') || can('checklists') },
       ]
     },
     {
       label: 'Insights & Tools',
       items: [
-        { to: '/reports', icon: BarChart2, label: 'Reports & Analytics', show: true },
+        { to: '/reports', icon: BarChart2, label: 'Reports & Analytics', show: can('export') },
         { to: '/stickers', icon: Tag, label: 'Print QR Tags', show: can('print_stickers') },
         { to: '/import', icon: FileSpreadsheet, label: 'Import Excel Data', show: can('import') },
       ]
@@ -59,6 +59,8 @@ export default function MobileMoreMenu({ isOpen, onClose }) {
         className="relative bg-bg-1 w-full h-[88vh] rounded-t-2xl shadow-2xl flex flex-col overflow-hidden" 
         style={{ animation: 'mobileSheetSlideUp 0.28s cubic-bezier(0.16,1,0.3,1)' }}
         role="dialog"
+        aria-modal="true"
+        aria-label="More navigation"
       >
         {/* Handle */}
         <div className="w-full flex justify-center pt-2.5 pb-1 shrink-0 cursor-pointer" onClick={onClose}>

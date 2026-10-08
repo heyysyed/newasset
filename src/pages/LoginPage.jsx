@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [loading,  setLoading]  = useState(false)
   const [error,    setError]    = useState('')
   const [success,  setSuccess]  = useState('')
+  const [resetting, setResetting] = useState(false)
 
   // Show deactivation message if redirected from Guard
   useEffect(() => {
@@ -138,6 +139,27 @@ export default function LoginPage() {
     }
   }
 
+  async function handlePasswordReset() {
+    setError(''); setSuccess('')
+    const normalizedEmail = email.trim()
+    if (!normalizedEmail) {
+      setError('Enter your work email first, then select “Forgot password?”.')
+      return
+    }
+    setResetting(true)
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+        redirectTo: `${window.location.origin}${window.location.pathname}#/login`,
+      })
+      if (resetError) throw resetError
+      setSuccess('Password reset instructions have been sent if that account exists.')
+    } catch (resetError) {
+      setError(resetError.message || 'Unable to send password reset instructions.')
+    } finally {
+      setResetting(false)
+    }
+  }
+
   return (
     <div className="flex min-h-screen font-sans bg-white">
       {/* Left Pane - Branding & Image */}
@@ -230,34 +252,39 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label className="block text-[12px] sm:text-[13px] font-medium text-slate-700 mb-1 sm:mb-1.5">Work email *</label>
+              <label htmlFor="login-email" className="block text-[12px] sm:text-[13px] font-medium text-slate-700 mb-1 sm:mb-1.5">Work email *</label>
               <div className="relative">
                 <input
+                  id="login-email"
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder="you@company.com"
                   required
+                  autoComplete="email"
                   className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-600/50 focus:border-teal-600 transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[12px] sm:text-[13px] font-medium text-slate-700 mb-1 sm:mb-1.5">Password *</label>
+              <label htmlFor="login-password" className="block text-[12px] sm:text-[13px] font-medium text-slate-700 mb-1 sm:mb-1.5">Password *</label>
               <div className="relative">
                 <input
+                  id="login-password"
                   type={showPw ? 'text' : 'password'}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••••••"
                   required
-                  minLength={6}
+                  autoComplete={tab === 'login' ? 'current-password' : 'new-password'}
+                  minLength={tab === 'register' ? 12 : 6}
                   className="w-full pl-3 sm:pl-4 pr-10 sm:pr-12 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-600/50 focus:border-teal-600 transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPw(p => !p)}
+                  aria-label={showPw ? 'Hide password' : 'Show password'}
                   className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
                 >
                   {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -350,13 +377,9 @@ export default function LoginPage() {
 
             {/* Additional Login specific options */}
             {tab === 'login' && (
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-1 gap-3 sm:gap-0">
-                <label className="flex items-center gap-2 cursor-pointer group">
-                  <input type="checkbox" className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-600" />
-                  <span className="text-[12px] sm:text-sm text-slate-600 group-hover:text-slate-800 transition-colors">Remember me</span>
-                </label>
-                <button type="button" className="text-[12px] sm:text-sm text-slate-500 hover:text-slate-900 transition-colors w-max">
-                  Forgot password?
+              <div className="flex justify-end pt-1">
+                <button type="button" onClick={handlePasswordReset} disabled={resetting} className="text-[12px] sm:text-sm text-slate-500 hover:text-slate-900 transition-colors disabled:opacity-60">
+                  {resetting ? 'Sending reset link…' : 'Forgot password?'}
                 </button>
               </div>
             )}
@@ -396,32 +419,14 @@ export default function LoginPage() {
               )}
             </div>
 
-            {/* SSO Section */}
+            {/* Security notice */}
             {tab === 'login' && (
-              <>
-                <div className="relative py-3 sm:py-4">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-slate-200"></div>
-                  </div>
-                  <div className="relative flex justify-center text-[11px] sm:text-sm">
-                    <span className="px-3 sm:px-4 bg-white text-slate-400">or continue with</span>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  className="w-full sm:w-max px-4 sm:px-5 py-2 sm:py-2.5 border border-slate-200 text-slate-700 font-medium rounded text-[12px] sm:text-sm hover:bg-slate-50 transition-colors"
-                >
-                  Company single sign-on
-                </button>
-
-                <div className="mt-6 sm:mt-8 bg-[#e8f4f6] rounded-md p-3 sm:p-3.5 flex items-start gap-2 sm:gap-2.5 text-[#147d92]">
+                <div className="mt-4 sm:mt-6 bg-[#e8f4f6] rounded-md p-3 sm:p-3.5 flex items-start gap-2 sm:gap-2.5 text-[#147d92]">
                   <AlertCircle size={16} className="shrink-0 mt-0.5 opacity-80" />
                   <p className="text-[11px] sm:text-xs font-medium leading-relaxed">
-                    Protected by enterprise SSO and role-based access.
+                    Protected by role-based access and secure sessions.
                   </p>
                 </div>
-              </>
             )}
 
             {tab === 'register' && (
@@ -434,12 +439,8 @@ export default function LoginPage() {
             )}
           </form>
 
-          <div className="mt-auto pt-10 sm:pt-16 flex flex-wrap justify-center gap-x-2 gap-y-1 text-[11px] sm:text-xs text-slate-400">
-            <a href="#" className="hover:text-slate-600 transition-colors">Privacy policy</a>
-            <span className="hidden sm:inline">·</span>
-            <a href="#" className="hover:text-slate-600 transition-colors">Terms of service</a>
-            <span className="hidden sm:inline">·</span>
-            <a href="#" className="hover:text-slate-600 transition-colors">Help center</a>
+          <div className="mt-auto pt-10 sm:pt-16 text-center text-[11px] sm:text-xs text-slate-400">
+            Contact your workspace administrator for account or access support.
           </div>
 
         </div>

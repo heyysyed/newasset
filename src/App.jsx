@@ -34,6 +34,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000,       // 5 minutes before refetch
+      gcTime: 0,                       // discard protected data as soon as its screen unmounts
       refetchOnWindowFocus: false,     // don't spam API on tab switch
       retry: 1,
     },

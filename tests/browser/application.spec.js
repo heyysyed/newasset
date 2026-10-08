@@ -11,6 +11,19 @@ test('anonymous visitors reach login without runtime exceptions',async({page})=>
   await expect(page.locator('input[type="password"]')).toBeVisible()
   expect(errors).toEqual([])
 })
+test('password recovery is actionable and the login page has no placeholder links',async({page})=>{
+  let recoveryRequests=0
+  await page.route('**/auth/v1/recover**',route=>{
+    recoveryRequests+=1
+    return route.fulfill({status:200,contentType:'application/json',body:'{}'})
+  })
+  await page.goto('/#/login')
+  await page.locator('input[type="email"]').fill('user@example.com')
+  await page.getByRole('button',{name:'Forgot password?'}).click()
+  await expect(page.getByText(/Password reset instructions have been sent/i)).toBeVisible()
+  expect(recoveryRequests).toBe(1)
+  await expect(page.locator('a[href="#"]')).toHaveCount(0)
+})
 test('public QR uses the restricted RPC and has no anonymous write controls',async({page})=>{
   const calls=[]
   page.on('request',r=>{if(r.url().includes('supabase.co')) calls.push(r.url())})

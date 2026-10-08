@@ -90,14 +90,12 @@ export default function Layout() {
       label: 'Operations',
       items: [
         { to: '/maintenance', label: 'Maintenance', exact: false, show: isAdmin || can('maintenance') },
-        { to: '/tool-crib', label: 'Tool Crib', exact: false, show: isAdmin || can('inventory') },
-        { to: '/procurement', label: 'Procurement', exact: false, show: isAdmin || can('inventory') },
+        { to: '/sites', label: 'Sites', exact: false, show: isAdmin || isMod },
       ]
     },
     {
       label: 'Inventory',
       items: [
-        { to: '/bulk', label: 'Bulk', exact: false, show: isAdmin || can('inventory') },
         { to: '/inventory', label: 'Materials', exact: false, show: isAdmin || can('inventory') },
       ]
     },
@@ -105,20 +103,19 @@ export default function Layout() {
       label: 'Field',
       items: [
         { to: '/scan', label: 'Scan', exact: false, show: true },
-        { to: '/audit', label: 'Audits', exact: false, show: true },
+        { to: '/audit', label: 'Audits', exact: false, show: can('audit') || can('checklists') },
       ]
     },
     {
       label: 'Analytics',
       items: [
-        { to: '/reports', label: 'Reports', exact: false, show: true },
+        { to: '/reports', label: 'Reports', exact: false, show: can('export') },
       ]
     },
     {
       label: 'Settings',
       items: [
         { to: '/admin', label: 'Admin', exact: false, show: isAdmin },
-        { to: '/sites', label: 'Sites', exact: false, show: isAdmin || isMod },
         { to: '/categories', label: 'Categories', exact: false, show: isAdmin },
         { to: '/stickers', label: 'Stickers', exact: false, show: can('print_stickers') },
         { to: '/import', label: 'Import', exact: false, show: can('import') },
@@ -133,12 +130,12 @@ export default function Layout() {
 
   // Mobile Bottom Nav (5 items)
   const BOTTOM_NAV = [
-    { to: '/', icon: LayoutDashboard, label: 'Home', exact: true },
-    { to: '/assets', icon: Package, label: 'Assets', exact: false },
+    { to: isAdmin || isMod ? '/' : '/field', icon: LayoutDashboard, label: 'Home', exact: true },
+    { to: '/assets', icon: Package, label: 'Assets', exact: false, show: isAdmin || isMod },
     { to: '/scan', icon: ScanLine, label: 'Scan', exact: false, isAction: true },
-    { to: '/maintenance', icon: Wrench, label: 'Maint.', exact: false },
+    { to: '/maintenance', icon: Wrench, label: 'Maint.', exact: false, show: can('maintenance') },
     { to: '#more', icon: MoreHorizontal, label: 'More', exact: false, action: () => setShowMobileMore(true) },
-  ]
+  ].filter(item => item.show !== false)
 
   return (
     <div className={`flex h-screen w-screen overflow-hidden bg-bg-1 font-sans text-text-0 selection:bg-accent/20 transition-colors duration-300`} data-theme={darkMode ? 'dark' : 'light'}>
@@ -203,9 +200,29 @@ export default function Layout() {
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t flex flex-col gap-2 shrink-0" style={{ borderColor: '#1e3848' }}>
-           <a href="#" className="text-[12px] text-[#9eb1bc] hover:text-white transition-colors">Help & documentation ↗</a>
-           <div className="text-[11px] text-[#647582]">Enterprise workspace · v3.8</div>
+        <div className="p-3 border-t flex flex-col gap-1 shrink-0" style={{ borderColor: '#1e3848' }}>
+          <button
+            onClick={() => setSidebarCollapsed(value => !value)}
+            className={`hidden lg:flex items-center gap-3 p-2 rounded text-[#9eb1bc] hover:bg-[#1b3b4b] hover:text-white transition-colors ${sidebarCollapsed ? 'justify-center' : ''}`}
+            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {sidebarCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+            {!sidebarCollapsed && <span className="text-[12px]">Collapse sidebar</span>}
+          </button>
+          <button
+            onClick={() => setEditingProfile(true)}
+            className={`flex items-center gap-3 p-2 rounded text-[#9eb1bc] hover:bg-[#1b3b4b] hover:text-white transition-colors ${sidebarCollapsed ? 'justify-center' : ''}`}
+          >
+            <div className="w-7 h-7 rounded-full bg-[#147d92] text-white flex items-center justify-center text-xs shrink-0">{(profile?.full_name || 'U')[0].toUpperCase()}</div>
+            {!sidebarCollapsed && <span className="text-[12px] truncate">{profile?.full_name || 'Profile'}</span>}
+          </button>
+          <button
+            onClick={handleSignOut}
+            className={`flex items-center gap-3 p-2 rounded text-[#9eb1bc] hover:bg-[#1b3b4b] hover:text-white transition-colors ${sidebarCollapsed ? 'justify-center' : ''}`}
+          >
+            <LogOut size={18} />
+            {!sidebarCollapsed && <span className="text-[12px]">Sign out</span>}
+          </button>
         </div>
       </aside>
 
@@ -249,15 +266,6 @@ export default function Layout() {
               title="Toggle Dark Mode"
             >
               {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-
-            {/* Help (desktop & tablet) */}
-            <button
-              className="hidden md:flex p-2 text-text-2 hover:text-text-0 hover:bg-bg-2 rounded-lg transition-colors"
-              title="Help"
-              aria-label="Help"
-            >
-              <HelpCircle size={18} />
             </button>
 
             <div className="w-px h-5 bg-border mx-1 hidden md:block" />
