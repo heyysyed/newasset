@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../../../context/AuthContext';
-import { supabase, autoCreateOverdueTickets, deleteMaintenanceSchedule } from '../../../../lib/supabase';
+import { autoCreateOverdueTickets } from '../../../../lib/supabase';
 import { scheduleService } from '../../services/scheduleService';
 import { Calendar, CheckCircle2, Edit2, Trash2, Plus, Loader2 } from 'lucide-react';
 import PMScheduleFormModal from './PMScheduleFormModal';

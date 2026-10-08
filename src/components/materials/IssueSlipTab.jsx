@@ -2,12 +2,11 @@ import { writePrintDocument } from '../../lib/printDocument'
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import {
   Plus, Search, Loader2, Printer, Package,
-  MapPin, User, FileText, AlertTriangle, Trash2, X,
+  MapPin, User, FileText, AlertTriangle,
 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import ModalShell from './ModalShell'
-import { trashSave } from './helpers'
 
 // ── Print Issue Slip ───────────────────────────────────────────────────────────
 
@@ -321,7 +320,6 @@ export default function IssueSlipTab({ items, stock, sites, onRefresh }) {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [showCreate, setShowCreate] = useState(false)
-  const [selectedIds, setSelectedIds] = useState(new Set())
 
   // ── Fetch slips ──────────────────────────────────────────────────────────────
 
@@ -368,20 +366,6 @@ export default function IssueSlipTab({ items, stock, sites, onRefresh }) {
     )
   }, [slips, search])
 
-  const toggleOne = id => setSelectedIds(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s })
-  const toggleAll = () => setSelectedIds(prev => prev.size === filtered.length && filtered.length > 0 ? new Set() : new Set(filtered.map(s => s.id)))
-  const clearSel = () => setSelectedIds(new Set())
-
-  async function handleBulkDelete(ids) {
-    if (!confirm(`Delete ${ids.length} issue slip(s)?\n\nThis will NOT restore the quantities. Revert quantities manually if needed.`)) return
-    try {
-      const { error } = await supabase.from('inventory_issue_slips').delete().in('id', ids)
-      if (error) throw error
-      clearSel()
-      fetchSlips()
-    } catch (e) { alert(e.message) }
-  }
-
   // ── Render ───────────────────────────────────────────────────────────────────
 
   return (
@@ -406,21 +390,6 @@ export default function IssueSlipTab({ items, stock, sites, onRefresh }) {
         </div>
       )}
 
-      {/* Bulk delete bar */}
-      {selectedIds.size > 0 && (
-        <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 16px', background:'var(--red-dim)', borderBottom:'1px solid var(--status-danger-soft)' }}>
-          <span style={{ color:'var(--red)', }}>{selectedIds.size} slip{selectedIds.size > 1 ? 's' : ''} selected</span>
-          <button onClick={() => handleBulkDelete([...selectedIds])}
-            style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:6, padding:'6px 14px', borderRadius:10, background:'var(--red)', border:'none', color:'white', cursor:'pointer', }}>
-            <Trash2 size={13}/> Delete Selected
-          </button>
-          <button onClick={clearSel}
-            style={{ display:'flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:10, background:'var(--bg-3)', border:'1.5px solid var(--border)', color:'var(--text-2)', cursor:'pointer', }}>
-            <X size={13}/> Cancel
-          </button>
-        </div>
-      )}
-
       {/* Desktop Table */}
       {!loading && (
         <div className="card desktop-table" style={{ overflow: 'hidden', marginBottom: 16 }}>
@@ -428,7 +397,6 @@ export default function IssueSlipTab({ items, stock, sites, onRefresh }) {
             <table className="tbl" style={{ minWidth: 950 }}>
               <thead>
                 <tr>
-                  <th style={{ width:36 }}><input type="checkbox" checked={selectedIds.size === filtered.length && filtered.length > 0} onChange={toggleAll} style={{ cursor:'pointer' }}/></th>
                   <th>Date</th>
                   <th>Slip No</th>
                   <th>Item</th>
@@ -442,8 +410,7 @@ export default function IssueSlipTab({ items, stock, sites, onRefresh }) {
               </thead>
               <tbody>
                 {filtered.map(slip => (
-                  <tr key={slip.id} style={{ background: selectedIds.has(slip.id) ? 'var(--status-danger-soft)' : undefined }}>
-                    <td><input type="checkbox" checked={selectedIds.has(slip.id)} onChange={() => toggleOne(slip.id)} style={{ cursor:'pointer' }}/></td>
+                  <tr key={slip.id}>
                     <td>
                       <span style={{ color: 'var(--text-2)', }}>
                         {new Date(slip.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
@@ -497,17 +464,12 @@ export default function IssueSlipTab({ items, stock, sites, onRefresh }) {
                         style={{ padding: 6, marginRight: 4 }} title="Print Slip">
                         <Printer size={14} />
                       </button>
-                      <button onClick={() => handleBulkDelete([slip.id])} title="Delete"
-                        style={{ padding: 6, borderRadius: 8, background: 'var(--red-dim)',
-                          border: '1.5px solid var(--status-danger-soft)', cursor: 'pointer', color: 'var(--red)' }}>
-                        <Trash2 size={13} />
-                      </button>
                     </td>
                   </tr>
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={10} style={{ padding: 60, textAlign: 'center', color: 'var(--text-3)' }}>
+                    <td colSpan={9} style={{ padding: 60, textAlign: 'center', color: 'var(--text-3)' }}>
                       {search ? 'No matching issue slips found.' : 'No issue slips yet.'}
                     </td>
                   </tr>

@@ -800,9 +800,9 @@ export async function fetchMaintenanceLogsPaginated(filters = {}, page = 0, page
 
 export async function deleteMaintenanceTicket(id) {
   const { data: t } = await supabase.from('maintenance_tickets').select('ticket_no, title').eq('id', id).single()
-  const { error } = await supabase.from('maintenance_tickets').delete().eq('id', id)
+  const { error } = await supabase.from('maintenance_tickets').update({ status: 'cancelled' }).eq('id', id)
   if (error) throw error
-  await logActivity(null, 'deleted', 'ticket', id, t?.ticket_no || id)
+  await logActivity(null, 'cancelled', 'ticket', id, t?.ticket_no || id)
 }
 
 export async function updateMaintenanceSchedule(id, updates) {
@@ -814,9 +814,9 @@ export async function updateMaintenanceSchedule(id, updates) {
 
 export async function deleteMaintenanceSchedule(id) {
   const { data: s } = await supabase.from('maintenance_schedules').select('title').eq('id', id).single()
-  const { error } = await supabase.from('maintenance_schedules').delete().eq('id', id)
+  const { error } = await supabase.from('maintenance_schedules').update({ status: 'paused' }).eq('id', id)
   if (error) throw error
-  await logActivity(null, 'deleted', 'schedule', id, s?.title || id)
+  await logActivity(null, 'paused', 'schedule', id, s?.title || id)
 }
 
 // ── Ticket Comments ─────────────────────────────────────
@@ -1057,9 +1057,10 @@ export async function updateGatePass(id, updates, userId, companyCode) {
 }
 
 export async function deleteGatePass(id) {
-  await supabase.from('gate_pass_items').delete().eq('gate_pass_id', id)
-  const { error } = await supabase.from('gate_passes').delete().eq('id', id)
+  const { data: pass } = await supabase.from('gate_passes').select('pass_no').eq('id', id).single()
+  const { error } = await supabase.from('gate_passes').update({ status: 'cancelled' }).eq('id', id)
   if (error) throw error
+  await logActivity(null, 'cancelled', 'gate_pass', id, pass?.pass_no || id)
 }
 
 

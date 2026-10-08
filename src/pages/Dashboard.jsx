@@ -185,7 +185,7 @@ export default function Dashboard() {
       setRefreshing(true)
 
       let tQ = supabase.from('maintenance_tickets')
-        .select('id, ticket_no, title, status, priority, sla_due_at, resolved_at, assigned_to, created_at, assets(asset_name, site, category)')
+        .select('id, ticket_no, title, status, priority, sla_due_at, resolved_at, assigned_to, created_at, assets(asset_name, site, category), assignee:profiles!maintenance_tickets_assigned_to_fkey(full_name)')
         .order('created_at', { ascending: false }).limit(100)
       if (cc) tQ = tQ.eq('company_code', cc)
 
@@ -614,7 +614,7 @@ export default function Dashboard() {
                 {filteredRecentlyAdded.slice(0, 4).map(a => (
                   <tr key={a.id} className="hover:bg-[#f4f6f8] cursor-pointer" onClick={() => navigate(`/assets/${a.id}`)}>
                     <td className="px-5 py-3.5 font-medium text-slate-900">{a.asset_code} · {a.asset_name}</td>
-                    <td className="px-5 py-3.5 text-[#647582]">{a.site || 'Detroit Plant'}</td>
+                    <td className="px-5 py-3.5 text-[#647582]">{a.site || 'No site assigned'}</td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-2">
                         <span className={`w-2 h-2 rounded-full ${a.status === 'Active' ? 'bg-[#247553]' : 'bg-[#b44949]'}`}></span>
@@ -672,7 +672,7 @@ export default function Dashboard() {
                   return (
                     <tr key={t.id} className="hover:bg-[#f4f6f8] cursor-pointer" onClick={() => navigate('/maintenance')}>
                       <td className="px-5 py-3.5 font-medium text-slate-900">{t.ticket_no} · {t.title.length > 20 ? t.title.substring(0, 20) + '...' : t.title}</td>
-                      <td className="px-5 py-3.5 text-[#647582]">{t.assigned_to || 'Taylor Brooks'}</td>
+                      <td className="px-5 py-3.5 text-[#647582]">{t.assignee?.full_name || 'Unassigned'}</td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-2">
                           <span className={`w-2 h-2 rounded-full ${statusColor}`}></span>

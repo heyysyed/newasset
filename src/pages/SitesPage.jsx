@@ -12,8 +12,9 @@ export default function SitesPage() {
   const [assets, setAssets] = useState([])
   const [loading, setLoading] = useState(true)
 
+  const locationsStorageKey = `assetpro_locations:${user?.id || 'anonymous'}:${cc || 'unassigned'}`
   const [locationsStore, setLocationsStore] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('assetpro_locations')) || {} }
+    try { return JSON.parse(localStorage.getItem(locationsStorageKey)) || {} }
     catch { return {} }
   })
 
@@ -27,8 +28,8 @@ export default function SitesPage() {
   const [locForm, setLocForm] = useState(null)
 
   useEffect(() => {
-    localStorage.setItem('assetpro_locations', JSON.stringify(locationsStore))
-  }, [locationsStore])
+    localStorage.setItem(locationsStorageKey, JSON.stringify(locationsStore))
+  }, [locationsStore, locationsStorageKey])
 
   useEffect(() => {
     loadData()
@@ -61,24 +62,6 @@ export default function SitesPage() {
     if (!selectedSite) return []
     return locationsStore[selectedSite.id] || []
   }, [selectedSite, locationsStore])
-
-  useEffect(() => {
-    if (sites.length > 0 && Object.keys(locationsStore).length === 0) {
-      const initial = {}
-      sites.forEach(s => {
-        initial[s.id] = [
-          { id: 'loc-1', name: 'Production floor', code: `${s.site_code || 'S'}-PROD`, parentId: null, manager: 'Jamie Lee' },
-          { id: 'loc-2', name: 'Bay 01', code: `${s.site_code || 'S'}-PROD-01`, parentId: 'loc-1', manager: '' },
-          { id: 'loc-3', name: 'Bay 02', code: `${s.site_code || 'S'}-PROD-02`, parentId: 'loc-1', manager: '' },
-          { id: 'loc-4', name: 'Bay 04', code: `${s.site_code || 'S'}-PROD-04`, parentId: 'loc-1', manager: 'Morgan Chen' },
-          { id: 'loc-5', name: 'Central store', code: `${s.site_code || 'S'}-CS`, parentId: null, manager: '' },
-          { id: 'loc-6', name: 'Receiving Dock 2', code: `${s.site_code || 'S'}-RD2`, parentId: null, manager: '' },
-          { id: 'loc-7', name: 'Utility room', code: `${s.site_code || 'S'}-UTIL`, parentId: null, manager: '' },
-        ]
-      })
-      setLocationsStore(initial)
-    }
-  }, [sites])
 
   const handleSiteClick = (s) => {
     setSelectedSiteId(s.id)
@@ -224,11 +207,7 @@ export default function SitesPage() {
                   const sAssets = assets.filter(a => isSiteMatch(a.site, site))
                   const sLocs = locationsStore[site.id] || []
 
-                  // Mock managers for visual match
-                  let mgr = ''
-                  if (site.name.includes('Detroit')) mgr = 'Jamie Lee'
-                  else if (site.name.includes('Austin')) mgr = 'Taylor Brooks'
-                  else if (site.name.includes('Denver')) mgr = 'Alex Rivera'
+                  const mgr = [site.checker?.full_name, site.hod?.full_name].filter(Boolean).join(' / ') || 'Unassigned'
 
                   return (
                     <tr

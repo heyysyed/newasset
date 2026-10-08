@@ -446,7 +446,7 @@ export default function AdminPage() {
     { id: 'tracking',   label: 'Task SLA Tracking',  icon: ClipboardCheck, count: (auditAssignments || []).length || null, group: 'Operations & Security', desc: 'Track maintenance and inspection SLA resolution deadlines' },
     { id: 'reports',    label: 'Scheduled Reports', icon: FileSpreadsheet, count: (settings?.scheduled_reports || []).length || null, group: 'Operations & Security', desc: 'Configure automated scheduled report delivery' },
     { id: 'logs',       label: 'Activity Audit Logs', icon: History,       count: null, group: 'Operations & Security', desc: 'Complete chronological audit log of all system changes' },
-    { id: 'trash',      label: 'Deleted Trash Bin', icon: Trash2,         count: (deletedAssets || []).length || null, group: 'Operations & Security', desc: 'Recovery center for deleted equipment with permanent purge' },
+    { id: 'trash',      label: 'Asset Archive', icon: Trash2,             count: (deletedAssets || []).length || null, group: 'Operations & Security', desc: 'Recover archived equipment while preserving retained history' },
   ]
 
   async function loadLogs() {

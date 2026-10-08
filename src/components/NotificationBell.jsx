@@ -53,7 +53,8 @@ export default function NotificationBell() {
   function handleNotifClick(n) {
     if (!n.is_read) markRead([n.id])
     setOpen(false)
-    if (n.link) navigate(n.link)
+    // Notification records are database content; only allow internal routes.
+    if (typeof n.link === 'string' && /^\/(?!\/)/.test(n.link)) navigate(n.link)
   }
 
   const dropdown = open ? createPortal(
@@ -148,6 +149,7 @@ export default function NotificationBell() {
         ref={btnRef}
         onClick={openDropdown}
         title="Notifications"
+        aria-label={unreadCount ? `Notifications, ${unreadCount} unread` : 'Notifications'}
         style={{ 
           width: 32, height: 32, borderRadius: 8, 
           display: 'flex', alignItems: 'center', justifyContent: 'center',

@@ -1118,6 +1118,7 @@ function InventoryPageContent() {
             <TabBtn active={tab === 'stock'} icon={Boxes} label="Site Stock" onClick={() => setTab('stock')} />
             <TabBtn active={tab === 'master'} icon={Package} label="Master Catalog" onClick={() => setTab('master')} />
             <TabBtn active={tab === 'components'} icon={Layers} label="Serialized Components" onClick={() => setTab('components')} />
+            <TabBtn active={tab === 'transactions'} icon={History} label="Transaction History" onClick={() => setTab('transactions')} />
             
             <div style={{ width: 1, height: 24, background: 'var(--border)', margin: '4px', flexShrink: 0 }} />
             

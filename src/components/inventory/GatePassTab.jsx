@@ -131,7 +131,7 @@ export default function GatePassTab({ gatePasses, items, assets, sites = [], onR
                           <button onClick={() => handleApprove(gp)} className="btn-ghost" style={{ padding: 6, color: 'var(--green)' }} title="Approve"><Check size={14} /></button>
                         )}
                         {gp.status === 'pending' && (
-                          <button onClick={() => handleDelete(gp)} className="btn-ghost" style={{ padding: 6, color: 'var(--red)' }} title="Delete"><Trash2 size={14} /></button>
+                          <button onClick={() => handleDelete(gp)} className="btn-ghost" style={{ padding: 6, color: 'var(--red)' }} title="Cancel gate pass"><Trash2 size={14} /></button>
                         )}
                         <button onClick={() => openDetail(gp)} className="btn-ghost" style={{ padding: 6 }} title="View"><ChevronRight size={14} /></button>
                       </div>
@@ -228,7 +228,7 @@ export default function GatePassTab({ gatePasses, items, assets, sites = [], onR
   }
 
   async function handleDelete(gp) {
-    if (!window.confirm(`Delete gate pass ${gp.pass_no}?`)) return
+    if (!window.confirm(`Cancel gate pass ${gp.pass_no}? Its items and approval history will be preserved.`)) return
     try { await deleteGatePass(gp.id); onRefresh() } catch (e) { alert(e.message) }
   }
 }
