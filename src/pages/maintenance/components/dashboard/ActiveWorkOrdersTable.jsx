@@ -7,7 +7,7 @@ export default function ActiveWorkOrdersTable({ workOrders, isLoading }) {
       <div className="bg-[var(--bg-0)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
         <div className="skeleton w-48 h-6 mb-5 rounded"></div>
         <div className="flex flex-col gap-4">
-          {[1,2,3,4].map(i => <div key={i} className="skeleton h-16 rounded-xl"></div>)}
+          {[1,2,3,4].map(i => <div key={`skel-${i}`} className="skeleton h-16 rounded-xl"></div>)}
         </div>
       </div>
     );

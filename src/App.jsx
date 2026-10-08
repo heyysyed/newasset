@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { NotificationProvider } from './context/NotificationContext'
 import { supabase } from './lib/supabase'
+import { Toaster } from 'react-hot-toast'
 import { ImportProvider } from './context/ImportContext'
 import Layout from './components/Layout'
 import SkeletonLoader from './components/SkeletonLoader'
@@ -156,6 +157,7 @@ export default function App() {
           <NotificationProvider>
             <ImportProvider>
               <ErrorBoundary>
+                <Toaster position="top-center" toastOptions={{ style: { background: 'var(--bg-2)', color: 'var(--text-1)', borderRadius: '12px', border: '1px solid var(--border)' } }} />
                 <AppRoutes />
               </ErrorBoundary>
             </ImportProvider>
@@ -165,5 +167,3 @@ export default function App() {
     </QueryClientProvider>
   )
 }
-
-

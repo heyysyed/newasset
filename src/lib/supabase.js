@@ -122,7 +122,7 @@ export async function updateSettings(updates) {
 }
 
 export const getAssetSelectCols = (canViewFinancials = false) => {
-  const base = 'id, asset_code, asset_name, make, model_no, purchase_order_no, serial_no, capacity, status, category, site, type_code, purchase_date, location, department, assigned_to, notes, custom_fields, latitude, longitude, warranty_expiry, disposal_date, disposal_reason, checklist_template_id, quantity, parent_asset_id, added_on, updated_at, added_by'
+  const base = 'id, asset_code, asset_name, make, model_no, purchase_order_no, serial_no, capacity, status, category, site, type_code, purchase_date, location, department, assigned_to, notes, custom_fields, latitude, longitude, warranty_expiry, disposal_date, disposal_reason, checklist_template_id, quantity, parent_asset_id, nfc_tag_id, added_on, updated_at, added_by'
   const fin = ', purchase_value, salvage_value, useful_life_years, depreciation_method, depreciation_rate_percent'
   return canViewFinancials ? `${base}${fin}` : base
 }
@@ -209,7 +209,7 @@ const DELETED_ASSETS_COLS = [
   'status', 'category', 'site', 'type_code', 'purchase_date', 'location', 'department', 
   'assigned_to', 'notes', 'custom_fields', 'purchase_value', 'salvage_value', 'useful_life_years', 
   'depreciation_method', 'depreciation_rate_percent', 'latitude', 'longitude', 'warranty_expiry', 
-  'disposal_date', 'disposal_reason', 'checklist_template_id', 'added_on', 'added_by'
+  'disposal_date', 'disposal_reason', 'checklist_template_id', 'added_on', 'added_by', 'nfc_tag_id'
 ];
 
 async function backupAsset(asset, userId) {

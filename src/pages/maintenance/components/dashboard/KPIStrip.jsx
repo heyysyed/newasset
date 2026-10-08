@@ -9,7 +9,7 @@ export default function KPIStrip({ kpis, slaBreachedCount, slaAtRiskCount, isLoa
     return (
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
         {[1,2,3,4,5,6].map(i => (
-          <div key={i} className="skeleton" style={{ height: 90, borderRadius: 12 }}></div>
+          <div key={`skel-${i}`} className="skeleton" style={{ height: 90, borderRadius: 12 }}></div>
         ))}
       </div>
     );

@@ -334,7 +334,7 @@ export default function UserDirectory({
                 { device: 'Chrome on Windows 11', ip: '103.21.124.89', loc: 'Mumbai, India', active: 'Active now (Current)' },
                 { device: 'AssetPro Mobile iOS App', ip: '114.143.20.12', loc: 'Delhi, India', active: '2 hours ago' },
               ].map((s, i) => (
-                <div key={i} style={{ padding: 12, borderRadius: 10, background: 'var(--bg-3)', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div key={`skel2-${i}`} style={{ padding: 12, borderRadius: 10, background: 'var(--bg-3)', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <div style={{ color: 'var(--text-0)', }}>{s.device}</div>
                     <div style={{ color: 'var(--text-3)', }}>IP: {s.ip} • {s.loc} • {s.active}</div>

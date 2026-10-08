@@ -289,7 +289,7 @@ export default function Site360Workspace({ site, siteAssets, siteTickets }) {
           </h3>
           <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 12 }}>
             {intel.recommendations.map((rec, i) => (
-              <li key={i} style={{ 
+              <li key={`skel2-${i}`} style={{ 
                 display: 'flex', alignItems: 'flex-start', gap: 12, 
                 padding: '16px', background: 'var(--bg-1)', borderRadius: 12,
                 border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)'

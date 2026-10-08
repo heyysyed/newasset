@@ -7,7 +7,7 @@ export default function MaintenanceAlerts({ attentionQueue, isLoading }) {
       <div className="bg-[var(--bg-0)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
         <div className="skeleton w-36 h-6 mb-4 rounded"></div>
         <div className="flex flex-col gap-3">
-          {[1,2,3].map(i => <div key={i} className="skeleton h-20 rounded-xl"></div>)}
+          {[1,2,3].map(i => <div key={`skel-${i}`} className="skeleton h-20 rounded-xl"></div>)}
         </div>
       </div>
     );

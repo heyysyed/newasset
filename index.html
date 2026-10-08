@@ -9,6 +9,15 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
+  <div id="error-display" style="color: red; padding: 20px; font-family: monospace; z-index: 9999; position: absolute; background: white;"></div>
+  <script>
+    window.onerror = function(message, source, lineno, colno, error) {
+      document.getElementById('error-display').innerText += message + '\n';
+    };
+    window.addEventListener('unhandledrejection', function(event) {
+      document.getElementById('error-display').innerText += 'Unhandled Rejection: ' + event.reason + '\n';
+    });
+  </script>
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
 </body>

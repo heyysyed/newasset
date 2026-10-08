@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Package, Tag, FileSpreadsheet,
   Settings, LogOut, Menu, X, ChevronRight, Shield, ClipboardCheck,
   Wrench, Boxes, Search, HelpCircle, MapPin, BarChart2, ScanLine,
-  PanelLeftClose, PanelLeftOpen, MoreHorizontal, FolderOpen
+  PanelLeftClose, PanelLeftOpen, MoreHorizontal, FolderOpen, Moon, Sun
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useImport } from '../context/ImportContext'
@@ -54,6 +55,17 @@ export default function Layout() {
   const [editingProfile, setEditingProfile] = useState(false)
 
   const [showMobileMore, setShowMobileMore] = useState(false)
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark')
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark')
+      localStorage.setItem('theme', 'dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+      localStorage.setItem('theme', 'light')
+    }
+  }, [darkMode])
 
   const mobileTitle = useMemo(() => getMobileTitle(location.pathname), [location.pathname])
 
@@ -120,7 +132,7 @@ export default function Layout() {
   ]
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-bg-1 font-sans text-text-0 selection:bg-accent/20" data-theme="light">
+    <div className={`flex h-screen w-screen overflow-hidden bg-bg-1 font-sans text-text-0 selection:bg-accent/20 transition-colors duration-300`} data-theme={darkMode ? 'dark' : 'light'}>
 
       {/* ── Sidebar (Tablet & Desktop) ── */}
       <aside
@@ -246,6 +258,14 @@ export default function Layout() {
               <NotificationBell />
             </div>
 
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="p-2 text-text-2 hover:text-text-0 hover:bg-bg-2 rounded-lg transition-colors ml-1"
+              title="Toggle Dark Mode"
+            >
+              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+
             {/* Help (desktop & tablet) */}
             <button
               className="hidden md:flex p-2 text-text-2 hover:text-text-0 hover:bg-bg-2 rounded-lg transition-colors"
@@ -277,8 +297,18 @@ export default function Layout() {
           id="main-scroll-container"
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         >
-          <div className="w-full p-4 lg:p-6 pb-20 md:pb-6">
-            <Outlet />
+          <div className="w-full p-4 lg:p-6 pb-20 md:pb-6 relative">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={location.pathname}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+              >
+                <Outlet />
+              </motion.div>
+            </AnimatePresence>
           </div>
         </main>
 

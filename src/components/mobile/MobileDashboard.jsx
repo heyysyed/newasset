@@ -30,7 +30,7 @@ export default function MobileDashboard({
         <div className="h-20 bg-bg-1 border border-border rounded-xl" />
         <div className="grid grid-cols-4 gap-2">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-16 bg-bg-1 border border-border rounded-xl" />
+            <div key={`skel3-${i}`} className="h-16 bg-bg-1 border border-border rounded-xl" />
           ))}
         </div>
         <div className="h-28 bg-bg-1 border border-border rounded-xl" />

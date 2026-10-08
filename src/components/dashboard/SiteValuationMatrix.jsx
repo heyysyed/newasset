@@ -138,14 +138,14 @@ export default function SiteValuationMatrix({ assets = [], selectedSite, onSelec
     const siteObj = siteMatrixData.find(s => s.site === siteName) || {}
 
     return (
-      <div style={{ background: '#0f172a', color: '#fff', padding: '10px 14px', borderRadius: 10, boxShadow: '0 4px 14px rgba(0,0,0,0.18)', border: '1px solid rgba(255,255,255,0.1)' }}>
+      <div style={{ background: 'var(--bg-3)', color: 'var(--text-0)', padding: '10px 14px', borderRadius: 10, boxShadow: '0 4px 14px rgba(0,0,0,0.18)', border: '1px solid rgba(255,255,255,0.1)' }}>
         <div style={{ color: 'var(--status-info)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
           <Building2 size={14} /> {siteName}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <div>Machinery Net Value: <strong style={{ color: '#34d399', }}>{formatIndianCurrencyCompact(siteObj.machineryValue)}</strong></div>
           <div>Bulk Inventory Value: <strong style={{ color: '#fbbf24', }}>{formatIndianCurrencyCompact(siteObj.bulkValue)}</strong></div>
-          <div>Total Asset Count: <strong style={{ color: '#fff', }}>{siteObj.assetCount} units</strong></div>
+          <div>Total Asset Count: <strong style={{ color: 'var(--text-0)', }}>{siteObj.assetCount} units</strong></div>
           {siteObj.openTickets > 0 && <div style={{ color: '#f87171', }}>Open Repair Tickets: {siteObj.openTickets}</div>}
         </div>
       </div>
@@ -153,21 +153,21 @@ export default function SiteValuationMatrix({ assets = [], selectedSite, onSelec
   }
 
   return (
-    <div className="card" style={{ padding: 20, background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 12, marginBottom: 16 }}>
+    <div className="card" style={{ padding: 20, background: 'var(--bg-1)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: 16 }}>
       
       {/* Header & Metric Toggle Bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
         <div>
-          <h3 style={{ margin: 0, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <h3 style={{ margin: 0, color: 'var(--text-1)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Building2 size={18} color='var(--accent)' /> Site Asset & Valuation Matrix
           </h3>
-          <p style={{ margin: 0, color: '#64748b', }}>
+          <p style={{ margin: 0, color: 'var(--text-2)', }}>
             Multi-site capital breakdown combining heavy machinery book value and live bulk inventory stock
           </p>
         </div>
 
         {/* Toggle Mode Pills */}
-        <div style={{ display: 'flex', gap: 4, background: '#f1f5f9', padding: 3, borderRadius: 8, border: '1px solid #e2e8f0' }}>
+        <div style={{ display: 'flex', gap: 4, background: '#f1f5f9', padding: 3, borderRadius: 8, border: '1px solid var(--border)' }}>
           {[
             { id: 'combined', label: 'Combined' },
             { id: 'machinery', label: 'Machinery' },
@@ -221,10 +221,10 @@ export default function SiteValuationMatrix({ assets = [], selectedSite, onSelec
           </ResponsiveContainer>
 
           <div style={{ position: 'absolute', textAlign: 'center', pointerEvents: 'none' }}>
-            <div style={{ textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
+            <div style={{ textTransform: 'uppercase', color: 'var(--text-2)', letterSpacing: '0.05em' }}>
               {metricMode === 'count' ? 'TOTAL UNITS' : 'TOTAL VALUATION'}
             </div>
-            <div style={{ color: '#0f172a', }}>
+            <div style={{ color: 'var(--text-1)', }}>
               {metricMode === 'count' ? totalMatrixValue : formatIndianCurrencyCompact(totalMatrixValue)}
             </div>
             <div style={{ color: 'var(--accent)', marginTop: 2 }}>
@@ -234,14 +234,14 @@ export default function SiteValuationMatrix({ assets = [], selectedSite, onSelec
         </div>
 
         {/* Right Column: High-Density Site Data Matrix Table */}
-        <div style={{ overflowX: 'auto', maxHeight: 260, overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: 10 }}>
+        <div style={{ overflowX: 'auto', maxHeight: 260, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 10 }}>
           <table className="tbl" style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                <th style={{ padding: '8px 12px', color: '#64748b', textTransform: 'uppercase' }}>Site Name</th>
-                <th style={{ padding: '8px 12px', color: '#64748b', textTransform: 'uppercase', textAlign: 'right' }}>Machinery (₹)</th>
-                <th style={{ padding: '8px 12px', color: '#64748b', textTransform: 'uppercase', textAlign: 'right' }}>Bulk Stock (₹)</th>
-                <th style={{ padding: '8px 12px', color: '#64748b', textTransform: 'uppercase', textAlign: 'right' }}>Total Valuation</th>
+              <tr style={{ background: 'var(--bg-2)', borderBottom: '1px solid var(--border)' }}>
+                <th style={{ padding: '8px 12px', color: 'var(--text-2)', textTransform: 'uppercase' }}>Site Name</th>
+                <th style={{ padding: '8px 12px', color: 'var(--text-2)', textTransform: 'uppercase', textAlign: 'right' }}>Machinery (₹)</th>
+                <th style={{ padding: '8px 12px', color: 'var(--text-2)', textTransform: 'uppercase', textAlign: 'right' }}>Bulk Stock (₹)</th>
+                <th style={{ padding: '8px 12px', color: 'var(--text-2)', textTransform: 'uppercase', textAlign: 'right' }}>Total Valuation</th>
               </tr>
             </thead>
             <tbody>
@@ -253,22 +253,23 @@ export default function SiteValuationMatrix({ assets = [], selectedSite, onSelec
                     onClick={() => onSelectSite(isSelected ? '' : row.site)}
                     style={{
                       cursor: 'pointer',
-                      background: isSelected ? 'rgba(37,99,235,0.08)' : '#ffffff',
+                      background: isSelected ? 'var(--accent-soft)' : 'transparent',
                       borderLeft: isSelected ? '4px solid var(--accent)' : '4px solid transparent',
+                      borderBottom: '1px solid var(--border)',
                       transition: 'background 0.15s'
                     }}
                   >
-                    <td style={{ padding: '10px 12px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <td style={{ padding: '10px 12px', color: 'var(--text-1)', display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span style={{ width: 8, height: 8, borderRadius: '50%', background: SITE_COLORS[idx % SITE_COLORS.length] }} />
                       {row.site}
                     </td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', color: '#475569' }}>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-2)' }}>
                       {formatIndianCurrencyCompact(row.machineryValue)}
                     </td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', color: '#475569' }}>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-2)' }}>
                       {formatIndianCurrencyCompact(row.bulkValue)}
                     </td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', color: '#0f172a' }}>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--text-1)' }}>
                       {formatIndianCurrencyCompact(row.combinedValuation)}
                     </td>
                   </tr>

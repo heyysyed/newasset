@@ -91,6 +91,46 @@
   --radius-pill: 9999px;
 }
 
+.dark {
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --text-placeholder: #475569;
+  --text-inverse: #0F172A;
+
+  --bg-app: #0B0E14;
+  --bg-surface: #151A23;
+  --bg-subtle: #1C2331;
+  --bg-track: #2A3441;
+
+  --border-default: #334155;
+  --border-subtle: #1E293B;
+  --border-strong: #475569;
+
+  --accent: #3B82F6;
+  --accent-hover: #60A5FA;
+  --accent-light: #93C5FD;
+  --accent-soft: rgba(59,130,246,0.15);
+  
+  --status-success: #22C55E;
+  --status-success-soft: rgba(34,197,94,0.15);
+  
+  --status-warning: #F59E0B;
+  --status-warning-soft: rgba(245,158,11,0.15);
+  
+  --status-danger: #EF4444;
+  --status-danger-soft: rgba(239,68,68,0.15);
+  
+  --status-info: #06B6D4;
+  --status-info-soft: rgba(6,182,212,0.15);
+  
+  --status-special: #8B5CF6;
+  --status-special-soft: rgba(139,92,246,0.15);
+  
+  --signal: #FBBF24;
+  --signal-soft: rgba(251,191,36,0.15);
+}
+
 html, body, #root, button, input, select, textarea, * {
   font-family: var(--font-sans);
 }

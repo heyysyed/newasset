@@ -37,13 +37,13 @@ export default function BreakdownDecomposition({ maintLogs = [], onSelectFilter 
   }, [maintLogs])
 
   return (
-    <div className="card" style={{ padding: 20, background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 12 }}>
+    <div className="card" style={{ padding: 20, background: 'var(--bg-1)', border: '1px solid var(--border)', borderRadius: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
         <div>
-          <h3 style={{ margin: 0, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <h3 style={{ margin: 0, color: 'var(--text-1)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Repair Spend Decomposition Tree
           </h3>
-          <p style={{ margin: 0, color: '#64748b' }}>Interactive drill-down: Site → Category → Asset</p>
+          <p style={{ margin: 0, color: 'var(--text-2)' }}>Interactive drill-down: Site → Category → Asset</p>
         </div>
         <span style={{ color: 'var(--accent)', background: 'rgba(37,99,235,0.08)', padding: '4px 10px', borderRadius: 20 }}>
           Total: {formatCurrency(totalCost)}
@@ -75,20 +75,20 @@ export default function BreakdownDecomposition({ maintLogs = [], onSelectFilter 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   {isSiteOpen ? <ChevronDown size={15} color='var(--accent)' /> : <ChevronRight size={15} color="#64748b" />}
                   <Building2 size={15} color='var(--accent)' />
-                  <span style={{ color: '#0f172a' }}>{s.site}</span>
+                  <span style={{ color: 'var(--text-1)' }}>{s.site}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <div style={{ width: 80, height: 6, background: '#e2e8f0', borderRadius: 4, overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${Math.min(100, sitePct)}%`, background: 'var(--accent)' }} />
                   </div>
-                  <span style={{ color: '#0f172a' }}>
-                    {formatCurrency(s.cost)} <span style={{ color: '#64748b', }}>({Math.round(sitePct)}%)</span>
+                  <span style={{ color: 'var(--text-1)' }}>
+                    {formatCurrency(s.cost)} <span style={{ color: 'var(--text-2)', }}>({Math.round(sitePct)}%)</span>
                   </span>
                 </div>
               </div>
 
               {isSiteOpen && (
-                <div style={{ paddingLeft: 24, paddingRight: 14, paddingBottom: 10, background: '#f8fafc', display: 'flex', flexDirection: 'column', gap: 6, borderTop: '1px solid #f1f5f9' }}>
+                <div style={{ paddingLeft: 24, paddingRight: 14, paddingBottom: 10, background: 'var(--bg-2)', display: 'flex', flexDirection: 'column', gap: 6, borderTop: '1px solid #f1f5f9' }}>
                   {Object.values(s.categories).map(cat => {
                     const isCatOpen = expandedCategory === `${s.site}_${cat.category}`
                     return (
@@ -107,9 +107,9 @@ export default function BreakdownDecomposition({ maintLogs = [], onSelectFilter 
                         {isCatOpen && (
                           <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 4, paddingLeft: 12 }}>
                             {Object.values(cat.assets).map(ast => (
-                              <div key={ast.code} style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
+                              <div key={ast.code} style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-2)' }}>
                                 <span>• {ast.code}</span>
-                                <span style={{ color: '#0f172a' }}>{formatCurrency(ast.cost)}</span>
+                                <span style={{ color: 'var(--text-1)' }}>{formatCurrency(ast.cost)}</span>
                               </div>
                             ))}
                           </div>

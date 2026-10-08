@@ -176,7 +176,7 @@ export default function MobileReportsPage({
             {/* KPI Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {kpis.map((kpi, i) => (
-                <div key={i} style={{ padding: '14px', borderRadius: 12, background: 'var(--bg-2)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <div key={`skel2-${i}`} style={{ padding: '14px', borderRadius: 12, background: 'var(--bg-2)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <span style={{ color: 'var(--text-3)', letterSpacing: '0.05em' }}>{kpi.label}</span>
                   <span style={{ color: kpi.color || 'var(--text-0)', }}>{kpi.value}</span>
                 </div>

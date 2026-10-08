@@ -799,20 +799,27 @@ export default function AssetList() {
       </div>
 
       {/* View Toggle */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 16, background: '#fff', borderRadius: 8, padding: 4, border: '1px solid var(--border)', width: '100%', overflowX: 'auto' }}>
+      <div className="flex gap-1.5 mb-5 bg-bg-2 p-1.5 rounded-xl border border-border w-full overflow-x-auto custom-scrollbar">
         {[
           { id: 'register', label: 'Asset Register', icon: Package },
           { id: 'transfers', label: 'Transfers', icon: ArrowRightLeft },
           { id: 'map', label: 'Map View', icon: MapPin }
-        ].map(tab => (
-          <button key={tab.id} onClick={() => setViewMode(tab.id)}
-            style={{ flex: 1, minWidth: 140, justifyContent: 'center', display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: 6,
-              border: 'none', cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap',
-              background: viewMode === tab.id ? '#4285f4' : 'transparent',
-              color: viewMode === tab.id ? 'white' : 'var(--text-2)' }}>
-            <tab.icon size={16} /> <span className="mobile-hide">{tab.label}</span>
-          </button>
-        ))}
+        ].map(tab => {
+          const isActive = viewMode === tab.id
+          return (
+            <button 
+              key={tab.id} 
+              onClick={() => setViewMode(tab.id)}
+              className={`flex-1 min-w-[140px] flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-lg border transition-all whitespace-nowrap text-sm font-medium ${
+                isActive 
+                  ? 'bg-accent text-white border-accent shadow-sm' 
+                  : 'bg-transparent text-text-2 border-transparent hover:bg-bg-1 hover:text-text-1'
+              }`}
+            >
+              <tab.icon size={16} /> <span className="mobile-hide">{tab.label}</span>
+            </button>
+          )
+        })}
       </div>
 
       {isAssetsError && (
@@ -844,18 +851,20 @@ export default function AssetList() {
       {/* Register View */}
       {viewMode === 'register' && <>
       {/* Summary Stats Bar */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, marginBottom: 16 }}>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
-          { icon: Package, label: 'Showing', val: assets.length, color: 'var(--accent)' },
-          { icon: Activity, label: 'Active', val: summaryStats.activeCount, color: 'var(--green)' },
-          { icon: MapPin, label: 'Sites', val: summaryStats.siteCount, color: 'var(--cyan)' },
-          { icon: IndianRupee, label: 'Total Value', val: formatCurrency(summaryStats.totalValue), color: 'var(--accent)' },
+          { icon: Package, label: 'Showing', val: assets.length, color: 'var(--accent)', bg: 'rgba(var(--accent-rgb), 0.1)' },
+          { icon: Activity, label: 'Active', val: summaryStats.activeCount, color: 'var(--status-success)', bg: 'rgba(var(--status-success-rgb), 0.1)' },
+          { icon: MapPin, label: 'Sites', val: summaryStats.siteCount, color: 'var(--cyan)', bg: 'rgba(var(--cyan-rgb), 0.1)' },
+          { icon: IndianRupee, label: 'Total Value', val: formatCurrency(summaryStats.totalValue), color: 'var(--accent)', bg: 'rgba(var(--accent-rgb), 0.1)' },
         ].map(s => (
-          <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'var(--bg-2)', borderRadius: 10, border: '1px solid var(--border)' }}>
-            <s.icon size={16} style={{ color: s.color, flexShrink: 0 }} />
-            <div>
-              <div style={{ color: 'var(--text-0)' }}>{s.val}</div>
-              <div style={{ color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
+          <div key={s.label} className="flex items-center gap-4 p-4 bg-bg-1 rounded-xl border border-border hover:border-accent/40 hover:shadow-md transition-all group">
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-110" style={{ backgroundColor: s.bg || 'var(--bg-2)', color: s.color, border: `1px solid ${s.color}20` }}>
+              <s.icon size={18} />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-xl font-semibold text-text-0 truncate leading-tight">{s.val}</span>
+              <span className="text-[11px] font-medium text-text-3 uppercase tracking-wider truncate mt-0.5">{s.label}</span>
             </div>
           </div>
         ))}

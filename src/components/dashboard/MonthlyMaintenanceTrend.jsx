@@ -46,7 +46,7 @@ export default function MonthlyMaintenanceTrend({ maintLogs = [] }) {
     if (!active || !payload?.length) return null
     const item = payload[0].payload
     return (
-      <div style={{ background: '#0f172a', color: '#fff', padding: '8px 12px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+      <div style={{ background: 'var(--bg-3)', color: 'var(--text-0)', padding: '8px 12px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
         <div style={{ color: 'var(--status-info)' }}>{item.name} Spend Trend</div>
         <div>Repair Cost: <strong style={{ color: '#34d399', }}>{formatCurrency(item.cost)}</strong></div>
         <div>Work Orders: <strong style={{ color: '#fbbf24', }}>{item.count} tickets</strong></div>
@@ -55,13 +55,13 @@ export default function MonthlyMaintenanceTrend({ maintLogs = [] }) {
   }
 
   return (
-    <div className="card" style={{ padding: 20, background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 12 }}>
+    <div className="card" style={{ padding: 20, background: 'var(--bg-1)', border: '1px solid var(--border)', borderRadius: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
         <div>
-          <h3 style={{ margin: 0, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <h3 style={{ margin: 0, color: 'var(--text-1)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Monthly Repair Spend Trend
           </h3>
-          <p style={{ margin: 0, color: '#64748b' }}>6-month rolling maintenance cost trend (₹)</p>
+          <p style={{ margin: 0, color: 'var(--text-2)' }}>6-month rolling maintenance cost trend (₹)</p>
         </div>
         <TrendingUp size={18} color="#059669" />
       </div>

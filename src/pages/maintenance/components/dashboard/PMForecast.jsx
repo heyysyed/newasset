@@ -7,7 +7,7 @@ export default function PMForecast({ schedules, isLoading }) {
       <div className="bg-[var(--bg-0)] border border-[var(--border)] rounded-2xl p-5 md:p-6 shadow-sm">
         <div className="skeleton w-36 h-6 mb-5 rounded"></div>
         <div className="grid grid-cols-3 gap-3 md:gap-4">
-          {[1, 2, 3].map(i => <div key={i} className="skeleton h-24 rounded-xl"></div>)}
+          {[1, 2, 3].map(i => <div key={`skel-${i}`} className="skeleton h-24 rounded-xl"></div>)}
         </div>
       </div>
     );

@@ -25,7 +25,7 @@ export default function MobileSitesPage({
     return (
       <div className="flex flex-col gap-3 p-4">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="h-44 bg-bg-1 border border-border rounded-xl animate-pulse" />
+          <div key={`skel3-${i}`} className="h-44 bg-bg-1 border border-border rounded-xl animate-pulse" />
         ))}
       </div>
     )

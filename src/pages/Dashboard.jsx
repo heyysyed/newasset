@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import {
   Package, Activity, MapPin, Wrench, TrendingUp, ArrowRight, RefreshCw,
@@ -39,15 +40,19 @@ const CAT_COLORS = ['#4f7eff', '#34d399', 'var(--status-warning)', 'var(--status
 
 function StatCard({ icon: Icon, label, value, color, sub, delay = 0, progress }) {
   return (
-    <div 
-      className="card animate-fade-up relative overflow-hidden" 
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: delay / 1000, ease: "easeOut" }}
+      whileHover={{ y: -4, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)" }}
+      className="card relative overflow-hidden" 
       style={{ 
-        animationDelay: `${delay}ms`,
         padding: '20px 24px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         minHeight: 120,
+        backgroundColor: 'var(--bg-2)'
       }}
     >
       <div style={{ position: 'absolute', right: -20, top: -20, opacity: 0.03, transform: 'rotate(-10deg)', pointerEvents: 'none' }}>
@@ -63,14 +68,19 @@ function StatCard({ icon: Icon, label, value, color, sub, delay = 0, progress })
         {sub && <span style={{ color: color, background: `${color}12`, padding: '4px 10px', borderRadius: 20 }}>{sub}</span>}
       </div>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, minWidth: 0 }}>
-        <div title={value} style={{ color: 'var(--text-0)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</div>
+        <div title={value} style={{ color: 'var(--text-0)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '24px', fontWeight: 'bold' }}>{value}</div>
       </div>
       {progress != null && (
         <div style={{ marginTop: 16, height: 4, borderRadius: 4, background: 'var(--bg-3)', overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: `${Math.max(2, Math.min(100, progress))}%`, background: color, transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.max(2, Math.min(100, progress))}%` }}
+            transition={{ duration: 1, delay: 0.2 + (delay / 1000), ease: "easeOut" }}
+            style={{ height: '100%', background: color }} 
+          />
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }
 
@@ -397,7 +407,7 @@ export default function Dashboard() {
 
   if (loading) return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16 }}>
-      {[...Array(8)].map((_, i) => <div key={i} className="skeleton" style={{ height: 120, borderRadius: 12 }} />)}
+      {[...Array(8)].map((_, i) => <div key={`skel-${i}`} className="skeleton" style={{ height: 120, borderRadius: 12 }} />)}
     </div>
   )
 
@@ -622,7 +632,7 @@ export default function Dashboard() {
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={75} dataKey="value" stroke="var(--bg-1)" strokeWidth={2}>
-                        {pieData.map((entry, i) => <Cell key={i} fill={(STATUS_COLOR[entry.name] || { hex: '#6b7a99' }).hex} />)}
+                        {pieData.map((entry, i) => <Cell key={`cell-${i}`} fill={(STATUS_COLOR[entry.name] || { hex: '#6b7a99' }).hex} />)}
                       </Pie>
                       <Tooltip content={<CustomTooltip />} />
                     </PieChart>
@@ -704,7 +714,7 @@ export default function Dashboard() {
                 <YAxis tick={{ fill: 'var(--text-2)', }} axisLine={false} tickLine={false} tickFormatter={v => v >= 10000000 ? `${(v / 10000000).toFixed(1)}Cr` : v >= 100000 ? `${(v / 100000).toFixed(1)}L` : v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
                 <Tooltip content={<CurrencyTooltip />} cursor={{ fill: 'rgba(43,127,255,0.06)' }} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                  {valueByCategory.map((_, i) => <Cell key={i} fill={`url(#valCatGrad-${i})`} />)}
+                  {valueByCategory.map((_, i) => <Cell key={`cell-${i}`} fill={`url(#valCatGrad-${i})`} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
