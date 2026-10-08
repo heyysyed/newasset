@@ -80,39 +80,48 @@ export default function Layout() {
 
   const NAV_GROUPS = [
     {
-      label: 'Overview',
+      label: 'Core',
       items: [
-        { to: '/', icon: LayoutDashboard, label: 'Dashboard', exact: true, show: isAdmin || isMod },
+        { to: '/', label: 'Dashboard', exact: true, show: isAdmin || isMod },
+        { to: '/assets', label: 'Assets', exact: false, show: isAdmin || isMod },
       ]
     },
     {
       label: 'Operations',
       items: [
-        { to: '/assets', icon: Package, label: 'Assets', exact: false, show: isAdmin || isMod },
-        { to: '/sites', icon: MapPin, label: 'Sites', exact: false, show: isAdmin || isMod },
-        { to: '/categories', icon: FolderOpen, label: 'Categories', exact: false, show: isAdmin },
+        { to: '/maintenance', label: 'Maintenance', exact: false, show: isAdmin || can('maintenance') },
+        { to: '/tool-crib', label: 'Tool Crib', exact: false, show: isAdmin || can('inventory') },
+        { to: '/procurement', label: 'Procurement', exact: false, show: isAdmin || can('inventory') },
       ]
     },
     {
-      label: 'Maintenance & Inventory',
+      label: 'Inventory',
       items: [
-        { to: '/maintenance', icon: Wrench, label: 'Maintenance', exact: false, show: isAdmin || can('maintenance') },
-        { to: '/inventory', icon: Boxes, label: 'Inventory', exact: false, show: isAdmin || isMod || can('inventory') },
-        { to: '/audit', icon: ClipboardCheck, label: 'Inspections', exact: false, show: true },
+        { to: '/bulk', label: 'Bulk', exact: false, show: isAdmin || can('inventory') },
+        { to: '/inventory', label: 'Materials', exact: false, show: isAdmin || can('inventory') },
       ]
     },
     {
-      label: 'Insights & Tools',
+      label: 'Field',
       items: [
-        { to: '/reports', icon: BarChart2, label: 'Reports', exact: false, show: true },
-        { to: '/stickers', icon: Tag, label: 'QR & Tags', exact: false, show: can('print_stickers') },
-        { to: '/import', icon: FileSpreadsheet, label: 'Import Data', exact: false, show: can('import') },
+        { to: '/scan', label: 'Scan', exact: false, show: true },
+        { to: '/audit', label: 'Audits', exact: false, show: true },
       ]
     },
     {
-      label: 'System',
+      label: 'Analytics',
       items: [
-        { to: '/admin', icon: Shield, label: 'Administration', exact: false, show: isAdmin },
+        { to: '/reports', label: 'Reports', exact: false, show: true },
+      ]
+    },
+    {
+      label: 'Settings',
+      items: [
+        { to: '/admin', label: 'Admin', exact: false, show: isAdmin },
+        { to: '/sites', label: 'Sites', exact: false, show: isAdmin || isMod },
+        { to: '/categories', label: 'Categories', exact: false, show: isAdmin },
+        { to: '/stickers', label: 'Stickers', exact: false, show: can('print_stickers') },
+        { to: '/import', label: 'Import', exact: false, show: can('import') },
       ]
     }
   ]
@@ -136,19 +145,23 @@ export default function Layout() {
 
       {/* ── Sidebar (Tablet & Desktop) ── */}
       <aside
-        className={`hidden md:flex flex-col bg-bg-0 border-r border-border shadow-sm shrink-0 h-screen z-30 transition-all duration-200 ease-in-out ${
-          sidebarCollapsed ? 'w-[72px] min-w-[72px]' : 'w-[260px] min-w-[260px]'
+        className={`hidden md:flex flex-col border-r shadow-sm shrink-0 h-screen z-30 transition-all duration-200 ease-in-out ${
+          sidebarCollapsed ? 'w-[64px] min-w-[64px]' : 'w-[240px] min-w-[240px]'
         }`}
+        style={{ backgroundColor: '#142d3a', borderColor: '#1e3848' }}
       >
         {/* Sidebar Header */}
-        <div className="flex items-center justify-between h-14 px-4 border-b border-border shrink-0">
+        <div className="flex items-center h-14 px-5 border-b shrink-0" style={{ borderColor: '#1e3848' }}>
           <div className="flex items-center gap-2 overflow-hidden">
-            <img
-              src={companyLogo}
-              alt="Strongbuilt"
-              className={`object-contain transition-all duration-300 ${sidebarCollapsed ? 'w-8 scale-150 ml-1' : 'h-8 lg:h-9 w-auto'}`}
-              style={{ filter: sidebarCollapsed ? 'drop-shadow(0 0 2px rgba(0,0,0,0.1))' : 'none' }}
-            />
+            {!sidebarCollapsed ? (
+              <div className="font-bold text-lg tracking-wide whitespace-nowrap text-white">
+                <span style={{ fontFamily: '"Stencil Becker Solid", "Stencil", sans-serif', letterSpacing: '0.05em' }}>STRONGBUILT</span> <span className="opacity-60 text-sm">/ EAM</span>
+              </div>
+            ) : (
+              <div className="font-bold text-lg tracking-wide w-full text-center text-white">
+                <span style={{ fontFamily: '"Stencil Becker Solid", "Stencil", sans-serif', letterSpacing: '0.05em' }}>S</span><span className="opacity-60">E</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -158,9 +171,9 @@ export default function Layout() {
             const visibleItems = group.items.filter(i => i.show)
             if (visibleItems.length === 0) return null
             return (
-              <div key={idx} className="flex flex-col gap-1">
+              <div key={idx} className="flex flex-col">
                 {!sidebarCollapsed && (
-                  <h4 className="px-3 text-[11px] tracking-wider text-text-3 uppercase mb-1">
+                  <h4 className="px-3 text-[11px] tracking-wider uppercase mb-1.5" style={{ color: '#647582' }}>
                     {group.label}
                   </h4>
                 )}
@@ -172,11 +185,14 @@ export default function Layout() {
                       to={item.to}
                       end={item.exact}
                       title={sidebarCollapsed ? item.label : undefined}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-small text-body-medium transition-colors
-                        ${active ? 'bg-accent/10 text-accent' : 'text-text-2 hover:bg-bg-1 hover:text-text-0'}
+                      className={`flex items-center gap-2 px-3 py-[6px] rounded-[4px] text-[13px] font-medium transition-colors
+                        ${active ? 'text-white' : 'text-[#9eb1bc] hover:bg-[#1b3b4b] hover:text-white'}
                       `}
+                      style={active ? { backgroundColor: '#147d92' } : {}}
                     >
-                      <item.icon size={18} className={`shrink-0 ${active ? 'text-accent' : 'text-text-3'}`} />
+                      <span className="w-3 flex justify-center shrink-0">
+                        {active ? '▸' : ''}
+                      </span>
                       {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
                     </NavLink>
                   )
@@ -187,42 +203,9 @@ export default function Layout() {
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-3 border-t border-border flex flex-col gap-1 shrink-0">
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className={`hidden lg:flex items-center gap-3 p-2 text-text-3 hover:text-text-0 hover:bg-bg-1 rounded-lg transition-colors w-full ${sidebarCollapsed ? 'justify-center' : 'justify-start'}`}
-            title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-          >
-            <div className="w-8 flex items-center justify-center shrink-0">
-              {sidebarCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
-            </div>
-            {!sidebarCollapsed && <span className="text-small font-medium">Collapse</span>}
-          </button>
-
-          <div className="relative group cursor-pointer" onClick={() => setEditingProfile(true)}>
-            <div className={`flex items-center gap-3 p-2 rounded-lg hover:bg-bg-1 transition-colors ${sidebarCollapsed ? 'justify-center' : 'justify-start'}`}>
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-accent text-small shrink-0 font-medium" style={{ background: 'var(--accent-soft)' }}>
-                {(profile?.full_name || 'U')[0]}
-              </div>
-              {!sidebarCollapsed && (
-                <div className="flex-1 min-w-0">
-                  <div className="text-small text-text-0 truncate font-medium">{profile?.full_name || 'User'}</div>
-                  <div className="text-caption text-text-3 truncate capitalize">{profile?.role || 'User'}</div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <button
-            onClick={handleSignOut}
-            className={`flex items-center gap-3 p-2 text-danger hover:bg-danger-subtle hover:text-danger rounded-lg transition-colors w-full ${sidebarCollapsed ? 'justify-center' : 'justify-start'}`}
-            style={{ '--tw-bg-opacity': 0.1 }}
-          >
-            <div className="w-8 flex items-center justify-center shrink-0">
-              <LogOut size={18} />
-            </div>
-            {!sidebarCollapsed && <span className="text-small font-medium">Sign Out</span>}
-          </button>
+        <div className="p-4 border-t flex flex-col gap-2 shrink-0" style={{ borderColor: '#1e3848' }}>
+           <a href="#" className="text-[12px] text-[#9eb1bc] hover:text-white transition-colors">Help & documentation ↗</a>
+           <div className="text-[11px] text-[#647582]">Enterprise workspace · v3.8</div>
         </div>
       </aside>
 
@@ -236,8 +219,10 @@ export default function Layout() {
           <div className="flex items-center gap-3 flex-1 min-w-0">
             {/* Mobile only: logo + page title */}
             <div className="flex items-center gap-2.5 md:hidden min-w-0">
-              <img src={companyLogo} alt="Strongbuilt" className="h-9 w-auto object-contain shrink-0" />
-              <span className="text-[16px] font-medium text-text-0 truncate tracking-tight">{mobileTitle}</span>
+              <span className="font-bold text-[15px] tracking-wide text-text-0 shrink-0" style={{ fontFamily: '"Stencil Becker Solid", "Stencil", sans-serif', letterSpacing: '0.05em' }}>
+                STRONGBUILT
+              </span>
+              <span className="text-[15px] font-medium text-text-2 truncate tracking-tight">{mobileTitle}</span>
             </div>
 
 

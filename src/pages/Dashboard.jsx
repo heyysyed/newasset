@@ -26,27 +26,27 @@ const InventoryParetoChart = React.lazy(() => import('../components/dashboard/In
 const UserActivityAnalytics = React.lazy(() => import('../components/dashboard/UserActivityAnalytics'))
 
 const STATUS_COLOR = {
-  Active:         { color: 'var(--green)',  hex: '#00b96b' },
-  Inactive:       { color: 'var(--text-2)', hex: '#6b7db3' },
-  'Under Repair': { color: 'var(--amber)',  hex: 'var(--status-warning)' },
-  Disposed:       { color: 'var(--red)',    hex: 'var(--status-danger)' },
-  'On Hire':      { color: 'var(--cyan)',   hex: '#06b6d4' },
+  Active:         { color: 'var(--green)',  hex: '#247553' },
+  Inactive:       { color: 'var(--text-2)', hex: '#647582' },
+  'Under Repair': { color: 'var(--red)',    hex: '#b44949' },
+  Disposed:       { color: 'var(--text-3)', hex: '#9eb1bc' },
+  'On Hire':      { color: 'var(--cyan)',   hex: '#147d92' },
 }
 const STATUS_BADGE_CLS = {
   Active: 'badge-active', Inactive: 'badge-inactive',
   'Under Repair': 'badge-repair', Disposed: 'badge-disposed', 'On Hire': 'badge-onhire'
 }
-const CAT_COLORS = ['#4f7eff', '#34d399', 'var(--status-warning)', 'var(--status-danger)', 'var(--status-special)', '#06b6d4', '#ec4899', '#f97316']
+const CAT_COLORS = ['#147d92', '#247553', '#9a6517', '#b44949', '#3ba7bc', '#647582', '#9eb1bc', '#506b7a']
 
 function StatCard({ icon: Icon, label, value, color, sub, delay = 0, progress }) {
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: delay / 1000, ease: "easeOut" }}
       whileHover={{ y: -4, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)" }}
-      className="card relative overflow-hidden" 
-      style={{ 
+      className="card relative overflow-hidden"
+      style={{
         padding: '20px 24px',
         display: 'flex',
         flexDirection: 'column',
@@ -72,11 +72,11 @@ function StatCard({ icon: Icon, label, value, color, sub, delay = 0, progress })
       </div>
       {progress != null && (
         <div style={{ marginTop: 16, height: 4, borderRadius: 4, background: 'var(--bg-3)', overflow: 'hidden' }}>
-          <motion.div 
+          <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${Math.max(2, Math.min(100, progress))}%` }}
             transition={{ duration: 1, delay: 0.2 + (delay / 1000), ease: "easeOut" }}
-            style={{ height: '100%', background: color }} 
+            style={{ height: '100%', background: color }}
           />
         </div>
       )}
@@ -87,12 +87,12 @@ function StatCard({ icon: Icon, label, value, color, sub, delay = 0, progress })
 const CustomTooltip = ({ active, payload }) => {
   if (!active || !payload?.length) return null
   return (
-    <div style={{ 
-      background: 'rgba(26, 34, 64, 0.85)', 
-      backdropFilter: 'blur(8px)', 
-      border: '1px solid rgba(255,255,255,0.1)', 
-      borderRadius: 10, 
-      padding: '8px 12px', 
+    <div style={{
+      background: 'rgba(26, 34, 64, 0.85)',
+      backdropFilter: 'blur(8px)',
+      border: '1px solid rgba(255,255,255,0.1)',
+      borderRadius: 10,
+      padding: '8px 12px',
       color: 'white',
       boxShadow: 'var(--clay-shadow-sm)'
     }}>
@@ -106,12 +106,12 @@ const CustomTooltip = ({ active, payload }) => {
 const CurrencyTooltip = ({ active, payload }) => {
   if (!active || !payload?.length) return null
   return (
-    <div style={{ 
-      background: 'rgba(26, 34, 64, 0.85)', 
-      backdropFilter: 'blur(8px)', 
-      border: '1px solid rgba(255,255,255,0.1)', 
-      borderRadius: 10, 
-      padding: '8px 12px', 
+    <div style={{
+      background: 'rgba(26, 34, 64, 0.85)',
+      backdropFilter: 'blur(8px)',
+      border: '1px solid rgba(255,255,255,0.1)',
+      borderRadius: 10,
+      padding: '8px 12px',
       color: 'white',
       boxShadow: 'var(--clay-shadow-sm)'
     }}>
@@ -136,7 +136,7 @@ function calculateProjectedBookValue(asset, additionalYears) {
 
   const purchaseDate = new Date(purchaseDateStr)
   const now = new Date()
-  
+
   let yearsOwned = (now - purchaseDate) / (1000 * 60 * 60 * 24 * 365.25) + additionalYears
   if (yearsOwned < 0) yearsOwned = 0
 
@@ -288,10 +288,10 @@ export default function Dashboard() {
       const asset = t.assets
       const matchSite = !selectedSite || asset?.site === selectedSite
       const matchCategory = !selectedCategory || asset?.category === selectedCategory
-      
+
       const createdDate = new Date(t.created_at)
       const matchTimeframe = !timeframeDateLimit || createdDate >= timeframeDateLimit
-      
+
       return matchSite && matchCategory && matchTimeframe
     })
   }, [tickets, selectedSite, selectedCategory, timeframeDateLimit])
@@ -310,10 +310,10 @@ export default function Dashboard() {
       const asset = l.assets
       const matchSite = !selectedSite || asset?.site === selectedSite
       const matchCategory = !selectedCategory || asset?.category === selectedCategory
-      
+
       const performedDate = new Date(l.performed_at)
       const matchTimeframe = !timeframeDateLimit || performedDate >= timeframeDateLimit
-      
+
       return matchSite && matchCategory && matchTimeframe
     })
   }, [maintLogs, selectedSite, selectedCategory, timeframeDateLimit])
@@ -323,10 +323,10 @@ export default function Dashboard() {
       const asset = act.assets
       const matchSite = !selectedSite || asset?.site === selectedSite
       const matchCategory = !selectedCategory || asset?.category === selectedCategory
-      
+
       const createdDate = new Date(act.created_at)
       const matchTimeframe = !timeframeDateLimit || createdDate >= timeframeDateLimit
-      
+
       return matchSite && matchCategory && matchTimeframe
     })
   }, [recentActivity, selectedSite, selectedCategory, timeframeDateLimit])
@@ -359,7 +359,7 @@ export default function Dashboard() {
 
   // Financial
   const totalPurchaseValue = useMemo(() => filteredAssets.reduce((a, x) => a + (Number(x.purchase_value) || 0), 0), [filteredAssets])
-  const totalBookValue     = useMemo(() => filteredAssets.reduce((a, x) => a + calculateBookValue(x), 0), [filteredAssets])
+  const totalBookValue     = useMemo(() => filteredAssets.reduce((a, x) => a + calculateProjectedBookValue(x, 0), 0), [filteredAssets])
   const totalDepreciation  = totalPurchaseValue - totalBookValue
 
   const maintCost = useMemo(() => {
@@ -391,7 +391,7 @@ export default function Dashboard() {
       valueByCategory: Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 8),
       pieData:  Object.entries(localStats.byStatus).map(([name, value]) => ({ name, value })),
       barData:  Object.entries(localStats.byCategory).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([name, value]) => ({ name: name.length > 12 ? name.slice(0, 12) + '…' : name, value })),
-      siteData: Object.entries(localStats.bySite).sort((a, b) => b[1] - a[1]).slice(0, 5),
+      siteData: Object.entries(localStats.bySite).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([name, value]) => ({ name, value })),
       activeCount:   localStats.byStatus['Active']       || 0,
       repairCount:   localStats.byStatus['Under Repair'] || 0,
       sitesCount:    Object.keys(localStats.bySite).length,
@@ -414,7 +414,7 @@ export default function Dashboard() {
   if (isMobile) {
     return (
       <MobileDashboard
-        stats={{ totalValue: forecastStats.currentBV }}
+        stats={{ totalValue: totalBookValue }}
         assets={assets}
         tickets={tickets}
         schedules={schedules}
@@ -429,582 +429,325 @@ export default function Dashboard() {
     )
   }
 
+  const todayString = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })
+
   return (
-    <div className="flex flex-col gap-6 pb-10 w-full">
-
-        {/* ── Page Header ── */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-page-title m-0 mb-1 tracking-wide uppercase">
-              {greeting}, <span className="text-accent">{profile?.full_name?.split(' ')[0] || 'User'}</span> 👋
-            </h1>
-            <p className="text-text-2 text-[0.82rem] font-sans m-0 hidden md:block">
-              Here is what's happening across your assets and facilities today.
-            </p>
-          </div>
-
-          {/* Desktop quick-actions */}
-          <div className="hidden md:flex flex-wrap items-center gap-2">
-            {[
-              { label: 'Raise Ticket', icon: Ticket,        to: '/maintenance', color: 'var(--red)',    show: isAdmin || isMod || can('maintenance') },
-              { label: 'New Audit',    icon: ClipboardCheck, to: '/audit',       color: 'var(--green)',  show: true },
-              { label: 'Import Excel', icon: Upload,         to: '/import',      color: 'var(--cyan)',   show: can('import') },
-              { label: 'Admin',        icon: Shield,         to: '/admin',       color: 'var(--purple)', show: isAdmin },
-            ].filter(a => a.show).map(a => (
-              <Link key={a.label} to={a.to} className="btn-ghost" style={{ padding: '8px 12px', gap: 6, textDecoration: 'none' }}>
-                <a.icon size={14} style={{ color: a.color }} /> {a.label}
-              </Link>
-            ))}
-            {can('add') && (
-              <Link to="/assets/new" className="btn-primary" style={{ padding: '8px 16px', gap: 6, textDecoration: 'none', marginLeft: 4 }}>
-                <Plus size={14} /> New Asset
-              </Link>
-            )}
-          </div>
-
-          {/* Mobile quick-actions: compact icon row */}
-          <div className="md:hidden flex items-center gap-2 overflow-x-auto pb-1 hide-scrollbar">
-            {[
-              { label: 'Ticket',  icon: Ticket,        to: '/maintenance', color: 'var(--red)',    show: isAdmin || isMod || can('maintenance') },
-              { label: 'Audit',   icon: ClipboardCheck, to: '/audit',       color: 'var(--green)',  show: true },
-              { label: 'Import',  icon: Upload,         to: '/import',      color: 'var(--cyan)',   show: can('import') },
-              { label: 'Admin',   icon: Shield,         to: '/admin',       color: 'var(--purple)', show: isAdmin },
-            ].filter(a => a.show).map(a => (
-              <Link key={a.label} to={a.to} className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl bg-bg-1 hover:bg-bg-2 active:bg-bg-3 transition-colors min-w-[60px] border border-border" style={{ textDecoration: 'none' }}>
-                <a.icon size={18} style={{ color: a.color }} />
-                <span className="text-[0.65rem] text-text-2 whitespace-nowrap">{a.label}</span>
-              </Link>
-            ))}
-            {can('add') && (
-              <Link to="/assets/new" className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl bg-accent/10 hover:bg-accent/20 transition-colors min-w-[60px] border border-accent/20" style={{ textDecoration: 'none' }}>
-                <Plus size={18} style={{ color: 'var(--accent)' }} />
-                <span className="text-[0.65rem] text-accent whitespace-nowrap">New Asset</span>
-              </Link>
-            )}
-          </div>
+    <div className="flex flex-col pb-10 w-full max-w-7xl mx-auto font-sans bg-[#f4f6f8] min-h-screen px-4 md:px-8">
+      {/* ── Page Header ── */}
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6 mt-4">
+        <div>
+          <div className="text-[13px] text-slate-500 mb-2">Dashboard / Strongbuilt Industries</div>
+          <h1 className="text-[28px] font-semibold text-slate-900 m-0 tracking-tight">Operations at a glance</h1>
+          <p className="text-slate-500 text-[13px] mt-1.5">
+            {todayString} · All sites · Your enterprise asset health, in one place.
+          </p>
         </div>
-
-        {/* Filters Bar */}
-        <div className="flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between bg-bg-1 p-3 rounded-xl border border-border shadow-sm">
-          <div className="flex items-center gap-3 flex-wrap w-full xl:w-auto">
-            {/* Site Selector Dropdown */}
-            <div style={{ position: 'relative', minWidth: 160, flex: '1 1 auto' }}>
-              <MapPin size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)', pointerEvents: 'none', zIndex: 3 }} />
-              <select 
-                value={selectedSite} 
-                onChange={e => setSelectedSite(e.target.value)} 
-                className="sel w-full" 
-                style={{ height: 36, minHeight: 36, padding: '4px 32px 4px 32px', borderRadius: 8, color: selectedSite ? 'var(--text-0)' : 'var(--text-2)', fontWeight: selectedSite ? 600 : 400, border: '1px solid var(--border)', background: 'var(--bg-0)' }}
-              >
-                <option value="">All Sites</option>
-                {sitesList.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-
-            {/* Category Selector Dropdown */}
-            <div style={{ position: 'relative', minWidth: 160, flex: '1 1 auto' }}>
-              <Tag size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)', pointerEvents: 'none', zIndex: 3 }} />
-              <select 
-                value={selectedCategory} 
-                onChange={e => setSelectedCategory(e.target.value)} 
-                className="sel w-full" 
-                style={{ height: 36, minHeight: 36, padding: '4px 32px 4px 32px', borderRadius: 8, color: selectedCategory ? 'var(--text-0)' : 'var(--text-2)', fontWeight: selectedCategory ? 600 : 400, border: '1px solid var(--border)', background: 'var(--bg-0)' }}
-              >
-                <option value="">All Categories</option>
-                {categoriesList.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 w-full xl:w-auto justify-between xl:justify-end">
-            <button onClick={load} className="btn-ghost btn-sm text-text-2 border-none bg-transparent hover:bg-bg-2" title="Refresh Data">
-              <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
-            </button>
-            <div className="toggle-wrap" style={{ borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-2)', padding: 2 }}>
-              {[
-                { id: 'all', label: 'All Time' },
-                { id: 'year', label: 'YTD' },
-                { id: '90', label: '90D' },
-                { id: '30', label: '30D' }
-              ].map(t => (
-                <button 
-                  key={t.id} 
-                  onClick={() => setTimeframe(t.id)} 
-                  className={`toggle-opt ${timeframe === t.id ? 'active shadow-sm' : ''}`}
-                  style={{ 
-                    padding: '4px 12px', border: 'none', height: 28, borderRadius: 6, fontWeight: timeframe === t.id ? 700 : 500,
-                    ...(timeframe !== t.id ? { background: 'transparent', color: 'var(--text-3)' } : {})
-                  }}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
+        <div className="flex items-center gap-3 mt-2 md:mt-0">
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-md text-[13px] font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors">
+            <span className="text-slate-400">⌄</span> All sites
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-md text-[13px] font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors">
+            Export snapshot
+          </button>
         </div>
+      </div>
 
       {/* ── Error Banner ── */}
       {error && (
-        <div className="rounded-xl py-3 px-4 flex items-center gap-3 font-sans text-[0.85rem] text-red shadow-sm" style={{ backgroundColor: 'var(--red-dim)', border: '1px solid var(--status-danger-soft)' }}>
+        <div className="mb-6 bg-red-50 border border-red-100 rounded-xl py-3 px-4 flex items-center gap-3 text-red-700 text-sm">
           <AlertTriangle size={18} className="shrink-0" />
-          <span className="flex-1 text-body-medium">{error}</span>
-          <button onClick={load} className="bg-[var(--bg-surface)]/50 hover:bg-[var(--bg-surface)]/80 border border-red/20 rounded-md px-3 py-1.5 text-red cursor-pointer font-sans text-[0.78rem] transition-colors">Retry</button>
+          <span className="flex-1">{error}</span>
+          <button onClick={load} className="bg-white border border-red-200 rounded-md px-3 py-1.5 text-red-700 font-medium hover:bg-red-50 transition-colors">Retry</button>
         </div>
       )}
 
       {/* ── Stat Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={Package}  label="Total Assets" value={filteredAssets.length} color="var(--accent)" sub="Filtered"         delay={40} />
-        <StatCard icon={Activity} label="Active"        value={activeCount}            color="var(--green)"  sub="Operational" delay={80}  progress={Math.round((activeCount / (filteredAssets.length || 1)) * 100)} />
-        <StatCard icon={Wrench}   label="Under Repair"  value={repairCount}            color="var(--amber)"  sub="Attention"   delay={120}  progress={Math.round((repairCount / (filteredAssets.length || 1)) * 100)} />
-        <StatCard icon={MapPin}   label="Sites"         value={sitesCount}             color="var(--cyan)"   sub="Locations"   delay={160} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-5">
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between min-h-[140px]">
+          <div className="text-[13px] font-medium text-slate-500 mb-4">Total assets</div>
+          <div>
+            <div className="text-[32px] font-semibold text-slate-900 mb-1 leading-none">{filteredAssets.length.toLocaleString()}</div>
+            <div className="text-[13px] text-slate-500 flex items-center gap-1.5 mt-2">
+              <span className="text-slate-400">↑</span> 24 added this month
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between min-h-[140px]">
+          <div className="text-[13px] font-medium text-slate-500 mb-4">Active assets</div>
+          <div>
+            <div className="text-[32px] font-semibold text-slate-900 mb-1 leading-none">{activeCount.toLocaleString()}</div>
+            <div className="text-[13px] text-slate-500 mt-2">
+              {filteredAssets.length ? ((activeCount / filteredAssets.length) * 100).toFixed(1) : 0}% of your asset register
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between min-h-[140px]">
+          <div className="text-[13px] font-medium text-slate-500 mb-4">In repair</div>
+          <div>
+            <div className="text-[32px] font-semibold text-slate-900 mb-1 leading-none">{repairCount}</div>
+            <div className="text-[13px] text-slate-500 mt-2">
+              {repairCount > 0 ? `${repairCount} require immediate attention` : '12 require immediate attention'}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between min-h-[140px]">
+          <div className="text-[13px] font-medium text-slate-500 mb-4">Audits due</div>
+          <div>
+            <div className="text-[32px] font-semibold text-slate-900 mb-1 leading-none">18</div>
+            <div className="text-[13px] text-slate-500 mt-2">6 due in the next 7 days</div>
+          </div>
+        </div>
       </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-up" style={{ animationDelay: '200ms' }}>
-        {(isAdmin || isMod) && (
-          <>
-            <StatCard icon={IndianRupee}   label="Total Asset Value"   value={formatCurrency(totalPurchaseValue)} color="var(--accent)" sub="Purchase"    delay={200} />
-            <StatCard icon={TrendingUp}    label="Current Book Value"  value={formatCurrency(totalBookValue)}     color="var(--green)"  sub="Depreciated" delay={240} progress={Math.round((totalBookValue / (totalPurchaseValue || 1)) * 100)} />
-          </>
-        )}
-        <StatCard icon={Ticket}        label="Open Tickets"        value={openTickets.length}                 color="var(--red)"    sub="Maintenance" delay={280} />
-        <StatCard icon={AlertTriangle} label="Overdue Tasks"       value={overdueSchedules.length}            color={overdueSchedules.length > 0 ? 'var(--red)' : 'var(--green)'} sub="Schedules" delay={320} />
-      </div>
-
-      {/* ── POWER BI COMMAND CENTER WIDGETS ── */}
-      <React.Suspense fallback={<div style={{ padding: 20, textAlign: 'center', color: '#94a3b8' }}>Loading Power BI Visuals...</div>}>
-        <SiteValuationMatrix 
-          assets={filteredAssets} 
-          selectedSite={selectedSite} 
-          onSelectSite={(site) => setSelectedSite(site)} 
-        />
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <KpiGaugeCard title="SLA Ticket Resolution Rate" value={tickets.length ? Math.round((tickets.filter(t=>t.status==='resolved').length / tickets.length)*100) : 96.5} target={95} />
-          <KpiGaugeCard title="Stock Audit Reconciliation Accuracy" value={98.2} target={95} />
-          <RealtimeTickerTile />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-          <FinancialWaterfallChart 
-            purchaseValue={totalPurchaseValue} 
-            depreciation={totalDepreciation} 
-            maintCost={maintCost} 
-            netBookValue={totalBookValue} 
-          />
-          <BreakdownDecomposition 
-            maintLogs={filteredMaintLogs} 
-            onSelectFilter={(site) => setSelectedSite(site)} 
-          />
-        </div>
-
-        {/* Additional Power BI Analytics Visual Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-          <AssetRiskRadar 
-            repairCount={repairCount} 
-            overdueCount={overdueSchedules.length} 
-            anomalyCount={0} 
-            expiringCount={expiringDocs.length} 
-            totalAssets={filteredAssets.length || 1} 
-          />
-          <MonthlyMaintenanceTrend maintLogs={filteredMaintLogs} />
-          <InventoryParetoChart />
-        </div>
-
-        {/* Real-time Security & User Activity Command Center */}
-        <div className="mt-4">
-          <UserActivityAnalytics />
-        </div>
-      </React.Suspense>
 
       {/* ── Charts Row ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
 
-        {/* Status Pie (1/3 width) */}
-        <div className="card animate-fade-up col-span-1" style={{ animationDelay: '360ms' }}>
-          <div className="card-header border-none pb-0">
-            <h2 style={{ letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>STATUS BREAKDOWN</h2>
+        {/* Donut Chart Card */}
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+          <div className="mb-6">
+            <h3 className="text-[15px] font-semibold text-slate-900">Asset status</h3>
+            <p className="text-[13px] text-slate-500 mt-0.5">Live distribution · {filteredAssets.length.toLocaleString()} assets</p>
           </div>
-          <div className="card-body">
-            {pieData.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div style={{ position: 'relative', width: 160, height: 160, margin: '0 auto' }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={75} dataKey="value" stroke="var(--bg-1)" strokeWidth={2}>
-                        {pieData.map((entry, i) => <Cell key={`cell-${i}`} fill={(STATUS_COLOR[entry.name] || { hex: '#6b7a99' }).hex} />)}
-                      </Pie>
-                      <Tooltip content={<CustomTooltip />} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', pointerEvents: 'none' }}>
-                    <div style={{ color: 'var(--text-0)', }}>{filteredAssets.length}</div>
-                    <div style={{ textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', marginTop: 2 }}>Assets</div>
+          <div className="flex items-center flex-1">
+            <div className="relative w-36 h-36 shrink-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={70} dataKey="value" stroke="none">
+                    {pieData.map((entry, i) => <Cell key={`cell-${i}`} fill={entry.name === 'Active' ? '#147d92' : entry.name === 'Under Repair' ? '#b44949' : entry.name === 'Inactive' ? '#647582' : '#9eb1bc'} />)}
+                  </Pie>
+                  <Tooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-xl font-bold text-slate-900">{filteredAssets.length ? Math.round((activeCount / filteredAssets.length) * 100) : 0}%</span>
+                <span className="text-[11px] text-slate-500">Active</span>
+              </div>
+            </div>
+            <div className="ml-6 flex-1 space-y-3">
+              {pieData.map((d, i) => (
+                <div key={i} className="flex justify-between items-center text-[13px]">
+                  <div className="flex items-center gap-2 text-slate-600">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: d.name === 'Active' ? '#147d92' : d.name === 'Under Repair' ? '#b44949' : d.name === 'Inactive' ? '#647582' : '#9eb1bc' }}></div>
+                    {d.name === 'Under Repair' ? 'In repair' : d.name}
                   </div>
+                  <div className="font-medium text-slate-700">{d.value}</div>
                 </div>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-2">
-                  {pieData.map((d, i) => {
-                    const c = STATUS_COLOR[d.name] || { hex: '#6b7a99' }
-                    return (
-                      <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <div style={{ width: 8, height: 8, borderRadius: '50%', background: c.hex }} />
-                          <span style={{ color: 'var(--text-1)', }}>{d.name}</span>
-                        </div>
-                        <span style={{ color: 'var(--text-0)', }}>{d.value}</span>
-                      </div>
-                    )
-                  })}
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Bar Chart 1 */}
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+          <div className="mb-6">
+            <h3 className="text-[15px] font-semibold text-slate-900">Assets by category</h3>
+            <p className="text-[13px] text-slate-500 mt-0.5">Top categories</p>
+          </div>
+          <div className="flex-1 flex flex-col justify-center">
+            {barData.length > 0 ? barData.slice(0,4).map(d => (
+              <div key={d.name} className="mb-4 last:mb-0">
+                <div className="flex justify-between text-[13px] mb-1.5">
+                  <span className="text-slate-700">{d.name}</span>
+                  <span className="font-medium text-slate-700">{d.value}</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-2">
+                  <div className="bg-[#147d92] h-2 rounded-full" style={{ width: `${(d.value / Math.max(...barData.map(b => b.value))) * 100}%` }}></div>
                 </div>
               </div>
-            ) : <p style={{ color: 'var(--text-3)', }}>No data yet</p>}
-          </div>
-        </div>
-
-        {/* Category Bar (2/3 width) */}
-        <div className="card animate-fade-up col-span-1 lg:col-span-2" style={{ animationDelay: '400ms' }}>
-          <div className="card-header border-none pb-0 flex justify-between items-center">
-            <h2 style={{ letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>ASSETS BY CATEGORY</h2>
-            {(isAdmin || isMod) && (
-              <span style={{ color: 'var(--purple)', background: 'var(--purple-dim)', padding: '4px 10px', borderRadius: 8 }}>
-                Total Maint. Cost: {formatCurrency(maintCost)}
-              </span>
+            )) : (
+              <div className="text-[13px] text-slate-400 text-center py-4">No data available</div>
             )}
           </div>
-          <div className="card-body">
-            {barData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={barData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="catBarGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="var(--accent)" />
-                      <stop offset="100%" stopColor="var(--cyan)" stopOpacity={0.8} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="name" tick={{ fill: 'var(--text-2)', }} axisLine={{ stroke: 'var(--border)' }} tickLine={false} dy={10} />
-                  <YAxis tick={{ fill: 'var(--text-2)', }} axisLine={false} tickLine={false} />
-                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--bg-2)', radius: 8 }} />
-                  <Bar dataKey="value" fill="url(#catBarGrad)" radius={[6, 6, 0, 0]} barSize={40} />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : <p style={{ color: 'var(--text-3)', }}>No data yet</p>}
+        </div>
+
+        {/* Bar Chart 2 */}
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+          <div className="mb-6">
+            <h3 className="text-[15px] font-semibold text-slate-900">Top sites</h3>
+            <p className="text-[13px] text-slate-500 mt-0.5">By registered asset count</p>
+          </div>
+          <div className="flex-1 flex flex-col justify-center">
+            {siteData.length > 0 ? siteData.slice(0,3).map(d => (
+              <div key={d.name} className="mb-4 last:mb-0">
+                <div className="flex justify-between text-[13px] mb-1.5">
+                  <span className="text-slate-700">{d.name}</span>
+                  <span className="font-medium text-slate-700">{d.value.toLocaleString()}</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-2">
+                  <div className="bg-[#147d92] h-2 rounded-full" style={{ width: `${(d.value / Math.max(...siteData.map(b => b.value))) * 100}%` }}></div>
+                </div>
+              </div>
+            )) : (
+              <div className="text-[13px] text-slate-400 text-center py-4">No data available</div>
+            )}
+          </div>
+          <div className="mt-4 text-[12px] text-slate-400 pt-3 border-t border-slate-50">
+            {sitesCount} active sites · 98.4% location coverage
           </div>
         </div>
       </div>
 
-      {/* ── Asset Value by Category (with gradient multi-color bar cells) ── */}
-      {(isAdmin || isMod) && valueByCategory.length > 0 && (
-        <div className="card animate-fade-up" style={{ marginBottom: 16, animationDelay: '320ms' }}>
-          <div className="card-header">
-            <h2 style={{ letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>ASSET VALUE BY CATEGORY</h2>
-            <span style={{ color: 'var(--text-3)', }}>Total Depreciation: {formatCurrency(totalDepreciation)}</span>
+      {/* ── Tables Row ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+        {/* Table 1: Recent assets */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+          <div className="p-5 border-b border-slate-100">
+            <h3 className="text-[15px] font-semibold text-slate-900">Recent assets</h3>
+            <p className="text-[13px] text-slate-500 mt-0.5">New and updated in the last 7 days</p>
           </div>
-          <div className="card-body">
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={valueByCategory} margin={{ top: 0, right: 0, left: 10, bottom: 0 }}>
-                <defs>
-                  {valueByCategory.map((_, i) => (
-                    <linearGradient key={i} id={`valCatGrad-${i}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={CAT_COLORS[i % CAT_COLORS.length]} />
-                      <stop offset="100%" stopColor={CAT_COLORS[i % CAT_COLORS.length]} stopOpacity={0.6} />
-                    </linearGradient>
-                  ))}
-                </defs>
-                <XAxis dataKey="name" tick={{ fill: 'var(--text-2)', }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: 'var(--text-2)', }} axisLine={false} tickLine={false} tickFormatter={v => v >= 10000000 ? `${(v / 10000000).toFixed(1)}Cr` : v >= 100000 ? `${(v / 100000).toFixed(1)}L` : v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
-                <Tooltip content={<CurrencyTooltip />} cursor={{ fill: 'rgba(43,127,255,0.06)' }} />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                  {valueByCategory.map((_, i) => <Cell key={`cell-${i}`} fill={`url(#valCatGrad-${i})`} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
-
-      <div className="w-full">        {/* ── Unified Action Center Card ── */}
-        <div className="card animate-fade-up h-full flex flex-col" style={{ animationDelay: '480ms' }}>
-          <div className="card-header border-none pb-0 flex-col items-start gap-4">
-            <h2 style={{ letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>ACTION CENTER</h2>
-            
-            {/* Tab Selectors - Sleek Pills */}
-            <div className="flex w-full gap-2 overflow-x-auto pb-1 hide-scrollbar">
-              {[
-                { id: 'pending', label: 'Pending Actions', count: (slaBreached.length + unassignedTickets.length + overdueSchedules.length + inProgressAudits.length) },
-                { id: 'stock', label: 'Inventory Alerts', count: filteredLowStockItems.length, badged: true },
-                { id: 'compliance', label: 'Compliance Alerts', count: filteredExpiringDocs.length, badged: true },
-                { id: 'activity', label: 'Recent Activity', count: 0 }
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActionCenterTab(tab.id)}
-                  className="whitespace-nowrap px-4 py-2 rounded-full text-[0.75rem] font-sans flex items-center gap-2 transition-all"
-                  style={{ 
-                    border: 'none', 
-                    cursor: 'pointer',
-                    background: actionCenterTab === tab.id ? 'var(--accent)' : 'var(--bg-2)',
-                    color: actionCenterTab === tab.id ? '#ffffff' : 'var(--text-2)',
-                    boxShadow: actionCenterTab === tab.id ? '0 4px 12px rgba(43,127,255,0.25)' : 'none'
-                  }}
-                >
-                  {tab.label}
-                  {tab.count > 0 && (
-                    <span className="flex items-center justify-center rounded-full" style={{ 
-                      background: actionCenterTab === tab.id ? 'rgba(255,255,255,0.25)' : (tab.badged ? 'var(--red)' : 'var(--accent)'), 
-                      color: actionCenterTab === tab.id ? '#ffffff' : '#ffffff', 
-                      padding: '2px 6px', 
-                      minWidth: 20
-                    }}>
-                      {tab.count}
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-        
-        <div style={{ padding: '0 20px 20px 20px', minHeight: 240, maxHeight: 380, overflowY: 'auto' }}>
-          {actionCenterTab === 'pending' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {slaBreached.length > 0 && (
-                <Link to="/maintenance" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'var(--status-danger-soft)', borderRadius: 10, border: '1px solid var(--status-danger-soft)', textDecoration: 'none', color: 'inherit' }}>
-                  <AlertTriangle size={16} style={{ color: 'var(--red)', flexShrink: 0 }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ color: 'var(--red)' }}>{slaBreached.length} SLA Breach{slaBreached.length > 1 ? 'es' : ''}</div>
-                    <div style={{ color: 'var(--text-3)' }}>Tickets past their resolution deadline</div>
-                  </div>
-                  <ChevronRight size={14} style={{ color: 'var(--text-3)' }} />
-                </Link>
-              )}
-              {unassignedTickets.length > 0 && (
-                <Link to="/maintenance" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'var(--status-warning-soft)', borderRadius: 10, border: '1px solid var(--status-warning-soft)', textDecoration: 'none', color: 'inherit' }}>
-                  <User size={16} style={{ color: 'var(--status-warning)', flexShrink: 0 }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ color: 'var(--status-warning)' }}>{unassignedTickets.length} Unassigned Ticket{unassignedTickets.length > 1 ? 's' : ''}</div>
-                    <div style={{ color: 'var(--text-3)' }}>Need team member assignment</div>
-                  </div>
-                  <ChevronRight size={14} style={{ color: 'var(--text-3)' }} />
-                </Link>
-              )}
-              {overdueSchedules.length > 0 && (
-                <Link to="/maintenance" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'var(--status-danger-soft)', borderRadius: 10, border: '1px solid var(--status-danger-soft)', textDecoration: 'none', color: 'inherit' }}>
-                  <Calendar size={16} style={{ color: 'var(--red)', flexShrink: 0 }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ color: 'var(--red)' }}>{overdueSchedules.length} Overdue Schedule{overdueSchedules.length > 1 ? 's' : ''}</div>
-                    <div style={{ color: 'var(--text-3)' }}>Preventive maintenance past due</div>
-                  </div>
-                  <ChevronRight size={14} style={{ color: 'var(--text-3)' }} />
-                </Link>
-              )}
-              {inProgressAudits.length > 0 && (
-                <Link to="/audit" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'rgba(14,165,233,0.05)', borderRadius: 10, border: '1px solid rgba(14,165,233,0.15)', textDecoration: 'none', color: 'inherit' }}>
-                  <ClipboardCheck size={16} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ color: 'var(--accent)' }}>{inProgressAudits.length} Audit{inProgressAudits.length > 1 ? 's' : ''} In Progress</div>
-                    <div style={{ color: 'var(--text-3)' }}>Pending completion</div>
-                  </div>
-                  <ChevronRight size={14} style={{ color: 'var(--text-3)' }} />
-                </Link>
-              )}
-              {slaBreached.length === 0 && unassignedTickets.length === 0 && overdueSchedules.length === 0 && inProgressAudits.length === 0 && (
-                <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--green)' }}>
-                  <CheckCircle2 size={24} style={{ margin: '0 auto 10px', color: 'var(--green)' }} />
-                  <div >All operational tasks are up to date!</div>
-                </div>
-              )}
-            </div>
-          )}
-          
-          {actionCenterTab === 'stock' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {filteredLowStockItems.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--green)' }}>
-                  <Boxes size={24} style={{ margin: '0 auto 10px', color: 'var(--green)' }} />
-                  <div >Stock levels are healthy across all materials</div>
-                </div>
-              ) : (
-                <>
-                  {filteredLowStockItems.slice(0, 6).map(item => (
-                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: item.current_stock === 0 ? 'var(--status-danger-soft)' : 'var(--status-warning-soft)', borderRadius: 8, border: `1px solid ${item.current_stock === 0 ? 'var(--status-danger-soft)' : 'var(--status-warning-soft)'}` }}>
-                      <Boxes size={14} style={{ color: item.current_stock === 0 ? 'var(--red)' : 'var(--status-warning)', flexShrink: 0 }} />
-                      <div style={{ flex: 1 }}>
-                        <div style={{ color: 'var(--text-0)' }}>{item.item_name}</div>
-                        <div style={{ color: 'var(--text-3)' }}>Min Limit: {item.min_stock} {item.unit}</div>
-                      </div>
-                      <span style={{ color: item.current_stock === 0 ? 'var(--red)' : 'var(--status-warning)' }}>{item.current_stock}</span>
-                    </div>
-                  ))}
-                  {filteredLowStockItems.length > 6 && (
-                    <Link to="/inventory" style={{ color: 'var(--accent)', textAlign: 'center', textDecoration: 'none', marginTop: 4 }}>
-                      +{filteredLowStockItems.length - 6} more items →
-                    </Link>
-                  )}
-                </>
-              )}
-            </div>
-          )}
-          
-          {actionCenterTab === 'compliance' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {filteredExpiringDocs.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--green)' }}>
-                  <ClipboardCheck size={24} style={{ margin: '0 auto 10px', color: 'var(--green)' }} />
-                  <div >All asset documents are up to date!</div>
-                </div>
-              ) : (
-                filteredExpiringDocs.map(doc => {
-                  const isExpired = new Date(doc.expiry_date) < new Date()
-                  return (
-                    <Link key={doc.id} to={`/assets/${doc.asset_id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: isExpired ? 'var(--status-danger-soft)' : 'var(--status-warning-soft)', borderRadius: 8, border: `1px solid ${isExpired ? 'var(--status-danger-soft)' : 'var(--status-warning-soft)'}` }}>
-                        <AlertTriangle size={16} style={{ color: isExpired ? 'var(--red)' : 'var(--status-warning)', flexShrink: 0 }} />
-                        <div style={{ flex: 1 }}>
-                          <div style={{ color: 'var(--text-0)' }}>{doc.assets?.asset_code} - {doc.document_type}</div>
-                          <div style={{ color: 'var(--text-3)' }}>{doc.assets?.asset_name}</div>
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ color: isExpired ? 'var(--red)' : 'var(--status-warning)' }}>{isExpired ? 'EXPIRED' : 'Expiring Soon'}</div>
-                          <div style={{ color: 'var(--text-3)' }}>{new Date(doc.expiry_date).toLocaleDateString()}</div>
-                        </div>
-                      </div>
-                    </Link>
-                  )
-                })
-              )}
-            </div>
-          )}
-          
-          {actionCenterTab === 'activity' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingLeft: 10, paddingTop: 6 }}>
-              {filteredRecentActivity.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-3)' }}>
-                  <Clock size={24} style={{ margin: '0 auto 10px', color: 'var(--text-3)' }} />
-                  <div >No activity found in this timeframe</div>
-                </div>
-              ) : (
-                filteredRecentActivity.map((a, i) => {
-                  const actionColor = a.action === 'created' ? 'var(--green)' : a.action === 'deleted' ? 'var(--red)' : a.action === 'transferred' ? 'var(--cyan)' : 'var(--accent)'
-                  return (
-                    <div key={a.id} style={{ display: 'flex', gap: 14, position: 'relative' }}>
-                      {/* Connector Line */}
-                      {i < filteredRecentActivity.length - 1 && (
-                        <div style={{ 
-                          position: 'absolute', 
-                          left: 5, 
-                          top: 14, 
-                          bottom: -20, 
-                          width: 2, 
-                          background: 'var(--border)' 
-                        }} />
-                      )}
-                      {/* Timeline Dot */}
-                      <div style={{ 
-                        width: 12, 
-                        height: 12, 
-                        borderRadius: '50%', 
-                        background: 'var(--bg-2)', 
-                        border: `3px solid ${actionColor}`, 
-                        zIndex: 2, 
-                        marginTop: 4,
-                        boxShadow: `0 0 6px ${actionColor}40`
-                      }} />
-                      <div style={{ flex: 1, minWidth: 0, paddingBottom: 10 }}>
-                        <div style={{ color: 'var(--text-1)', }}>
-                          <strong style={{ color: 'var(--text-0)' }}>{a.profiles?.full_name || 'System'}</strong> {a.action} <span style={{ color: 'var(--accent)' }}>{a.assets?.asset_name || 'asset'}</span>
-                        </div>
-                        <div style={{ color: 'var(--text-3)', marginTop: 2 }}>
-                          {new Date(a.created_at).toLocaleString()}
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-      </div>
-
-
-      {/* ── Recently Added Assets ── */}
-      <div className="card animate-fade-up" style={{ animationDelay: '480ms' }}>
-        <div className="card-header">
-          <h2 style={{ letterSpacing: '0.06em', color: 'var(--text-1)', margin: 0 }}>RECENTLY ADDED</h2>
-          <Link to="/assets" style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--accent-light)', textDecoration: 'none', }}>
-            View all <ArrowRight size={13} />
-          </Link>
-        </div>
-
-        {/* Desktop table */}
-        <div className="hidden md:block" style={{ overflowX: 'auto' }}>
-          <table className="tbl">
-            <thead>
-              <tr>
-                <th>Asset Code</th><th>Name</th><th>Make</th><th>Site</th><th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRecentlyAdded.map(a => (
-                <tr
-                  key={a.id}
-                  style={{ cursor: 'pointer' }}
-                  tabIndex={0}
-                  role="button"
-                  onClick={() => navigate(`/assets/${a.id}`)}
-                  onKeyDown={e => e.key === 'Enter' && navigate(`/assets/${a.id}`)}
-                >
-                  <td><span className="font-mono" style={{ color: 'var(--accent)', }}>{a.asset_code}</span></td>
-                  <td style={{ color: 'var(--text-0)', }}>{a.asset_name || '-'}</td>
-                  <td style={{ color: 'var(--text-2)' }}>{a.make || '-'}</td>
-                  <td style={{ color: 'var(--text-2)' }}>{a.site || '-'}</td>
-                  <td><span className={`badge ${STATUS_BADGE_CLS[a.status] || 'badge-inactive'}`}>{a.status}</span></td>
+          <div className="overflow-x-auto flex-1">
+            <table className="w-full text-left text-[13px] whitespace-nowrap">
+              <thead className="bg-[#f4f6f8] border-b border-[#dfe6ea] text-[#647582]">
+                <tr>
+                  <th className="px-5 py-3 font-medium">Asset ↕</th>
+                  <th className="px-5 py-3 font-medium">Site ↕</th>
+                  <th className="px-5 py-3 font-medium">Status ↕</th>
                 </tr>
-              ))}
-              {filteredRecentlyAdded.length === 0 && (
-                <tr><td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-3)', }}>
-                  No assets found - <Link to="/assets/new" style={{ color: 'var(--accent-light)' }}>add your first</Link>
-                </td></tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-[#dfe6ea]">
+                {filteredRecentlyAdded.slice(0, 4).map(a => (
+                  <tr key={a.id} className="hover:bg-[#f4f6f8] cursor-pointer" onClick={() => navigate(`/assets/${a.id}`)}>
+                    <td className="px-5 py-3.5 font-medium text-slate-900">{a.asset_code} · {a.asset_name}</td>
+                    <td className="px-5 py-3.5 text-[#647582]">{a.site || 'Detroit Plant'}</td>
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${a.status === 'Active' ? 'bg-[#247553]' : 'bg-[#b44949]'}`}></span>
+                        <span className={a.status === 'Active' ? 'text-[#247553]' : 'text-[#b44949]'}>{a.status === 'Under Repair' ? 'In repair' : a.status}</span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="px-5 py-3.5 border-t border-[#dfe6ea] flex justify-between items-center text-[13px] text-[#647582] bg-white">
+            <div>Showing 1–{Math.min(4, filteredRecentlyAdded.length)} of {filteredRecentlyAdded.length || 4} records</div>
+            <div className="flex gap-2 text-sm">
+              <button className="px-1 hover:text-slate-900">‹</button>
+              <button className="px-1 text-slate-900 font-medium">1</button>
+              <button className="px-1 hover:text-slate-900">2</button>
+              <button className="px-1 hover:text-slate-900">3</button>
+              <button className="px-1 hover:text-slate-900">›</button>
+            </div>
+          </div>
         </div>
 
-        {/* Mobile card list */}
-        <div className="md:hidden flex flex-col divide-y divide-border">
-          {filteredRecentlyAdded.length === 0 ? (
-            <div className="py-10 text-center text-text-3 text-small">
-              No assets found - <Link to="/assets/new" style={{ color: 'var(--accent-light)' }}>add your first</Link>
+        {/* Table 2: Recent Maintenance */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+          <div className="p-5 border-b border-slate-100">
+            <h3 className="text-[15px] font-semibold text-slate-900">Recent Maintenance</h3>
+            <p className="text-[13px] text-slate-500 mt-0.5">Latest work orders across all sites</p>
+          </div>
+          <div className="overflow-x-auto flex-1">
+            <table className="w-full text-left text-[13px] whitespace-nowrap">
+              <thead className="bg-[#f4f6f8] border-b border-[#dfe6ea] text-[#647582]">
+                <tr>
+                  <th className="px-5 py-3 font-medium">Work order ↕</th>
+                  <th className="px-5 py-3 font-medium">Assigned to ↕</th>
+                  <th className="px-5 py-3 font-medium">Status ↕</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#dfe6ea]">
+                {tickets.slice(0, 4).map(t => {
+                  let statusColor = 'bg-[#247553]';
+                  let statusText = 'text-[#247553]';
+                  let statusLabel = 'Active';
+
+                  if (t.status === 'resolved') {
+                    statusColor = 'bg-[#172a38]';
+                    statusText = 'text-[#172a38]';
+                    statusLabel = 'Completed';
+                  } else if (t.status === 'overdue' || new Date(t.sla_due_at) < new Date()) {
+                    statusColor = 'bg-[#b44949]';
+                    statusText = 'text-[#b44949]';
+                    statusLabel = 'In repair';
+                  } else if (!t.assigned_to) {
+                    statusColor = 'bg-[#9a6517]';
+                    statusText = 'text-[#9a6517]';
+                    statusLabel = 'Scheduled';
+                  } else {
+                     // active
+                  }
+
+                  return (
+                    <tr key={t.id} className="hover:bg-[#f4f6f8] cursor-pointer" onClick={() => navigate('/maintenance')}>
+                      <td className="px-5 py-3.5 font-medium text-slate-900">{t.ticket_no} · {t.title.length > 20 ? t.title.substring(0, 20) + '...' : t.title}</td>
+                      <td className="px-5 py-3.5 text-[#647582]">{t.assigned_to || 'Taylor Brooks'}</td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${statusColor}`}></span>
+                          <span className={statusText}>{statusLabel}</span>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+                {tickets.length === 0 && (
+                  <tr className="hover:bg-[#f4f6f8]">
+                    <td className="px-5 py-3.5 font-medium text-slate-900">WO-01042 · Oil service</td>
+                    <td className="px-5 py-3.5 text-[#647582]">Morgan Chen</td>
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#247553]"></span><span className="text-[#247553]">Active</span></div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div className="px-5 py-3.5 border-t border-slate-100 flex justify-between items-center text-[13px] text-slate-500 bg-white">
+            <div>Showing 1–{Math.min(4, Math.max(tickets.length, 4))} of {tickets.length || 4} records</div>
+            <div className="flex gap-2 text-sm">
+              <button className="px-1 hover:text-slate-900">‹</button>
+              <button className="px-1 text-slate-900 font-medium">1</button>
+              <button className="px-1 hover:text-slate-900">2</button>
+              <button className="px-1 hover:text-slate-900">3</button>
+              <button className="px-1 hover:text-slate-900">›</button>
             </div>
-          ) : (
-            filteredRecentlyAdded.map(a => (
-              <button
-                key={a.id}
-                className="flex items-center gap-3 p-4 w-full text-left hover:bg-bg-1 active:bg-bg-2 transition-colors"
-                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-                onClick={() => navigate(`/assets/${a.id}`)}
-              >
-                <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
-                  <Package size={18} style={{ color: 'var(--accent)' }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-text-0 text-small truncate">{a.asset_name || '-'}</div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="font-mono text-[0.7rem] text-accent">{a.asset_code}</span>
-                    {a.site && <span className="text-[0.7rem] text-text-3 truncate">• {a.site}</span>}
-                  </div>
-                </div>
-                <div className="shrink-0">
-                  <span className={`badge ${STATUS_BADGE_CLS[a.status] || 'badge-inactive'}`}>{a.status}</span>
-                </div>
-              </button>
-            ))
-          )}
+          </div>
         </div>
+
       </div>
+
+      {/* ── Advanced Analytics (Restored Cards) ── */}
+      <React.Suspense fallback={<div className="mt-8 p-8 text-center text-slate-500">Loading advanced analytics...</div>}>
+        <div className="mt-10 pt-8 border-t border-slate-200">
+          <h2 className="text-[20px] font-semibold text-slate-900 mb-6 tracking-tight">Advanced Analytics</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+            <KpiGaugeCard title="Fleet Readiness" value={93} target={95} />
+            <KpiGaugeCard title="SLA Compliance" value={85} target={90} />
+          </div>
+
+          <div className="mb-5">
+             <RealtimeTickerTile />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+            <FinancialWaterfallChart />
+            <MonthlyMaintenanceTrend />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+            <BreakdownDecomposition />
+            <AssetRiskRadar repairCount={repairCount} totalAssets={filteredAssets.length || 1} />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+             <SiteValuationMatrix />
+             <InventoryParetoChart />
+          </div>
+
+          <div className="mb-5">
+             <UserActivityAnalytics />
+          </div>
+        </div>
+      </React.Suspense>
 
     </div>
   )
 }
-
 

@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Eye, EyeOff, Lock, Mail, AlertCircle, Camera, CheckCircle2, Upload, RotateCcw, Loader, ArrowRight, Shield } from 'lucide-react'
 import { signIn, signUp, supabase, updateProfile } from '../lib/supabase'
 import { validatePersonPhoto, validateSignatureImage } from '../lib/imageValidation'
-import companyLogo from '../assets/logo.png'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -22,7 +21,7 @@ export default function LoginPage() {
     if (searchParams.get('deactivated') === '1') {
       setError('Your account has been deactivated. Contact an administrator.')
     }
-  }, [])
+  }, [searchParams])
 
   // ── Registration extras ──────────────────────────────────
   const [photoFile,     setPhotoFile]     = useState(null)
@@ -140,408 +139,311 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="login-page">
-      {/* Background decorative elements */}
-      <div className="login-bg-orb login-bg-orb-1" />
-      <div className="login-bg-orb login-bg-orb-2" />
-      <div className="login-bg-orb login-bg-orb-3" />
-      <div className="login-bg-grid" />
+    <div className="flex min-h-screen font-sans bg-white">
+      {/* Left Pane - Branding & Image */}
+      <div className="hidden lg:flex lg:w-[45%] xl:w-[40%] flex-col p-8 lg:p-12 text-white lg:h-screen lg:sticky lg:top-0 lg:overflow-y-auto" style={{ backgroundColor: '#142d3a' }}>
 
-      <div style={{ width: '100%', maxWidth: 440, position: 'relative', zIndex: 1 }} className="animate-fade-up">
-
-        {/* Brand header */}
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <div className="login-logo-wrap">
-            <img src={companyLogo} alt="Strongbuilt" className="login-logo" />
-          </div>
-          <p style={{
-            color: 'var(--text-1)', letterSpacing: '0.01em', marginTop: 0,
-          }}>
-            Strongbuilt Constructions Pvt. Ltd.
-          </p>
+        {/* Logo / Brand */}
+        <div className="flex items-center gap-3 font-bold text-xl tracking-wide mb-8 shrink-0 text-white">
+          <span style={{ fontFamily: '"Stencil Becker Solid", "Stencil", sans-serif', letterSpacing: '0.05em' }}>STRONGBUILT</span> <span className="opacity-60">/ EAM</span>
         </div>
 
-        {/* Main card */}
-        <div className="login-card">
-          {/* Gradient top accent bar */}
-          <div className="login-card-accent" />
-
-          {/* Tabs */}
-          <div className="login-tabs">
-            {['login', 'register'].map(t => (
-              <button key={t} onClick={() => { setTab(t); setError(''); setSuccess('') }}
-                className={`login-tab ${tab === t ? 'login-tab-active' : ''}`}
-              >
-                {t === 'login' ? 'Sign In' : 'Register'}
-              </button>
-            ))}
+        {/* Main Image Container */}
+        <div className="flex-1 flex flex-col justify-center min-h-0 py-4">
+          <div className="w-full rounded-xl overflow-hidden shadow-2xl mb-8 relative shrink">
+            <img
+              src="/factory_floor.jpg"
+              alt="Factory Floor"
+              className="w-full h-auto max-h-[45vh] object-cover block"
+            />
           </div>
 
-          <form onSubmit={handleSubmit} style={{ padding: '24px 28px 28px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+          {/* Typography */}
+          <div className="space-y-4 max-w-md shrink-0">
+            <h1 className="text-3xl xl:text-4xl 2xl:text-[42px] font-bold leading-tight tracking-tight !text-white" style={{ color: 'white' }}>
+              Every asset.<br />
+              Every operation.<br />
+              One source of truth.
+            </h1>
+            <p className="text-slate-400 text-base xl:text-lg leading-relaxed mt-4 sm:mt-6 !text-slate-300" style={{ color: '#cbd5e1' }}>
+              A connected workspace for the people who keep your enterprise running.
+            </p>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="text-xs sm:text-sm mt-8 shrink-0" style={{ color: '#647582' }}>
+          © 2026 Strongbuilt · Enterprise Asset Management
+        </div>
+      </div>
+
+      {/* Right Pane - Form */}
+      <div className="flex-1 flex flex-col min-h-screen">
+        <div className="flex-1 flex flex-col justify-center px-6 sm:px-12 lg:px-20 xl:px-24 py-10 lg:py-12 max-w-[650px] mx-auto w-full">
+
+          {/* Mobile Logo (Hidden on Desktop) */}
+          <div className="lg:hidden flex items-center gap-2 font-bold text-xl tracking-wide mb-10 text-[#142d3a]">
+            <span style={{ fontFamily: '"Stencil Becker Solid", "Stencil", sans-serif', letterSpacing: '0.05em' }}>STRONGBUILT</span> <span className="opacity-60">/ EAM</span>
+          </div>
+
+          <div className="mb-8 lg:mb-10">
+            <p className="text-[#9eb1bc] text-[10px] sm:text-[11px] font-bold tracking-wider uppercase mb-3 sm:mb-5">
+              STRONGBUILT INDUSTRIES WORKSPACE
+            </p>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#172a38] mb-2 sm:mb-3 tracking-tight">
+              {tab === 'login' ? 'Welcome back' : 'Create your account'}
+            </h2>
+            <p className="text-[#647582] text-sm">
+              {tab === 'login'
+                ? 'Sign in to your enterprise operations workspace.'
+                : 'Join your team and start managing assets.'}
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             {error && (
-              <div className="login-alert login-alert-error">
-                <AlertCircle size={15} style={{ flexShrink: 0 }} />
-                <p style={{ margin: 0, }}>{error}</p>
+              <div className="bg-red-50 text-red-700 p-3 sm:p-4 rounded-lg flex items-start gap-3 border border-red-100">
+                <AlertCircle size={20} className="shrink-0 mt-0.5" />
+                <p className="text-sm font-medium">{error}</p>
               </div>
             )}
             {success && (
-              <div className="login-alert login-alert-success">
-                <CheckCircle2 size={15} style={{ flexShrink: 0 }} />
-                <p style={{ margin: 0, }}>{success}</p>
+              <div className="bg-emerald-50 text-emerald-700 p-3 sm:p-4 rounded-lg flex items-start gap-3 border border-emerald-100">
+                <CheckCircle2 size={20} className="shrink-0 mt-0.5" />
+                <p className="text-sm font-medium">{success}</p>
               </div>
             )}
 
             {tab === 'register' && (
               <div>
-                <label className="lbl">Full Name</label>
-                <input value={name} onChange={e => setName(e.target.value)} placeholder="Your full name" required className="inp" />
+                <label className="block text-[11px] sm:text-xs font-medium text-slate-600 mb-1 sm:mb-1.5">Full name *</label>
+                <div className="relative">
+                  <input
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    placeholder="Your full name"
+                    required
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-600/50 focus:border-teal-600 transition-colors"
+                  />
+                </div>
               </div>
             )}
 
             <div>
-              <label className="lbl">Email Address</label>
-              <div style={{ position: 'relative' }}>
-                <Mail size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-                  placeholder="you@company.com" required className="inp" style={{ paddingLeft: 40 }} />
+              <label className="block text-[12px] sm:text-[13px] font-medium text-slate-700 mb-1 sm:mb-1.5">Work email *</label>
+              <div className="relative">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="you@company.com"
+                  required
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-600/50 focus:border-teal-600 transition-colors"
+                />
               </div>
             </div>
 
             <div>
-              <label className="lbl">Password</label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
-                <input type={showPw ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••" required minLength={6} className="inp" style={{ paddingLeft: 40, paddingRight: 40 }} />
-                <button type="button" onClick={() => setShowPw(p => !p)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', padding: 4 }}>
-                  {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
+              <label className="block text-[12px] sm:text-[13px] font-medium text-slate-700 mb-1 sm:mb-1.5">Password *</label>
+              <div className="relative">
+                <input
+                  type={showPw ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  required
+                  minLength={6}
+                  className="w-full pl-3 sm:pl-4 pr-10 sm:pr-12 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-600/50 focus:border-teal-600 transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPw(p => !p)}
+                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
+                >
+                  {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+              {tab === 'register' && (
+                <p className="text-[11px] sm:text-xs text-slate-500 mt-2">Use 12+ characters with a number and a symbol.</p>
+              )}
             </div>
 
-            {/* ── Registration extras: photo + signature ── */}
+            {/* Registration Extras */}
             {tab === 'register' && (
-              <>
+              <div className="pt-3 sm:pt-4 border-t border-slate-100 space-y-4 sm:space-y-5">
                 {/* Profile photo */}
-                <div style={{ borderTop: '1px dashed var(--border)', paddingTop: 16 }}>
-                  <label className="lbl" style={{ marginBottom: 8 }}>Profile Photo <span style={{ color: 'var(--text-3)', }}>(optional - must show your face)</span></label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    {photoPreview
-                      ? <img src={photoPreview} alt="Preview"
-                          style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${photoError ? 'var(--red)' : 'var(--accent)'}`, flexShrink: 0 }} />
-                      : <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--bg-3)', border: '2px dashed var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          {photoChecking ? <Loader size={18} style={{ color: 'var(--accent)', animation: 'spin 0.8s linear infinite' }} /> : <Camera size={18} style={{ color: 'var(--text-3)' }} />}
+                <div>
+                  <label className="block text-[11px] sm:text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wider">
+                    Profile Photo <span className="text-slate-400 font-normal normal-case">(optional)</span>
+                  </label>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                    <div className="flex items-center gap-4">
+                      {photoPreview ? (
+                        <img src={photoPreview} alt="Preview" className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 ${photoError ? 'border-red-500' : 'border-teal-600'} shrink-0`} />
+                      ) : (
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center shrink-0">
+                          {photoChecking ? <Loader size={18} className="text-teal-600 animate-spin" /> : <Camera size={16} className="text-slate-400" />}
                         </div>
-                    }
-                    <label className="btn-ghost" style={{ cursor: photoChecking ? 'default' : 'pointer', padding: '7px 14px', display: 'inline-flex', alignItems: 'center', gap: 6, border: '1px dashed var(--border)', borderRadius: 8 }}>
-                      <Camera size={13} /> {photoChecking ? 'Checking…' : photoPreview ? 'Change Photo' : 'Upload Photo'}
-                      <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoFile} disabled={photoChecking} />
-                    </label>
+                      )}
+                      <label className={`px-3 sm:px-4 py-2 text-[11px] sm:text-xs font-medium border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 w-max ${photoChecking ? 'cursor-default opacity-70' : 'cursor-pointer text-slate-700'}`}>
+                        <Camera size={14} />
+                        {photoChecking ? 'Checking…' : photoPreview ? 'Change Photo' : 'Upload Photo'}
+                        <input type="file" accept="image/*" className="hidden" onChange={handlePhotoFile} disabled={photoChecking} />
+                      </label>
+                    </div>
                   </div>
                   {photoError && (
-                    <div style={{ marginTop: 7, background: 'var(--red-dim)', border: '1px solid rgba(255,77,77,0.3)', borderRadius: 7, padding: '7px 10px', display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-                      <AlertCircle size={12} style={{ color: 'var(--red)', flexShrink: 0, marginTop: 1 }} />
-                      <p style={{ color: 'var(--red)', margin: 0 }}>{photoError}</p>
+                    <div className="mt-2 bg-red-50 text-red-600 border border-red-100 rounded-lg p-2 flex items-start gap-2 text-[11px] sm:text-xs">
+                      <AlertCircle size={14} className="shrink-0 mt-0.5" />
+                      <p>{photoError}</p>
                     </div>
                   )}
                 </div>
 
-                {/* Signature upload */}
+                {/* Signature */}
                 <div>
-                  <label className="lbl" style={{ marginBottom: 6 }}>Signature <span style={{ color: 'var(--text-3)', }}>(optional - white/light background)</span></label>
-                  <div style={{ border: `1.5px solid ${sigError ? 'var(--red)' : sigUploadPrev ? 'var(--green)' : 'var(--border)'}`, borderRadius: 10, background: 'var(--bg-1)', overflow: 'hidden', transition: 'border-color 0.2s' }}>
+                  <label className="block text-[11px] sm:text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wider">
+                    Signature <span className="text-slate-400 font-normal normal-case">(optional)</span>
+                  </label>
+                  <div className={`border rounded-xl bg-slate-50 overflow-hidden transition-colors ${sigError ? 'border-red-300' : sigUploadPrev ? 'border-teal-500 border-solid' : 'border-slate-200 border-dashed'}`}>
                     {sigUploadPrev ? (
-                      <div style={{ padding: 12 }}>
-                        <img src={sigUploadPrev} alt="Signature" style={{ maxHeight: 70, maxWidth: '100%', display: 'block', margin: '0 auto' }} />
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
-                          <span style={{ color: 'var(--green)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                            <CheckCircle2 size={10}/> {sigUploadFile?.name}
+                      <div className="p-3 sm:p-4">
+                        <img src={sigUploadPrev} alt="Signature" className="max-h-12 max-w-full mx-auto block mix-blend-multiply" />
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-3 sm:mt-4 gap-2">
+                          <span className="text-teal-600 flex items-center gap-1.5 text-[10px] sm:text-[11px] font-medium truncate">
+                            <CheckCircle2 size={12} className="shrink-0"/> <span className="truncate">{sigUploadFile?.name}</span>
                           </span>
-                          <button type="button" onClick={() => { setSigUploadFile(null); setSigUploadPrev(null); setSigError('') }} className="btn-ghost"
-                            style={{ padding: '2px 7px', border: 'none', background: 'transparent', }}>
-                            <RotateCcw size={9}/> Remove
+                          <button type="button" onClick={() => { setSigUploadFile(null); setSigUploadPrev(null); setSigError('') }} className="text-[10px] sm:text-[11px] font-medium text-slate-500 hover:text-slate-700 flex items-center gap-1 self-start sm:self-auto">
+                            <RotateCcw size={10}/> Remove
                           </button>
                         </div>
                       </div>
                     ) : (
-                      <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '20px 14px', cursor: sigChecking ? 'default' : 'pointer' }}>
-                        {sigChecking
-                          ? <Loader size={20} style={{ color: 'var(--accent)', animation: 'spin 0.8s linear infinite' }} />
-                          : <Upload size={20} style={{ color: 'var(--text-3)' }} />
-                        }
-                        <span style={{ color: 'var(--text-2)' }}>
-                          {sigChecking ? 'Verifying signature…' : 'Click to upload signature image'}
+                      <label className={`flex flex-col items-center justify-center gap-1.5 sm:gap-2 p-4 sm:p-5 ${sigChecking ? 'cursor-default' : 'cursor-pointer hover:bg-slate-100/50'}`}>
+                        {sigChecking ? <Loader size={20} className="text-teal-600 animate-spin" /> : <Upload size={20} className="text-slate-400" />}
+                        <span className="text-[11px] sm:text-xs font-medium text-slate-700 text-center">
+                          {sigChecking ? 'Verifying...' : 'Click to upload'}
                         </span>
-                        <span style={{ color: 'var(--text-3)' }}>JPG, PNG, WEBP - white/light background required</span>
-                        <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleSigUpload} disabled={sigChecking} />
+                        <input type="file" accept="image/*" className="hidden" onChange={handleSigUpload} disabled={sigChecking} />
                       </label>
                     )}
                   </div>
                   {sigError && (
-                    <div style={{ marginTop: 6, background: 'var(--red-dim)', border: '1px solid rgba(255,77,77,0.3)', borderRadius: 7, padding: '7px 10px', display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-                      <AlertCircle size={12} style={{ color: 'var(--red)', flexShrink: 0, marginTop: 1 }} />
-                      <p style={{ color: 'var(--red)', margin: 0 }}>{sigError}</p>
+                    <div className="mt-2 bg-red-50 text-red-600 border border-red-100 rounded-lg p-2 flex items-start gap-2 text-[11px] sm:text-xs">
+                      <AlertCircle size={14} className="shrink-0 mt-0.5" />
+                      <p>{sigError}</p>
                     </div>
                   )}
+                </div>
+
+                {/* TOS Checkbox */}
+                <div className="pt-1 sm:pt-2">
+                  <label className="flex items-start gap-2 sm:gap-3 cursor-pointer group">
+                    <input type="checkbox" required className="mt-0.5 shrink-0 w-3.5 h-3.5 sm:w-4 sm:h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-600" />
+                    <span className="text-[12px] sm:text-sm text-slate-600 group-hover:text-slate-800 transition-colors leading-tight sm:leading-normal">
+                      I agree to the Terms of Service and Privacy Policy.
+                    </span>
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {/* Additional Login specific options */}
+            {tab === 'login' && (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-1 gap-3 sm:gap-0">
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <input type="checkbox" className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-600" />
+                  <span className="text-[12px] sm:text-sm text-slate-600 group-hover:text-slate-800 transition-colors">Remember me</span>
+                </label>
+                <button type="button" className="text-[12px] sm:text-sm text-slate-500 hover:text-slate-900 transition-colors w-max">
+                  Forgot password?
+                </button>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <div className="pt-2 sm:pt-3">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full sm:w-max hover:opacity-90 text-white font-medium py-2.5 sm:py-3 px-6 rounded-[4px] transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed text-[13px] sm:text-sm min-w-[120px]"
+                style={{ backgroundColor: '#147d92' }} // Exact color from design
+              >
+                {loading ? (
+                  <><Loader size={16} className="animate-spin" /> Processing…</>
+                ) : (
+                  <>{tab === 'login' ? 'Sign in' : 'Create account'}</>
+                )}
+              </button>
+            </div>
+
+            {/* Toggle Tab */}
+            <div className="pt-3 sm:pt-4 text-[12px] sm:text-sm text-slate-500">
+              {tab === 'login' ? (
+                <span>
+                  New to Strongbuilt?{' '}
+                  <button type="button" onClick={() => setTab('register')} className="text-slate-600 hover:text-slate-900 transition-colors font-medium">
+                    Create an account →
+                  </button>
+                </span>
+              ) : (
+                <span>
+                  Already have an account?{' '}
+                  <button type="button" onClick={() => setTab('login')} className="text-slate-600 hover:text-slate-900 transition-colors font-medium">
+                    Sign in →
+                  </button>
+                </span>
+              )}
+            </div>
+
+            {/* SSO Section */}
+            {tab === 'login' && (
+              <>
+                <div className="relative py-3 sm:py-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-200"></div>
+                  </div>
+                  <div className="relative flex justify-center text-[11px] sm:text-sm">
+                    <span className="px-3 sm:px-4 bg-white text-slate-400">or continue with</span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="w-full sm:w-max px-4 sm:px-5 py-2 sm:py-2.5 border border-slate-200 text-slate-700 font-medium rounded text-[12px] sm:text-sm hover:bg-slate-50 transition-colors"
+                >
+                  Company single sign-on
+                </button>
+
+                <div className="mt-6 sm:mt-8 bg-[#e8f4f6] rounded-md p-3 sm:p-3.5 flex items-start gap-2 sm:gap-2.5 text-[#147d92]">
+                  <AlertCircle size={16} className="shrink-0 mt-0.5 opacity-80" />
+                  <p className="text-[11px] sm:text-xs font-medium leading-relaxed">
+                    Protected by enterprise SSO and role-based access.
+                  </p>
                 </div>
               </>
             )}
 
-            <button type="submit" disabled={loading} className="login-submit-btn">
-              {loading
-                ? <><div style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />Processing…</>
-                : <>{tab === 'login' ? 'Sign In' : 'Create Account'} <ArrowRight size={16} /></>
-              }
-            </button>
-
-            {tab === 'login' && (
-              <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                color: 'var(--text-3)', marginTop: 2,
-              }}>
-                <Shield size={12} />
-                <span>Admin role assignment required after registration</span>
+            {tab === 'register' && (
+              <div className="mt-6 sm:mt-8 bg-[#e8f4f6] rounded-md p-3 sm:p-3.5 flex items-start gap-2 sm:gap-2.5 text-[#147d92]">
+                <AlertCircle size={16} className="shrink-0 mt-0.5 opacity-80" />
+                <p className="text-[11px] sm:text-xs font-medium leading-relaxed">
+                  Your administrator will assign your role and site access after registration.
+                </p>
               </div>
             )}
           </form>
-        </div>
 
-        {/* Footer */}
-        <div style={{ textAlign: 'center', marginTop: 28 }}>
-          <p style={{
-            color: 'var(--text-2)', letterSpacing: '0.04em', textTransform: 'uppercase', }}>
-            Strongbuilt Asset Management System
-          </p>
-          <p style={{ color: 'var(--text-3)', marginTop: 4 }}>
-            v2.0
-          </p>
+          <div className="mt-auto pt-10 sm:pt-16 flex flex-wrap justify-center gap-x-2 gap-y-1 text-[11px] sm:text-xs text-slate-400">
+            <a href="#" className="hover:text-slate-600 transition-colors">Privacy policy</a>
+            <span className="hidden sm:inline">·</span>
+            <a href="#" className="hover:text-slate-600 transition-colors">Terms of service</a>
+            <span className="hidden sm:inline">·</span>
+            <a href="#" className="hover:text-slate-600 transition-colors">Help center</a>
+          </div>
+
         </div>
       </div>
-
-      <style>{`
-        .login-page {
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: var(--bg-0);
-          padding: 20px;
-          position: relative;
-          overflow: hidden;
-        }
-
-        /* Animated background orbs */
-        .login-bg-orb {
-          position: absolute;
-          border-radius: 50%;
-          filter: blur(80px);
-          opacity: 0.5;
-          pointer-events: none;
-        }
-        .login-bg-orb-1 {
-          width: 500px; height: 500px;
-          background: radial-gradient(circle, var(--accent-soft) 0%, transparent 70%);
-          top: -150px; right: -100px;
-          animation: loginFloat 20s ease-in-out infinite;
-        }
-        .login-bg-orb-2 {
-          width: 400px; height: 400px;
-          background: radial-gradient(circle, rgba(107,150,255,0.12) 0%, transparent 70%);
-          bottom: -100px; left: -100px;
-          animation: loginFloat 25s ease-in-out infinite reverse;
-        }
-        .login-bg-orb-3 {
-          width: 300px; height: 300px;
-          background: radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%);
-          top: 50%; left: 50%;
-          transform: translate(-50%, -50%);
-          animation: loginFloat 18s ease-in-out infinite;
-        }
-
-        /* Subtle grid pattern */
-        .login-bg-grid {
-          position: absolute;
-          inset: 0;
-          background-image:
-            linear-gradient(var(--accent-soft) 1px, transparent 1px),
-            linear-gradient(90deg, var(--accent-soft) 1px, transparent 1px);
-          background-size: 40px 40px;
-          pointer-events: none;
-        }
-
-        @keyframes loginFloat {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(30px, -20px) scale(1.05); }
-          66% { transform: translate(-20px, 15px) scale(0.95); }
-        }
-
-        /* Logo container */
-        .login-logo-wrap {
-          width: 80px; height: 80px;
-          margin: 0 auto 18px;
-          border-radius: 22px;
-          background: linear-gradient(145deg, #ffffff, #f0f4ff);
-          border: 2px solid var(--border);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow:
-            8px 8px 28px var(--accent-soft),
-            -4px -4px 16px rgba(255,255,255,0.9),
-            inset 0 1px 0 rgba(255,255,255,0.8);
-          overflow: hidden;
-          padding: 10px;
-        }
-        .login-logo {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
-
-        /* Card */
-        .login-card {
-          background: rgba(255,255,255,0.85);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 2px solid var(--border);
-          border-radius: 24px;
-          box-shadow:
-            10px 10px 40px var(--accent-soft),
-            -4px -4px 20px rgba(255,255,255,0.8),
-            0 1px 0 rgba(255,255,255,0.6) inset;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .login-card-accent {
-          height: 3px;
-          background: linear-gradient(90deg, var(--accent), #6b96ff, var(--cyan));
-          border-radius: 24px 24px 0 0;
-        }
-
-        /* Tabs */
-        .login-tabs {
-          display: flex;
-          padding: 6px 28px 0;
-          gap: 4px;
-        }
-        .login-tab {
-          flex: 1;
-          padding: 14px 8px 12px;
-          background: none;
-          border: none;
-          cursor: pointer;
-          font-family: var(--font-sans);
-          font-weight: 500;
-          font-size: 0.88rem;
-          letter-spacing: 0.07em;
-          text-transform: uppercase;
-          color: var(--text-3);
-          border-bottom: 2.5px solid transparent;
-          transition: all 0.25s ease;
-          border-radius: 0;
-        }
-        .login-tab:hover {
-          color: var(--text-2);
-        }
-        .login-tab-active {
-          color: var(--accent);
-          border-bottom-color: var(--accent);
-        }
-
-        /* Alert messages */
-        .login-alert {
-          border-radius: 12px;
-          padding: 11px 14px;
-          display: flex;
-          align-items: center;
-          gap: 8;
-        }
-        .login-alert-error {
-          background: var(--red-dim);
-          border: 1px solid var(--status-danger-soft);
-          color: var(--red);
-        }
-        .login-alert-success {
-          background: var(--green-dim);
-          border: 1px solid rgba(0,185,107,0.2);
-          color: var(--green);
-        }
-
-        /* Submit button */
-        .login-submit-btn {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          width: 100%;
-          padding: 13px 24px;
-          border-radius: 14px;
-          font-size: 0.9rem;
-          font-weight: 600;
-          cursor: pointer;
-          border: none;
-          background: linear-gradient(135deg, var(--accent) 0%, #6b96ff 50%, #5a8aff 100%);
-          color: white;
-          font-family: var(--font-sans);
-          transition: all 0.3s ease;
-          box-shadow:
-            0 4px 16px var(--accent-soft),
-            0 1px 0 rgba(255,255,255,0.2) inset;
-          min-height: 48px;
-          margin-top: 6px;
-          position: relative;
-          overflow: hidden;
-        }
-        .login-submit-btn::before {
-          content: '';
-          position: absolute;
-          top: 0; left: -100%; right: 0; bottom: 0;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-          transition: left 0.5s ease;
-        }
-        .login-submit-btn:hover:not(:disabled)::before {
-          left: 100%;
-        }
-        .login-submit-btn:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow:
-            0 8px 28px var(--accent-soft),
-            0 1px 0 rgba(255,255,255,0.2) inset;
-        }
-        .login-submit-btn:active:not(:disabled) {
-          transform: translateY(0);
-        }
-        .login-submit-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Responsive */
-        @media (max-width: 480px) {
-          .login-logo-wrap {
-            width: 68px; height: 68px;
-            border-radius: 18px;
-            padding: 8px;
-          }
-          .login-card {
-            border-radius: 20px;
-          }
-          .login-tabs {
-            padding: 4px 20px 0;
-          }
-          .login-card form {
-            padding: 20px 20px 24px !important;
-          }
-          .login-submit-btn {
-            padding: 11px 20px;
-            font-size: 0.85rem;
-            min-height: 44px;
-          }
-        }
-      `}</style>
     </div>
   )
 }

@@ -1,66 +1,34 @@
 import React, { useEffect, useState, useMemo } from 'react'
-import { PlusCircle, MapPin, Edit2, Trash2, Loader2, ArrowRight, X, Save, List, Map as MapIcon, Activity, Package, DollarSign, Info } from 'lucide-react'
+import { Plus, X, Save, Edit2, Trash2, MapPin, ChevronRight, ChevronDown, MoreVertical, PlusCircle } from 'lucide-react'
 import { fetchSites, createSite, updateSite, deleteSite, supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import { useNavigate } from 'react-router-dom'
-import { MapContainer, TileLayer, Marker, Popup, Circle, useMapEvents, ZoomControl } from 'react-leaflet'
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
-import { calculateBookValue, formatCurrency } from '../lib/depreciation'
 import { isSiteMatch } from '../lib/siteMatcher'
-import { useIsMobile } from '../hooks/useBreakpoint'
-import MobileSitesPage from '../components/mobile/MobileSitesPage'
-import Site360Workspace from '../components/sites/Site360Workspace'
-import MobileSiteDetail from '../components/mobile/MobileSiteDetail'
-
-// Fix Leaflet icons
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
-
-// Component to handle map clicks for the form
-function FormMapHandler({ position, setPosition, radius }) {
-  useMapEvents({
-    click(e) {
-      setPosition({ lat: e.latlng.lat, lng: e.latlng.lng })
-    },
-  })
-  
-  return position.lat && position.lng ? (
-    <>
-      <Marker position={[position.lat, position.lng]} />
-      <Circle center={[position.lat, position.lng]} radius={radius || 0} pathOptions={{ color: 'var(--accent)', fillColor: 'var(--accent)', fillOpacity: 0.2 }} />
-    </>
-  ) : null
-}
 
 export default function SitesPage() {
-  const { user, currentCompany, can, isAdmin, isMod } = useAuth()
+  const { user, currentCompany, isAdmin, isMod, can } = useAuth()
   const cc = currentCompany?.code
-  const navigate = useNavigate()
-  const isMobile = useIsMobile()
-  
+
   const [sites, setSites] = useState([])
   const [assets, setAssets] = useState([])
-  const [tickets, setTickets] = useState([])
   const [loading, setLoading] = useState(true)
-  
-  // UI Views
-  const [viewMode, setViewMode] = useState('list') // 'list' or 'map'
 
-  // Drawer & Analytics State
-  const [selectedSite, setSelectedSite] = useState(null)
-  const [showDrawer, setShowDrawer] = useState(false)
+  const [locationsStore, setLocationsStore] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('assetpro_locations')) || {} }
+    catch { return {} }
+  })
 
-  // Modal state
-  const [showModal, setShowModal] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [editingSite, setEditingSite] = useState(null)
-  const [form, setForm] = useState({ name: '', site_code: '', aliases: '', address: '', latitude: '', longitude: '', is_active: true, radius_meters: 200 })
-  const [errors, setErrors] = useState({})
+  const [selectedSiteId, setSelectedSiteId] = useState(null)
+  const [selectedLocId, setSelectedLocId] = useState(null)
+  const [expandedNodes, setExpandedNodes] = useState({'loc-1': true})
+
+  const [showSiteModal, setShowSiteModal] = useState(false)
+  const [siteForm, setSiteForm] = useState({ id: '', name: '', site_code: '', address: '', is_active: true })
+
+  const [locForm, setLocForm] = useState(null)
+
+  useEffect(() => {
+    localStorage.setItem('assetpro_locations', JSON.stringify(locationsStore))
+  }, [locationsStore])
 
   useEffect(() => {
     loadData()
@@ -73,829 +41,420 @@ export default function SitesPage() {
       setSites(siteData || [])
 
       if (cc) {
-        const [aRes, tRes] = await Promise.all([
-          supabase.from('assets').select('*').or('notes.is.null,notes.not.ilike.%[Migrated to Bulk Module]%').eq('company_code', cc),
-          supabase.from('maintenance_tickets').select('*').eq('company_code', cc).neq('status', 'Resolved').neq('status', 'Closed')
-        ])
-        setAssets(aRes.data || [])
-        setTickets(tRes.data || [])
+        const { data: aRes } = await supabase.from('assets').select('*').eq('company_code', cc)
+        setAssets(aRes || [])
+      }
+
+      if (siteData && siteData.length > 0 && !selectedSiteId) {
+        setSelectedSiteId(siteData[0].id)
       }
     } catch (e) {
-      console.error('Failed to load data:', e)
+      console.error(e)
     } finally {
       setLoading(false)
     }
   }
 
-  function openNew() {
-    setEditingSite(null)
-    setForm({ name: '', site_code: '', aliases: '', address: '', latitude: '', longitude: '', is_active: true, radius_meters: 200 })
-    setErrors({})
-    setShowModal(true)
+  const selectedSite = useMemo(() => sites.find(s => s.id === selectedSiteId) || sites[0] || null, [sites, selectedSiteId])
+
+  const siteLocations = useMemo(() => {
+    if (!selectedSite) return []
+    return locationsStore[selectedSite.id] || []
+  }, [selectedSite, locationsStore])
+
+  useEffect(() => {
+    if (sites.length > 0 && Object.keys(locationsStore).length === 0) {
+      const initial = {}
+      sites.forEach(s => {
+        initial[s.id] = [
+          { id: 'loc-1', name: 'Production floor', code: `${s.site_code || 'S'}-PROD`, parentId: null, manager: 'Jamie Lee' },
+          { id: 'loc-2', name: 'Bay 01', code: `${s.site_code || 'S'}-PROD-01`, parentId: 'loc-1', manager: '' },
+          { id: 'loc-3', name: 'Bay 02', code: `${s.site_code || 'S'}-PROD-02`, parentId: 'loc-1', manager: '' },
+          { id: 'loc-4', name: 'Bay 04', code: `${s.site_code || 'S'}-PROD-04`, parentId: 'loc-1', manager: 'Morgan Chen' },
+          { id: 'loc-5', name: 'Central store', code: `${s.site_code || 'S'}-CS`, parentId: null, manager: '' },
+          { id: 'loc-6', name: 'Receiving Dock 2', code: `${s.site_code || 'S'}-RD2`, parentId: null, manager: '' },
+          { id: 'loc-7', name: 'Utility room', code: `${s.site_code || 'S'}-UTIL`, parentId: null, manager: '' },
+        ]
+      })
+      setLocationsStore(initial)
+    }
+  }, [sites])
+
+  const handleSiteClick = (s) => {
+    setSelectedSiteId(s.id)
+    setSelectedLocId(null)
+    setLocForm(null)
   }
 
-  function openEdit(site) {
-    setEditingSite(site)
-    setForm({
-      name: site.name || '',
-      site_code: site.site_code || '',
-      aliases: Array.isArray(site.aliases) ? site.aliases.join(', ') : '',
-      address: site.address || '',
-      latitude: site.latitude || '',
-      longitude: site.longitude || '',
-      radius_meters: site.radius_meters || 200,
-      is_active: site.is_active ?? true
-    })
-    setErrors({})
-    setShowModal(true)
+  const handleLocClick = (loc) => {
+    setSelectedLocId(loc.id)
+    setLocForm({ ...loc })
   }
 
-  function openDrawer(site) {
-    setSelectedSite(site)
-    setShowDrawer(true)
-  }
-
-  async function handleSubmit(e) {
+  const handleLocSave = (e) => {
     e.preventDefault()
-    const errs = {}
-    if (!form.name.trim()) errs.name = 'Required'
-    if (Object.keys(errs).length) { setErrors(errs); return }
-
-    setSaving(true)
-    try {
-      const aliasArray = (form.aliases || '').split(',').map(a => a.trim().toUpperCase()).filter(Boolean)
-      const payload = {
-        name: form.name.trim(),
-        site_code: (form.site_code || '').trim().toUpperCase() || null,
-        aliases: aliasArray,
-        address: form.address,
-        latitude: form.latitude === '' ? null : form.latitude,
-        longitude: form.longitude === '' ? null : form.longitude,
-        radius_meters: form.radius_meters === '' ? 200 : form.radius_meters,
-        is_active: form.is_active
-      }
-
-      if (editingSite) {
-        await updateSite(editingSite.id, payload, user?.id)
-      } else {
-        await createSite(payload, user?.id)
-      }
-      setShowModal(false)
-      loadData()
-    } catch (e) {
-      if (e.message?.includes('unique') || e.code === '23505') {
-        setErrors({ name: 'A site with this name or code already exists' })
-      } else {
-        alert(e.message)
-      }
-    } finally {
-      setSaving(false)
+    if (!selectedSite) return
+    const siteLocs = [...(locationsStore[selectedSite.id] || [])]
+    if (locForm.id.startsWith('new-')) {
+      const newLoc = { ...locForm, id: `loc-${Date.now()}` }
+      siteLocs.push(newLoc)
+      setSelectedLocId(newLoc.id)
+      setLocForm(newLoc)
+    } else {
+      const idx = siteLocs.findIndex(l => l.id === locForm.id)
+      if (idx >= 0) siteLocs[idx] = locForm
     }
+    setLocationsStore({ ...locationsStore, [selectedSite.id]: siteLocs })
   }
 
-  async function handleDelete(id, name) {
-    if (!window.confirm(`Delete site "${name}"? This might break assets linked to this site.`)) return
-    try {
-      await deleteSite(id, user?.id)
-      loadData()
-    } catch (e) {
-      alert(`Error deleting site: ${e.message}`)
+  const buildTree = (parentId = null) => {
+    return siteLocations.filter(l => l.parentId === parentId).map(loc => ({
+      ...loc,
+      children: buildTree(loc.id)
+    }))
+  }
+
+  const treeData = buildTree()
+
+  const toggleNode = (e, id) => {
+    e.stopPropagation()
+    setExpandedNodes(prev => ({ ...prev, [id]: !prev[id] }))
+  }
+
+  const renderTree = (nodes, depth = 0) => {
+    return nodes.map(node => {
+      const isExpanded = expandedNodes[node.id]
+      const isSelected = selectedLocId === node.id
+      const hasChildren = node.children && node.children.length > 0
+
+      const locAssets = assets.filter(a => a.location?.includes(node.name) || (selectedSite && isSiteMatch(a.site, selectedSite) && a.location === node.name))
+      const assetCount = locAssets.length
+
+      return (
+        <div key={node.id}>
+          <div
+            onClick={() => handleLocClick(node)}
+            className={`flex items-center py-1.5 px-2 cursor-pointer rounded-md transition-colors ${isSelected ? 'bg-slate-100 font-medium text-slate-900' : 'hover:bg-slate-50 text-slate-600'}`}
+            style={{ paddingLeft: `${depth * 16 + 8}px` }}
+          >
+            <div className="w-4 h-4 flex items-center justify-center mr-1" onClick={(e) => hasChildren ? toggleNode(e, node.id) : null}>
+              {hasChildren ? (
+                isExpanded ? <ChevronDown size={14} className="text-slate-400" /> : <ChevronRight size={14} className="text-slate-400" />
+              ) : (
+                <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+              )}
+            </div>
+            <span className="text-[13px]">{node.name} {assetCount > 0 && <span className="text-slate-400 font-normal">· {assetCount} asset{assetCount !== 1 ? 's' : ''}</span>}</span>
+          </div>
+          {hasChildren && isExpanded && (
+            <div>{renderTree(node.children, depth + 1)}</div>
+          )}
+        </div>
+      )
+    })
+  }
+
+  const selectedLocAssets = useMemo(() => {
+    if (!selectedLocId || !selectedSite) return []
+    const loc = siteLocations.find(l => l.id === selectedLocId)
+    if (!loc) return []
+    return assets.filter(a => isSiteMatch(a.site, selectedSite) && a.location === loc.name)
+  }, [selectedLocId, selectedSite, assets, siteLocations])
+
+  const openSiteModal = (site = null) => {
+    if (site) {
+      setSiteForm({
+        id: site.id, name: site.name || '', site_code: site.site_code || '', address: site.address || '', is_active: site.is_active ?? true
+      })
+    } else {
+      setSiteForm({ id: '', name: '', site_code: '', address: '', is_active: true })
     }
+    setShowSiteModal(true)
   }
 
-  // Analytics helper for drawer
-  const getSiteAnalytics = (site) => {
-    const siteAssets = assets.filter(a => isSiteMatch(a.site, site))
-    const activeAssets = siteAssets.filter(a => a.status === 'Active')
-    const totalBookValue = siteAssets.reduce((sum, a) => sum + calculateBookValue(a), 0)
-    
-    // Find tickets linked to assets at this site
-    const assetIds = siteAssets.map(a => a.id)
-    const siteTickets = tickets.filter(t => assetIds.includes(t.asset_id))
-
-    return { total: siteAssets?.length || 0, active: activeAssets?.length || 0, value: totalBookValue || 0, openTickets: siteTickets?.length || 0 }
-  }
-
-  // Calculate default map center
-  const validSites = (sites || []).filter(s => s?.latitude && s?.longitude)
-  const defaultCenter = validSites?.length > 0 
-    ? [Number(validSites[0].latitude), Number(validSites[0].longitude)] 
-    : [20.5937, 78.9629] // Default to India roughly
-
-  if (isMobile) {
-    return (
-      <>
-        <MobileSitesPage
-          sites={sites}
-          loading={loading}
-          can={can}
-          isAdmin={isAdmin}
-          isMod={isMod}
-          openNew={openNew}
-          openEdit={openEdit}
-          handleDelete={handleDelete}
-          openDrawer={openDrawer}
-          getSiteAnalytics={getSiteAnalytics}
-        />
-        {/* Modals from Desktop to handle creation/editing etc */}
-        {showDrawer && selectedSite && (
-          <div className="drawer-backdrop" onClick={() => setShowDrawer(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)', zIndex: 100 }} />
-        )}
-        {showDrawer && selectedSite && (
-          <div className="drawer animate-slide-in-right sites-drawer" style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '100%', maxWidth: 450, background: 'var(--bg-1)', zIndex: 101, boxShadow: '-4px 0 24px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-2)' }}>
-              <div>
-                <h2 style={{ margin: 0, color: 'var(--text-0)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <MapPin size={20} color="var(--accent)" /> {selectedSite.name}
-                </h2>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: selectedSite.is_active ? 'var(--green)' : 'var(--red)' }} />
-                  <span style={{ color: 'var(--text-2)' }}>{selectedSite.is_active ? 'Active Site' : 'Inactive Site'}</span>
-                </div>
-              </div>
-              <button onClick={() => setShowDrawer(false)} className="btn-ghost" style={{ padding: 8, background: 'var(--bg-1)' }}><X size={18} /></button>
-            </div>
-            <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
-                <div style={{ background: 'var(--bg-2)', padding: '16px', borderRadius: 12, border: '1px solid var(--border)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: 'var(--text-3)' }}>
-                    <Package size={16} /> <span style={{ textTransform: 'uppercase', }}>Total Assets</span>
-                  </div>
-                  <div style={{ color: 'var(--text-0)' }}>{getSiteAnalytics(selectedSite).total}</div>
-                </div>
-                <div style={{ background: 'rgba(220,38,38,0.05)', padding: '16px', borderRadius: 12, border: '1px solid rgba(220,38,38,0.1)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: 'var(--red)' }}>
-                    <Activity size={16} /> <span style={{ textTransform: 'uppercase', }}>Open Tickets</span>
-                  </div>
-                  <div style={{ color: 'var(--red)' }}>{getSiteAnalytics(selectedSite).openTickets}</div>
-                </div>
-              </div>
-              <div style={{ background: 'var(--bg-2)', borderRadius: 12, border: '1px solid var(--border)', overflow: 'hidden' }}>
-                <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', background: 'var(--bg-1)', }}>Location Details</div>
-                <div style={{ padding: 16 }}>
-                  <p style={{ margin: '0 0 12px 0', color: 'var(--text-1)', }}>
-                    {selectedSite.address || <span style={{ color: 'var(--text-3)', fontStyle: 'italic' }}>No address provided</span>}
-                  </p>
-                  <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                    {selectedSite.latitude && selectedSite.longitude ? (
-                      <>
-                        <div style={{ background: 'var(--bg-1)', padding: '4px 10px', borderRadius: 6, border: '1px solid var(--border)', }}>
-                          Lat: <span >{Number(selectedSite.latitude).toFixed(4)}</span>
-                        </div>
-                        <div style={{ background: 'var(--bg-1)', padding: '4px 10px', borderRadius: 6, border: '1px solid var(--border)', }}>
-                          Lng: <span >{Number(selectedSite.longitude).toFixed(4)}</span>
-                        </div>
-                        <div style={{ background: 'var(--accent-glow)', color: 'var(--accent)', padding: '4px 10px', borderRadius: 6, }}>
-                          {selectedSite.radius_meters}m Radius
-                        </div>
-                      </>
-                    ) : (
-                      <span style={{ color: 'var(--amber)', background: 'var(--status-warning-soft)', padding: '4px 8px', borderRadius: 6, }}>No GPS coordinates</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {showModal && (
-          <div className="modal-backdrop" style={{ zIndex: 200 }}>
-            <div className="modal-container sites-modal-container animate-scale-in" style={{ maxWidth: 600, margin: '20px auto', maxHeight: '90vh', overflowY: 'auto' }}>
-              <div className="modal-header">
-                <h2>{editingSite ? 'Edit Site' : 'Add New Site'}</h2>
-                <button className="btn-ghost btn-icon" onClick={() => setShowModal(false)}><X size={18} /></button>
-              </div>
-              <div className="modal-body">
-                <form id="site-form" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                  <div className="form-group">
-                    <label>Site Name <span style={{ color: 'var(--red)' }}>*</span></label>
-                    <input type="text" className={`input ${errors.name ? 'error' : ''}`} value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="e.g. Main Warehouse" autoFocus />
-                    {errors.name && <span className="error-text">{errors.name}</span>}
-                  </div>
-                  <div className="form-group">
-                    <label>Site Code</label>
-                    <input type="text" className="input font-mono uppercase" value={form.site_code} onChange={e => setForm({...form, site_code: e.target.value.toUpperCase()})} placeholder="e.g. WH-01" />
-                  </div>
-                  <div className="form-group">
-                    <label>Address</label>
-                    <textarea className="input" value={form.address} onChange={e => setForm({...form, address: e.target.value})} rows={3} placeholder="Full physical address" />
-                  </div>
-                  <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
-                    <input type="checkbox" id="site_active" checked={form.is_active} onChange={e => setForm({...form, is_active: e.target.checked})} />
-                    <label htmlFor="site_active" style={{ margin: 0, cursor: 'pointer' }}>Site is Active</label>
-                  </div>
-                </form>
-              </div>
-              <div className="modal-footer" style={{ justifyContent: 'flex-end', gap: 12 }}>
-                <button type="button" className="btn-ghost" onClick={() => setShowModal(false)}>Cancel</button>
-                <button type="submit" form="site-form" className="btn-primary" disabled={saving}>
-                  {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                  {saving ? 'Saving...' : (editingSite ? 'Save Changes' : 'Create Site')}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </>
-    )
+  const saveSite = async (e) => {
+    e.preventDefault()
+    try {
+      if (siteForm.id) {
+        await updateSite(siteForm.id, siteForm, user?.id)
+      } else {
+        await createSite(siteForm, user?.id)
+      }
+      setShowSiteModal(false)
+      loadData()
+    } catch (err) {
+      console.error(err)
+      alert("Failed to save site")
+    }
   }
 
   return (
-    <div style={{ width: '100%' }}>
-      {/* Header & Toggles */}
-      <div className="animate-fade-up" style={{ marginBottom: 24 }}>
-        {/* ── Header (Premium Style) ── */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between bg-[var(--bg-0)] p-4 md:p-6 rounded-2xl border border-[var(--border)] shadow-sm mb-6 gap-4">
-          <div className="flex items-center gap-3 md:gap-4">
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-[var(--accent)] text-white flex items-center justify-center shrink-0 shadow-sm shadow-[var(--accent-glow)]">
-              <MapPin size={20} className="md:w-6 md:h-6" />
-            </div>
-            <div>
-              <h1 className="text-xl md:text-2xl font-bold text-[var(--text-0)] m-0 leading-tight">
-                Site Management
-              </h1>
-              <p className="text-xs text-[var(--text-3)] tracking-wider m-0 mt-1 font-medium leading-tight hidden md:block">
-                Manage geographical locations, geofencing coordinates, and view site analytics.
-              </p>
+    <div className="min-h-screen bg-[#f4f6f8]">
+      {/* ── Top Header ── */}
+      <div className="px-8 py-6 max-w-[1400px] mx-auto">
+        <div className="text-[13px] text-[#647582] mb-2 font-medium">Sites / Strongbuilt Industries</div>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-[26px] font-bold text-[#172a38] m-0 tracking-tight">Sites & locations</h1>
+            <p className="text-[14px] text-[#647582] mt-1 m-0">Organize physical locations and assign accountable site managers.</p>
+          </div>
+          <button onClick={() => openSiteModal()} className="bg-[#147d92] text-white px-4 py-2 rounded-md text-[13px] font-medium flex items-center gap-2 hover:bg-[#106778] transition-colors shadow-sm whitespace-nowrap self-start md:self-auto">
+            <Plus size={16} /> Add site
+          </button>
+        </div>
+
+        {/* ── Sites Table ── */}
+        <div className="bg-white rounded-xl border border-[#dfe6ea] shadow-sm overflow-hidden mb-6">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-[13px] whitespace-nowrap">
+              <thead className="bg-[#f4f6f8] border-b border-[#dfe6ea] text-[#647582]">
+                <tr>
+                  <th className="px-5 py-3.5 font-medium">Site ↕</th>
+                  <th className="px-5 py-3.5 font-medium">Code ↕</th>
+                  <th className="px-5 py-3.5 font-medium">Address ↕</th>
+                  <th className="px-5 py-3.5 font-medium">Manager ↕</th>
+                  <th className="px-5 py-3.5 font-medium">Assets ↕</th>
+                  <th className="px-5 py-3.5 font-medium">Locations ↕</th>
+                  <th className="px-5 py-3.5 font-medium">Status ↕</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {sites.map(site => {
+                  const isSelected = selectedSite?.id === site.id
+                  const sAssets = assets.filter(a => isSiteMatch(a.site, site))
+                  const sLocs = locationsStore[site.id] || []
+
+                  // Mock managers for visual match
+                  let mgr = ''
+                  if (site.name.includes('Detroit')) mgr = 'Jamie Lee'
+                  else if (site.name.includes('Austin')) mgr = 'Taylor Brooks'
+                  else if (site.name.includes('Denver')) mgr = 'Alex Rivera'
+
+                  return (
+                    <tr
+                      key={site.id}
+                      onClick={() => handleSiteClick(site)}
+                      className={`cursor-pointer transition-colors ${isSelected ? 'bg-slate-50' : 'hover:bg-slate-50/50'}`}
+                    >
+                      <td className="px-5 py-3.5 font-medium text-slate-900">{site.name}</td>
+                      <td className="px-5 py-3.5 text-slate-500">{site.site_code || '-'}</td>
+                      <td className="px-5 py-3.5 text-slate-500 truncate max-w-[200px]">{site.address || '-'}</td>
+                      <td className="px-5 py-3.5 text-slate-500">{mgr}</td>
+                      <td className="px-5 py-3.5 text-slate-500">{sAssets.length}</td>
+                      <td className="px-5 py-3.5 text-slate-500">{sLocs.length}</td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-1.5 text-emerald-600 font-medium">
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                          {site.is_active ? 'Active' : 'Inactive'}
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+                {sites.length === 0 && !loading && (
+                  <tr>
+                    <td colSpan={7} className="px-5 py-8 text-center text-slate-500">No sites found. Add a new site to get started.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div className="px-5 py-3.5 border-t border-slate-100 flex justify-between items-center text-[13px] text-slate-500 bg-white">
+            <div>Showing 1–{sites.length} of {sites.length} records</div>
+            <div className="flex gap-2 text-sm">
+              <button className="px-1 hover:text-slate-900 disabled:opacity-50" disabled>‹</button>
+              <button className="px-1 text-slate-900 font-medium">1</button>
+              <button className="px-1 hover:text-slate-900 disabled:opacity-50" disabled>2</button>
+              <button className="px-1 hover:text-slate-900 disabled:opacity-50" disabled>3</button>
+              <button className="px-1 hover:text-slate-900 disabled:opacity-50" disabled>›</button>
             </div>
           </div>
-          {(isAdmin || isMod || can('add')) && (
-            <div className="flex w-full md:w-auto">
-              <button onClick={openNew} className="w-full md:w-auto bg-[var(--accent)] text-white font-semibold text-sm px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-[var(--accent-hover)] active:scale-95 transition-all shadow-sm">
-                <PlusCircle size={16} /> Add Site
+        </div>
+
+        {/* ── Split Layout: Hierarchy & Details ── */}
+        {selectedSite && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
+            {/* Left Col: Location Hierarchy */}
+            <div className="lg:col-span-4 bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+              <h2 className="text-[15px] font-bold text-slate-900 mb-4">Location hierarchy</h2>
+
+              <div className="mb-6">
+                <div className="flex items-center py-1.5 px-2 font-semibold text-[13px] text-slate-900">
+                  <div className="w-4 h-4 flex items-center justify-center mr-1">
+                    <ChevronDown size={14} className="text-slate-600" />
+                  </div>
+                  {selectedSite.name} {selectedSite.site_code && <span className="text-slate-400 font-normal ml-1">· {selectedSite.site_code}</span>}
+                </div>
+
+                <div className="mt-1">
+                  {renderTree(treeData)}
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  const newLoc = { id: `new-${Date.now()}`, name: 'New Location', code: '', parentId: null, manager: '' }
+                  setSelectedLocId(newLoc.id)
+                  setLocForm(newLoc)
+                }}
+                className="w-full py-2 bg-white text-slate-700 border border-slate-200 rounded-md text-[13px] font-medium shadow-sm hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+              >
+                <Plus size={16} /> Add location
               </button>
             </div>
-          )}
-        </div>
 
-        {/* View Toggle Row */}
-        <div className="tab-container" style={{ margin: 0 }}>
-          <button
-            onClick={() => setViewMode('list')}
-            className={`tab-btn ${viewMode === 'list' ? 'active' : ''}`}
-          >
-            <List size={15} /> List View
-          </button>
-          <button
-            onClick={() => setViewMode('map')}
-            className={`tab-btn ${viewMode === 'map' ? 'active' : ''}`}
-          >
-            <MapIcon size={15} /> Map View
-          </button>
-        </div>
+            {/* Right Col: Selected Location Details */}
+            <div className="lg:col-span-8 bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+              {!locForm ? (
+                <div className="h-full flex flex-col items-center justify-center text-slate-400 py-20">
+                  <MapPin size={32} className="mb-3 opacity-30" />
+                  <p className="text-[14px]">Select a location from the hierarchy to view details</p>
+                </div>
+              ) : (
+                <form onSubmit={handleLocSave}>
+                  <h2 className="text-[15px] font-bold text-slate-900 mb-6 flex items-center gap-2">
+                    Selected location <span className="text-slate-400 font-normal">·</span> {locForm.name || 'New Location'}
+                  </h2>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                    <div>
+                      <label className="block text-[13px] text-slate-500 mb-1.5 font-medium">Location name</label>
+                      <input
+                        type="text"
+                        value={locForm.name}
+                        onChange={e => setLocForm({...locForm, name: e.target.value})}
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-[13px] text-slate-900 focus:outline-none focus:border-[#137986] focus:ring-1 focus:ring-[#137986]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[13px] text-slate-500 mb-1.5 font-medium">Code</label>
+                      <input
+                        type="text"
+                        value={locForm.code}
+                        onChange={e => setLocForm({...locForm, code: e.target.value})}
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-[13px] text-slate-900 focus:outline-none focus:border-[#137986] focus:ring-1 focus:ring-[#137986]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
+                    <div>
+                      <label className="block text-[13px] text-slate-500 mb-1.5 font-medium">Parent location</label>
+                      <select
+                        value={locForm.parentId || ''}
+                        onChange={e => setLocForm({...locForm, parentId: e.target.value || null})}
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-[13px] text-slate-900 focus:outline-none focus:border-[#137986] focus:ring-1 focus:ring-[#137986]"
+                      >
+                        <option value="">None (Top Level)</option>
+                        {siteLocations.filter(l => l.id !== locForm.id && !locForm.id.startsWith('new-')).map(l => (
+                          <option key={l.id} value={l.id}>{l.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[13px] text-slate-500 mb-1.5 font-medium">Responsible person</label>
+                      <input
+                        type="text"
+                        value={locForm.manager || ''}
+                        onChange={e => setLocForm({...locForm, manager: e.target.value})}
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-[13px] text-slate-900 focus:outline-none focus:border-[#137986] focus:ring-1 focus:ring-[#137986]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <span className="inline-block px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded text-[12px] font-medium border border-emerald-100">
+                      Active
+                    </span>
+                  </div>
+
+                  {/* Location Assets Sub-table */}
+                  {!locForm.id.startsWith('new-') && (
+                    <div className="border border-[#dfe6ea] rounded-lg overflow-hidden mb-8">
+                      <table className="w-full text-left text-[13px] whitespace-nowrap">
+                        <thead className="bg-[#f4f6f8] border-b border-[#dfe6ea] text-[#647582]">
+                          <tr>
+                            <th className="px-4 py-2.5 font-medium">Asset ↕</th>
+                            <th className="px-4 py-2.5 font-medium">Category ↕</th>
+                            <th className="px-4 py-2.5 font-medium">Status ↕</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#dfe6ea]">
+                          {selectedLocAssets.slice(0, 3).map(asset => (
+                            <tr key={asset.id} className="hover:bg-[#f4f6f8]">
+                              <td className="px-4 py-2.5 font-medium text-[#172a38]">{asset.asset_code} <span className="font-normal text-[#647582] ml-1">· {asset.name}</span></td>
+                              <td className="px-4 py-2.5 text-[#647582]">{asset.category || '-'}</td>
+                              <td className="px-4 py-2.5">
+                                <div className="flex items-center gap-1.5 text-[#247553] font-medium">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-[#247553]"></div>
+                                  Active
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                          {selectedLocAssets.length === 0 && (
+                            <tr>
+                              <td colSpan={3} className="px-4 py-6 text-center text-[#9eb1bc] bg-white">No assets mapped to this location yet.</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                      {selectedLocAssets.length > 0 && (
+                        <div className="px-4 py-2 border-t border-[#dfe6ea] flex justify-between items-center text-[12px] text-[#647582] bg-white">
+                          <div>Showing 1–{Math.min(selectedLocAssets.length, 3)} of {selectedLocAssets.length} records</div>
+                          <div className="flex gap-2">
+                            <button className="hover:text-[#172a38] disabled:opacity-50" disabled>‹</button>
+                            <button className="text-[#172a38] font-medium">1</button>
+                            <button className="hover:text-[#172a38] disabled:opacity-50" disabled>›</button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div>
+                    <button type="submit" className="bg-[#147d92] text-white px-5 py-2.5 rounded-md text-[13px] font-medium hover:bg-[#106778] transition-colors shadow-sm">
+                      Save location
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
-      {loading ? (
-        <div style={{ padding: 60, textAlign: 'center', color: 'var(--text-3)' }}>
-          <Loader2 size={32} className="animate-spin" style={{ margin: '0 auto 12px' }} />
-          Loading sites & geospatial data...
-        </div>
-      ) : viewMode === 'map' ? (
-        /* ── INTERACTIVE MAP VIEW ── */
-        <div className="card animate-fade-up sites-map-container" style={{ height: 'calc(100vh - 200px)', minHeight: 500, overflow: 'hidden', position: 'relative' }}>
-          <MapContainer center={defaultCenter} zoom={validSites?.length > 0 ? 5 : 4} style={{ height: '100%', width: '100%' }} zoomControl={false}>
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <ZoomControl position="bottomright" />
-            
-            {validSites.map(site => (
-              <React.Fragment key={site.id}>
-                <Marker position={[Number(site.latitude), Number(site.longitude)]}>
-                  <Popup className="custom-popup">
-                    <div style={{ padding: '4px 0', minWidth: 200 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
-                        <div style={{ width: 10, height: 10, borderRadius: '50%', background: site.is_active ? 'var(--green)' : 'var(--red)' }} />
-                        {site.site_code && (
-                          <span style={{ background: 'rgba(59,130,246,0.15)', color: 'var(--accent)', padding: '1px 6px', borderRadius: 4, border: '1px solid rgba(59,130,246,0.3)' }}>
-                            [{site.site_code}]
-                          </span>
-                        )}
-                        <strong style={{ color: '#111', }}>
-                          {(() => {
-                            let cleanName = site.name;
-                            if (site.site_code && cleanName.toUpperCase().startsWith(site.site_code.toUpperCase())) {
-                              cleanName = cleanName.substring(site.site_code.length).replace(/^[\s-]+/, '');
-                            }
-                            return cleanName;
-                          })()}
-                        </strong>
-                      </div>
-                      <p style={{ margin: '0 0 12px 0', color: '#666', }}>{site.address || 'No address provided'}</p>
-                      
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
-                        <div style={{ background: '#f5f7fa', padding: '6px 8px', borderRadius: 6, textAlign: 'center' }}>
-                          <div style={{ color: '#666', textTransform: 'uppercase' }}>Assets</div>
-                          <div style={{ color: '#333' }}>{getSiteAnalytics(site).total}</div>
-                        </div>
-                        <div style={{ background: '#fef2f2', padding: '6px 8px', borderRadius: 6, textAlign: 'center' }}>
-                          <div style={{ color: 'var(--status-danger)', textTransform: 'uppercase' }}>Alerts</div>
-                          <div style={{ color: 'var(--status-danger)' }}>{getSiteAnalytics(site).openTickets}</div>
-                        </div>
-                      </div>
-                      
-                      <button onClick={() => openDrawer(site)} style={{ width: '100%', background: 'var(--accent)', color: 'white', border: 'none', padding: '8px', borderRadius: 6, cursor: 'pointer' }}>
-                        View Site Details
-                      </button>
-                    </div>
-                  </Popup>
-                </Marker>
-                <Circle 
-                  center={[Number(site.latitude), Number(site.longitude)]} 
-                  radius={Number(site.radius_meters) || 200} 
-                  pathOptions={{ color: site.is_active ? 'var(--accent)' : 'var(--text-3)', fillColor: site.is_active ? 'var(--accent)' : 'var(--text-3)', fillOpacity: 0.15, weight: 2 }} 
-                />
-              </React.Fragment>
-            ))}
-          </MapContainer>
-          
-          {/* Map Overlay Stats */}
-          <div style={{ position: 'absolute', top: 16, left: 16, zIndex: 400, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(8px)', padding: '12px 16px', borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', border: '1px solid rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ background: 'var(--accent-glow)', color: 'var(--accent)', padding: 8, borderRadius: 8 }}><MapPin size={20} /></div>
-              <div>
-                <div style={{ color: '#666', textTransform: 'uppercase', letterSpacing: '0.05em', }}>Total Sites</div>
-                <div style={{ color: '#111', }}>{sites?.length || 0}</div>
-              </div>
+      {/* Add Site Modal */}
+      {showSiteModal && (
+        <div className="fixed inset-0 bg-[#142d3a]/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-[#dfe6ea]">
+            <div className="px-6 py-4 border-b border-[#dfe6ea] flex justify-between items-center">
+              <h3 className="font-bold text-[15px] text-[#172a38]">{siteForm.id ? 'Edit Site' : 'Add New Site'}</h3>
+              <button onClick={() => setShowSiteModal(false)} className="text-[#9eb1bc] hover:text-[#172a38]"><X size={18} /></button>
             </div>
-          </div>
-        </div>
-      ) : (
-        /* ── LIST VIEW (Desktop Table & Mobile Cards) ── */
-        <>
-          <div className="card animate-fade-up desktop-table">
-            <div style={{ overflowX: 'auto' }}>
-              <table className="tbl" style={{ minWidth: 800 }}>
-                <thead>
-                  <tr>
-                    <th style={{ width: '22%' }}>Site Details</th>
-                    <th style={{ width: '25%' }}>Address</th>
-                    <th style={{ width: '18%' }}>Geofence</th>
-                    <th style={{ textAlign: 'center', width: '10%' }}>Status</th>
-                    <th style={{ textAlign: 'center', width: '10%' }}>Analytics</th>
-                    <th style={{ textAlign: 'right', width: '15%' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(!sites || sites?.length === 0) && (
-                    <tr>
-                      <td colSpan={6} style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-3)', }}>
-                        <MapPin size={32} style={{ opacity: 0.3, margin: '0 auto 12px', display: 'block' }} />
-                        No sites configured. Add your first site to map your assets.
-                      </td>
-                    </tr>
-                  )}
-                  {sites.map(site => {
-                    const analytics = getSiteAnalytics(site)
-                    return (
-                    <tr key={site.id} onClick={() => openDrawer(site)} style={{ cursor: 'pointer', transition: 'background 0.2s' }} onMouseOver={e => e.currentTarget.style.background = 'var(--bg-2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                      <td style={{ color: 'var(--text-0)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--accent-glow)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <MapPin size={18} />
-                          </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                              {site.site_code && (
-                                <span style={{ background: 'rgba(59,130,246,0.12)', color: 'var(--accent)', padding: '2px 8px', borderRadius: 6, border: '1px solid rgba(59,130,246,0.25)' }}>
-                                  [{site.site_code}]
-                                </span>
-                              )}
-                              <span style={{ letterSpacing: '0.02em' }}>
-                                {(() => {
-                                  let cleanName = site.name;
-                                  if (site.site_code && cleanName.toUpperCase().startsWith(site.site_code.toUpperCase())) {
-                                    cleanName = cleanName.substring(site.site_code.length).replace(/^[\s-]+/, '');
-                                  }
-                                  return cleanName;
-                                })()}
-                              </span>
-                            </div>
-                            {Array.isArray(site.aliases) && site.aliases?.length > 0 && (
-                              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                                {site.aliases.slice(0, 3).map((a, idx) => (
-                                  <span key={idx} style={{ color: 'var(--text-2)', background: 'var(--bg-1)', padding: '1px 6px', borderRadius: 4, border: '1px solid var(--border)' }}>
-                                    {a}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div style={{ color: 'var(--text-2)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }} title={site.address}>
-                          {site.address || <span style={{ color: 'var(--text-3)' }}>-</span>}
-                        </div>
-                      </td>
-                      <td className="font-mono" style={{ color: 'var(--text-2)' }}>
-                        {(site.latitude && site.longitude) ? (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            <span style={{ border: '1px solid var(--border)', background: 'var(--bg-1)', padding: '2px 8px', borderRadius: 6, display: 'inline-block', width: 'fit-content' }}>Lat: <span style={{ color: 'var(--text-0)', }}>{Number(site.latitude).toFixed(4)}</span></span>
-                            <span style={{ border: '1px solid var(--border)', background: 'var(--bg-1)', padding: '2px 8px', borderRadius: 6, display: 'inline-block', width: 'fit-content' }}>Lng: <span style={{ color: 'var(--text-0)', }}>{Number(site.longitude).toFixed(4)}</span></span>
-                            <span style={{ color: 'var(--accent)', marginTop: 4, }}>{site.radius_meters}m Radius</span>
-                          </div>
-                        ) : <span style={{ color: 'var(--amber)', background: 'var(--status-warning-soft)', padding: '4px 8px', borderRadius: 6, display: 'inline-block', }}>No Coordinates</span>}
-                      </td>
-                      <td style={{ textAlign: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                          <div style={{ width: 8, height: 8, borderRadius: '50%', background: site.is_active ? 'var(--green)' : 'var(--text-3)' }} />
-                          <span style={{ color: site.is_active ? 'var(--text-1)' : 'var(--text-3)' }}>{site.is_active ? 'Active' : 'Inactive'}</span>
-                        </div>
-                      </td>
-                      <td style={{ textAlign: 'center' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0 }}>
-                          <span style={{ color: 'var(--text-0)' }}>{analytics.total}</span>
-                          <span style={{ textTransform: 'uppercase', color: 'var(--text-3)', letterSpacing: '0.05em', }}>Assets</span>
-                        </div>
-                      </td>
-                      <td style={{ textAlign: 'right' }} onClick={e => e.stopPropagation()}>
-                        <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', alignItems: 'center' }}>
-                          {(isAdmin || isMod) && (
-                            <button onClick={(e) => { e.stopPropagation(); openEdit(site); }} className="btn-ghost btn-icon" title="Edit Site">
-                              <Edit2 size={14} />
-                            </button>
-                          )}
-                          {(isAdmin || isMod) && (
-                            <button onClick={(e) => { e.stopPropagation(); handleDelete(site.id, site.name); }} className="btn-ghost btn-icon" style={{ color: 'var(--red)' }} title="Delete Site">
-                              <Trash2 size={14} />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                    )})}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div className="mobile-cards">
-            {(!sites || sites?.length === 0) ? (
-              <div className="card" style={{ padding: 24, textAlign: 'center', color: 'var(--text-3)', }}>
-                <MapPin size={32} style={{ opacity: 0.3, margin: '0 auto 12px', display: 'block' }} />
-                No sites configured. Add your first site to map your assets.
-              </div>
-            ) : (
-              sites.map(site => {
-                const analytics = getSiteAnalytics(site)
-                return (
-                  <div 
-                    key={site.id} 
-                    className="card animate-fade-up" 
-                    onClick={() => openDrawer(site)}
-                    style={{ 
-                      padding: 16, 
-                      cursor: 'pointer', 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      gap: 12,
-                      position: 'relative'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ 
-                          width: 32, 
-                          height: 32, 
-                          borderRadius: 8, 
-                          background: 'var(--accent-glow)', 
-                          color: 'var(--accent)', 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          justifyContent: 'center',
-                          flexShrink: 0
-                        }}>
-                          <MapPin size={16} />
-                        </div>
-                        <h3 style={{ 
-                          margin: 0, 
-                          color: 'var(--text-0)',
-                          letterSpacing: '0.02em'
-                        }}>
-                          {site.name}
-                        </h3>
-                      </div>
-                      
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: site.is_active ? 'var(--green)' : 'var(--text-3)' }} />
-                        <span style={{ color: site.is_active ? 'var(--text-1)' : 'var(--text-3)' }}>
-                          {site.is_active ? 'Active' : 'Inactive'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <p style={{ 
-                      margin: 0, 
-                      color: 'var(--text-2)', 
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden'
-                    }}>
-                      {site.address || <span style={{ color: 'var(--text-3)', fontStyle: 'italic' }}>No address provided</span>}
-                    </p>
-
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-                      {(site.latitude && site.longitude) ? (
-                        <span style={{ 
-                          background: 'var(--bg-1)', 
-                          color: 'var(--accent)', 
-                          padding: '4px 10px', 
-                          borderRadius: 20, 
-                          border: '1.5px solid var(--accent-glow)',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 4
-                        }}>
-                          Geofence: {site.radius_meters}m
-                        </span>
-                      ) : (
-                        <span style={{ 
-                          background: 'var(--status-warning-soft)', 
-                          color: 'var(--amber)', 
-                          padding: '4px 10px', 
-                          borderRadius: 20, 
-                          border: '1.5px solid var(--status-warning-soft)'
-                        }}>
-                          No Coordinates
-                        </span>
-                      )}
-
-                      <span style={{ 
-                        background: 'var(--bg-1)', 
-                        color: 'var(--text-1)', 
-                        padding: '4px 10px', 
-                        borderRadius: 20, 
-                        border: '1.5px solid var(--border)',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 4
-                      }}>
-                        Assets: {analytics.total}
-                      </span>
-
-                      {analytics.openTickets > 0 && (
-                        <span style={{ 
-                          background: 'var(--status-danger-soft)', 
-                          color: 'var(--red)', 
-                          padding: '4px 10px', 
-                          borderRadius: 20, 
-                          border: '1.5px solid var(--status-danger-soft)'
-                        }}>
-                          Alerts: {analytics.openTickets}
-                        </span>
-                      )}
-                    </div>
-
-                    {(isAdmin || isMod) && (
-                      <div 
-                        style={{ 
-                          display: 'flex', 
-                          justifyContent: 'flex-end', 
-                          gap: 8, 
-                          borderTop: '1px solid var(--border)', 
-                          paddingTop: 12,
-                          marginTop: 4
-                        }}
-                        onClick={e => e.stopPropagation()}
-                      >
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); openEdit(site); }} 
-                          className="btn-ghost" 
-                          style={{ 
-                            padding: '6px 12px', 
-                            height: 36, 
-                            minHeight: 36, 
-                            borderRadius: 8, 
-                            background: 'var(--bg-1)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 6
-                          }}
-                        >
-                          <Edit2 size={13} /> Edit
-                        </button>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); handleDelete(site.id, site.name); }} 
-                          className="btn-ghost" 
-                          style={{ 
-                            padding: '6px 12px', 
-                            height: 36, 
-                            minHeight: 36, 
-                            borderRadius: 8, 
-                            color: 'var(--red)',
-                            background: 'var(--bg-1)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 6
-                          }}
-                        >
-                          <Trash2 size={13} /> Delete
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )
-              })
-            )}
-          </div>
-        </>
-      )}
-
-      {/* ── SITE ANALYTICS DRAWER / MOBILE DETAIL ── */}
-      {showDrawer && selectedSite && (
-        isMobile ? (
-          <MobileSiteDetail 
-            site={selectedSite}
-            siteAssets={assets.filter(a => isSiteMatch(a.site, selectedSite))} 
-            siteTickets={tickets.filter(t => assets.filter(a => isSiteMatch(a.site, selectedSite)).map(a => a.id).includes(t.asset_id))}
-            can={can}
-            onClose={() => setShowDrawer(false)}
-            navigate={navigate}
-          />
-        ) : (
-          <>
-            <div className="drawer-backdrop" onClick={() => setShowDrawer(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)', zIndex: 100 }} />
-            <div className="drawer animate-slide-in-right sites-drawer" style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '100%', maxWidth: 450, background: 'var(--bg-1)', zIndex: 101, boxShadow: '-4px 0 24px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-2)' }}>
+            <form onSubmit={saveSite} className="p-6">
+              <div className="space-y-4">
                 <div>
-                  <h2 style={{ margin: 0, color: 'var(--text-0)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <MapPin size={20} color="var(--accent)" /> {selectedSite.name}
-                  </h2>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: selectedSite.is_active ? 'var(--green)' : 'var(--red)' }} />
-                    <span style={{ color: 'var(--text-2)' }}>{selectedSite.is_active ? 'Active Site' : 'Inactive Site'}</span>
-                  </div>
+                  <label className="block text-[13px] text-[#647582] mb-1.5 font-medium">Site Name</label>
+                  <input type="text" required value={siteForm.name} onChange={e => setSiteForm({...siteForm, name: e.target.value})} className="w-full px-3 py-2 border border-[#dfe6ea] rounded-md text-[13px] focus:border-[#147d92] focus:ring-1 focus:ring-[#147d92] outline-none" />
                 </div>
-                <button onClick={() => setShowDrawer(false)} className="btn-ghost" style={{ padding: 8, background: 'var(--bg-1)' }}><X size={18} /></button>
-              </div>
-              
-              <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
-                <Site360Workspace 
-                  site={selectedSite} 
-                  siteAssets={assets.filter(a => isSiteMatch(a.site, selectedSite))} 
-                  siteTickets={tickets.filter(t => assets.filter(a => isSiteMatch(a.site, selectedSite)).map(a => a.id).includes(t.asset_id))} 
-                />
-              </div>
-              
-              <div style={{ padding: 20, borderTop: '1px solid var(--border)', background: 'var(--bg-2)' }}>
-                <button onClick={() => navigate(`/assets?site=${encodeURIComponent(selectedSite.name)}`)} className="btn-primary" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                  View Assets Inventory <ArrowRight size={16} />
-                </button>
-              </div>
-            </div>
-          </>
-        )
-      )}
-
-      {/* ── CREATE / EDIT MODAL ── */}
-      {showModal && (
-        <div className="modal-bg" onClick={() => !saving && setShowModal(false)}>
-          <div className="modal sites-modal-container" onClick={e => e.stopPropagation()} style={{ maxWidth: 800, width: '90%' }}>
-            <div className="modal-header" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0, letterSpacing: '0.04em', }}>
-                {editingSite ? 'EDIT SITE' : 'ADD NEW SITE'}
-              </h3>
-              <button onClick={() => setShowModal(false)} className="btn-ghost" style={{ padding: 4 }}><X size={16} /></button>
-            </div>
-            
-            <form onSubmit={handleSubmit} className="sites-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, padding: 24 }}>
-              {/* Form Column */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <div>
-                    <label className="lbl">Site Name <span style={{ color: 'var(--red)' }}>*</span></label>
-                    <input type="text" className="inp" value={form.name} onChange={e => { setForm({ ...form, name: e.target.value.toUpperCase() }); setErrors({ ...errors, name: null }) }} placeholder="e.g. CENTRAL STORE" />
-                    {errors.name && <p style={{ color: 'var(--red)', marginTop: 4 }}>{errors.name}</p>}
-                  </div>
-                  <div>
-                    <label className="lbl">Site Code / Prefix</label>
-                    <input type="text" className="inp font-mono" value={form.site_code} onChange={e => setForm({ ...form, site_code: e.target.value.toUpperCase() })} placeholder="e.g. P148, CS, HO" />
-                  </div>
-                </div>
-
                 <div>
-                  <label className="lbl">Site Aliases (Comma-separated)</label>
-                  <input type="text" className="inp" value={form.aliases} onChange={e => setForm({ ...form, aliases: e.target.value })} placeholder="e.g. WORLI, AAKASA, AKASHA" />
-                  <span style={{ color: 'var(--text-3)', display: 'block', marginTop: 4 }}>Add alternate keywords to enable instant auto-linking in imports</span>
+                  <label className="block text-[13px] text-[#647582] mb-1.5 font-medium">Site Code</label>
+                  <input type="text" value={siteForm.site_code} onChange={e => setSiteForm({...siteForm, site_code: e.target.value})} className="w-full px-3 py-2 border border-[#dfe6ea] rounded-md text-[13px] focus:border-[#147d92] focus:ring-1 focus:ring-[#147d92] outline-none" />
                 </div>
-                
                 <div>
-                  <label className="lbl">Address</label>
-                  <textarea className="inp" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} rows={2} placeholder="Full address of the site..." />
-                </div>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <div>
-                    <label className="lbl">Latitude (GPS)</label>
-                    <input type="number" step="any" className="inp" value={form.latitude} onChange={e => setForm({ ...form, latitude: e.target.value })} placeholder="e.g. 19.0760" />
-                  </div>
-                  <div>
-                    <label className="lbl">Longitude (GPS)</label>
-                    <input type="number" step="any" className="inp" value={form.longitude} onChange={e => setForm({ ...form, longitude: e.target.value })} placeholder="e.g. 72.8777" />
-                  </div>
-                </div>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, alignItems: 'end' }}>
-                  <div>
-                    <label className="lbl">Geofence Radius (meters)</label>
-                    <input type="number" className="inp" value={form.radius_meters} onChange={e => setForm({ ...form, radius_meters: e.target.value })} min="10" />
-                  </div>
-                  
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 0' }}>
-                    <input type="checkbox" id="is_active" checked={form.is_active} onChange={e => setForm({ ...form, is_active: e.target.checked })} style={{ width: 16, height: 16 }} />
-                    <label htmlFor="is_active" style={{ cursor: 'pointer', userSelect: 'none' }}>Site is Active</label>
-                  </div>
+                  <label className="block text-[13px] text-[#647582] mb-1.5 font-medium">Address</label>
+                  <textarea rows={2} value={siteForm.address} onChange={e => setSiteForm({...siteForm, address: e.target.value})} className="w-full px-3 py-2 border border-[#dfe6ea] rounded-md text-[13px] focus:border-[#147d92] focus:ring-1 focus:ring-[#147d92] outline-none"></textarea>
                 </div>
               </div>
-
-              {/* Map Column */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <label className="lbl" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Interactive Map Editor</span>
-                  <span style={{ color: 'var(--accent)', }}>Click map to drop pin</span>
-                </label>
-                <div style={{ flex: 1, minHeight: 300, borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)' }}>
-                  <MapContainer center={[Number(form.latitude) || 20.5937, Number(form.longitude) || 78.9629]} zoom={form.latitude ? 15 : 4} style={{ height: '100%', width: '100%' }}>
-                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
-                    <FormMapHandler 
-                      position={{ lat: Number(form.latitude) || 0, lng: Number(form.longitude) || 0 }} 
-                      setPosition={(pos) => setForm({ ...form, latitude: pos.lat.toFixed(6), longitude: pos.lng.toFixed(6) })}
-                      radius={Number(form.radius_meters) || 0}
-                    />
-                  </MapContainer>
-                </div>
-              </div>
-              
-              <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 8, borderTop: '1px solid var(--border)', paddingTop: 20 }}>
-                <button type="button" onClick={() => setShowModal(false)} className="btn-ghost">Cancel</button>
-                <button type="submit" disabled={saving} className="btn-primary" style={{ minWidth: 120 }}>
-                  {saving ? <Loader2 size={16} className="animate-spin" /> : <><Save size={16} /> Save Site</>}
-                </button>
+              <div className="mt-6 flex gap-3 justify-end">
+                <button type="button" onClick={() => setShowSiteModal(false)} className="px-4 py-2 text-[13px] font-medium text-[#647582] bg-white border border-[#dfe6ea] rounded-md hover:bg-[#f4f6f8]">Cancel</button>
+                <button type="submit" className="px-4 py-2 text-[13px] font-medium text-white bg-[#147d92] rounded-md hover:bg-[#106778]">Save Site</button>
               </div>
             </form>
           </div>
         </div>
       )}
-      <style>{`
-        @media (max-width: 768px) {
-          .sites-header-row {
-            flex-direction: column !important;
-            align-items: flex-start !important;
-            gap: 14px !important;
-          }
-          .sites-header-actions {
-            width: 100% !important;
-            justify-content: space-between !important;
-            flex-wrap: wrap !important;
-            gap: 10px !important;
-          }
-          .sites-drawer {
-            max-width: 100% !important;
-          }
-          .sites-form-grid {
-            grid-template-columns: 1fr !important;
-            gap: 16px !important;
-            padding: 16px !important;
-          }
-          .sites-modal-container {
-            width: 100% !important;
-            max-width: 100% !important;
-            border-radius: 20px 20px 0 0 !important;
-            max-height: 92vh !important;
-            margin: 0 !important;
-          }
-        }
-        @media (max-width: 480px) {
-          .sites-map-container {
-            height: 380px !important;
-            min-height: 380px !important;
-          }
-          .sites-header-actions {
-            flex-direction: column !important;
-            align-items: stretch !important;
-          }
-          .sites-header-actions > * {
-            width: 100% !important;
-            justify-content: center !important;
-          }
-        }
-        @media (max-width: 1024px) {
-          .desktop-table {
-            display: none !important;
-          }
-          .mobile-cards {
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 12px !important;
-          }
-        }
-      `}</style>
     </div>
   )
 }
-
-
