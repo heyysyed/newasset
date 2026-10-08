@@ -6,6 +6,7 @@ import { useAuth } from '../../../../context/AuthContext'
 import WorkOrderCard from './WorkOrderCard'
 import WorkOrderDetailDrawer from './WorkOrderDetailDrawer'
 import WorkOrderFormModal from './WorkOrderFormModal'
+import { useSearchParams } from 'react-router-dom'
 
 const STATUS_OPTIONS = [
   { value: 'ALL', label: 'All Statuses' },
@@ -20,11 +21,12 @@ const STATUS_OPTIONS = [
 ]
 
 export default function WorkOrdersWorkspace() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
   const [selectedWO, setSelectedWO] = useState(null)
-  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [isFormOpen, setIsFormOpen] = useState(searchParams.get('new') === '1')
   const [statusFilter, setStatusFilter] = useState('ALL')
   
   const { data: workOrders = [], isLoading } = useQuery({
@@ -112,7 +114,7 @@ export default function WorkOrdersWorkspace() {
       {isFormOpen && (
         <WorkOrderFormModal
           isOpen={isFormOpen}
-          onClose={() => setIsFormOpen(false)}
+          onClose={() => { setIsFormOpen(false); setSearchParams({}, { replace: true }) }}
         />
       )}
     </div>

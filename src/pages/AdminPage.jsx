@@ -6,7 +6,7 @@ import {
   Package, MapPin, FileSpreadsheet, Wrench, Boxes, Tag, ClipboardCheck, UserCog,
   History, Filter, ChevronLeft, RotateCcw, Archive, Hash, LayoutGrid, List, Briefcase,
 } from 'lucide-react'
-import { supabase, getAllProfiles, updateProfile, getSettings, updateSettings, adminCreateUser, fetchActivityLogs, fetchDeletedAssets, restoreAsset, permanentlyDeleteAsset, fetchUserSiteAssignments, assignUserToSite, removeUserFromSite, fetchFilterOptions, getQrScanConfig, updateQrScanConfig, fetchAuditAssignments, fetchMaintenanceSubmissions, fetchEmployees } from '../lib/supabase'
+import { supabase, getAllProfiles, updateProfile, getSettings, updateSettings, adminCreateUser, fetchActivityLogs, fetchDeletedAssets, restoreAsset, fetchUserSiteAssignments, assignUserToSite, removeUserFromSite, fetchFilterOptions, getQrScanConfig, updateQrScanConfig, fetchAuditAssignments, fetchMaintenanceSubmissions, fetchEmployees } from '../lib/supabase'
 import { formatCurrency } from '../lib/depreciation'
 import { useAuth, DEFAULT_FIELDS } from '../context/AuthContext'
 import { useIsMobile } from '../hooks/useBreakpoint'
@@ -41,7 +41,7 @@ const MOD_PERM_GROUPS = [
       { key: 'can_edit_all',      label: 'Edit All Fields',   desc: 'Edit any field on any asset',              icon: Settings2 },
       { key: 'can_edit_location', label: 'Edit Location',     desc: 'Change the site / location of assets',     icon: MapPin },
       { key: 'can_edit_status',   label: 'Edit Status',       desc: 'Change active / inactive / disposed',      icon: ToggleLeft },
-      { key: 'can_delete',        label: 'Delete Assets',     desc: 'Permanently remove assets',                icon: Trash2 },
+      { key: 'can_delete',        label: 'Archive Assets',    desc: 'Archive assets while preserving history', icon: Trash2 },
       { key: 'can_export',        label: 'Export to Excel',   desc: 'Download asset list as Excel spreadsheet', icon: FileSpreadsheet },
       { key: 'can_import',        label: 'Import from Excel', desc: 'Bulk upload assets from Excel file',       icon: FileSpreadsheet },
     ],
@@ -476,14 +476,6 @@ export default function AdminPage() {
     setRestoring(s => { const n = { ...s }; delete n[deletedId]; return n })
   }
 
-  async function handlePermanentDelete(deletedId) {
-    if (!window.confirm('Permanently delete this asset from trash? This cannot be undone.')) return
-    try {
-      await permanentlyDeleteAsset(deletedId)
-      setDeletedAssets(prev => (prev || []).filter(d => d.id !== deletedId))
-    } catch (e) { alert(e.message) }
-  }
-
   if (loading) return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 400, gap: 16 }}>
       <div style={{ width: 40, height: 40, border: '3px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }}/>
@@ -594,10 +586,9 @@ export default function AdminPage() {
           {tab === 'trash' && (
             <TrashBinManager
               deletedAssets={deletedAssets}
-              loading={trashLoading}
+              trashLoading={trashLoading}
               restoring={restoring}
-              onRestore={handleRestore}
-              onPermanentDelete={handlePermanentDelete}
+              handleRestore={handleRestore}
             />
           )}
         </div>
@@ -1007,10 +998,9 @@ export default function AdminPage() {
           {tab === 'trash' && (
             <TrashBinManager
               deletedAssets={deletedAssets}
-              loading={trashLoading}
+              trashLoading={trashLoading}
               restoring={restoring}
-              onRestore={handleRestore}
-              onPermanentDelete={handlePermanentDelete}
+              handleRestore={handleRestore}
             />
           )}
 

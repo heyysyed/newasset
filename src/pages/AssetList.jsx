@@ -291,7 +291,7 @@ export default function AssetList() {
   // ── Actions ───────────────────────────────────────────────────────────
 
   async function handleDelete(ids) {
-    if (!window.confirm(`Permanently delete ${ids.length} asset(s)?`)) return
+    if (!window.confirm(`Archive ${ids.length} asset(s)? Their history and related records will be preserved.`)) return
     setDeleting(true)
     try { await bulkDeleteAssets(ids, user.id); setSelected(new Set()); queryClient.invalidateQueries({ queryKey: ['assets'] }) }
     catch (e) { alert(`Error: ${e.message}`) }

@@ -399,7 +399,7 @@ export default function AssetDetail() {
   }, [asset?.id, isBulk])
 
   async function handleDelete() {
-    if (!window.confirm('Permanently delete this asset?')) return
+    if (!window.confirm('Archive this asset? Its history and related records will be preserved.')) return
     try { await deleteAsset(id, user.id); navigate('/assets') }
     catch (e) { alert(`Error: ${e.message}`) }
   }

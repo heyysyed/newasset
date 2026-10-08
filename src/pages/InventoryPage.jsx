@@ -28,7 +28,7 @@ const fmt = (n) => Number(n || 0).toLocaleString('en-IN', { maximumFractionDigit
 
 function InventoryPageContent() {
   const { user, isAdmin, isMod, can } = useAuth()
-  const canWrite = isAdmin || isMod || (can ? can('inventory') : true) || true
+  const canWrite = isAdmin || isMod || (typeof can === 'function' && can('inventory'))
   const isMobile = useIsMobile()
 
   const [tab, setTab] = useState('stock')
@@ -335,23 +335,6 @@ function InventoryPageContent() {
     }
   }
 
-  const handleBulkDeleteStock = async () => {
-    if (!selectedStock.size) return
-    if (!confirm(`Are you sure you want to permanently delete ${selectedStock.size} stock record(s)? This cannot be undone.`)) return
-    setLoading(true)
-    try {
-      const ids = Array.from(selectedStock)
-      const { error } = await supabase.from('bulk_site_stock').delete().in('id', ids)
-      if (error) throw error
-      setSelectedStock(new Set())
-      refreshAll()
-    } catch (e) {
-      alert(e.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const exportStock = () => {
     const data = filteredStock.map(s => {
       const unitPrice = Number(s.bulk_items?.unit_price || s.unit_price || 0)
@@ -376,23 +359,6 @@ function InventoryPageContent() {
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, "Inventory Stock")
     XLSX.writeFile(wb, `Inventory_Stock_Report_${new Date().toISOString().split('T')[0]}.xlsx`)
-  }
-
-  const handleBulkDeleteMasterItems = async () => {
-    if (!selectedMaster.size) return
-    if (!confirm(`Are you sure you want to PERMANENTLY DELETE ${selectedMaster.size} master item(s)? This will also delete ALL related stock records and history!`)) return
-    setLoading(true)
-    try {
-      const ids = Array.from(selectedMaster)
-      const { error } = await supabase.from('bulk_items').delete().in('id', ids)
-      if (error) throw error
-      setSelectedMaster(new Set())
-      refreshAll()
-    } catch (e) {
-      alert(e.message)
-    } finally {
-      setLoading(false)
-    }
   }
 
   const handleImportMaster = async (e) => {
@@ -1202,11 +1168,6 @@ function InventoryPageContent() {
           
           {tab === 'stock' && (
             <div style={{ display:'flex', gap:6, flexWrap:'wrap', alignItems: 'center' }}>
-              {canWrite && selectedStock.size > 0 && (
-                <button onClick={handleBulkDeleteStock} className="btn-danger" style={{ padding:'6px 12px', minHeight: 38, background: 'var(--red)', color: 'white', borderRadius: 12, border: 'none', display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <Trash2 size={13}/> <span className="inv-btn-label">Delete ({selectedStock.size})</span>
-                </button>
-              )}
               {canWrite && (
                 <>
                   <label className="btn-ghost" style={{ padding:'6px 12px', minHeight: 38, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
@@ -1233,14 +1194,9 @@ function InventoryPageContent() {
           {tab === 'master' && canWrite && (
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
               {selectedMaster.size > 0 && (
-                <>
-                  <button onClick={handleBulkArchiveItems} className="btn-danger" style={{ padding:'6px 14px', minHeight: 38, background: 'var(--amber)', color: 'white', borderRadius: 12, border: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <ArchiveX size={14}/> Archive Selected
-                  </button>
-                  <button onClick={handleBulkDeleteMasterItems} className="btn-danger" style={{ padding:'6px 14px', minHeight: 38, background: 'var(--red)', color: 'white', borderRadius: 12, border: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Trash2 size={14}/> Delete Selected
-                  </button>
-                </>
+                <button onClick={handleBulkArchiveItems} className="btn-danger" style={{ padding:'6px 14px', minHeight: 38, background: 'var(--amber)', color: 'white', borderRadius: 12, border: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <ArchiveX size={14}/> Archive Selected
+                </button>
               )}
               <label className="btn-ghost" style={{ padding:'6px 14px', minHeight: 38, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                 <Plus size={14}/> Import Excel

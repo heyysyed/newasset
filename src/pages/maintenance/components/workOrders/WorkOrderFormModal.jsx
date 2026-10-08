@@ -1,10 +1,12 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { X, Save, Loader2 } from 'lucide-react'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { workOrderService } from '../../services/workOrderService'
 import { useAuth } from '../../../../context/AuthContext'
 import { supabase } from '../../../../lib/supabase'
+import { nextWorkOrderNumber } from '../../../../services/partsService'
+import toast from 'react-hot-toast'
 
 export default function WorkOrderFormModal({ isOpen, onClose }) {
   const { user } = useAuth()
@@ -43,7 +45,7 @@ export default function WorkOrderFormModal({ isOpen, onClose }) {
   })
 
   const [form, setForm] = useState({
-    work_order_number: `WO-${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}-${Math.floor(Math.random()*1000).toString().padStart(3,'0')}`,
+    work_order_number: '',
     asset_id: '',
     ticket_id: '',
     assigned_to: '',
@@ -55,6 +57,15 @@ export default function WorkOrderFormModal({ isOpen, onClose }) {
     scheduled_end: ''
   })
 
+  useEffect(() => {
+    if (!isOpen || form.work_order_number) return
+    let active = true
+    nextWorkOrderNumber().then(number => {
+      if (active && number) setForm(current => ({ ...current, work_order_number: number }))
+    })
+    return () => { active = false }
+  }, [isOpen, form.work_order_number])
+
   const createMutation = useMutation({
     mutationFn: async (payload) => {
       const { data, error } = await workOrderService.create(payload, user?.id)
@@ -65,7 +76,7 @@ export default function WorkOrderFormModal({ isOpen, onClose }) {
       queryClient.invalidateQueries({ queryKey: ['maintenance_work_orders'] })
       onClose()
     },
-    onError: (err) => alert(err.message)
+    onError: (err) => toast.error(err.message)
   })
 
   if (!isOpen) return null
@@ -74,6 +85,7 @@ export default function WorkOrderFormModal({ isOpen, onClose }) {
     e.preventDefault()
     createMutation.mutate({
       ...form,
+      work_order_number: form.work_order_number || undefined,
       asset_id: form.asset_id || null,
       ticket_id: form.ticket_id || null,
       assigned_to: form.assigned_to || null,
@@ -104,7 +116,7 @@ export default function WorkOrderFormModal({ isOpen, onClose }) {
             <div style={{ display: 'flex', gap: 16 }}>
               <div style={{ flex: 1 }}>
                 <label className="lbl">Work Order #</label>
-                <input className="inp" value={form.work_order_number} readOnly style={{ background: 'var(--bg-2)' }} />
+                <input className="inp" value={form.work_order_number || 'Assigned when saved'} readOnly style={{ background: 'var(--bg-2)' }} />
               </div>
               <div style={{ flex: 1 }}>
                 <label className="lbl">Priority</label>

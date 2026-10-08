@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Ticket, Search, Filter } from 'lucide-react';
 
 const PRIORITY_COLORS = {
@@ -18,7 +18,19 @@ const STATUS_COLORS = {
   cancelled: { bg: 'var(--bg-2)', text: 'var(--text-3)' },
 };
 
-export default function TicketsList({ tickets, isLoading, onRowClick }) {
+export default function TicketsList({ tickets, isLoading, onRowClick, initialSearch = '' }) {
+  const [search, setSearch] = useState(initialSearch)
+  const [status, setStatus] = useState('all')
+
+  useEffect(() => setSearch(initialSearch), [initialSearch])
+
+  const filteredTickets = useMemo(() => (tickets || []).filter(ticket => {
+    if (status !== 'all' && String(ticket.status || '').toLowerCase() !== status) return false
+    const query = search.trim().toLowerCase()
+    if (!query) return true
+    return [ticket.ticket_no, ticket.title, ticket.asset?.asset_name, ticket.asset?.asset_code]
+      .some(value => String(value || '').toLowerCase().includes(query))
+  }), [tickets, search, status])
   if (isLoading) {
     return (
       <div style={{ background: 'var(--bg-0)', border: '1px solid var(--border)', borderRadius: 12, padding: 24 }}>
@@ -39,7 +51,7 @@ export default function TicketsList({ tickets, isLoading, onRowClick }) {
             All Tickets
           </h3>
           <span style={{ background: 'var(--bg-2)', color: 'var(--text-1)', padding: '2px 8px', borderRadius: 12, fontSize: '0.75rem', fontWeight: 600 }}>
-            {tickets?.length || 0}
+            {filteredTickets.length}
           </span>
         </div>
         
@@ -49,21 +61,30 @@ export default function TicketsList({ tickets, isLoading, onRowClick }) {
             <input 
               type="text" 
               placeholder="Search tickets..." 
+              value={search}
+              onChange={event => setSearch(event.target.value)}
               style={{ padding: '8px 12px 8px 36px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-1)', color: 'var(--text-0)', fontSize: '0.85rem' }} 
             />
           </div>
-          <button className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px' }}>
-            <Filter size={16} /> Filter
-          </button>
+          <label className="sr-only" htmlFor="ticket-status-filter">Filter tickets by status</label>
+          <select id="ticket-status-filter" value={status} onChange={event => setStatus(event.target.value)} className="sel" style={{ minWidth: 140 }}>
+            <option value="all">All statuses</option>
+            <option value="open">Open</option>
+            <option value="assigned">Assigned</option>
+            <option value="in_progress">In progress</option>
+            <option value="resolved">Resolved</option>
+            <option value="closed">Closed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
         </div>
       </div>
 
       <div style={{ overflowX: 'auto' }}>
-        {(!tickets || tickets.length === 0) ? (
+        {filteredTickets.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 24px', color: 'var(--text-3)' }}>
             <Ticket size={48} style={{ opacity: 0.2, margin: '0 auto 16px' }} />
-            <div style={{ fontWeight: 500, color: 'var(--text-1)', marginBottom: 4 }}>No tickets found</div>
-            <div style={{ fontSize: '0.9rem' }}>Create a new ticket to get started.</div>
+            <div style={{ fontWeight: 500, color: 'var(--text-1)', marginBottom: 4 }}>No matching tickets</div>
+            <div style={{ fontSize: '0.9rem' }}>{tickets?.length ? 'Try changing the search or status filter.' : 'Create a new ticket to get started.'}</div>
           </div>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
@@ -77,7 +98,7 @@ export default function TicketsList({ tickets, isLoading, onRowClick }) {
               </tr>
             </thead>
             <tbody>
-              {tickets.map(ticket => {
+              {filteredTickets.map(ticket => {
                 const priorityColor = PRIORITY_COLORS[ticket.priority] || PRIORITY_COLORS.normal;
                 const statusColor = STATUS_COLORS[ticket.status] || STATUS_COLORS.open;
                 

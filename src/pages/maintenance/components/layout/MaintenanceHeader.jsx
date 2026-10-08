@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Search, Plus, QrCode, HardHat, Wrench } from 'lucide-react';
 import TicketForm from '../tickets/TicketForm';
 import { useCreateTicket } from '../../hooks/useTickets';
+import { useNavigate } from 'react-router-dom';
 
 export default function MaintenanceHeader() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [showTicketForm, setShowTicketForm] = useState(false);
   const [ticketInitialData, setTicketInitialData] = useState(null);
@@ -19,14 +21,11 @@ export default function MaintenanceHeader() {
     });
   };
   
-  useEffect(() => {
-    const t = setTimeout(() => {
-      if (searchQuery) {
-        console.log("Global search for:", searchQuery);
-      }
-    }, 500);
-    return () => clearTimeout(t);
-  }, [searchQuery]);
+  const handleSearch = (event) => {
+    event.preventDefault();
+    const query = searchQuery.trim();
+    navigate(query ? `/maintenance/tickets?search=${encodeURIComponent(query)}` : '/maintenance/tickets');
+  };
 
   return (
     <div className="pb-4">
@@ -48,7 +47,7 @@ export default function MaintenanceHeader() {
         </div>
         
         {/* QR Button (Mobile Only) */}
-        <button onClick={() => alert('Opening QR Code Scanner...')} className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--bg-1)] border border-[var(--border)] text-[var(--text-1)] active:scale-95 transition-transform">
+        <button onClick={() => navigate('/scan')} aria-label="Scan asset" className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--bg-1)] border border-[var(--border)] text-[var(--text-1)] active:scale-95 transition-transform">
           <QrCode size={18} />
         </button>
       </div>
@@ -57,7 +56,7 @@ export default function MaintenanceHeader() {
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto flex-1 md:justify-end">
         
         {/* Search */}
-        <div className="relative w-full sm:max-w-[240px] lg:max-w-[320px]">
+        <form onSubmit={handleSearch} className="relative w-full sm:max-w-[240px] lg:max-w-[320px]">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-3)]" />
           <input 
             type="text" 
@@ -66,12 +65,12 @@ export default function MaintenanceHeader() {
             onChange={e => setSearchQuery(e.target.value)}
             className="w-full py-2.5 pl-10 pr-4 rounded-xl border border-[var(--border)] bg-[var(--bg-1)] text-[var(--text-1)] text-sm font-medium focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition-all placeholder-[var(--text-3)]"
           />
-        </div>
+        </form>
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2.5 sm:gap-2">
           {/* QR Button (Desktop Only) */}
-          <button onClick={() => alert('Opening QR Code Scanner...')} className="hidden md:flex flex-shrink-0 p-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-1)] hover:bg-[var(--bg-2)] transition-colors text-[var(--text-1)]" title="Scan Asset">
+          <button onClick={() => navigate('/scan')} className="hidden md:flex flex-shrink-0 p-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-1)] hover:bg-[var(--bg-2)] transition-colors text-[var(--text-1)]" title="Scan Asset" aria-label="Scan asset">
             <QrCode size={18} />
           </button>
           
@@ -83,7 +82,7 @@ export default function MaintenanceHeader() {
           </button>
           
           <button 
-            onClick={() => { setTicketInitialData({ ticket_type: 'scheduled', priority: 'high' }); setShowTicketForm(true); }} 
+            onClick={() => navigate('/maintenance/work-orders?new=1')}
             className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--accent)] hover:opacity-90 transition-opacity text-white text-sm font-semibold whitespace-nowrap shadow-sm shadow-[var(--accent-glow)]"
           >
             <HardHat size={16} /> <span className="sm:hidden lg:inline">New</span> Work Order

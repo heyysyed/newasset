@@ -4,8 +4,10 @@ import TicketsList from './TicketsList';
 import TicketDetail from './TicketDetail';
 import TicketForm from './TicketForm';
 import { useTickets, useCreateTicket, useUpdateTicket } from '../../hooks/useTickets';
+import { useSearchParams } from 'react-router-dom';
 
 export default function TicketsWorkspace() {
+  const [searchParams] = useSearchParams();
   const { data: tickets, isLoading } = useTickets();
   const createTicket = useCreateTicket();
   const updateTicket = useUpdateTicket();
@@ -66,6 +68,7 @@ export default function TicketsWorkspace() {
         tickets={tickets} 
         isLoading={isLoading} 
         onRowClick={setSelectedTicket}
+        initialSearch={searchParams.get('search') || ''}
       />
 
       {/* Slide-over Detail View */}

@@ -3,9 +3,7 @@ import { useAuth } from '../../../../context/AuthContext';
 import { supabase, fetchAllVendors, deleteVendor, createVendor, updateVendor } from '../../../../lib/supabase';
 import { Building2, Edit2, Trash2, User, Mail, Phone, Loader2, Plus } from 'lucide-react';
 import VendorForm from './VendorForm';
-
-// Simple toast fallback
-const toast = { success: (m) => console.log('✓', m), error: (m) => console.error('✗', m) };
+import toast from 'react-hot-toast';
 
 export default function VendorsWorkspace() {
   const { isAdmin, currentCompany } = useAuth();
@@ -46,14 +44,16 @@ export default function VendorsWorkspace() {
     try {
       if (editingVendor) {
         await updateVendor(editingVendor.id, payload);
+        toast.success('Vendor updated');
       } else {
         await createVendor({ ...payload, company_code: cc });
+        toast.success('Vendor created');
       }
       setShowForm(false);
       setEditingVendor(null);
       fetchData();
     } catch (e) {
-      toast.info(e.message);
+      toast.error(e.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -63,10 +63,11 @@ export default function VendorsWorkspace() {
     if (!window.confirm('Are you sure?')) return
     try {
       await deleteVendor(id);
+      toast.success('Vendor deleted');
       const v = await fetchAllVendors();
       setVendors(v);
     } catch (e) {
-      toast.info(e.message);
+      toast.error(e.message);
     }
   }
 

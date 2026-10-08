@@ -10,8 +10,7 @@ export default function TrashBinManager({
   deletedAssets,
   trashLoading,
   restoring,
-  handleRestore,
-  handlePermanentDelete
+  handleRestore
 }) {
 
   return (
