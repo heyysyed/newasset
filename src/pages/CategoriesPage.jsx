@@ -430,11 +430,7 @@ export default function CategoriesPage() {
               </div>
               <div className="px-5 py-3.5 border-t border-slate-100 flex justify-between items-center text-[13px] text-slate-500 bg-white">
                 <div>Showing {currentSchemaFields.length > 0 ? 1 : 0}–{currentSchemaFields.length} of {currentSchemaFields.length} records</div>
-                <div className="flex gap-2 text-sm">
-                  <button className="px-1 hover:text-slate-900 disabled:opacity-50" disabled>‹</button>
-                  <button className="px-1 text-slate-900 font-medium">1</button>
-                  <button className="px-1 hover:text-slate-900 disabled:opacity-50" disabled>›</button>
-                </div>
+                <span>All records loaded</span>
               </div>
             </div>
           )}

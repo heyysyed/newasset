@@ -443,11 +443,13 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex items-center gap-3 mt-2 md:mt-0">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-md text-[13px] font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors">
-            <span className="text-slate-400">⌄</span> All sites
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-md text-[13px] font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors">
-            Export snapshot
+          <label className="sr-only" htmlFor="dashboard-site-filter">Filter dashboard by site</label>
+          <select id="dashboard-site-filter" value={selectedSite} onChange={event => setSelectedSite(event.target.value)} className="px-4 py-2 bg-white border border-slate-200 rounded-md text-[13px] font-medium text-slate-700 shadow-sm">
+            <option value="">All sites</option>
+            {sitesList.map(siteName => <option key={siteName} value={siteName}>{siteName}</option>)}
+          </select>
+          <button onClick={() => navigate('/reports')} className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-md text-[13px] font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors">
+            Open reports
           </button>
         </div>
       </div>
@@ -626,13 +628,7 @@ export default function Dashboard() {
           </div>
           <div className="px-5 py-3.5 border-t border-[#dfe6ea] flex justify-between items-center text-[13px] text-[#647582] bg-white">
             <div>Showing 1–{Math.min(4, filteredRecentlyAdded.length)} of {filteredRecentlyAdded.length || 4} records</div>
-            <div className="flex gap-2 text-sm">
-              <button className="px-1 hover:text-slate-900">‹</button>
-              <button className="px-1 text-slate-900 font-medium">1</button>
-              <button className="px-1 hover:text-slate-900">2</button>
-              <button className="px-1 hover:text-slate-900">3</button>
-              <button className="px-1 hover:text-slate-900">›</button>
-            </div>
+            <button onClick={() => navigate('/assets')} className="font-medium text-[#147d92] hover:underline">View all assets →</button>
           </div>
         </div>
 
@@ -686,27 +682,13 @@ export default function Dashboard() {
                     </tr>
                   )
                 })}
-                {tickets.length === 0 && (
-                  <tr className="hover:bg-[#f4f6f8]">
-                    <td className="px-5 py-3.5 font-medium text-slate-900">WO-01042 · Oil service</td>
-                    <td className="px-5 py-3.5 text-[#647582]">Morgan Chen</td>
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#247553]"></span><span className="text-[#247553]">Active</span></div>
-                    </td>
-                  </tr>
-                )}
+                {tickets.length === 0 && <tr><td colSpan={3} className="px-5 py-10 text-center text-[#647582]">No maintenance work orders have been recorded.</td></tr>}
               </tbody>
             </table>
           </div>
           <div className="px-5 py-3.5 border-t border-slate-100 flex justify-between items-center text-[13px] text-slate-500 bg-white">
-            <div>Showing 1–{Math.min(4, Math.max(tickets.length, 4))} of {tickets.length || 4} records</div>
-            <div className="flex gap-2 text-sm">
-              <button className="px-1 hover:text-slate-900">‹</button>
-              <button className="px-1 text-slate-900 font-medium">1</button>
-              <button className="px-1 hover:text-slate-900">2</button>
-              <button className="px-1 hover:text-slate-900">3</button>
-              <button className="px-1 hover:text-slate-900">›</button>
-            </div>
+            <div>Showing {tickets.length ? `1–${Math.min(4, tickets.length)} of ${tickets.length}` : '0'} records</div>
+            <button onClick={() => navigate('/maintenance/work-orders')} className="font-medium text-[#147d92] hover:underline">View all work orders →</button>
           </div>
         </div>
 

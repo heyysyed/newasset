@@ -13,6 +13,12 @@ try {
     catch (error) { if (attempt === 30) throw error; await new Promise(r => setTimeout(r, 250)) }
   }
   const sql = input => run(['exec','-i',name,'psql','-U','postgres','-v','ON_ERROR_STOP=1'],input)
+  // pg_isready can briefly succeed while the container's init process is
+  // restarting PostgreSQL. Require a real query before applying migrations.
+  for (let attempt = 0; ; attempt++) {
+    try { sql('SELECT 1;'); break }
+    catch (error) { if (attempt === 30) throw error; await new Promise(r => setTimeout(r, 250)) }
+  }
   sql(`CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role; CREATE SCHEMA auth;
     CREATE TABLE auth.users(id uuid PRIMARY KEY, email text, raw_user_meta_data jsonb DEFAULT '{}');
     CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;

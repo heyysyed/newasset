@@ -1,7 +1,9 @@
 import React from 'react';
 import { Hammer, ArrowRight, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function ActiveWorkOrdersTable({ workOrders, isLoading }) {
+  const navigate = useNavigate();
   if (isLoading) {
     return (
       <div className="bg-[var(--bg-0)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
@@ -22,7 +24,7 @@ export default function ActiveWorkOrdersTable({ workOrders, isLoading }) {
             Active Work Orders
           </h3>
         </div>
-        <button className="flex items-center gap-1.5 text-sm font-semibold px-3.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-1)] hover:bg-[var(--bg-2)] transition-colors text-[var(--text-1)]">
+        <button onClick={() => navigate('/maintenance/work-orders')} className="flex items-center gap-1.5 text-sm font-semibold px-3.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-1)] hover:bg-[var(--bg-2)] transition-colors text-[var(--text-1)]">
           View all <ArrowRight size={14} />
         </button>
       </div>
@@ -37,6 +39,7 @@ export default function ActiveWorkOrdersTable({ workOrders, isLoading }) {
             {workOrders.map((wo, idx) => (
               <div 
                 key={wo.id} 
+                onClick={() => navigate('/maintenance/work-orders')}
                 className={`p-4 md:p-5 flex flex-col md:flex-row md:items-center gap-3 md:gap-4 hover:bg-[var(--bg-1)] transition-colors cursor-pointer ${
                   idx !== workOrders.length - 1 ? 'border-b border-[var(--border)]' : ''
                 }`}

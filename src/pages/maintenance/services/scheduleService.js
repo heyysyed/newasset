@@ -63,12 +63,14 @@ export const scheduleService = {
 
   async delete(id, userId) {
     try {
+      // Maintenance schedules are operational records. Pause them instead of
+      // deleting history that may be referenced by logs and generated tickets.
       const { error } = await supabase
         .from('maintenance_schedules')
-        .delete()
+        .update({ status: 'paused' })
         .eq('id', id);
       if (error) throw error;
-      await logEvent('schedule', id, 'deleted', userId, null, null);
+      await logEvent('schedule', id, 'paused', userId, null, { status: 'paused' });
       return { error: null };
     } catch (error) {
       return { error };

@@ -1,7 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CalendarClock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../../context/AuthContext';
+import { scheduleService } from '../../services/scheduleService';
+import toast from 'react-hot-toast';
 
 export default function PMForecast({ schedules, isLoading }) {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [generating, setGenerating] = useState(false);
+
+  const generateTasks = async () => {
+    setGenerating(true);
+    const target = new Date();
+    target.setDate(target.getDate() + 30);
+    try {
+      const { count, error } = await scheduleService.generateDuePMTasks(target.toISOString().slice(0, 10), user?.id);
+      if (error) throw error;
+      toast.success(`${Number(count) || 0} preventive-maintenance task(s) generated`);
+      navigate('/maintenance/tickets');
+    } catch (error) {
+      toast.error(error.message || 'Could not generate preventive-maintenance tasks');
+    } finally {
+      setGenerating(false);
+    }
+  };
   if (isLoading) {
     return (
       <div className="bg-[var(--bg-0)] border border-[var(--border)] rounded-2xl p-5 md:p-6 shadow-sm">
@@ -54,11 +77,11 @@ export default function PMForecast({ schedules, isLoading }) {
       </div>
 
       <div className="mt-5 flex flex-col sm:flex-row gap-3">
-        <button className="flex-1 btn-primary py-2.5 text-sm rounded-lg font-semibold shadow-sm">
+        <button onClick={() => navigate('/maintenance/preventive')} className="flex-1 btn-primary py-2.5 text-sm rounded-lg font-semibold shadow-sm">
           View Schedule
         </button>
-        <button className="flex-1 bg-[var(--bg-2)] hover:bg-[var(--bg-3)] text-[var(--text-1)] transition-colors py-2.5 text-sm rounded-lg font-semibold">
-          Generate Tasks
+        <button onClick={generateTasks} disabled={generating} className="flex-1 bg-[var(--bg-2)] hover:bg-[var(--bg-3)] text-[var(--text-1)] transition-colors py-2.5 text-sm rounded-lg font-semibold disabled:opacity-60">
+          {generating ? 'Generating…' : 'Generate Tasks'}
         </button>
       </div>
     </div>

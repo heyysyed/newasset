@@ -261,13 +261,7 @@ export default function SitesPage() {
           </div>
           <div className="px-5 py-3.5 border-t border-slate-100 flex justify-between items-center text-[13px] text-slate-500 bg-white">
             <div>Showing 1–{sites.length} of {sites.length} records</div>
-            <div className="flex gap-2 text-sm">
-              <button className="px-1 hover:text-slate-900 disabled:opacity-50" disabled>‹</button>
-              <button className="px-1 text-slate-900 font-medium">1</button>
-              <button className="px-1 hover:text-slate-900 disabled:opacity-50" disabled>2</button>
-              <button className="px-1 hover:text-slate-900 disabled:opacity-50" disabled>3</button>
-              <button className="px-1 hover:text-slate-900 disabled:opacity-50" disabled>›</button>
-            </div>
+            <span>All records loaded</span>
           </div>
         </div>
 
@@ -402,11 +396,7 @@ export default function SitesPage() {
                       {selectedLocAssets.length > 0 && (
                         <div className="px-4 py-2 border-t border-[#dfe6ea] flex justify-between items-center text-[12px] text-[#647582] bg-white">
                           <div>Showing 1–{Math.min(selectedLocAssets.length, 3)} of {selectedLocAssets.length} records</div>
-                          <div className="flex gap-2">
-                            <button className="hover:text-[#172a38] disabled:opacity-50" disabled>‹</button>
-                            <button className="text-[#172a38] font-medium">1</button>
-                            <button className="hover:text-[#172a38] disabled:opacity-50" disabled>›</button>
-                          </div>
+                          <span>All records loaded</span>
                         </div>
                       )}
                     </div>

@@ -143,9 +143,9 @@ export default function Site360Workspace({ site, siteAssets, siteTickets }) {
                   </div>
                 </div>
                 {att.actionLabel && (
-                  <button className="btn-primary" style={{ padding: '8px 16px', borderRadius: 10, background: att.severity === 'CRITICAL' || att.severity === 'HIGH' ? 'var(--red)' : 'var(--amber)', color: 'white', border: 'none' }}>
+                  <Link to="/maintenance" className="btn-primary" style={{ padding: '8px 16px', borderRadius: 10, background: att.severity === 'CRITICAL' || att.severity === 'HIGH' ? 'var(--red)' : 'var(--amber)', color: 'white', border: 'none', textDecoration: 'none' }}>
                     {att.actionLabel}
-                  </button>
+                  </Link>
                 )}
               </div>
             ))}

@@ -1,7 +1,9 @@
 import React from 'react';
 import { AlertTriangle, Clock, Activity, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function MaintenanceAlerts({ attentionQueue, isLoading }) {
+  const navigate = useNavigate();
   if (isLoading) {
     return (
       <div className="bg-[var(--bg-0)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
@@ -46,6 +48,7 @@ export default function MaintenanceAlerts({ attentionQueue, isLoading }) {
             return (
               <div 
                 key={`${item.type}-${item.id}`} 
+                onClick={() => navigate(item.type === 'work_order' ? '/maintenance/work-orders' : '/maintenance/tickets')}
                 className={`group flex items-center justify-between p-3.5 md:p-4 bg-[var(--bg-1)] rounded-xl border-l-4 shadow-sm hover:shadow transition-all cursor-pointer ${
                   isBreached ? 'border-[var(--status-danger)]' : isCritical ? 'border-[var(--status-warning)]' : 'border-[var(--accent)]'
                 }`}
@@ -86,7 +89,7 @@ export default function MaintenanceAlerts({ attentionQueue, isLoading }) {
 
       {attentionQueue?.length > 8 && (
         <div className="px-6 py-3 border-t border-[var(--border)] text-center bg-[var(--bg-0)]">
-          <button className="text-sm font-semibold text-[var(--text-2)] hover:text-[var(--text-0)] transition-colors">
+          <button onClick={() => navigate('/maintenance/tickets')} className="text-sm font-semibold text-[var(--text-2)] hover:text-[var(--text-0)] transition-colors">
             View all {attentionQueue.length} items
           </button>
         </div>

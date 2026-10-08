@@ -5,6 +5,7 @@ import { supabase, autoCreateOverdueTickets, deleteMaintenanceSchedule } from '.
 import { scheduleService } from '../../services/scheduleService';
 import { Calendar, CheckCircle2, Edit2, Trash2, Plus, Loader2 } from 'lucide-react';
 import PMScheduleFormModal from './PMScheduleFormModal';
+import toast from 'react-hot-toast';
 
 const FREQ_MAP = {
   daily: 'Daily',
@@ -40,12 +41,12 @@ export default function PMWorkspace() {
       const { error } = await scheduleService.delete(id, user?.id);
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['maintenance_schedules'] }),
-    onError: (e) => alert(e.message)
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['maintenance_schedules'] }); toast.success('Schedule paused'); },
+    onError: (e) => toast.error(e.message)
   });
 
   async function handleDeleteSchedule(id) {
-    if (!window.confirm('Are you sure you want to delete this schedule?')) return;
+    if (!window.confirm('Pause this preventive-maintenance schedule? Existing maintenance history will be preserved.')) return;
     deleteMutation.mutate(id);
   }
 
@@ -110,7 +111,7 @@ export default function PMWorkspace() {
                       <button className="btn-ghost" style={{ padding: '6px 12px', color: 'var(--text-2)' }} onClick={() => handleEditSchedule(s)}>
                         <Edit2 size={14} />
                       </button>
-                      <button className="btn-ghost" style={{ padding: '6px 12px', color: 'var(--red)' }} onClick={() => handleDeleteSchedule(s.id)} disabled={deleteMutation.isPending}>
+                      <button title="Pause schedule" className="btn-ghost" style={{ padding: '6px 12px', color: 'var(--red)' }} onClick={() => handleDeleteSchedule(s.id)} disabled={deleteMutation.isPending}>
                         {deleteMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                       </button>
                     </>
